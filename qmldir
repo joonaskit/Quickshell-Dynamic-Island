@@ -1,0 +1,47 @@
+singleton Theme 1.0 Theme.qml
+singleton AudioService 1.0 AudioService.qml
+singleton BrightnessService 1.0 BrightnessService.qml
+singleton WindowService 1.0 WindowService.qml
+singleton NetworkService 1.0 NetworkService.qml
+singleton BluetoothService 1.0 BluetoothService.qml
+singleton PowerService 1.0 PowerService.qml
+singleton CaffeineService 1.0 CaffeineService.qml
+singleton ClipboardService 1.0 ClipboardService.qml
+singleton NotificationService 1.0 NotificationService.qml
+singleton MicrophoneService 1.0 MicrophoneService.qml
+singleton PowerProfileService 1.0 PowerProfileService.qml
+singleton HardwareStatsService 1.0 HardwareStatsService.qml
+IslandWindow 1.0 IslandWindow.qml
+IslandPill 1.0 IslandPill.qml
+IslandDetachedBubble 1.0 IslandDetachedBubble.qml
+CompactClockView 1.0 CompactClockView.qml
+CompactMediaView 1.0 CompactMediaView.qml
+CompactNotificationAlertView 1.0 CompactNotificationAlertView.qml
+ExpandedView 1.0 ExpandedView.qml
+NotificationListView 1.0 NotificationListView.qml
+MiniCalendarWidget 1.0 MiniCalendarWidget.qml
+MediaWidget 1.0 MediaWidget.qml
+VolumeSlider 1.0 VolumeSlider.qml
+AudioOutputSelector 1.0 AudioOutputSelector.qml
+BrightnessSlider 1.0 BrightnessSlider.qml
+AudioVisualizer 1.0 AudioVisualizer.qml
+SvgIcon 1.0 SvgIcon.qml
+TopBarWings 1.0 TopBarWings.qml
+IPhoneBattery 1.0 IPhoneBattery.qml
+AppIndicatorPill 1.0 AppIndicatorPill.qml
+TopRightStatusCluster 1.0 TopRightStatusCluster.qml
+WifiQuickSettings 1.0 WifiQuickSettings.qml
+BluetoothQuickSettings 1.0 BluetoothQuickSettings.qml
+PowerQuickSettings 1.0 PowerQuickSettings.qml
+ClipboardQuickSettings 1.0 ClipboardQuickSettings.qml
+MicrophoneQuickSettings 1.0 MicrophoneQuickSettings.qml
+PowerProfileQuickSettings 1.0 PowerProfileQuickSettings.qml
+HardwareStatsQuickSettings 1.0 HardwareStatsQuickSettings.qml
+singleton DockService 1.0 DockService.qml
+DockWindow 1.0 DockWindow.qml
+DockBar 1.0 DockBar.qml
+DockItem 1.0 DockItem.qml
+DockContextMenu 1.0 DockContextMenu.qml
+DockAppPicker 1.0 DockAppPicker.qml
+TopLeftAppCluster 1.0 TopLeftAppCluster.qml
+VirtualDesktopsPill 1.0 VirtualDesktopsPill.qml

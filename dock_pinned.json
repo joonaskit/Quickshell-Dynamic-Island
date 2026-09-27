@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dolphin",
+    "name": "Files",
+    "icon": "org.kde.dolphin",
+    "desktopFile": "org.kde.dolphin.desktop",
+    "command": "dolphin"
+  },
+  {
+    "id": "firefox",
+    "name": "Firefox",
+    "icon": "firefox",
+    "desktopFile": "org.mozilla.firefox.desktop",
+    "command": "firefox"
+  },
+  {
+    "id": "konsole",
+    "name": "Terminal",
+    "icon": "utilities-terminal",
+    "desktopFile": "org.kde.konsole.desktop",
+    "command": "konsole"
+  },
+  {
+    "id": "antigravity-ide",
+    "name": "Antigravity",
+    "icon": "/home/jkikke/Lataukset/Antigravity IDE/resources/app/resources/linux/code.png",
+    "desktopFile": "",
+    "command": "\"/home/jkikke/Lataukset/Antigravity IDE/antigravity-ide\""
+  },
+  {
+    "id": "zed",
+    "name": "Zed",
+    "icon": "dev.zed.Zed",
+    "desktopFile": "dev.zed.Zed.desktop",
+    "command": "zed"
+  },
+  {
+    "id": "systemmonitor",
+    "name": "Activity",
+    "icon": "utilities-system-monitor",
+    "desktopFile": "org.kde.plasma-systemmonitor.desktop",
+    "command": "plasma-systemmonitor"
+  }
+]
