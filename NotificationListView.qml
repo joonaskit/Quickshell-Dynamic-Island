@@ -120,6 +120,18 @@ Item {
                     border.width: 1
                     border.color: Qt.rgba(1, 1, 1, 0.06)
 
+                    // Spring-in on creation
+                    scale: 1.0
+                    opacity: 1.0
+                    Component.onCompleted: {
+                        scale = 0.92;
+                        opacity = 0.0;
+                        scaleAnim.start();
+                        opacityAnim.start();
+                    }
+                    NumberAnimation { id: scaleAnim; target: notifCard; property: "scale"; to: 1.0; duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
+                    NumberAnimation { id: opacityAnim; target: notifCard; property: "opacity"; to: 1.0; duration: Theme.animDurationFast }
+
                     Behavior on color {
                         ColorAnimation { duration: 120 }
                     }
@@ -241,7 +253,9 @@ Item {
             Layout.preferredHeight: Theme.px(58)
             radius: Theme.px(10)
             color: Qt.rgba(1, 1, 1, 0.03)
-            visible: NotificationService.notifications.length === 0
+            opacity: NotificationService.notifications.length === 0 ? 1.0 : 0.0
+            visible: opacity > 0.01
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
             RowLayout {
                 anchors.centerIn: parent

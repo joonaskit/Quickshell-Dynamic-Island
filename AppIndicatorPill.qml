@@ -341,7 +341,7 @@ Item {
         NumberAnimation {
             duration: Theme.animDuration
             easing.type: Easing.OutBack
-            easing.overshoot: 1.15
+            easing.overshoot: Theme.animEntranceOvershoot
         }
     }
 
@@ -543,10 +543,10 @@ Item {
                             visible: opacity > 0.01
 
                             Behavior on opacity {
-                                NumberAnimation { duration: 140 }
+                                NumberAnimation { duration: Theme.animDurationTooltip }
                             }
                             Behavior on scale {
-                                NumberAnimation { duration: 140; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
+                                NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutBack; easing.overshoot: Theme.animEntranceOvershoot }
                             }
 
                             // Subtle shadow under tooltip

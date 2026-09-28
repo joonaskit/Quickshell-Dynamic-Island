@@ -130,7 +130,7 @@ Item {
                         radius: 4
                         color: Theme.accentBlue
 
-                        Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutQuad } }
+                        Behavior on width { NumberAnimation { duration: Theme.animDurationProgress; easing.type: Easing.OutQuad } }
                     }
                 }
             }
@@ -176,7 +176,7 @@ Item {
                         radius: 4
                         color: Theme.accentPurple
 
-                        Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutQuad } }
+                        Behavior on width { NumberAnimation { duration: Theme.animDurationProgress; easing.type: Easing.OutQuad } }
                     }
                 }
             }

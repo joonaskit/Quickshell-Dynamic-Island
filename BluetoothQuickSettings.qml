@@ -151,7 +151,9 @@ Item {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 6
-                visible: BluetoothService.isEnabled
+                opacity: BluetoothService.isEnabled ? 1.0 : 0.0
+                visible: opacity > 0.01
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                 // Section Label
                 Text {
@@ -177,6 +179,7 @@ Item {
                             height: 34
                             radius: 8
                             color: deviceMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.isConnected ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                             RowLayout {
                                 anchors.fill: parent
@@ -195,6 +198,7 @@ Item {
                                     }
                                     size: 13
                                     color: modelData.isConnected ? Theme.accentBlue : Theme.textSecondary
+                                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
 
                                 // Device Name
@@ -206,6 +210,7 @@ Item {
                                     color: modelData.isConnected ? Theme.accentBlue : Theme.textPrimary
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
+                                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
 
                                 // Status text / checkmark
@@ -217,13 +222,17 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 10
                                     color: modelData.isConnected ? Theme.accentBlue : Theme.textTertiary
+                                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
 
                                 SvgIcon {
                                     name: "check"
                                     size: 12
                                     color: Theme.accentBlue
-                                    visible: modelData.isConnected
+                                    opacity: modelData.isConnected ? 1.0 : 0.0
+                                    scale: modelData.isConnected ? 1.0 : 0.5
+                                    Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                                    Behavior on scale { NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot } }
                                 }
                             }
 
@@ -243,7 +252,9 @@ Item {
                     Item {
                         width: parent.width
                         height: 30
-                        visible: BluetoothService.pairedDevices.length === 0
+                        opacity: BluetoothService.pairedDevices.length === 0 ? 1.0 : 0.0
+                        visible: opacity > 0.01
+                        Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                         Text {
                             anchors.centerIn: parent
@@ -260,7 +271,9 @@ Item {
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 36
-                visible: !BluetoothService.isEnabled
+                opacity: !BluetoothService.isEnabled ? 1.0 : 0.0
+                visible: opacity > 0.01
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                 Text {
                     anchors.centerIn: parent

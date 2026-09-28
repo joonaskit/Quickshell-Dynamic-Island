@@ -61,8 +61,10 @@ Item {
                     Layout.preferredHeight: 32
                     radius: 16
                     color: backMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.08)
+                    scale: backMouse.pressed ? 0.90 : (backMouse.containsMouse ? 1.05 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 140 } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -126,8 +128,10 @@ Item {
                     Layout.preferredHeight: 28
                     radius: 14
                     color: closeMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : "transparent"
+                    scale: closeMouse.pressed ? 0.90 : (closeMouse.containsMouse ? 1.05 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 140 } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -1036,7 +1040,7 @@ Item {
                             radius: 12
                             color: resetMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Qt.rgba(1, 1, 1, 0.08)
 
-                            Behavior on color { ColorAnimation { duration: 140 } }
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                             RowLayout {
                                 id: resetRow
@@ -1086,7 +1090,7 @@ Item {
         opacity: (scrollContainer.moving || scrollContainer.flicking || scrollFadeTimer.running) ? 1.0 : 0.0
 
         Behavior on opacity {
-            NumberAnimation { duration: 250 }
+            NumberAnimation { duration: Theme.animDurationFast }
         }
 
         Rectangle {
@@ -1120,7 +1124,7 @@ Item {
             radius: 2
             color: grabberMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(1, 1, 1, 0.25)
 
-            Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
         }
 
         MouseArea {
@@ -1160,10 +1164,10 @@ Item {
         opacity: enabled ? 1.0 : 0.4
 
         Behavior on color {
-            ColorAnimation { duration: 140 }
+            ColorAnimation { duration: Theme.animDurationFast }
         }
         Behavior on opacity {
-            NumberAnimation { duration: 160 }
+            NumberAnimation { duration: Theme.animDurationPopover }
         }
 
         MouseArea {
@@ -1233,7 +1237,7 @@ Item {
                 radius: 12
                 color: toggleRow.checked ? Theme.accentGreen : "#39393d"
 
-                Behavior on color { ColorAnimation { duration: 180 } }
+                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                 Rectangle {
                     y: 2
@@ -1244,7 +1248,7 @@ Item {
                     color: "#ffffff"
 
                     Behavior on x {
-                        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
                     }
                 }
             }
@@ -1270,7 +1274,7 @@ Item {
         opacity: enabled ? 1.0 : 0.4
 
         Behavior on opacity {
-            NumberAnimation { duration: 160 }
+            NumberAnimation { duration: Theme.animDurationPopover }
         }
 
         ColumnLayout {
@@ -1353,7 +1357,7 @@ Item {
                             readonly property bool isSelected: segRow.currentValue === modelData.value
                             color: isSelected ? Qt.rgba(1, 1, 1, 0.22) : (segBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
 
-                            Behavior on color { ColorAnimation { duration: 140 } }
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                             Text {
                                 anchors.centerIn: parent
@@ -1503,6 +1507,11 @@ Item {
                         width: Math.max(radius * 2, trackArea.width * sliderRow.fraction)
                         radius: 3
                         color: sliderRow.iconColor
+
+                        Behavior on width {
+                            enabled: !trackMouse.pressed
+                            NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic }
+                        }
                     }
                 }
 
@@ -1515,9 +1524,18 @@ Item {
                     color: "#ffffff"
                     x: Math.max(0, Math.min(trackArea.width - width, (trackArea.width * sliderRow.fraction) - (width / 2)))
                     anchors.verticalCenter: parent.verticalCenter
+                    scale: trackMouse.pressed ? 1.15 : (trackMouse.containsMouse ? 1.08 : 1.0)
 
                     border.width: 1
                     border.color: Qt.rgba(0, 0, 0, 0.25)
+
+                    Behavior on x {
+                        enabled: !trackMouse.pressed
+                        NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on scale {
+                        NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
+                    }
 
                     // Subtle inner glow / shadow
                     Rectangle {
@@ -1527,6 +1545,10 @@ Item {
                         radius: 3
                         color: sliderRow.iconColor
                         opacity: trackMouse.pressed ? 0.9 : 0.4
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: Theme.animDurationFast }
+                        }
                     }
                 }
 
@@ -1567,8 +1589,10 @@ Item {
                         color: isSelected ? Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.25) : (presetMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04))
                         border.width: isSelected ? 1 : 0
                         border.color: isSelected ? sliderRow.iconColor : "transparent"
+                        scale: presetMouse.pressed ? 0.94 : (presetMouse.containsMouse ? 1.04 : 1.0)
 
-                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationTooltip } }
+                        Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                         Text {
                             anchors.centerIn: parent

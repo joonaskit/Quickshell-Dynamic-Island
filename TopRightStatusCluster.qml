@@ -265,7 +265,7 @@ Item {
         }
         Behavior on height {
             NumberAnimation {
-                duration: root.isTopBarMode ? 260 : Theme.animDuration
+                duration: root.isTopBarMode ? Theme.animDurationTopBar : Theme.animDuration
                 easing.type: (!root.isTopBarMode && root.anyMenuOpen) ? Theme.animEasing : Easing.OutCubic
                 easing.overshoot: (!root.isTopBarMode && root.anyMenuOpen) ? Theme.animOvershoot : 1.0
             }
@@ -336,14 +336,14 @@ Item {
                     scale: coffeeMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "coffee"
                         size: root.iconSize
                         color: CaffeineService.isActive ? Theme.accentOrange : (coffeeMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38))
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -366,7 +366,7 @@ Item {
                     scale: wifiMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -377,7 +377,7 @@ Item {
                             if (NetworkService.isConnected && NetworkService.isWifi) return Theme.textPrimary;
                             return wifiMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -400,7 +400,7 @@ Item {
                     scale: btMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -412,7 +412,7 @@ Item {
                             if (BluetoothService.isEnabled) return Theme.textPrimary;
                             return btMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -439,7 +439,7 @@ Item {
                     scale: micMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -449,7 +449,7 @@ Item {
                             if (root.micMenuOpen || !MicrophoneService.isMuted) return Theme.accentRed;
                             return micMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -479,7 +479,7 @@ Item {
                     scale: clipboardMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -490,7 +490,7 @@ Item {
                             if (ClipboardService.currentText !== "") return Theme.textPrimary;
                             return clipboardMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -513,7 +513,7 @@ Item {
                     scale: profileMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -529,7 +529,7 @@ Item {
                             if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreen;
                             return profileMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.45);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -552,7 +552,7 @@ Item {
                     scale: hardwareMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -563,7 +563,7 @@ Item {
                             if (HardwareStatsService.cpuPercent > 50) return Theme.accentOrange;
                             return hardwareMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.45);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {
@@ -591,7 +591,7 @@ Item {
                     scale: devicesMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -603,7 +603,7 @@ Item {
                             if (DeviceService.hasDevices) return Theme.accentBlue;
                             return devicesMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     // Dot indicator badge when detachable devices are connected
@@ -639,7 +639,7 @@ Item {
                     scale: notifMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -650,7 +650,7 @@ Item {
                             if (NotificationService.unreadCount > 0) return Theme.accentOrange;
                             return notifMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38);
                         }
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     // Notification unread dot indicator badge
@@ -689,7 +689,7 @@ Item {
                     scale: batteryMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
                     IPhoneBattery {
                         id: batteryContent

@@ -216,11 +216,11 @@ Item {
             use24Hour: Theme.use24Hour
             isHovered: root.isHovered
             opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isAlertingNotification && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.animDurationFast }
-            }
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
         }
 
         // Compact Media View
@@ -230,11 +230,11 @@ Item {
             currentTime: root.currentDate
             player: root.activePlayer
             opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isAlertingNotification && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.animDurationFast }
-            }
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
         }
 
         // Compact Notification Alert View (pops open when a notification arrives)
@@ -242,11 +242,11 @@ Item {
             id: compactNotificationView
             anchors.centerIn: parent
             opacity: (!root.isExpanded && !root.isSettingsOpen && root.isAlertingNotification) ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.animDurationFast }
-            }
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
         }
 
         // Click-to-expand MouseArea: active ONLY when compact!
@@ -287,6 +287,7 @@ Item {
             displayBattery: UPower.displayDevice
 
             opacity: (root.isExpanded && !root.isSettingsOpen) ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.97
             visible: opacity > 0.01
 
             onRequestCollapse: {
@@ -297,9 +298,8 @@ Item {
                 root.openSettings();
             }
 
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.animDurationFast }
-            }
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
         }
 
         // Settings Card View
@@ -310,6 +310,7 @@ Item {
             anchors.top: parent.top
 
             opacity: root.isSettingsOpen ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.97
             visible: opacity > 0.01
 
             onRequestBack: {
@@ -320,9 +321,8 @@ Item {
                 root.collapse();
             }
 
-            Behavior on opacity {
-                NumberAnimation { duration: Theme.animDurationFast }
-            }
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
         }
     }
 }

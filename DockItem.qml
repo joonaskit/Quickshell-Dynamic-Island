@@ -140,7 +140,7 @@ Item {
         visible: opacity > 0.01
 
         Behavior on opacity {
-            NumberAnimation { duration: 120 }
+            NumberAnimation { duration: Theme.animDurationTooltip }
         }
 
         Rectangle {

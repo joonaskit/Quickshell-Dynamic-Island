@@ -282,7 +282,7 @@ Item {
                                     opacity: isBusy ? 0.5 : 1.0
                                     color: ejectMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Qt.rgba(1, 1, 1, 0.08)
 
-                                    Behavior on color { ColorAnimation { duration: 140 } }
+                                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                                     RowLayout {
                                         id: ejectRow
@@ -433,7 +433,7 @@ Item {
                                                 radius: 12
                                                 color: browseMouse.containsMouse ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : Qt.rgba(1, 1, 1, 0.08)
 
-                                                Behavior on color { ColorAnimation { duration: 140 } }
+                                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                                                 RowLayout {
                                                     id: browseRow
@@ -484,7 +484,7 @@ Item {
                                                     }
                                                 }
 
-                                                Behavior on color { ColorAnimation { duration: 140 } }
+                                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                                                 RowLayout {
                                                     id: mountToggleRow

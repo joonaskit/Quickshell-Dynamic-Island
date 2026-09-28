@@ -222,7 +222,9 @@ Item {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 4
-                visible: MicrophoneService.sources.length > 1
+                opacity: MicrophoneService.sources.length > 1 ? 1.0 : 0.0
+                visible: opacity > 0.01
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                 Text {
                     text: "INPUT DEVICES"
@@ -240,6 +242,7 @@ Item {
                         Layout.preferredHeight: 28
                         radius: 8
                         color: modelData.isDefault ? Qt.rgba(255/255, 69/255, 58/255, 0.18) : (sourceMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                         RowLayout {
                             anchors.fill: parent
@@ -251,6 +254,7 @@ Item {
                                 name: "mic"
                                 size: 12
                                 color: modelData.isDefault ? Theme.accentRed : Theme.textTertiary
+                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                             }
 
                             Text {
@@ -261,13 +265,17 @@ Item {
                                 color: modelData.isDefault ? Theme.accentRed : Theme.textSecondary
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
+                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                             }
 
                             SvgIcon {
                                 name: "check"
                                 size: 12
                                 color: Theme.accentRed
-                                visible: modelData.isDefault
+                                opacity: modelData.isDefault ? 1.0 : 0.0
+                                scale: modelData.isDefault ? 1.0 : 0.5
+                                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                                Behavior on scale { NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot } }
                             }
                         }
 

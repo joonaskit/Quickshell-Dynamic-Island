@@ -139,7 +139,7 @@ Item {
 
         Behavior on height {
             NumberAnimation {
-                duration: root.isTopBarMode ? 260 : Theme.animDuration
+                duration: root.isTopBarMode ? Theme.animDurationTopBar : Theme.animDuration
                 easing.type: (!root.isTopBarMode && root.menuOpen) ? Theme.animEasing : Easing.OutCubic
                 easing.overshoot: (!root.isTopBarMode && root.menuOpen) ? Theme.animOvershoot : 1.0
             }
@@ -220,7 +220,7 @@ Item {
                     rotation: root.menuOpen ? 180 : 0
 
                     Behavior on rotation {
-                        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
                     }
                 }
             }
@@ -249,7 +249,7 @@ Item {
             visible: opacity > 0.01
 
             Behavior on opacity {
-                NumberAnimation { duration: 140 }
+                NumberAnimation { duration: Theme.animDurationFast }
             }
         }
 

@@ -38,7 +38,7 @@ Item {
         NumberAnimation {
             duration: Theme.animDuration
             easing.type: Easing.OutBack
-            easing.overshoot: 1.15
+            easing.overshoot: Theme.animEntranceOvershoot
         }
     }
 
@@ -69,7 +69,7 @@ Item {
 
         scale: bubbleMouse.pressed ? 0.90 : 1.0
         Behavior on scale {
-            NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
         }
 
         SvgIcon {

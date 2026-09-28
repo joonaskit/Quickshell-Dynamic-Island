@@ -216,7 +216,10 @@ Item {
                                     name: "check"
                                     size: 12
                                     color: Theme.accentBlue
-                                    visible: modelData.inUse
+                                    opacity: modelData.inUse ? 1.0 : 0.0
+                                    scale: modelData.inUse ? 1.0 : 0.5
+                                    Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                                    Behavior on scale { NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot } }
                                 }
 
                                 // Network Name
@@ -264,7 +267,9 @@ Item {
                     Item {
                         width: parent.width
                         height: 30
-                        visible: NetworkService.availableNetworks.length === 0
+                        opacity: NetworkService.availableNetworks.length === 0 ? 1.0 : 0.0
+                        visible: opacity > 0.01
+                        Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                         Text {
                             anchors.centerIn: parent
@@ -281,7 +286,9 @@ Item {
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 36
-                visible: !NetworkService.isWifiEnabled
+                opacity: !NetworkService.isWifiEnabled ? 1.0 : 0.0
+                visible: opacity > 0.01
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                 Text {
                     anchors.centerIn: parent

@@ -146,15 +146,15 @@ Item {
                     color: settingsMouse.pressed ? Qt.rgba(1, 1, 1, 0.16) : (settingsMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05))
                     scale: settingsMouse.pressed ? 0.92 : (settingsMouse.containsMouse ? 1.05 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 140 } }
-                    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutBack } }
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "settings"
                         size: Theme.px(15)
                         color: settingsMouse.containsMouse ? Theme.accentBlue : Theme.textSecondary
-                        Behavior on color { ColorAnimation { duration: 140 } }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
                     MouseArea {

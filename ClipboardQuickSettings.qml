@@ -99,10 +99,17 @@ Item {
                     radius: 14
                     enabled: ClipboardService.currentText !== "" || ClipboardService.history.length > 0
                     opacity: enabled ? 1.0 : 0.35
+                    scale: emptyMouse.pressed ? 0.92 : (emptyMouse.containsMouse && enabled ? 1.05 : 1.0)
                     color: emptyMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.24) : Qt.rgba(255/255, 69/255, 58/255, 0.12)
 
                     Behavior on color {
-                        ColorAnimation { duration: 150 }
+                        ColorAnimation { duration: Theme.animDurationFast }
+                    }
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.animDurationFast }
+                    }
+                    Behavior on scale {
+                        NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
                     }
 
                     RowLayout {
@@ -238,7 +245,9 @@ Item {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 6
-                visible: ClipboardService.history.length > 1
+                opacity: ClipboardService.history.length > 1 ? 1.0 : 0.0
+                visible: opacity > 0.01
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
                 // Divider
                 Rectangle {
@@ -271,7 +280,7 @@ Item {
                         color: histMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.03)
 
                         Behavior on color {
-                            ColorAnimation { duration: 120 }
+                            ColorAnimation { duration: Theme.animDurationTooltip }
                         }
 
                         RowLayout {
@@ -302,6 +311,14 @@ Item {
                                 Layout.preferredHeight: 20
                                 radius: 10
                                 color: delMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : "transparent"
+                                scale: delMouse.pressed ? 0.88 : (delMouse.containsMouse ? 1.15 : 1.0)
+
+                                Behavior on color {
+                                    ColorAnimation { duration: Theme.animDurationTooltip }
+                                }
+                                Behavior on scale {
+                                    NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
+                                }
 
                                 SvgIcon {
                                     anchors.centerIn: parent

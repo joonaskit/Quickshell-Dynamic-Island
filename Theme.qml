@@ -88,8 +88,13 @@ Singleton {
     // Animations
     readonly property int animDuration: 360
     readonly property int animDurationFast: 180
+    readonly property int animDurationTooltip: 120      // tooltip opacity fade & press scale
+    readonly property int animDurationPopover: 160      // popover X/Y repositioning slide
+    readonly property int animDurationTopBar: 260       // top-bar mode height morph (tighter, no overshoot)
+    readonly property int animDurationProgress: 300     // live progress bar fills
     readonly property int animEasing: Easing.OutBack
     readonly property real animOvershoot: 1.08
+    readonly property real animEntranceOvershoot: 1.15  // scale-from-zero entrance (bubbles, pills appearing)
 
     // Behavior flags
     property bool use24Hour: true

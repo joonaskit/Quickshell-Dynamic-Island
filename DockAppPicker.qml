@@ -13,9 +13,14 @@ Item {
 
     visible: opacity > 0.001
     opacity: isOpen ? 1.0 : 0.0
+    scale: isOpen ? 1.0 : 0.92
+    transformOrigin: Item.Bottom
 
     Behavior on opacity {
         NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
+    }
+    Behavior on scale {
+        NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
     }
 
     width: 380

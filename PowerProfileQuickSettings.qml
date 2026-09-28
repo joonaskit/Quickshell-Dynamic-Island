@@ -118,8 +118,8 @@ Item {
                         : (saveMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
                     scale: saveMouse.pressed ? 0.96 : (saveMouse.containsMouse ? 1.02 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutBack } }
 
                     RowLayout {
                         anchors.fill: parent
@@ -130,6 +130,7 @@ Item {
                             name: "leaf"
                             size: 16
                             color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreen : Theme.textTertiary
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
 
                         ColumnLayout {
@@ -142,6 +143,7 @@ Item {
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
                                 color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreen : Theme.textPrimary
+                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                             }
                             Text {
                                 text: "Lower clock speeds, quiet fans"
@@ -155,7 +157,10 @@ Item {
                             name: "check"
                             size: 14
                             color: Theme.accentGreen
-                            visible: PowerProfileService.activeProfile === "power-saver"
+                            opacity: PowerProfileService.activeProfile === "power-saver" ? 1.0 : 0.0
+                            scale: PowerProfileService.activeProfile === "power-saver" ? 1.0 : 0.5
+                            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                            Behavior on scale { NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot } }
                         }
                     }
 
@@ -178,8 +183,8 @@ Item {
                         : (balMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
                     scale: balMouse.pressed ? 0.96 : (balMouse.containsMouse ? 1.02 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutBack } }
 
                     RowLayout {
                         anchors.fill: parent
@@ -190,6 +195,7 @@ Item {
                             name: "gauge"
                             size: 16
                             color: PowerProfileService.activeProfile === "balanced" ? Theme.accentBlue : Theme.textTertiary
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
 
                         ColumnLayout {
@@ -202,6 +208,7 @@ Item {
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
                                 color: PowerProfileService.activeProfile === "balanced" ? Theme.accentBlue : Theme.textPrimary
+                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                             }
                             Text {
                                 text: "Standard dynamic performance"
@@ -215,7 +222,10 @@ Item {
                             name: "check"
                             size: 14
                             color: Theme.accentBlue
-                            visible: PowerProfileService.activeProfile === "balanced"
+                            opacity: PowerProfileService.activeProfile === "balanced" ? 1.0 : 0.0
+                            scale: PowerProfileService.activeProfile === "balanced" ? 1.0 : 0.5
+                            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                            Behavior on scale { NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot } }
                         }
                     }
 
@@ -238,8 +248,8 @@ Item {
                         : (perfMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
                     scale: perfMouse.pressed ? 0.96 : (perfMouse.containsMouse ? 1.02 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutBack } }
 
                     RowLayout {
                         anchors.fill: parent
@@ -250,6 +260,7 @@ Item {
                             name: "bolt"
                             size: 16
                             color: PowerProfileService.activeProfile === "performance" ? Theme.accentRed : Theme.textTertiary
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
 
                         ColumnLayout {
@@ -262,6 +273,7 @@ Item {
                                 font.pixelSize: 12
                                 font.weight: Font.DemiBold
                                 color: PowerProfileService.activeProfile === "performance" ? Theme.accentRed : Theme.textPrimary
+                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                             }
                             Text {
                                 text: "Maximum clock speed & throughput"
@@ -275,7 +287,10 @@ Item {
                             name: "check"
                             size: 14
                             color: Theme.accentRed
-                            visible: PowerProfileService.activeProfile === "performance"
+                            opacity: PowerProfileService.activeProfile === "performance" ? 1.0 : 0.0
+                            scale: PowerProfileService.activeProfile === "performance" ? 1.0 : 0.5
+                            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                            Behavior on scale { NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot } }
                         }
                     }
 

@@ -107,7 +107,7 @@ Item {
                 }
 
                 Behavior on dockScale {
-                    NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
                 }
 
                 Rectangle {
@@ -157,7 +157,7 @@ Item {
                     opacity: (launchpadMouse.containsMouse && launchpadItem.dockScale > 1.1) ? 1.0 : 0.0
                     visible: opacity > 0.01
 
-                    Behavior on opacity { NumberAnimation { duration: 120 } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
 
                     Rectangle {
                         id: launchpadTipBg
@@ -318,7 +318,7 @@ Item {
                 }
 
                 Behavior on dockScale {
-                    NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
                 }
 
                 Item {
@@ -370,7 +370,7 @@ Item {
                     opacity: (trashMouse.containsMouse && trashItem.dockScale > 1.1) ? 1.0 : 0.0
                     visible: opacity > 0.01
 
-                    Behavior on opacity { NumberAnimation { duration: 120 } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
 
                     Rectangle {
                         id: trashTipBg
@@ -441,9 +441,14 @@ Item {
 
         visible: opacity > 0.001
         opacity: isOpen ? 1.0 : 0.0
+        scale: isOpen ? 1.0 : 0.92
+        transformOrigin: Item.Bottom
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
+        }
+        Behavior on scale {
+            NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
         }
 
         width: 150

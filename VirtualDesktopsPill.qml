@@ -179,7 +179,7 @@ Item {
                         Behavior on color { ColorAnimation { duration: 110 } }
                         Behavior on scale {
                             NumberAnimation {
-                                duration: 120
+                                duration: Theme.animDurationTooltip
                                 easing.type: Easing.OutCubic
                             }
                         }
@@ -264,10 +264,10 @@ Item {
                 color: "transparent"
                 opacity: (addMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.65
 
-                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
                 Behavior on scale {
                     NumberAnimation {
-                        duration: 120
+                        duration: Theme.animDurationTooltip
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -327,8 +327,8 @@ Item {
         opacity: (root.isTooltipActive && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
         visible: opacity > 0.01
 
-        Behavior on opacity { NumberAnimation { duration: 120 } }
-        Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
+        Behavior on x { NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic } }
 
         Rectangle {
             id: tooltipBg
@@ -379,8 +379,8 @@ Item {
         opacity: root.menuOpen ? 1.0 : 0.0
         visible: opacity > 0.01
 
-        Behavior on opacity { NumberAnimation { duration: 130 } }
-        Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
+        Behavior on x { NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic } }
 
         Rectangle {
             id: menuCard
