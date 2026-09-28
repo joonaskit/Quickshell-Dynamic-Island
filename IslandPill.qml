@@ -8,7 +8,8 @@ Item {
 
     property bool isExpanded: false
     property bool isTopBarMode: false
-    property bool isHovered: compactClickArea.containsMouse
+    property bool hasFullscreenApp: false
+    property bool isHovered: compactClickArea.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp
     property date currentDate: clock.date
 
     // System services
@@ -215,7 +216,7 @@ Item {
             id: compactClickArea
             anchors.fill: parent
             enabled: !root.isExpanded
-            hoverEnabled: !root.isExpanded
+            hoverEnabled: !root.isExpanded && !root.isTopBarMode && !root.hasFullscreenApp
             cursorShape: Qt.PointingHandCursor
 
             onClicked: {

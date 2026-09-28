@@ -202,23 +202,97 @@ class WindowBridge(dbus.service.Object):
         self.run_kwin_code(code)
 
     @dbus.service.method(BUS_NAME, in_signature="s", out_signature="")
+    def maximizeWindow(self, target_id_or_app):
+        escaped = str(target_id_or_app).replace('"', '\\"').lower()
+        code = f"""
+        var target = "{escaped}";
+        var win = null;
+        if (target && target.length > 0) {{
+            var wins = workspace.windowList();
+            for (var i = 0; i < wins.length; i++) {{
+                var w = wins[i];
+                if (!w) continue;
+                var wId = String(w.internalId).toLowerCase();
+                var wApp = String(w.resourceClass || w.desktopFileName || "").toLowerCase();
+                if (wId === target || wApp === target || wApp.indexOf(target) >= 0 || target.indexOf(wApp) >= 0) {{
+                    win = w;
+                    break;
+                }}
+            }}
+        }}
+        if (!win) {{
+            win = workspace.activeWindow;
+        }}
+        if (win) {{
+            if (typeof win.setMaximize === "function") {{
+                win.setMaximize(true, true);
+            }} else {{
+                win.maximized = true;
+            }}
+        }}
+        """
+        self.run_kwin_code(code)
+
+    @dbus.service.method(BUS_NAME, in_signature="s", out_signature="")
     def unmaximizeWindow(self, target_id_or_app):
         escaped = str(target_id_or_app).replace('"', '\\"').lower()
         code = f"""
         var target = "{escaped}";
-        var wins = workspace.windowList();
-        for (var i = 0; i < wins.length; i++) {{
-            var w = wins[i];
-            if (!w) continue;
-            var wId = String(w.internalId).toLowerCase();
-            var wApp = String(w.resourceClass || w.desktopFileName || "").toLowerCase();
-            if (wId === target || wApp === target || wApp.indexOf(target) >= 0 || target.indexOf(wApp) >= 0) {{
-                if (typeof w.setMaximize === "function") {{
-                    w.setMaximize(false, false);
-                }} else {{
-                    w.maximized = false;
+        var win = null;
+        if (target && target.length > 0) {{
+            var wins = workspace.windowList();
+            for (var i = 0; i < wins.length; i++) {{
+                var w = wins[i];
+                if (!w) continue;
+                var wId = String(w.internalId).toLowerCase();
+                var wApp = String(w.resourceClass || w.desktopFileName || "").toLowerCase();
+                if (wId === target || wApp === target || wApp.indexOf(target) >= 0 || target.indexOf(wApp) >= 0) {{
+                    win = w;
+                    break;
                 }}
-                break;
+            }}
+        }}
+        if (!win) {{
+            win = workspace.activeWindow;
+        }}
+        if (win) {{
+            if (typeof win.setMaximize === "function") {{
+                win.setMaximize(false, false);
+            }} else {{
+                win.maximized = false;
+            }}
+        }}
+        """
+        self.run_kwin_code(code)
+
+    @dbus.service.method(BUS_NAME, in_signature="s", out_signature="")
+    def toggleMaximizeWindow(self, target_id_or_app):
+        escaped = str(target_id_or_app).replace('"', '\\"').lower()
+        code = f"""
+        var target = "{escaped}";
+        var win = null;
+        if (target && target.length > 0) {{
+            var wins = workspace.windowList();
+            for (var i = 0; i < wins.length; i++) {{
+                var w = wins[i];
+                if (!w) continue;
+                var wId = String(w.internalId).toLowerCase();
+                var wApp = String(w.resourceClass || w.desktopFileName || "").toLowerCase();
+                if (wId === target || wApp === target || wApp.indexOf(target) >= 0 || target.indexOf(wApp) >= 0) {{
+                    win = w;
+                    break;
+                }}
+            }}
+        }}
+        if (!win) {{
+            win = workspace.activeWindow;
+        }}
+        if (win) {{
+            var isMax = (win.maximizeMode === 3 || win.maximized === true);
+            if (typeof win.setMaximize === "function") {{
+                win.setMaximize(!isMax, !isMax);
+            }} else {{
+                win.maximized = !isMax;
             }}
         }}
         """

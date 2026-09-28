@@ -6,6 +6,7 @@ Item {
     id: root
 
     property bool isTopBarMode: false
+    property bool hasFullscreenApp: false
     property date currentDate: new Date()
 
     property bool wifiMenuOpen: false
@@ -112,8 +113,8 @@ Item {
         root.hardwareMenuOpen = next;
     }
 
-    // Hover state matching IslandPill: expands capsule smoothly on pill hover
-    readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.anyMenuOpen
+    // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
+    readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.anyMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
     // Target dimensions for liquid jelly morphing
     readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 14 : 26) + (root.isClusterHovered ? 8 : 0)
@@ -182,6 +183,7 @@ Item {
 
         HoverHandler {
             id: clusterHoverHandler
+            enabled: !root.isTopBarMode && !root.hasFullscreenApp
         }
 
         topLeftRadius: root.targetTopRadius
@@ -286,7 +288,7 @@ Item {
                     MouseArea {
                         id: coffeeMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: CaffeineService.toggle()
                     }
@@ -319,7 +321,7 @@ Item {
                     MouseArea {
                         id: wifiMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleWifiMenu()
                     }
@@ -353,7 +355,7 @@ Item {
                     MouseArea {
                         id: btMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleBluetoothMenu()
                     }
@@ -389,7 +391,7 @@ Item {
                     MouseArea {
                         id: micMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onClicked: function(mouse) {
@@ -429,7 +431,7 @@ Item {
                     MouseArea {
                         id: clipboardMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleClipboardMenu()
                     }
@@ -467,7 +469,7 @@ Item {
                     MouseArea {
                         id: profileMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleProfileMenu()
                     }
@@ -500,7 +502,7 @@ Item {
                     MouseArea {
                         id: hardwareMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleHardwareMenu()
                     }
@@ -546,7 +548,7 @@ Item {
                     MouseArea {
                         id: notifMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleNotificationMenu()
                     }
@@ -577,7 +579,7 @@ Item {
                     MouseArea {
                         id: batteryMouse
                         anchors.fill: parent
-                        hoverEnabled: true
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.togglePowerMenu()
                     }

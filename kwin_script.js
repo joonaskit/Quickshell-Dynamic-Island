@@ -106,6 +106,7 @@ function getWindowSummary() {
                 title: getTitle(w),
                 active: (w === workspace.activeWindow),
                 minimized: !!w.minimized,
+                maximized: isMax(w),
                 onCurrent: isOnCurrent(w),
                 desktops: getWindowDesktopIds(w)
             });

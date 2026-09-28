@@ -34,8 +34,8 @@ Item {
         root.activeMenuTargetX = targetX;
     }
 
-    // Hover state matching IslandPill: expands capsule smoothly on pill hover
-    readonly property bool isHovered: pillHoverHandler.hovered && !root.menuOpen
+    // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
+    readonly property bool isHovered: pillHoverHandler.hovered && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
     // Geometry
     readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 14 : 20)
@@ -84,6 +84,7 @@ Item {
 
         HoverHandler {
             id: pillHoverHandler
+            enabled: !root.isTopBarMode && !root.hasFullscreenApp
         }
 
         // Frosted glass appearance
@@ -187,8 +188,8 @@ Item {
                                 text: String(desktopItem.modelData.index + 1)
                                 font.family: Theme.fontFamily
                                 font.pixelSize: root.isTopBarMode ? 11 : 12
-                                font.weight: desktopItem.isCurrent ? Font.Bold : (itemMouse.containsMouse ? Font.DemiBold : Font.Normal)
-                                color: desktopItem.isCurrent ? "#ffffff" : (itemMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
+                                font.weight: desktopItem.isCurrent ? Font.Bold : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Font.DemiBold : Font.Normal)
+                                color: desktopItem.isCurrent ? "#ffffff" : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
 
                                 Behavior on color { ColorAnimation { duration: 110 } }
                             }
@@ -207,7 +208,7 @@ Item {
                         MouseArea {
                             id: itemMouse
                             anchors.fill: parent
-                            hoverEnabled: true
+                            hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                             cursorShape: Qt.PointingHandCursor
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
@@ -220,7 +221,7 @@ Item {
                             }
 
                             onEntered: {
-                                if (root.menuOpen) return;
+                                if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp) return;
                                 let mapped = desktopItem.mapToItem(root, desktopItem.width / 2, 0);
                                 let dName = modelData.name || ("Desktop " + (modelData.index + 1));
                                 let winText = desktopItem.winCount > 0 ? (" • " + desktopItem.winCount + (desktopItem.winCount === 1 ? " window" : " windows")) : " (Empty)";
@@ -255,7 +256,7 @@ Item {
                 height: root.isTopBarMode ? 18 : 22
                 radius: height / 2
                 color: "transparent"
-                opacity: addMouse.containsMouse ? 1.0 : 0.65
+                opacity: (addMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.65
 
                 Behavior on opacity { NumberAnimation { duration: 120 } }
                 Behavior on scale {
@@ -271,13 +272,13 @@ Item {
                     anchors.centerIn: parent
                     name: "plus"
                     size: root.isTopBarMode ? 9 : 10
-                    color: addMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
+                    color: (addMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary
                 }
 
                 MouseArea {
                     id: addMouse
                     anchors.fill: parent
-                    hoverEnabled: true
+                    hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                     cursorShape: Qt.PointingHandCursor
 
                     onWheel: function(wheel) {
@@ -289,7 +290,7 @@ Item {
                     }
 
                     onEntered: {
-                        if (root.menuOpen) return;
+                        if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp) return;
                         let mapped = addDesktopBtn.mapToItem(root, addDesktopBtn.width / 2, 0);
                         root.hoveredTooltipText = "New Desktop";
                         root.hoveredTooltipTargetX = mapped.x;
@@ -317,7 +318,7 @@ Item {
         x: Math.max(0, Math.min(root.width - tooltipBg.width, root.hoveredTooltipTargetX - tooltipBg.width / 2))
         z: 300
 
-        opacity: (root.isTooltipActive && !root.menuOpen) ? 1.0 : 0.0
+        opacity: (root.isTooltipActive && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
         visible: opacity > 0.01
 
         Behavior on opacity { NumberAnimation { duration: 120 } }

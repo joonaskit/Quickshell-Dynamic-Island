@@ -29,8 +29,8 @@ Item {
     readonly property int appCount: appItems.length
 
     property var hoveredAppItem: null
-    // Hover state matching IslandPill: expands capsule smoothly on pill hover
-    readonly property bool isPillHovered: pillHoverHandler.hovered && !root.contextMenuOpen
+    // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
+    readonly property bool isPillHovered: pillHoverHandler.hovered && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
     // Target dimensions matching TopRightStatusCluster morphing physics
     readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 14 : 20) + (root.isPillHovered ? 8 : 0)
@@ -376,6 +376,7 @@ Item {
 
         HoverHandler {
             id: pillHoverHandler
+            enabled: !root.isTopBarMode && !root.hasFullscreenApp
         }
 
         topLeftRadius: root.targetTopRadius
@@ -485,11 +486,15 @@ Item {
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
-                            hoverEnabled: true
+                            hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                             cursorShape: Qt.PointingHandCursor
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-                            onEntered: root.hoveredAppItem = modelData
+                            onEntered: {
+                                if (!root.isTopBarMode && !root.hasFullscreenApp) {
+                                    root.hoveredAppItem = modelData;
+                                }
+                            }
                             onExited: {
                                 if (root.hoveredAppItem === modelData) root.hoveredAppItem = null;
                             }
@@ -526,8 +531,8 @@ Item {
                             border.color: Theme.islandBorder
                             z: 300
 
-                            opacity: (mouseArea.containsMouse && !mouseArea.pressed && !root.contextMenuOpen) ? 1.0 : 0.0
-                            scale: (mouseArea.containsMouse && !mouseArea.pressed && !root.contextMenuOpen) ? 1.0 : 0.85
+                            opacity: (mouseArea.containsMouse && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
+                            scale: (mouseArea.containsMouse && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.85
                             visible: opacity > 0.01
 
                             Behavior on opacity {

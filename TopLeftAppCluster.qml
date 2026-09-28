@@ -6,6 +6,7 @@ Item {
     id: root
 
     property bool isTopBarMode: false
+    property bool hasFullscreenApp: false
     property string activeAppTitle: ""
     property string activeAppId: WindowService.activeAppId
     property string activeWindowTitle: WindowService.activeWindowTitle
@@ -13,6 +14,13 @@ Item {
     property var openWindows: WindowService.getAppWindows(activeAppId)
 
     readonly property bool isDesktop: (!activeAppTitle || activeAppTitle === "Desktop" || activeAppId === "")
+
+    readonly property bool isWindowMaximized: {
+        if (root.isDesktop) return false;
+        let win = root.openWindows.find(function(w) { return w.id === root.activeWindowId || w.active; });
+        if (win && win.maximized !== undefined) return !!win.maximized;
+        return WindowService.isFocusedWindowMaximized;
+    }
 
     property bool menuOpen: false
     z: root.menuOpen ? 200 : 15
@@ -34,8 +42,8 @@ Item {
         }
     }
 
-    // Hover state matching IslandPill
-    readonly property bool isHovered: headerMouse.containsMouse && !root.menuOpen
+    // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
+    readonly property bool isHovered: headerMouse.containsMouse && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
     // Dimensions
     readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 20 : 28) + (root.isHovered ? 8 : 0)
@@ -203,7 +211,7 @@ Item {
                 id: headerMouse
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                hoverEnabled: true
+                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: root.toggleMenu()
             }
@@ -290,10 +298,21 @@ Item {
                 }
 
                 MenuItem {
-                    visible: !root.isDesktop
-                    iconName: "restore"
-                    iconColor: Theme.accentBlue
-                    label: "Unmaximize (Float)"
+                    visible: !root.isDesktop && !root.isWindowMaximized
+                    iconName: "maximize"
+                    iconColor: Theme.accentGreen
+                    label: "Maximize"
+                    onClicked: {
+                        WindowService.maximizeWindow(root.activeWindowId || root.activeAppId);
+                        root.closeMenu();
+                    }
+                }
+
+                MenuItem {
+                    visible: !root.isDesktop && root.isWindowMaximized
+                    iconName: "unmaximize"
+                    iconColor: Theme.accentYellow
+                    label: "Unmaximize"
                     onClicked: {
                         WindowService.unmaximizeWindow(root.activeWindowId || root.activeAppId);
                         root.closeMenu();

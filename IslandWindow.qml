@@ -144,6 +144,7 @@ PanelWindow {
         anchors.leftMargin: 16
         y: window.isMaximized ? 0 : Theme.topMargin
         isTopBarMode: window.isMaximized
+        hasFullscreenApp: window.hasFullscreenApp
         activeAppTitle: window.activeAppTitle
         activeAppId: WindowService.activeAppId
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
@@ -191,6 +192,7 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         y: window.isMaximized ? 0 : Theme.topMargin
         isTopBarMode: window.isMaximized
+        hasFullscreenApp: window.hasFullscreenApp
 
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
         visible: opacity > 0.01
@@ -302,6 +304,7 @@ PanelWindow {
         anchors.rightMargin: 16
         y: window.isMaximized ? 0 : Theme.topMargin
         isTopBarMode: window.isMaximized
+        hasFullscreenApp: window.hasFullscreenApp
         currentDate: islandPill.currentDate
 
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0

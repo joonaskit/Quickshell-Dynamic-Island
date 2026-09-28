@@ -7,6 +7,7 @@ Singleton {
     id: root
 
     property bool isMaximized: false
+    property bool isFocusedWindowMaximized: false
     property bool hasFullscreenApp: false
     property string activeAppTitle: ""
     property string activeAppId: ""
@@ -89,9 +90,16 @@ Singleton {
         Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.minimizeWindow", String(idOrApp)]);
     }
 
+    function maximizeWindow(idOrApp) {
+        Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.maximizeWindow", String(idOrApp || "")]);
+    }
+
     function unmaximizeWindow(idOrApp) {
-        if (!idOrApp) return;
-        Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.unmaximizeWindow", String(idOrApp)]);
+        Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.unmaximizeWindow", String(idOrApp || "")]);
+    }
+
+    function toggleMaximize(idOrApp) {
+        Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.toggleMaximizeWindow", String(idOrApp || "")]);
     }
 
     function toggleKeepAbove(idOrApp) {
@@ -234,8 +242,10 @@ Singleton {
                     if (root.windowList && root.windowList.length > 0) {
                         let activeWin = root.windowList.find(function(w) { return w.active; });
                         root.activeWindowId = activeWin ? activeWin.id : "";
+                        root.isFocusedWindowMaximized = activeWin ? (activeWin.maximized !== undefined ? !!activeWin.maximized : root.isMaximized) : false;
                     } else {
                         root.activeWindowId = "";
+                        root.isFocusedWindowMaximized = (rawApp !== "" && rawApp !== "Desktop") ? root.isMaximized : false;
                     }
 
                     // Clean formatted app name
