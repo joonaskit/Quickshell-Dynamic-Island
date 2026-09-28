@@ -11,6 +11,8 @@ singleton NotificationService 1.0 NotificationService.qml
 singleton MicrophoneService 1.0 MicrophoneService.qml
 singleton PowerProfileService 1.0 PowerProfileService.qml
 singleton HardwareStatsService 1.0 HardwareStatsService.qml
+singleton DeviceService 1.0 DeviceService.qml
+singleton SettingsService 1.0 SettingsService.qml
 IslandWindow 1.0 IslandWindow.qml
 IslandPill 1.0 IslandPill.qml
 IslandDetachedBubble 1.0 IslandDetachedBubble.qml
@@ -37,6 +39,8 @@ ClipboardQuickSettings 1.0 ClipboardQuickSettings.qml
 MicrophoneQuickSettings 1.0 MicrophoneQuickSettings.qml
 PowerProfileQuickSettings 1.0 PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 HardwareStatsQuickSettings.qml
+DeviceQuickSettings 1.0 DeviceQuickSettings.qml
+SettingsView 1.0 SettingsView.qml
 singleton DockService 1.0 DockService.qml
 DockWindow 1.0 DockWindow.qml
 DockBar 1.0 DockBar.qml

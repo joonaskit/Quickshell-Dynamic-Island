@@ -13,8 +13,8 @@ Item {
     property real trackLength: player && player.length ? player.length : 0
     property real trackPosition: player && player.position ? player.position : 0
 
-    implicitHeight: 96
-    implicitWidth: parent ? parent.width : 370
+    implicitHeight: Theme.px(96)
+    implicitWidth: parent ? parent.width : Theme.px(370)
 
     // Timer to update track position regularly while playing
     Timer {
@@ -50,13 +50,13 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 12
+        spacing: Theme.px(12)
 
         // Album Art
         Rectangle {
-            Layout.preferredWidth: 48
-            Layout.preferredHeight: 48
-            radius: 10
+            Layout.preferredWidth: Theme.px(48)
+            Layout.preferredHeight: Theme.px(48)
+            radius: Theme.px(10)
             color: "#1c1c1e"
             border.color: Qt.rgba(1, 1, 1, 0.1)
             border.width: 1
@@ -73,7 +73,7 @@ Item {
             SvgIcon {
                 anchors.centerIn: parent
                 name: "music"
-                size: 22
+                size: Theme.px(22)
                 color: Theme.accentOrange
                 visible: root.artUrl === "" || parent.children[0].status !== Image.Ready
             }
@@ -82,12 +82,12 @@ Item {
         // Title and Artist
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 2
+            spacing: Theme.px(2)
 
             Text {
                 text: root.trackTitle
                 font.family: Theme.fontDisplay
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontPx(13)
                 font.weight: Font.DemiBold
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -97,7 +97,7 @@ Item {
             Text {
                 text: root.trackArtist + (root.trackAlbum ? " • " + root.trackAlbum : "")
                 font.family: Theme.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Theme.fontPx(11)
                 color: Theme.textSecondary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -106,14 +106,14 @@ Item {
 
         // Transport Controls
         Row {
-            spacing: 4
+            spacing: Theme.px(4)
             Layout.alignment: Qt.AlignVCenter
 
             // Previous button
             Rectangle {
-                width: 30
-                height: 30
-                radius: 15
+                width: Theme.px(30)
+                height: Theme.px(30)
+                radius: Theme.px(15)
                 color: prevArea.containsMouse ? Theme.controlBackgroundHover : "transparent"
 
                 SvgIcon {
@@ -138,15 +138,15 @@ Item {
 
             // Play / Pause button (filled prominent circle)
             Rectangle {
-                width: 32
-                height: 32
-                radius: 16
+                width: Theme.px(32)
+                height: Theme.px(32)
+                radius: Theme.px(16)
                 color: playArea.containsMouse ? Qt.rgba(1, 1, 1, 0.95) : Qt.rgba(1, 1, 1, 0.85)
 
                 SvgIcon {
                     anchors.centerIn: parent
                     name: root.isPlaying ? "pause" : "play"
-                    size: 14
+                    size: Theme.px(14)
                     color: "#000000"
                 }
 
@@ -165,15 +165,15 @@ Item {
 
             // Next button
             Rectangle {
-                width: 30
-                height: 30
-                radius: 15
+                width: Theme.px(30)
+                height: Theme.px(30)
+                radius: Theme.px(15)
                 color: nextArea.containsMouse ? Theme.controlBackgroundHover : "transparent"
 
                 SvgIcon {
                     anchors.centerIn: parent
                     name: "next"
-                    size: 14
+                    size: Theme.px(14)
                     color: Theme.textPrimary
                 }
 
@@ -195,17 +195,17 @@ Item {
     // Seek / Progress Bar Row
     ColumnLayout {
         anchors.top: topRow.bottom
-        anchors.topMargin: 8
+        anchors.topMargin: Theme.px(8)
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 3
+        spacing: Theme.px(3)
 
         // Seek Bar Track
         Rectangle {
             id: trackBar
             Layout.fillWidth: true
-            Layout.preferredHeight: 5
-            radius: 2.5
+            Layout.preferredHeight: Theme.px(5)
+            radius: Theme.px(2.5)
             color: Theme.sliderTrack
 
             // Fill Bar
@@ -214,7 +214,7 @@ Item {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                radius: 2.5
+                radius: Theme.px(2.5)
                 color: seekArea.containsMouse ? Theme.accentGreen : Theme.textPrimary
                 width: root.trackLength > 0 ? Math.min(trackBar.width, Math.max(0, (root.trackPosition / root.trackLength) * trackBar.width)) : 0
 
@@ -226,7 +226,7 @@ Item {
             MouseArea {
                 id: seekArea
                 anchors.fill: parent
-                anchors.margins: -4 // larger hit area
+                anchors.margins: -Theme.px(4) // larger hit area
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: function(mouse) {
@@ -247,7 +247,7 @@ Item {
             Text {
                 text: root.formatTime(root.trackPosition)
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Theme.fontPx(10)
                 font.features: { "tnum": 1 }
                 color: Theme.textTertiary
             }
@@ -257,7 +257,7 @@ Item {
             Text {
                 text: root.formatTime(root.trackLength)
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Theme.fontPx(10)
                 font.features: { "tnum": 1 }
                 color: Theme.textTertiary
             }

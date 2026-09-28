@@ -6,20 +6,20 @@ Item {
 
     property bool expanded: false
 
-    implicitWidth: parent ? parent.width : 370
+    implicitWidth: parent ? parent.width : Theme.px(370)
     implicitHeight: selectorColumn.implicitHeight
 
     ColumnLayout {
         id: selectorColumn
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 4
+        spacing: Theme.px(4)
 
         // Main selector pill
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 28
-            radius: 8
+            Layout.preferredHeight: Theme.px(28)
+            radius: Theme.px(8)
             color: selectorMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04)
             border.width: 1
             border.color: root.expanded ? Qt.rgba(10/255, 132/255, 255/255, 0.35) : Qt.rgba(1, 1, 1, 0.08)
@@ -33,14 +33,14 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                spacing: 7
+                anchors.leftMargin: Theme.px(8)
+                anchors.rightMargin: Theme.px(8)
+                spacing: Theme.px(7)
 
                 // Device Type Icon
                 SvgIcon {
                     name: AudioService.currentSinkIcon || "volume-high"
-                    size: 13
+                    size: Theme.px(13)
                     color: Theme.accentBlue
                 }
 
@@ -49,7 +49,7 @@ Item {
                     Layout.fillWidth: true
                     text: AudioService.currentSinkDisplayName || "Audio Output"
                     font.family: Theme.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.Medium
                     color: Theme.textPrimary
                     elide: Text.ElideRight
@@ -59,7 +59,7 @@ Item {
                 SvgIcon {
                     visible: (AudioService.sinks || []).length > 1
                     name: root.expanded ? "chevron-up" : "chevron-down"
-                    size: 12
+                    size: Theme.px(12)
                     color: root.expanded ? Theme.accentBlue : Theme.textSecondary
                 }
             }
@@ -84,7 +84,7 @@ Item {
         ColumnLayout {
             id: sinkListLayout
             Layout.fillWidth: true
-            spacing: 3
+            spacing: Theme.px(3)
             visible: root.expanded && (AudioService.sinks || []).length > 1
 
             Repeater {
@@ -92,8 +92,8 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 30
-                    radius: 7
+                    Layout.preferredHeight: Theme.px(30)
+                    radius: Theme.px(7)
                     color: itemMouse.containsMouse
                         ? Qt.rgba(1, 1, 1, 0.1)
                         : (modelData.isDefault ? Qt.rgba(10/255, 132/255, 255/255, 0.16) : Qt.rgba(1, 1, 1, 0.03))
@@ -106,13 +106,13 @@ Item {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 8
-                        anchors.rightMargin: 8
-                        spacing: 8
+                        anchors.leftMargin: Theme.px(8)
+                        anchors.rightMargin: Theme.px(8)
+                        spacing: Theme.px(8)
 
                         SvgIcon {
                             name: modelData.icon || "volume-high"
-                            size: 13
+                            size: Theme.px(13)
                             color: modelData.isDefault ? Theme.accentBlue : Theme.textSecondary
                         }
 
@@ -120,7 +120,7 @@ Item {
                             Layout.fillWidth: true
                             text: modelData.displayName
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             font.weight: modelData.isDefault ? Font.DemiBold : Font.Normal
                             color: modelData.isDefault ? Theme.textPrimary : Theme.textSecondary
                             elide: Text.ElideRight
@@ -128,7 +128,7 @@ Item {
 
                         SvgIcon {
                             name: "check"
-                            size: 12
+                            size: Theme.px(12)
                             color: Theme.accentBlue
                             visible: modelData.isDefault
                         }

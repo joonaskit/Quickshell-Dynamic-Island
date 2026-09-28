@@ -7,25 +7,25 @@ Item {
     property var notification: NotificationService.latestNotification
 
     implicitHeight: Theme.compactHeight
-    implicitWidth: 310
+    implicitWidth: Theme.px(310)
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 14
-        spacing: 9
+        anchors.leftMargin: Theme.px(12)
+        anchors.rightMargin: Theme.px(14)
+        spacing: Theme.px(9)
 
         // Notification Icon Badge
         Rectangle {
-            Layout.preferredWidth: 26
-            Layout.preferredHeight: 26
-            radius: 13
+            Layout.preferredWidth: Theme.px(26)
+            Layout.preferredHeight: Theme.px(26)
+            radius: Theme.px(13)
             color: Qt.rgba(255/255, 159/255, 10/255, 0.22)
 
             SvgIcon {
                 anchors.centerIn: parent
                 name: "bell"
-                size: 13
+                size: Theme.px(13)
                 color: Theme.accentOrange
             }
         }
@@ -37,12 +37,12 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 4
+                spacing: Theme.px(4)
 
                 Text {
                     text: root.notification ? (root.notification.appName || "Notification") : "Notification"
                     font.family: Theme.fontDisplay
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.Bold
                     color: Theme.accentOrange
                     elide: Text.ElideRight
@@ -52,7 +52,7 @@ Item {
                     visible: root.notification && root.notification.summary && root.notification.summary.length > 0
                     text: "• " + (root.notification ? root.notification.summary : "")
                     font.family: Theme.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.DemiBold
                     color: Theme.textPrimary
                     elide: Text.ElideRight
@@ -63,7 +63,7 @@ Item {
             Text {
                 text: root.notification ? (root.notification.body || root.notification.summary || "") : ""
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Theme.fontPx(10)
                 color: Theme.textSecondary
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -73,9 +73,9 @@ Item {
 
         // Right Pulse indicator dot
         Rectangle {
-            Layout.preferredWidth: 7
-            Layout.preferredHeight: 7
-            radius: 3.5
+            Layout.preferredWidth: Theme.px(7)
+            Layout.preferredHeight: Theme.px(7)
+            radius: Theme.px(3.5)
             color: Theme.accentOrange
 
             SequentialAnimation on opacity {

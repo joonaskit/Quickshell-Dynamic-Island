@@ -6,8 +6,8 @@ Item {
 
     signal clicked()
 
-    width: bubbleMouse.containsMouse ? 44 : 38
-    height: bubbleMouse.containsMouse ? 44 : 38
+    width: bubbleMouse.containsMouse ? Theme.px(44) : Theme.px(38)
+    height: bubbleMouse.containsMouse ? Theme.px(44) : Theme.px(38)
 
     Behavior on width {
         NumberAnimation {
@@ -28,7 +28,7 @@ Item {
     property bool isExpanded: false
     property bool isTopBarMode: false
 
-    readonly property bool shouldShow: NotificationService.unreadCount > 0 && !isExpanded && !isTopBarMode
+    readonly property bool shouldShow: SettingsService.showDetachedNotifBubble && NotificationService.unreadCount > 0 && !isExpanded && !isTopBarMode
 
     scale: shouldShow ? 1.0 : 0.0
     opacity: shouldShow ? 1.0 : 0.0
@@ -51,9 +51,9 @@ Item {
     // Ambient drop shadow
     Rectangle {
         anchors.centerIn: bubbleBody
-        width: bubbleBody.width + 10
-        height: bubbleBody.height + 8
-        radius: bubbleBody.radius + 3
+        width: bubbleBody.width + Theme.px(10)
+        height: bubbleBody.height + Theme.px(8)
+        radius: bubbleBody.radius + Theme.px(3)
         color: Theme.islandShadow
         opacity: 0.45
     }
@@ -75,7 +75,7 @@ Item {
         SvgIcon {
             anchors.centerIn: parent
             name: "bell"
-            size: 15
+            size: Theme.px(15)
             color: Theme.accentOrange
         }
 
@@ -83,11 +83,11 @@ Item {
         Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.topMargin: 2
-            anchors.rightMargin: 2
-            width: Math.max(14, badgeText.implicitWidth + 6)
-            height: 14
-            radius: 7
+            anchors.topMargin: Theme.px(2)
+            anchors.rightMargin: Theme.px(2)
+            width: Math.max(Theme.px(14), badgeText.implicitWidth + Theme.px(6))
+            height: Theme.px(14)
+            radius: Theme.px(7)
             color: Theme.accentRed
             visible: NotificationService.unreadCount > 0
 
@@ -96,7 +96,7 @@ Item {
                 anchors.centerIn: parent
                 text: NotificationService.unreadCount > 9 ? "9+" : NotificationService.unreadCount
                 font.family: Theme.fontDisplay
-                font.pixelSize: 8
+                font.pixelSize: Theme.fontPx(8)
                 font.weight: Font.Bold
                 color: "#ffffff"
             }

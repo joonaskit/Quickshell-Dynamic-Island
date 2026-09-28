@@ -4,39 +4,39 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    implicitWidth: parent ? parent.width : 370
+    implicitWidth: parent ? parent.width : Theme.px(370)
     implicitHeight: contentColumn.implicitHeight
 
     ColumnLayout {
         id: contentColumn
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 8
+        spacing: Theme.px(8)
 
         // Header: Bell Icon, Title, Count Badge & Clear All
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: Theme.px(6)
 
             SvgIcon {
                 name: "bell"
-                size: 13
+                size: Theme.px(13)
                 color: Theme.accentOrange
             }
 
             Text {
                 text: "NOTIFICATIONS"
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Theme.fontPx(10)
                 font.weight: Font.DemiBold
                 color: Theme.textTertiary
             }
 
             // Count Badge
             Rectangle {
-                Layout.preferredHeight: 16
-                Layout.preferredWidth: countText.implicitWidth + 8
-                radius: 8
+                Layout.preferredHeight: Theme.px(16)
+                Layout.preferredWidth: countText.implicitWidth + Theme.px(8)
+                radius: Theme.px(8)
                 color: Qt.rgba(255/255, 159/255, 10/255, 0.2)
 
                 Text {
@@ -44,7 +44,7 @@ Item {
                     anchors.centerIn: parent
                     text: NotificationService.notifications.length
                     font.family: Theme.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontPx(10)
                     font.weight: Font.Bold
                     color: Theme.accentOrange
                 }
@@ -54,9 +54,9 @@ Item {
 
             // Clear All Button
             Rectangle {
-                Layout.preferredHeight: 22
-                Layout.preferredWidth: clearRow.implicitWidth + 12
-                radius: 11
+                Layout.preferredHeight: Theme.px(22)
+                Layout.preferredWidth: clearRow.implicitWidth + Theme.px(12)
+                radius: Theme.px(11)
                 color: clearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : Qt.rgba(1, 1, 1, 0.05)
                 scale: clearMouse.pressed ? 0.92 : (clearMouse.containsMouse ? 1.08 : 1.0)
 
@@ -71,18 +71,18 @@ Item {
                 RowLayout {
                     id: clearRow
                     anchors.centerIn: parent
-                    spacing: 4
+                    spacing: Theme.px(4)
 
                     SvgIcon {
                         name: "trash"
-                        size: 10
+                        size: Theme.px(10)
                         color: clearMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
                     }
 
                     Text {
                         text: "Clear"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.fontPx(10)
                         font.weight: Font.DemiBold
                         color: clearMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
                     }
@@ -103,7 +103,7 @@ Item {
         // List of Notifications (up to 4 most recent)
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: Theme.px(6)
 
             Repeater {
                 model: {
@@ -114,8 +114,8 @@ Item {
                 Rectangle {
                     id: notifCard
                     Layout.fillWidth: true
-                    Layout.preferredHeight: cardLayout.implicitHeight + 14
-                    radius: 10
+                    Layout.preferredHeight: cardLayout.implicitHeight + Theme.px(14)
+                    radius: Theme.px(10)
                     color: cardMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.04)
                     border.width: 1
                     border.color: Qt.rgba(1, 1, 1, 0.06)
@@ -129,19 +129,19 @@ Item {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.top: parent.top
-                        anchors.margins: 7
-                        spacing: 2
+                        anchors.margins: Theme.px(7)
+                        spacing: Theme.px(2)
 
                         // Top line: App Name Badge, Time & Dismiss '✕' button
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 6
+                            spacing: Theme.px(6)
 
                             // App Name
                             Rectangle {
-                                Layout.preferredHeight: 16
-                                Layout.preferredWidth: appText.implicitWidth + 8
-                                radius: 4
+                                Layout.preferredHeight: Theme.px(16)
+                                Layout.preferredWidth: appText.implicitWidth + Theme.px(8)
+                                radius: Theme.px(4)
                                 color: Qt.rgba(10/255, 132/255, 255/255, 0.15)
 
                                 Text {
@@ -149,7 +149,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: modelData.appName || "System"
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: 9
+                                    font.pixelSize: Theme.fontPx(9)
                                     font.weight: Font.DemiBold
                                     color: Theme.accentBlue
                                 }
@@ -158,7 +158,7 @@ Item {
                             Text {
                                 text: modelData.time || ""
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: Theme.fontPx(10)
                                 color: Theme.textTertiary
                             }
 
@@ -166,9 +166,9 @@ Item {
 
                             // Dismiss button
                             Rectangle {
-                                Layout.preferredWidth: 18
-                                Layout.preferredHeight: 18
-                                radius: 9
+                                Layout.preferredWidth: Theme.px(18)
+                                Layout.preferredHeight: Theme.px(18)
+                                radius: Theme.px(9)
                                 color: dismissMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : "transparent"
                                 scale: dismissMouse.pressed ? 0.88 : (dismissMouse.containsMouse ? 1.22 : 1.0)
 
@@ -183,7 +183,7 @@ Item {
                                 SvgIcon {
                                     anchors.centerIn: parent
                                     name: "close"
-                                    size: 9
+                                    size: Theme.px(9)
                                     color: dismissMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.25)
                                 }
 
@@ -205,7 +205,7 @@ Item {
                             Layout.fillWidth: true
                             text: modelData.summary || ""
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             font.weight: Font.DemiBold
                             color: Theme.textPrimary
                             elide: Text.ElideRight
@@ -217,7 +217,7 @@ Item {
                             Layout.fillWidth: true
                             text: modelData.body || ""
                             font.family: Theme.fontFamily
-                            font.pixelSize: 10
+                            font.pixelSize: Theme.fontPx(10)
                             color: Theme.textSecondary
                             wrapMode: Text.WrapAnywhere
                             maximumLineCount: 2
@@ -238,25 +238,25 @@ Item {
         // Empty state when no notifications
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 58
-            radius: 10
+            Layout.preferredHeight: Theme.px(58)
+            radius: Theme.px(10)
             color: Qt.rgba(1, 1, 1, 0.03)
             visible: NotificationService.notifications.length === 0
 
             RowLayout {
                 anchors.centerIn: parent
-                spacing: 8
+                spacing: Theme.px(8)
 
                 SvgIcon {
                     name: "bell"
-                    size: 14
+                    size: Theme.px(14)
                     color: Qt.rgba(1, 1, 1, 0.25)
                 }
 
                 Text {
                     text: "No notifications"
                     font.family: Theme.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.Medium
                     color: Theme.textTertiary
                 }

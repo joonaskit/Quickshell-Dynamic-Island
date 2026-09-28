@@ -9,25 +9,25 @@ Item {
     property bool isHovered: false
 
     implicitHeight: Theme.compactHeight
-    implicitWidth: contentRow.implicitWidth + 24
+    implicitWidth: contentRow.implicitWidth + Theme.px(24)
 
     RowLayout {
         id: contentRow
         anchors.centerIn: parent
-        spacing: 8
+        spacing: Theme.px(8)
 
         // Sleek subtle clock icon or glowing accent dot
         Item {
-            Layout.preferredWidth: 18
-            Layout.preferredHeight: 18
+            Layout.preferredWidth: Theme.px(18)
+            Layout.preferredHeight: Theme.px(18)
             Layout.alignment: Qt.AlignVCenter
 
             // Soft glowing pulse behind icon
             Rectangle {
                 anchors.centerIn: parent
-                width: 14
-                height: 14
-                radius: 7
+                width: Theme.px(14)
+                height: Theme.px(14)
+                radius: Theme.px(7)
                 color: Theme.accentBlue
                 opacity: root.isHovered ? 0.35 : 0.15
 
@@ -39,7 +39,7 @@ Item {
             SvgIcon {
                 anchors.centerIn: parent
                 name: "clock"
-                size: 14
+                size: Theme.px(14)
                 color: root.isHovered ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.75)
 
                 Behavior on color {
@@ -59,7 +59,7 @@ Item {
                 }
             }
             font.family: Theme.fontDisplay
-            font.pixelSize: 15
+            font.pixelSize: Theme.fontPx(15)
             font.weight: Font.DemiBold
             font.letterSpacing: 0.3
             font.features: { "tnum": 1 }
@@ -72,12 +72,12 @@ Item {
             id: dateBadge
             text: Qt.formatDateTime(root.currentTime, "ddd").toUpperCase()
             font.family: Theme.fontFamily
-            font.pixelSize: 10
+            font.pixelSize: Theme.fontPx(10)
             font.weight: Font.Bold
             color: Theme.textSecondary
             opacity: 0.8
             Layout.alignment: Qt.AlignVCenter
-            Layout.leftMargin: 2
+            Layout.leftMargin: Theme.px(2)
         }
     }
 }

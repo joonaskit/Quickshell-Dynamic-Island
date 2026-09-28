@@ -7,6 +7,7 @@ Item {
     id: root
 
     property bool isExpanded: false
+    property bool isSettingsOpen: false
     property bool isTopBarMode: false
     property bool hasFullscreenApp: false
     property bool isHovered: compactClickArea.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp
@@ -36,27 +37,35 @@ Item {
 
     // Compact base width (stable across hover and expand)
     readonly property real compactWidth: {
-        if (root.isAlertingNotification) return 310;
+        if (root.isAlertingNotification) return Theme.px(310);
         return (root.hasMediaPlaying && Theme.showMediaWhenPlaying)
             ? Theme.compactWidthMedia
             : Theme.compactWidthClock;
     }
 
+    readonly property real settingsWidth: Theme.px(540)
+
     // Target dimensions based on state
     readonly property real targetWidth: {
+        if (root.isSettingsOpen) {
+            return root.settingsWidth;
+        }
         if (root.isExpanded) {
             return Theme.expandedWidth;
         }
         if (root.isAlertingNotification) {
-            return 310 + (root.isHovered ? 8 : 0);
+            return Theme.px(310) + (root.isHovered ? Theme.px(8) : 0);
         }
         if (root.hasMediaPlaying && Theme.showMediaWhenPlaying) {
-            return Theme.compactWidthMedia + (root.isHovered ? 10 : 0);
+            return Theme.compactWidthMedia + (root.isHovered ? Theme.px(10) : 0);
         }
-        return Theme.compactWidthClock + (root.isHovered ? 8 : 0);
+        return Theme.compactWidthClock + (root.isHovered ? Theme.px(8) : 0);
     }
 
     readonly property real targetHeight: {
+        if (root.isSettingsOpen) {
+            return settingsView.implicitHeight;
+        }
         if (root.isExpanded) {
             return expandedView.implicitHeight;
         }
@@ -68,31 +77,55 @@ Item {
 
     // Corner radii: morphs to 0 in top-bar mode, rounded when floating
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode && !root.isExpanded) return 0;
-        return root.isExpanded ? Theme.expandedRadius : Theme.compactRadius;
+        if (root.isTopBarMode && !root.isExpanded && !root.isSettingsOpen) return 0;
+        return (root.isExpanded || root.isSettingsOpen) ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     // Bottom radii: rounds to 0 in top-bar mode, expandedRadius when expanded, compactRadius when compact
     readonly property real targetBottomRadius: {
-        if (root.isTopBarMode && !root.isExpanded) return 0;
-        return root.isExpanded ? Theme.expandedRadius : Theme.compactRadius;
+        if (root.isTopBarMode && !root.isExpanded && !root.isSettingsOpen) return 0;
+        return (root.isExpanded || root.isSettingsOpen) ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     implicitWidth: pillBody.width
     implicitHeight: pillBody.height
 
-
     function toggle() {
-        root.isExpanded = !root.isExpanded;
+        if (root.isSettingsOpen) {
+            root.collapse();
+        } else {
+            root.isExpanded = !root.isExpanded;
+        }
     }
 
     function expand() {
         root.isExpanded = true;
+        root.isSettingsOpen = false;
         NotificationService.markAllRead();
     }
 
     function collapse() {
         root.isExpanded = false;
+        root.isSettingsOpen = false;
+    }
+
+    function openSettings() {
+        root.isSettingsOpen = true;
+    }
+
+    function closeSettings() {
+        root.isSettingsOpen = false;
+    }
+
+    // Inactivity auto-collapse timer (disabled when settings is open or timeout is 0)
+    Timer {
+        id: autoCollapseTimer
+        interval: Theme.autoCollapseTimeout > 0 ? Theme.autoCollapseTimeout : 6000
+        running: root.isExpanded && !root.isSettingsOpen && !pillHoverHandler.hovered && Theme.autoCollapseTimeout > 0
+        repeat: false
+        onTriggered: {
+            root.collapse();
+        }
     }
 
     // Layered Soft Ambient Shadow
@@ -100,16 +133,16 @@ Item {
         id: ambientGlow
         anchors.horizontalCenter: pillBody.horizontalCenter
         anchors.centerIn: pillBody
-        width: pillBody.width + 12
-        height: pillBody.height + 10
+        width: pillBody.width + Theme.px(12)
+        height: pillBody.height + Theme.px(10)
 
-        topLeftRadius: root.targetTopRadius + 4
-        topRightRadius: root.targetTopRadius + 4
-        bottomLeftRadius: root.targetBottomRadius + 4
-        bottomRightRadius: root.targetBottomRadius + 4
+        topLeftRadius: root.targetTopRadius + Theme.px(4)
+        topRightRadius: root.targetTopRadius + Theme.px(4)
+        bottomLeftRadius: root.targetBottomRadius + Theme.px(4)
+        bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
-        opacity: (root.isTopBarMode && !root.isExpanded) ? 0.0 : (root.isExpanded ? 0.65 : 0.45)
+        opacity: (root.isTopBarMode && !root.isExpanded && !root.isSettingsOpen) ? 0.0 : ((root.isExpanded || root.isSettingsOpen) ? 0.65 : 0.45)
         visible: opacity > 0.01
 
         Behavior on opacity {
@@ -121,10 +154,10 @@ Item {
     Rectangle {
         id: pillBody
         anchors.top: parent.top
-        anchors.topMargin: (root.isTopBarMode && root.isExpanded) ? -1 : 0
+        anchors.topMargin: (root.isTopBarMode && (root.isExpanded || root.isSettingsOpen)) ? -1 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.targetWidth
-        height: root.targetHeight + ((root.isTopBarMode && root.isExpanded) ? 1 : 0)
+        height: root.targetHeight + ((root.isTopBarMode && (root.isExpanded || root.isSettingsOpen)) ? 1 : 0)
 
         topLeftRadius: root.targetTopRadius
         topRightRadius: root.targetTopRadius
@@ -133,6 +166,11 @@ Item {
 
         color: Theme.islandBackground
         clip: true
+
+        HoverHandler {
+            id: pillHoverHandler
+            enabled: !root.isTopBarMode && !root.hasFullscreenApp
+        }
 
         border.color: root.isHovered ? Theme.islandBorderHover : Theme.islandBorder
         border.width: root.isTopBarMode ? 0 : 1
@@ -148,8 +186,8 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: Theme.animDuration
-                easing.type: root.isExpanded ? Theme.animEasing : Easing.OutCubic
-                easing.overshoot: root.isExpanded ? Theme.animOvershoot : 1.0
+                easing.type: (root.isExpanded || root.isSettingsOpen) ? Theme.animEasing : Easing.OutCubic
+                easing.overshoot: (root.isExpanded || root.isSettingsOpen) ? Theme.animOvershoot : 1.0
             }
         }
 
@@ -177,7 +215,7 @@ Item {
             currentTime: root.currentDate
             use24Hour: Theme.use24Hour
             isHovered: root.isHovered
-            opacity: (!root.isExpanded && !root.isAlertingNotification && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
+            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isAlertingNotification && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
             visible: opacity > 0.01
 
             Behavior on opacity {
@@ -191,7 +229,7 @@ Item {
             anchors.centerIn: parent
             currentTime: root.currentDate
             player: root.activePlayer
-            opacity: (!root.isExpanded && !root.isAlertingNotification && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
+            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isAlertingNotification && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
             visible: opacity > 0.01
 
             Behavior on opacity {
@@ -203,7 +241,7 @@ Item {
         CompactNotificationAlertView {
             id: compactNotificationView
             anchors.centerIn: parent
-            opacity: (!root.isExpanded && root.isAlertingNotification) ? 1.0 : 0.0
+            opacity: (!root.isExpanded && !root.isSettingsOpen && root.isAlertingNotification) ? 1.0 : 0.0
             visible: opacity > 0.01
 
             Behavior on opacity {
@@ -215,12 +253,12 @@ Item {
         MouseArea {
             id: compactClickArea
             anchors.fill: parent
-            enabled: !root.isExpanded
-            hoverEnabled: !root.isExpanded && !root.isTopBarMode && !root.hasFullscreenApp
+            enabled: !root.isExpanded && !root.isSettingsOpen
+            hoverEnabled: !root.isExpanded && !root.isSettingsOpen && !root.isTopBarMode && !root.hasFullscreenApp
             cursorShape: Qt.PointingHandCursor
 
             onClicked: {
-                if (!root.isExpanded) {
+                if (!root.isExpanded && !root.isSettingsOpen) {
                     root.expand();
                 }
             }
@@ -230,7 +268,7 @@ Item {
         MouseArea {
             id: expandedClickArea
             anchors.fill: parent
-            enabled: root.isExpanded
+            enabled: root.isExpanded && !root.isSettingsOpen
             cursorShape: Qt.ArrowCursor
 
             onClicked: {
@@ -248,10 +286,37 @@ Item {
             player: root.activePlayer
             displayBattery: UPower.displayDevice
 
-            opacity: root.isExpanded ? 1.0 : 0.0
+            opacity: (root.isExpanded && !root.isSettingsOpen) ? 1.0 : 0.0
             visible: opacity > 0.01
 
             onRequestCollapse: {
+                root.collapse();
+            }
+
+            onRequestOpenSettings: {
+                root.openSettings();
+            }
+
+            Behavior on opacity {
+                NumberAnimation { duration: Theme.animDurationFast }
+            }
+        }
+
+        // Settings Card View
+        SettingsView {
+            id: settingsView
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+
+            opacity: root.isSettingsOpen ? 1.0 : 0.0
+            visible: opacity > 0.01
+
+            onRequestBack: {
+                root.isSettingsOpen = false;
+            }
+
+            onRequestClose: {
                 root.collapse();
             }
 

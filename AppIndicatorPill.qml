@@ -30,15 +30,20 @@ Item {
 
     property var hoveredAppItem: null
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
-    readonly property bool isPillHovered: pillHoverHandler.hovered && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property bool isPillHovered: (pillHoverHandler.hovered || hoveredAppItem !== null) && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+
+    readonly property bool isEnabled: SettingsService.showAppTrayPill
+    onIsEnabledChanged: {
+        if (!isEnabled && contextMenuOpen) closeContextMenu();
+    }
 
     // Target dimensions matching TopRightStatusCluster morphing physics
-    readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 14 : 20) + (root.isPillHovered ? 8 : 0)
-    readonly property real expandedWidth: Math.max(215, Math.max(compactWidth, menuContent.implicitWidth + 24))
-    readonly property real targetWidth: root.contextMenuOpen ? expandedWidth : (root.appCount > 0 ? compactWidth : 0)
+    readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? Theme.px(14) : Theme.px(20)) + (root.isPillHovered ? Theme.px(8) : 0)
+    readonly property real expandedWidth: Math.max(Theme.px(215), Math.max(compactWidth, menuContent.implicitWidth + Theme.px(24)))
+    readonly property real targetWidth: !root.isEnabled ? 0 : (root.contextMenuOpen ? expandedWidth : (root.appCount > 0 ? compactWidth : 0))
 
     readonly property real compactHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
-    readonly property real expandedHeight: 40 + menuContent.implicitHeight + 14
+    readonly property real expandedHeight: Theme.px(40) + menuContent.implicitHeight + Theme.px(14)
     readonly property real targetHeight: root.contextMenuOpen ? expandedHeight : compactHeight
 
     readonly property real targetTopRadius: {
@@ -52,6 +57,8 @@ Item {
 
     implicitWidth: pillBackground.width
     implicitHeight: pillBackground.height
+    width: implicitWidth
+    height: implicitHeight
 
     property alias hitBox: pillBackground
 
@@ -326,8 +333,8 @@ Item {
     }
 
     // Smooth spring entrance/exit physics
-    scale: (root.appCount > 0 && !root.hasFullscreenApp) ? 1.0 : 0.0
-    opacity: (root.appCount > 0 && !root.hasFullscreenApp) ? 1.0 : 0.0
+    scale: (root.isEnabled && root.appCount > 0 && !root.hasFullscreenApp) ? 1.0 : 0.0
+    opacity: (root.isEnabled && root.appCount > 0 && !root.hasFullscreenApp) ? 1.0 : 0.0
     visible: opacity > 0.01
 
     Behavior on scale {
@@ -348,13 +355,13 @@ Item {
     Rectangle {
         id: shadow
         anchors.centerIn: pillBackground
-        width: pillBackground.width + 12
-        height: pillBackground.height + 10
+        width: pillBackground.width + Theme.px(12)
+        height: pillBackground.height + Theme.px(10)
 
-        topLeftRadius: root.targetTopRadius + 4
-        topRightRadius: root.targetTopRadius + 4
-        bottomLeftRadius: root.targetBottomRadius + 4
-        bottomRightRadius: root.targetBottomRadius + 4
+        topLeftRadius: root.targetTopRadius + Theme.px(4)
+        topRightRadius: root.targetTopRadius + Theme.px(4)
+        bottomLeftRadius: root.targetBottomRadius + Theme.px(4)
+        bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
         opacity: (root.isTopBarMode && !root.contextMenuOpen) ? 0.0 : (root.contextMenuOpen ? 0.65 : 0.45)

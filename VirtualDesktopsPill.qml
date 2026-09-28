@@ -24,6 +24,11 @@ Item {
     property real activeMenuTargetX: 0
     readonly property bool menuOpen: activeMenuDesktop !== null
 
+    readonly property bool isEnabled: SettingsService.showVirtualDesktops
+    onIsEnabledChanged: {
+        if (!isEnabled && menuOpen) closeMenu();
+    }
+
     function closeMenu() {
         root.activeMenuDesktop = null;
     }
@@ -36,12 +41,13 @@ Item {
 
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
     readonly property bool isHovered: pillHoverHandler.hovered && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property bool isPillHovered: pillHoverHandler.hovered && !root.hasFullscreenApp
 
     // Geometry
-    readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 14 : 20)
-    readonly property real targetWidth: (root.desktopCount > 0 && !root.hasFullscreenApp) ? (compactWidth + (root.isHovered ? 8 : 0)) : 0
+    readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? Theme.px(14) : Theme.px(20))
+    readonly property real targetWidth: (root.isEnabled && root.desktopCount > 0 && !root.hasFullscreenApp) ? (compactWidth + (root.isHovered ? Theme.px(8) : 0)) : 0
     readonly property real targetHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
-    readonly property real pillHeight: root.isTopBarMode ? 26 : Theme.compactHeight
+    readonly property real pillHeight: root.isTopBarMode ? Theme.px(26) : Theme.compactHeight
 
     implicitWidth: pillBackground.width
     implicitHeight: root.targetHeight
@@ -49,8 +55,8 @@ Item {
     property alias hitBox: pillBackground
     property alias menuHitBox: menuPopover
 
-    visible: targetWidth > 1
-    opacity: targetWidth > 1 ? 1.0 : 0.0
+    visible: root.isEnabled && targetWidth > 1
+    opacity: (root.isEnabled && targetWidth > 1) ? 1.0 : 0.0
 
     Behavior on opacity {
         NumberAnimation { duration: Theme.animDurationFast }
@@ -60,9 +66,9 @@ Item {
     Rectangle {
         id: shadow
         anchors.centerIn: pillBackground
-        width: pillBackground.width + 10
-        height: pillBackground.height + 8
-        radius: pillBackground.radius + 3
+        width: pillBackground.width + Theme.px(10)
+        height: pillBackground.height + Theme.px(8)
+        radius: pillBackground.radius + Theme.px(3)
         color: Theme.islandShadow
         opacity: root.isTopBarMode ? 0.0 : 0.40
         visible: opacity > 0.01
@@ -79,12 +85,12 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: root.targetWidth
         height: root.pillHeight
-        radius: root.isTopBarMode ? 13 : Theme.compactRadius
+        radius: root.isTopBarMode ? Theme.px(13) : Theme.compactRadius
         clip: false
 
         HoverHandler {
             id: pillHoverHandler
-            enabled: !root.isTopBarMode && !root.hasFullscreenApp
+            enabled: !root.hasFullscreenApp
         }
 
         // Frosted glass appearance

@@ -13,19 +13,19 @@ Item {
     property bool showPercentage: true
 
     implicitWidth: contentRow.implicitWidth
-    implicitHeight: 18
+    implicitHeight: Theme.px(18)
 
     RowLayout {
         id: contentRow
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 5
+        spacing: Theme.px(5)
 
         // Battery percentage text
         Text {
             visible: root.showPercentage && root.isPresent
             text: Math.round(root.percentage * 100) + "%"
             font.family: Theme.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Theme.fontPx(11)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
             color: Theme.textPrimary
@@ -35,7 +35,7 @@ Item {
         // Nuclear icon when running on direct line power (no battery detected)
         SvgIcon {
             name: "nuclear"
-            size: 15
+            size: Theme.px(15)
             color: Theme.accentYellow
             visible: !root.isPresent
             Layout.alignment: Qt.AlignVCenter
@@ -45,14 +45,14 @@ Item {
         Row {
             visible: root.isPresent
             Layout.alignment: Qt.AlignVCenter
-            spacing: 1.5
+            spacing: Math.max(1, Theme.px(1.5))
 
             // Main Pill Capsule
             Rectangle {
                 id: capsule
-                width: 25
-                height: 12.5
-                radius: 3.5
+                width: Theme.px(25)
+                height: Theme.px(12.5)
+                radius: Theme.px(3.5)
                 color: "transparent"
                 border.width: 1.2
                 border.color: Qt.rgba(1, 1, 1, 0.55)
@@ -86,7 +86,7 @@ Item {
                 SvgIcon {
                     anchors.centerIn: parent
                     name: "bolt"
-                    size: 9
+                    size: Theme.px(9)
                     color: root.percentage > 0.55 ? "#000000" : Theme.accentGreen
                     visible: root.isCharging
                 }
@@ -94,8 +94,8 @@ Item {
 
             // Positive terminal cap
             Rectangle {
-                width: 1.5
-                height: 4.5
+                width: Math.max(1, Theme.px(1.5))
+                height: Theme.px(4.5)
                 radius: 0.8
                 anchors.verticalCenter: capsule.verticalCenter
                 color: Qt.rgba(1, 1, 1, 0.55)

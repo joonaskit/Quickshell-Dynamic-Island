@@ -68,9 +68,9 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
-            enabled: islandPill.isExpanded || appCluster.menuOpen
+            enabled: islandPill.isExpanded || islandPill.isSettingsOpen || appCluster.menuOpen
             onClicked: {
-                if (islandPill.isExpanded) islandPill.collapse();
+                if (islandPill.isExpanded || islandPill.isSettingsOpen) islandPill.collapse();
                 if (appCluster.menuOpen) appCluster.closeMenu();
             }
         }
@@ -103,10 +103,16 @@ PanelWindow {
             item: (!window.hasFullscreenApp && (!window.isMaximized || statusCluster.anyMenuOpen)) ? statusCluster.hitBox : null
         }
         Region {
-            item: (!window.hasFullscreenApp && (!window.isMaximized || appCluster.menuOpen)) ? appCluster.hitBox : null
+            item: (!window.hasFullscreenApp && topLeftEdgeTrigger.visible) ? topLeftEdgeTrigger : null
         }
         Region {
-            item: (!window.hasFullscreenApp && virtualDesktopsPill.visible && virtualDesktopsPill.desktopCount > 0) ? virtualDesktopsPill.hitBox : null
+            item: (!window.hasFullscreenApp && appIndicatorEdgeTrigger.visible) ? appIndicatorEdgeTrigger : null
+        }
+        Region {
+            item: (!window.hasFullscreenApp && SettingsService.showWindowControls && appCluster.visible && !window.appClusterShouldHide && (!window.isMaximized || appCluster.menuOpen)) ? appCluster.hitBox : null
+        }
+        Region {
+            item: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops && virtualDesktopsPill.visible && virtualDesktopsPill.desktopCount > 0 && !window.virtualDesktopsShouldHide) ? virtualDesktopsPill.hitBox : null
         }
         Region {
             item: (!window.hasFullscreenApp && virtualDesktopsPill.menuOpen) ? virtualDesktopsPill.menuHitBox : null
@@ -115,10 +121,133 @@ PanelWindow {
             item: (!window.hasFullscreenApp && (statusCluster.anyMenuOpen || appIndicatorPill.contextMenuOpen || appCluster.menuOpen || virtualDesktopsPill.menuOpen)) ? dismissOverlay : null
         }
         Region {
-            item: (!window.hasFullscreenApp && notifBubble.visible) ? notifBubble : null
+            item: (!window.hasFullscreenApp && SettingsService.showDetachedNotifBubble && notifBubble.visible) ? notifBubble : null
         }
         Region {
-            item: (!window.hasFullscreenApp && appIndicatorPill.visible && (appIndicatorPill.appCount > 0 || appIndicatorPill.contextMenuOpen)) ? appIndicatorPill.hitBox : null
+            item: (!window.hasFullscreenApp && SettingsService.showAppTrayPill && appIndicatorPill.visible && (appIndicatorPill.appCount > 0 || appIndicatorPill.contextMenuOpen) && !window.appIndicatorShouldHide) ? appIndicatorPill.hitBox : null
+        }
+    }
+
+    // Auto-hide reveal state for top-left pills (window controls & virtual desktops)
+    property bool topLeftRevealed: false
+
+    readonly property bool isTopLeftHovered: edgeHoverHandler.hovered || appCluster.isClusterHovered || virtualDesktopsPill.isPillHovered
+
+    // Dwell timer: user must hold the mouse at the top edge for 220ms before revealing
+    Timer {
+        id: topLeftDwellTimer
+        interval: 220
+        repeat: false
+        onTriggered: {
+            window.topLeftRevealed = true;
+        }
+    }
+
+    // Unhover timer: keeps the pill down for a moment after mouse leaves
+    Timer {
+        id: topLeftUnhoverTimer
+        interval: 750
+        repeat: false
+        onTriggered: {
+            if (!appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
+                window.topLeftRevealed = false;
+            }
+        }
+    }
+
+    // Target Y coordinates for smooth gliding
+    readonly property bool appClusterShouldHide: SettingsService.autoHideWindowControls && !window.topLeftRevealed && !appCluster.menuOpen
+    readonly property real appClusterTargetY: {
+        if (appClusterShouldHide) return -appCluster.height - 18;
+        return window.isMaximized ? 0 : Theme.topMargin;
+    }
+
+    readonly property bool virtualDesktopsShouldHide: SettingsService.autoHideVirtualDesktops && !window.topLeftRevealed && !virtualDesktopsPill.menuOpen
+    readonly property real virtualDesktopsTargetY: {
+        if (virtualDesktopsShouldHide) return -virtualDesktopsPill.height - 18;
+        return window.isMaximized ? 0 : Theme.topMargin;
+    }
+
+    // Auto-hide reveal state for app indicator pill
+    property bool appIndicatorRevealed: false
+    readonly property bool isAppIndicatorHovered: appIndicatorEdgeHoverHandler.hovered || appIndicatorPill.isPillHovered
+
+    Timer {
+        id: appIndicatorDwellTimer
+        interval: 220
+        repeat: false
+        onTriggered: {
+            window.appIndicatorRevealed = true;
+        }
+    }
+
+    Timer {
+        id: appIndicatorUnhoverTimer
+        interval: 750
+        repeat: false
+        onTriggered: {
+            if (!appIndicatorPill.contextMenuOpen) {
+                window.appIndicatorRevealed = false;
+            }
+        }
+    }
+
+    readonly property bool appIndicatorShouldHide: SettingsService.autoHideAppTrayPill && !window.appIndicatorRevealed && !appIndicatorPill.contextMenuOpen
+    readonly property real appIndicatorTargetY: {
+        if (appIndicatorShouldHide) return -Math.max(appIndicatorPill.height, Theme.compactHeight) - 24;
+        return window.isMaximized ? 0 : Theme.topMargin;
+    }
+
+    // Edge trigger strip for top-left pills when auto-hide is enabled
+    Item {
+        id: topLeftEdgeTrigger
+        anchors.top: parent.top
+        x: 0
+        height: 6
+        width: Math.max(160, (appCluster.visible ? (appCluster.x + appCluster.width) : 0) + (virtualDesktopsPill.visible ? (virtualDesktopsPill.width + 16) : 0))
+        visible: (SettingsService.autoHideWindowControls && SettingsService.showWindowControls) ||
+                 (SettingsService.autoHideVirtualDesktops && SettingsService.showVirtualDesktops)
+
+        HoverHandler {
+            id: edgeHoverHandler
+            enabled: topLeftEdgeTrigger.visible && !window.hasFullscreenApp
+            onHoveredChanged: {
+                if (hovered) {
+                    topLeftUnhoverTimer.stop();
+                    topLeftDwellTimer.start();
+                } else {
+                    topLeftDwellTimer.stop();
+                    if (!window.isTopLeftHovered && !appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
+                        topLeftUnhoverTimer.start();
+                    }
+                }
+            }
+        }
+    }
+
+    // Edge trigger strip for app indicator pill when auto-hide is enabled
+    Item {
+        id: appIndicatorEdgeTrigger
+        anchors.top: parent.top
+        x: appIndicatorPill.x
+        height: 6
+        width: Math.max(48, appIndicatorPill.width)
+        visible: SettingsService.showAppTrayPill && SettingsService.autoHideAppTrayPill && appIndicatorPill.appCount > 0
+
+        HoverHandler {
+            id: appIndicatorEdgeHoverHandler
+            enabled: appIndicatorEdgeTrigger.visible && !window.hasFullscreenApp
+            onHoveredChanged: {
+                if (hovered) {
+                    appIndicatorUnhoverTimer.stop();
+                    appIndicatorDwellTimer.start();
+                } else {
+                    appIndicatorDwellTimer.stop();
+                    if (!window.isAppIndicatorHovered && !appIndicatorPill.contextMenuOpen) {
+                        appIndicatorUnhoverTimer.start();
+                    }
+                }
+            }
         }
     }
 
@@ -142,13 +271,27 @@ PanelWindow {
         id: appCluster
         anchors.left: parent.left
         anchors.leftMargin: 16
-        y: window.isMaximized ? 0 : Theme.topMargin
+        y: window.appClusterTargetY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
         activeAppTitle: window.activeAppTitle
         activeAppId: WindowService.activeAppId
-        opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
+        opacity: (!window.hasFullscreenApp && SettingsService.showWindowControls) ? 1.0 : 0.0
         visible: opacity > 0.01
+
+        onIsClusterHoveredChanged: {
+            if (isClusterHovered) {
+                topLeftUnhoverTimer.stop();
+            } else if (!window.isTopLeftHovered && !appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
+                topLeftUnhoverTimer.start();
+            }
+        }
+
+        onMenuOpenChanged: {
+            if (!menuOpen && !window.isTopLeftHovered) {
+                topLeftUnhoverTimer.start();
+            }
+        }
 
         Behavior on y {
             NumberAnimation {
@@ -165,13 +308,33 @@ PanelWindow {
     // Companion Pill for Virtual Desktops / Workspaces
     VirtualDesktopsPill {
         id: virtualDesktopsPill
-        anchors.left: appCluster.right
-        anchors.leftMargin: 8
-        y: window.isMaximized ? 0 : Theme.topMargin
+        x: (SettingsService.showWindowControls && appCluster.visible) ? (appCluster.x + appCluster.width + 8) : 16
+        y: window.virtualDesktopsTargetY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
-        opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
+        opacity: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops) ? 1.0 : 0.0
         visible: opacity > 0.01
+
+        onIsPillHoveredChanged: {
+            if (isPillHovered) {
+                topLeftUnhoverTimer.stop();
+            } else if (!window.isTopLeftHovered && !appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
+                topLeftUnhoverTimer.start();
+            }
+        }
+
+        onMenuOpenChanged: {
+            if (!menuOpen && !window.isTopLeftHovered) {
+                topLeftUnhoverTimer.start();
+            }
+        }
+
+        Behavior on x {
+            NumberAnimation {
+                duration: Theme.animDuration
+                easing.type: Easing.OutCubic
+            }
+        }
 
         Behavior on y {
             NumberAnimation {
@@ -188,7 +351,7 @@ PanelWindow {
     // Dynamic Island container positioned at top center
     IslandPill {
         id: islandPill
-        z: islandPill.isExpanded ? 300 : 20
+        z: (islandPill.isExpanded || islandPill.isSettingsOpen) ? 300 : 20
         anchors.horizontalCenter: parent.horizontalCenter
         y: window.isMaximized ? 0 : Theme.topMargin
         isTopBarMode: window.isMaximized
@@ -215,7 +378,7 @@ PanelWindow {
         anchors.left: islandPill.right
         anchors.leftMargin: 8
         anchors.verticalCenter: islandPill.verticalCenter
-        isExpanded: islandPill.isExpanded
+        isExpanded: islandPill.isExpanded || islandPill.isSettingsOpen
         isTopBarMode: window.isMaximized
 
         onClicked: {
@@ -228,19 +391,30 @@ PanelWindow {
         id: appIndicatorPill
         anchors.right: statusCluster.left
         anchors.rightMargin: 8
-        y: window.isMaximized ? 0 : Theme.topMargin
+        y: window.appIndicatorTargetY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
-        isIslandExpanded: islandPill.isExpanded
+        isIslandExpanded: islandPill.isExpanded || islandPill.isSettingsOpen
 
         onCollapseIslandRequested: {
             islandPill.collapse();
+        }
+
+        onIsPillHoveredChanged: {
+            if (isPillHovered) {
+                appIndicatorUnhoverTimer.stop();
+            } else if (!window.isAppIndicatorHovered && !contextMenuOpen) {
+                appIndicatorUnhoverTimer.start();
+            }
         }
 
         onContextMenuOpenChanged: {
             if (contextMenuOpen) {
                 statusCluster.closeAllMenus();
                 appCluster.closeMenu();
+                appIndicatorUnhoverTimer.stop();
+            } else if (!window.isAppIndicatorHovered) {
+                appIndicatorUnhoverTimer.start();
             }
         }
 
@@ -292,7 +466,7 @@ PanelWindow {
                 statusCluster.closeAllMenus();
                 appIndicatorPill.closeContextMenu();
                 appCluster.closeMenu();
-                if (islandPill.isExpanded) islandPill.collapse();
+                if (islandPill.isExpanded || islandPill.isSettingsOpen) islandPill.collapse();
             }
         }
     }
@@ -323,7 +497,7 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
-            enabled: islandPill.isExpanded
+            enabled: islandPill.isExpanded || islandPill.isSettingsOpen
             onClicked: {
                 islandPill.collapse();
             }

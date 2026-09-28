@@ -25,6 +25,11 @@ Item {
     property bool menuOpen: false
     z: root.menuOpen ? 200 : 15
 
+    readonly property bool isEnabled: SettingsService.showWindowControls
+    onIsEnabledChanged: {
+        if (!isEnabled && menuOpen) closeMenu();
+    }
+
     property alias hitBox: clusterBackground
 
     function toggleMenu() {
@@ -43,20 +48,21 @@ Item {
     }
 
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
-    readonly property bool isHovered: headerMouse.containsMouse && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property bool isHovered: (headerMouse.containsMouse || clusterHoverHandler.hovered) && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property bool isClusterHovered: (headerMouse.containsMouse || clusterHoverHandler.hovered) && !root.hasFullscreenApp
 
     // Dimensions
-    readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? 20 : 28) + (root.isHovered ? 8 : 0)
-    readonly property real expandedWidth: Math.max(275, compactWidth)
-    readonly property real targetWidth: root.menuOpen ? expandedWidth : compactWidth
+    readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? Theme.px(20) : Theme.px(28)) + (root.isHovered ? Theme.px(8) : 0)
+    readonly property real expandedWidth: Math.max(Theme.px(275), compactWidth)
+    readonly property real targetWidth: !root.isEnabled ? 0 : (root.menuOpen ? expandedWidth : compactWidth)
 
     readonly property real compactHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
     readonly property real menuContentHeight: menuColumn.implicitHeight
 
     readonly property real targetHeight: {
         if (!root.menuOpen) return compactHeight;
-        if (root.isTopBarMode) return compactHeight + 1 + menuContentHeight + 22;
-        return 42 + menuContentHeight + 22;
+        if (root.isTopBarMode) return compactHeight + 1 + menuContentHeight + Theme.px(22);
+        return Theme.px(42) + menuContentHeight + Theme.px(22);
     }
 
     readonly property real targetTopRadius: {
@@ -65,24 +71,31 @@ Item {
     }
 
     readonly property real targetBottomRadius: {
-        if (root.isTopBarMode) return root.menuOpen ? 18 : 0;
+        if (root.isTopBarMode) return root.menuOpen ? Theme.px(18) : 0;
         return root.menuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     implicitWidth: clusterBackground.width
     implicitHeight: clusterBackground.height
 
+    visible: root.isEnabled && (clusterBackground.width > 1 || root.menuOpen)
+    opacity: root.isEnabled ? 1.0 : 0.0
+
+    Behavior on opacity {
+        NumberAnimation { duration: Theme.animDurationFast }
+    }
+
     // Ambient drop shadow, morphing with the capsule
     Rectangle {
         id: shadow
         anchors.centerIn: clusterBackground
-        width: clusterBackground.width + 12
-        height: clusterBackground.height + 10
+        width: clusterBackground.width + Theme.px(12)
+        height: clusterBackground.height + Theme.px(10)
 
-        topLeftRadius: root.targetTopRadius + 4
-        topRightRadius: root.targetTopRadius + 4
-        bottomLeftRadius: root.targetBottomRadius + 4
-        bottomRightRadius: root.targetBottomRadius + 4
+        topLeftRadius: root.targetTopRadius + Theme.px(4)
+        topRightRadius: root.targetTopRadius + Theme.px(4)
+        bottomLeftRadius: root.targetBottomRadius + Theme.px(4)
+        bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
         opacity: (root.isTopBarMode && !root.menuOpen) ? 0.0 : (root.menuOpen ? 0.65 : 0.45)
@@ -101,6 +114,11 @@ Item {
         width: root.targetWidth
         height: root.targetHeight
         clip: true
+
+        HoverHandler {
+            id: clusterHoverHandler
+            enabled: !root.hasFullscreenApp
+        }
 
         topLeftRadius: root.targetTopRadius
         topRightRadius: root.targetTopRadius

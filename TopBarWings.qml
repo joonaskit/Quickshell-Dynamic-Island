@@ -21,7 +21,7 @@ Item {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
-    height: Theme.topMargin + Theme.compactHeight + 6
+    height: Theme.topMargin + Theme.compactHeight + Theme.px(6)
 
     // Bar visibility: visible when maximized or while fluidly growing/retracting
     visible: root.isMaximized || barBackground.width > (root.compactCenterWidth + 2)

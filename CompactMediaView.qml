@@ -11,19 +11,19 @@ Item {
     property string artUrl: player && player.trackArtUrl ? player.trackArtUrl : ""
 
     implicitHeight: Theme.compactHeight
-    implicitWidth: contentRow.implicitWidth + 20
+    implicitWidth: contentRow.implicitWidth + Theme.px(20)
 
     RowLayout {
         id: contentRow
         anchors.centerIn: parent
-        spacing: 9
+        spacing: Theme.px(9)
 
         // Album art thumbnail or music icon
         Rectangle {
-            Layout.preferredWidth: 22
-            Layout.preferredHeight: 22
+            Layout.preferredWidth: Theme.px(22)
+            Layout.preferredHeight: Theme.px(22)
             Layout.alignment: Qt.AlignVCenter
-            radius: 5
+            radius: Theme.px(5)
             color: "#1c1c1e"
             clip: true
 
@@ -38,7 +38,7 @@ Item {
             SvgIcon {
                 anchors.centerIn: parent
                 name: "music"
-                size: 13
+                size: Theme.px(13)
                 color: Theme.accentOrange
                 visible: root.artUrl === "" || parent.children[0].status !== Image.Ready
             }
@@ -49,7 +49,7 @@ Item {
             id: infoText
             text: Qt.formatDateTime(root.currentTime, "hh:mm")
             font.family: Theme.fontDisplay
-            font.pixelSize: 14
+            font.pixelSize: Theme.fontPx(14)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
             color: Theme.textPrimary
@@ -61,9 +61,9 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             playing: root.isPlaying
             barColor: Theme.accentGreen
-            maxHeight: 14
-            minHeight: 3
-            barWidth: 2.5
+            maxHeight: Theme.px(14)
+            minHeight: Theme.px(3)
+            barWidth: Theme.px(2.5)
         }
     }
 }

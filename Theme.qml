@@ -42,17 +42,48 @@ Singleton {
     readonly property string fontFamily: "SF Pro Text, Cantarell, Noto Sans, Liberation Sans, -apple-system, sans-serif"
     readonly property string fontDisplay: "SF Pro Display, Cantarell, Noto Sans, Liberation Sans, -apple-system, sans-serif"
 
-    // Dimensions
-    property int topMargin: 10
-    property int compactWidthClock: 154
-    property int compactWidthMedia: 228
-    property int compactHeight: 38
-    property int compactRadius: 19
+    // UI Scaling & DPI (limits: 0.80 to 1.25)
+    property real uiScale: 1.0
+    property real fontScale: 1.0
 
-    property int expandedWidth: 410
-    property int expandedHeight: 180
-    property int expandedHeightWithMedia: 236
-    property int expandedRadius: 28
+    // Scaling helpers
+    function px(base) {
+        return Math.round(base * uiScale);
+    }
+
+    function fontPx(base) {
+        return Math.max(8, Math.round(base * fontScale * uiScale));
+    }
+
+    // Base dimensions (unscaled reference)
+    readonly property int baseTopMargin: 10
+    readonly property int baseCompactWidthClock: 154
+    readonly property int baseCompactWidthMedia: 228
+    readonly property int baseCompactHeight: 38
+    readonly property int baseCompactRadius: 19
+
+    readonly property int baseExpandedWidth: 410
+    readonly property int baseExpandedHeight: 180
+    readonly property int baseExpandedHeightWithMedia: 236
+    readonly property int baseExpandedRadius: 28
+
+    readonly property int baseTopBarHeight: 34
+    readonly property int baseDockHeight: 64
+    readonly property int baseDockIconSize: 44
+    readonly property int baseDockRadius: 20
+    readonly property int baseDockBottomMargin: 12
+
+    // Dynamically scaled dimensions
+    property int topMargin: px(baseTopMargin)
+    property int compactWidthClock: px(baseCompactWidthClock)
+    property int compactWidthMedia: px(baseCompactWidthMedia)
+    property int compactHeight: px(baseCompactHeight)
+    property int compactRadius: px(baseCompactRadius)
+
+    property int expandedWidth: px(baseExpandedWidth)
+    property int expandedHeight: px(baseExpandedHeight)
+    property int expandedHeightWithMedia: px(baseExpandedHeightWithMedia)
+    property int expandedRadius: px(baseExpandedRadius)
 
     // Animations
     readonly property int animDuration: 360
@@ -68,15 +99,15 @@ Singleton {
     property bool hideOnFullscreen: true
     property bool morphToTopBarWhenMaximized: true
     property bool reserveSpaceWhenMaximized: true
-    property int topBarHeight: 34
+    property int topBarHeight: px(baseTopBarHeight)
     property bool allScreens: false
     property int autoCollapseTimeout: 6000
 
     // Dock Styling & Dimensions
-    property int dockHeight: 64
-    property int dockIconSize: 44
-    property int dockRadius: 20
-    property int dockBottomMargin: 12
+    property int dockHeight: px(baseDockHeight)
+    property int dockIconSize: px(baseDockIconSize)
+    property int dockRadius: px(baseDockRadius)
+    property int dockBottomMargin: px(baseDockBottomMargin)
     property real dockScaleHover: 1.28
     property real dockScaleAdjacent: 1.12
     property bool dockReserveSpace: false

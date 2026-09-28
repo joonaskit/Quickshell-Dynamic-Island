@@ -10,14 +10,24 @@ Item {
     property var displayBattery: null
 
     signal requestCollapse()
+    signal requestOpenSettings()
+
+    // Card visibility bindings directly referenced from services to avoid layout cycle / forward reference errors
+    readonly property bool showCalendar: SettingsService.showExpandedCalendar
+    readonly property bool showMedia: SettingsService.showExpandedMedia && (root.player !== null)
+    readonly property bool showNotifications: SettingsService.showExpandedNotifications && NotificationService.notifications.length > 0
+    readonly property bool showAudioSink: SettingsService.showExpandedAudioSink
+    readonly property bool showVolume: SettingsService.showExpandedVolume
+    readonly property bool showBrightness: SettingsService.showExpandedBrightness && BrightnessService.isAvailable
+    readonly property bool showControls: showAudioSink || showVolume || showBrightness
 
     // Screen-aware maximum height to prevent overflowing the monitor or window
     readonly property real maxAllowedHeight: {
         let scrH = (Screen.height > 0) ? Screen.height : 1080;
-        return Math.min(scrH - 120, 840);
+        return Math.min(scrH - Theme.px(120), Theme.px(840));
     }
 
-    readonly property real desiredHeight: contentColumn.implicitHeight + bottomGrabberArea.height + 24
+    readonly property real desiredHeight: contentColumn.implicitHeight + bottomGrabberArea.height + Theme.px(24)
     readonly property bool needsScroll: desiredHeight > maxAllowedHeight
 
     implicitWidth: Theme.expandedWidth
@@ -59,66 +69,103 @@ Item {
 
         ColumnLayout {
             id: contentColumn
-            width: scrollContainer.width - 28
+            width: scrollContainer.width - Theme.px(28)
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 14
-            spacing: 12
+            anchors.topMargin: Theme.px(14)
+            spacing: Theme.px(12)
 
-            // Top Header: Centered Clock & Date
-            ColumnLayout {
+            // Top Header: Centered Clock & Date with Settings Button
+            Item {
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 2
+                implicitHeight: clockCol.implicitHeight
 
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 4
+                ColumnLayout {
+                    id: clockCol
+                    anchors.centerIn: parent
+                    spacing: Theme.px(2)
 
-                    Text {
-                        text: {
-                            if (Theme.use24Hour) {
-                                return Qt.formatDateTime(root.currentTime, "hh:mm");
-                            } else {
-                                return Qt.formatDateTime(root.currentTime, "h:mm");
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: Theme.px(4)
+
+                        Text {
+                            text: {
+                                if (Theme.use24Hour) {
+                                    return Qt.formatDateTime(root.currentTime, "hh:mm");
+                                } else {
+                                    return Qt.formatDateTime(root.currentTime, "h:mm");
+                                }
                             }
+                            font.family: Theme.fontDisplay
+                            font.pixelSize: Theme.fontPx(24)
+                            font.weight: Font.Bold
+                            font.features: { "tnum": 1 }
+                            color: Theme.textPrimary
                         }
-                        font.family: Theme.fontDisplay
-                        font.pixelSize: 24
-                        font.weight: Font.Bold
-                        font.features: { "tnum": 1 }
-                        color: Theme.textPrimary
+
+                        Text {
+                            text: ":" + Qt.formatDateTime(root.currentTime, "ss")
+                            font.family: Theme.fontDisplay
+                            font.pixelSize: Theme.fontPx(15)
+                            font.weight: Font.Medium
+                            font.features: { "tnum": 1 }
+                            color: Theme.textSecondary
+                            Layout.alignment: Qt.AlignBaseline
+                            visible: Theme.showSeconds
+                        }
+
+                        Text {
+                            text: Qt.formatDateTime(root.currentTime, "AP")
+                            font.family: Theme.fontDisplay
+                            font.pixelSize: Theme.fontPx(12)
+                            font.weight: Font.DemiBold
+                            color: Theme.textSecondary
+                            Layout.alignment: Qt.AlignBaseline
+                            visible: !Theme.use24Hour
+                        }
                     }
 
                     Text {
-                        text: ":" + Qt.formatDateTime(root.currentTime, "ss")
-                        font.family: Theme.fontDisplay
-                        font.pixelSize: 15
+                        Layout.alignment: Qt.AlignHCenter
+                        text: Qt.formatDateTime(root.currentTime, "dddd, MMMM d")
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontPx(12)
                         font.weight: Font.Medium
-                        font.features: { "tnum": 1 }
                         color: Theme.textSecondary
-                        Layout.alignment: Qt.AlignBaseline
-                        visible: Theme.showSeconds
-                    }
-
-                    Text {
-                        text: Qt.formatDateTime(root.currentTime, "AP")
-                        font.family: Theme.fontDisplay
-                        font.pixelSize: 12
-                        font.weight: Font.DemiBold
-                        color: Theme.textSecondary
-                        Layout.alignment: Qt.AlignBaseline
-                        visible: !Theme.use24Hour
                     }
                 }
 
-                Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: Qt.formatDateTime(root.currentTime, "dddd, MMMM d")
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 12
-                    font.weight: Font.Medium
-                    color: Theme.textSecondary
+                // Settings Icon Button
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Theme.px(30)
+                    height: Theme.px(30)
+                    radius: Theme.px(15)
+                    color: settingsMouse.pressed ? Qt.rgba(1, 1, 1, 0.16) : (settingsMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05))
+                    scale: settingsMouse.pressed ? 0.92 : (settingsMouse.containsMouse ? 1.05 : 1.0)
+
+                    Behavior on color { ColorAnimation { duration: 140 } }
+                    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutBack } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "settings"
+                        size: Theme.px(15)
+                        color: settingsMouse.containsMouse ? Theme.accentBlue : Theme.textSecondary
+                        Behavior on color { ColorAnimation { duration: 140 } }
+                    }
+
+                    MouseArea {
+                        id: settingsMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.requestOpenSettings();
+                        }
+                    }
                 }
             }
 
@@ -131,15 +178,18 @@ Item {
 
             // Mini Calendar Widget with week numbers
             MiniCalendarWidget {
+                id: calendarWidget
                 Layout.fillWidth: true
                 currentDate: root.currentTime
+                visible: root.showCalendar
             }
 
-            // Hairline Divider
+            // Hairline Divider after calendar
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
+                visible: root.showCalendar && (root.showMedia || root.showNotifications || root.showControls)
             }
 
             // Media Player Section
@@ -147,21 +197,22 @@ Item {
                 id: mediaWidget
                 Layout.fillWidth: true
                 player: root.player
-                visible: root.player !== null
+                visible: root.showMedia
             }
 
-            // Divider between Media and Sliders if media is active
+            // Divider between Media and following content
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.player !== null
+                visible: root.showMedia && (root.showNotifications || root.showControls)
             }
 
-            // Notification List Section (visible when there are notifications)
+            // Notification List Section (visible when enabled and there are notifications)
             NotificationListView {
+                id: notificationList
                 Layout.fillWidth: true
-                visible: NotificationService.notifications.length > 0
+                visible: root.showNotifications
             }
 
             // Divider after notifications
@@ -169,25 +220,32 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
-                visible: NotificationService.notifications.length > 0
+                visible: root.showNotifications && root.showControls
             }
 
             // System Controls Section (Audio Output, Volume & Brightness)
             ColumnLayout {
+                id: controlsCol
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Theme.px(6)
+                visible: root.showControls
 
                 AudioOutputSelector {
+                    id: audioOutputSelector
                     Layout.fillWidth: true
+                    visible: root.showAudioSink
                 }
 
                 VolumeSlider {
+                    id: volumeSlider
                     Layout.fillWidth: true
+                    visible: root.showVolume
                 }
 
                 BrightnessSlider {
+                    id: brightnessSlider
                     Layout.fillWidth: true
-                    visible: BrightnessService.isAvailable
+                    visible: root.showBrightness
                 }
             }
         }
@@ -199,13 +257,13 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 20
+        height: Theme.px(20)
 
         Rectangle {
             anchors.centerIn: parent
-            width: 38
-            height: 4
-            radius: 2
+            width: Theme.px(38)
+            height: Theme.px(4)
+            radius: Theme.px(2)
             color: grabberMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(1, 1, 1, 0.25)
 
             Behavior on color {

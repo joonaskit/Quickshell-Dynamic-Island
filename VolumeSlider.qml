@@ -7,18 +7,18 @@ Item {
     property real volume: AudioService.volume
     property bool isMuted: AudioService.isMuted
 
-    implicitHeight: 34
-    implicitWidth: parent ? parent.width : 370
+    implicitHeight: Theme.px(34)
+    implicitWidth: parent ? parent.width : Theme.px(370)
 
     RowLayout {
         anchors.fill: parent
-        spacing: 10
+        spacing: Theme.px(10)
 
         // Speaker / Mute Toggle Button
         Rectangle {
-            Layout.preferredWidth: 28
-            Layout.preferredHeight: 28
-            radius: 14
+            Layout.preferredWidth: Theme.px(28)
+            Layout.preferredHeight: Theme.px(28)
+            radius: Theme.px(14)
             color: muteMouse.containsMouse ? Theme.controlBackgroundHover : "transparent"
 
             SvgIcon {
@@ -28,7 +28,7 @@ Item {
                     if (root.volume < 0.5) return "volume-low";
                     return "volume-high";
                 }
-                size: 16
+                size: Theme.px(16)
                 color: root.isMuted ? Theme.accentRed : Theme.textPrimary
             }
 
@@ -47,15 +47,15 @@ Item {
         Item {
             id: trackContainer
             Layout.fillWidth: true
-            Layout.preferredHeight: 32
+            Layout.preferredHeight: Theme.px(32)
 
             Rectangle {
                 id: sliderTrack
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                height: 18
-                radius: 9
+                height: Theme.px(18)
+                radius: Theme.px(9)
                 color: Theme.sliderTrack
                 clip: true
 
@@ -65,7 +65,7 @@ Item {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    radius: 9
+                    radius: Theme.px(9)
                     color: root.isMuted ? Theme.textTertiary : (dragArea.containsMouse || dragArea.pressed ? Theme.accentBlue : Theme.sliderFill)
                     width: Math.max(0, Math.min(sliderTrack.width, (root.isMuted ? 0 : root.volume) * sliderTrack.width))
 
@@ -121,10 +121,10 @@ Item {
         // Percentage readout
         Text {
             id: percentText
-            Layout.preferredWidth: 38
+            Layout.preferredWidth: Theme.px(38)
             text: root.isMuted ? "Mute" : Math.round(root.volume * 100) + "%"
             font.family: Theme.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Theme.fontPx(11)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
             color: root.isMuted ? Theme.accentRed : Theme.textSecondary

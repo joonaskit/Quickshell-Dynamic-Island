@@ -8,7 +8,7 @@ Item {
     property int displayYear: currentDate.getFullYear()
     property int displayMonth: currentDate.getMonth() // 0-indexed
 
-    implicitWidth: parent ? parent.width : 370
+    implicitWidth: parent ? parent.width : Theme.px(370)
     implicitHeight: mainLayout.implicitHeight
 
     readonly property var monthNames: [
@@ -75,26 +75,26 @@ Item {
         id: mainLayout
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 8
+        spacing: Theme.px(8)
 
         // Month & Navigation Header
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: Theme.px(6)
 
             // Calendar Icon & Title
             RowLayout {
-                spacing: 6
+                spacing: Theme.px(6)
                 SvgIcon {
                     name: "calendar"
-                    size: 13
+                    size: Theme.px(13)
                     color: Theme.accentBlue
                 }
 
                 Text {
                     text: root.monthNames[root.displayMonth] + " " + root.displayYear
                     font.family: Theme.fontDisplay
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.fontPx(12)
                     font.weight: Font.DemiBold
                     color: Theme.textPrimary
                 }
@@ -104,9 +104,9 @@ Item {
 
             // Today Jump Button
             Rectangle {
-                Layout.preferredHeight: 20
-                Layout.preferredWidth: todayText.implicitWidth + 12
-                radius: 10
+                Layout.preferredHeight: Theme.px(20)
+                Layout.preferredWidth: todayText.implicitWidth + Theme.px(12)
+                radius: Theme.px(10)
                 color: todayMouse.containsMouse ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : Qt.rgba(1, 1, 1, 0.06)
                 visible: (root.displayYear !== root.currentDate.getFullYear() || root.displayMonth !== root.currentDate.getMonth())
 
@@ -115,7 +115,7 @@ Item {
                     anchors.centerIn: parent
                     text: "Today"
                     font.family: Theme.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontPx(10)
                     font.weight: Font.DemiBold
                     color: Theme.accentBlue
                 }
@@ -134,16 +134,16 @@ Item {
 
             // Prev Month Button
             Rectangle {
-                Layout.preferredWidth: 22
-                Layout.preferredHeight: 22
-                radius: 11
+                Layout.preferredWidth: Theme.px(22)
+                Layout.preferredHeight: Theme.px(22)
+                radius: Theme.px(11)
                 color: prevMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                 scale: prevMouse.pressed ? 0.90 : 1.0
 
                 SvgIcon {
                     anchors.centerIn: parent
                     name: "chevron-left"
-                    size: 12
+                    size: Theme.px(12)
                     color: Theme.textSecondary
                 }
 
@@ -165,16 +165,16 @@ Item {
 
             // Next Month Button
             Rectangle {
-                Layout.preferredWidth: 22
-                Layout.preferredHeight: 22
-                radius: 11
+                Layout.preferredWidth: Theme.px(22)
+                Layout.preferredHeight: Theme.px(22)
+                radius: Theme.px(11)
                 color: nextMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
                 scale: nextMouse.pressed ? 0.90 : 1.0
 
                 SvgIcon {
                     anchors.centerIn: parent
                     name: "chevron-right"
-                    size: 12
+                    size: Theme.px(12)
                     color: Theme.textSecondary
                 }
 
@@ -198,8 +198,8 @@ Item {
         // Calendar Grid Container Card
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: gridColumn.implicitHeight + 12
-            radius: 12
+            Layout.preferredHeight: gridColumn.implicitHeight + Theme.px(12)
+            radius: Theme.px(12)
             color: Qt.rgba(1, 1, 1, 0.03)
             border.width: 1
             border.color: Qt.rgba(1, 1, 1, 0.06)
@@ -209,8 +209,8 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 6
-                spacing: 2
+                anchors.margins: Theme.px(6)
+                spacing: Theme.px(2)
 
                 // Header Row: Wk, Mo, Tu, We, Th, Fr, Sa, Su
                 RowLayout {
@@ -222,13 +222,13 @@ Item {
 
                         Item {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 20
+                            Layout.preferredHeight: Theme.px(20)
 
                             Text {
                                 anchors.centerIn: parent
                                 text: modelData
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: Theme.fontPx(10)
                                 font.weight: Font.DemiBold
                                 color: (index === 0) ? Theme.accentOrange : ((index >= 6) ? Theme.textSecondary : Theme.textTertiary)
                             }
@@ -249,7 +249,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 24
+                        Layout.preferredHeight: Theme.px(24)
                         spacing: 0
 
                         // 1. Week Number Column (Wk)
@@ -259,16 +259,16 @@ Item {
 
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 22
-                                height: 18
-                                radius: 4
+                                width: Theme.px(22)
+                                height: Theme.px(18)
+                                radius: Theme.px(4)
                                 color: modelData.isCurrentWeek ? Qt.rgba(255/255, 159/255, 10/255, 0.18) : "transparent"
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: modelData.weekNumber
                                     font.family: Theme.fontDisplay
-                                    font.pixelSize: 9
+                                    font.pixelSize: Theme.fontPx(9)
                                     font.weight: modelData.isCurrentWeek ? Font.Bold : Font.Normal
                                     font.features: { "tnum": 1 }
                                     color: modelData.isCurrentWeek ? Theme.accentOrange : Qt.rgba(1, 1, 1, 0.3)
@@ -287,9 +287,9 @@ Item {
                                 Rectangle {
                                     id: dayBadge
                                     anchors.centerIn: parent
-                                    width: 22
-                                    height: 22
-                                    radius: 11
+                                    width: Theme.px(22)
+                                    height: Theme.px(22)
+                                    radius: Theme.px(11)
                                     color: {
                                         if (modelData.isToday) return Theme.accentBlue;
                                         if (cellMouse.containsMouse) return Qt.rgba(1, 1, 1, 0.1);
@@ -300,7 +300,7 @@ Item {
                                         anchors.centerIn: parent
                                         text: modelData.day
                                         font.family: Theme.fontDisplay
-                                        font.pixelSize: 10
+                                        font.pixelSize: Theme.fontPx(10)
                                         font.weight: modelData.isToday ? Font.Bold : Font.Normal
                                         font.features: { "tnum": 1 }
                                         color: {

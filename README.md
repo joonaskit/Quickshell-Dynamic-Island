@@ -165,14 +165,20 @@ All design tokens and behavior settings can be modified in [`Theme.qml`](file://
 - [`HardwareStatsService.qml`](file:///home/jkikke/code/git/quickshell/HardwareStatsService.qml) - Singleton service streaming real-time CPU %, RAM %, and CPU temperature.
 - [`HardwareStatsQuickSettings.qml`](file:///home/jkikke/code/git/quickshell/HardwareStatsQuickSettings.qml) - Morphed panel with live meters for CPU, memory, and thermals.
 - [`hardware_stats.py`](file:///home/jkikke/code/git/quickshell/hardware_stats.py) - Background daemon measuring real-time CPU, RAM, and CPU temperature.
+- [`DeviceService.qml`](file:///home/jkikke/code/git/quickshell/DeviceService.qml) - Singleton service managing detachable drives (USB sticks, external disks), mounting, unmounting, and safe power-off removal.
+- [`DeviceQuickSettings.qml`](file:///home/jkikke/code/git/quickshell/DeviceQuickSettings.qml) - Morphed panel displaying connected detachable devices, partition storage meters, file manager browse, mount/unmount toggles, and safe eject.
+- [`devices.py`](file:///home/jkikke/code/git/quickshell/devices.py) - Helper script and real-time monitor daemon for detachable block devices, UDisks2 mounting, unmounting, and drive power-off.
 - [`VolumeSlider.qml`](file:///home/jkikke/code/git/quickshell/VolumeSlider.qml) - Interactive volume slider with mute toggle button.
 - [`BrightnessService.qml`](file:///home/jkikke/code/git/quickshell/BrightnessService.qml) - Display backlight service managing brightness via `brightnessctl`.
 - [`BrightnessSlider.qml`](file:///home/jkikke/code/git/quickshell/BrightnessSlider.qml) - Interactive screen brightness slider with sun icon.
 - [`AudioVisualizer.qml`](file:///home/jkikke/code/git/quickshell/AudioVisualizer.qml) - 4-bar animated soundwave equalizer.
 - [`AppIndicatorPill.qml`](file:///home/jkikke/code/git/quickshell/AppIndicatorPill.qml) - Persistent application indicator capsule positioned to the left of the notification cluster, displaying live tray icons for active background apps (Discord, Steam, Spotify, etc.).
-- [`TopRightStatusCluster.qml`](file:///home/jkikke/code/git/quickshell/TopRightStatusCluster.qml) - Morphed status capsule with Caffeine, Wi-Fi, Bluetooth, Microphone, Clipboard, Performance, Hardware Stats, Notifications, and Power.
+- [`TopRightStatusCluster.qml`](file:///home/jkikke/code/git/quickshell/TopRightStatusCluster.qml) - Morphed status capsule with Caffeine, Wi-Fi, Bluetooth, Microphone, Clipboard, Performance, Hardware Stats, Detachable Devices, Notifications, and Power.
 - [`ClipboardService.qml`](file:///home/jkikke/code/git/quickshell/ClipboardService.qml) - Wayland clipboard service with history tracking, copy, and clear functions via `wl-clipboard`.
 - [`ClipboardQuickSettings.qml`](file:///home/jkikke/code/git/quickshell/ClipboardQuickSettings.qml) - iOS-style clipboard popover displaying active copy, history list, and one-click clear button.
+- [`SettingsService.qml`](file:///home/jkikke/code/git/quickshell/SettingsService.qml) - Singleton service managing persistent user settings, automatic loading on start, and debounced saving to `settings.json`.
+- [`SettingsView.qml`](file:///home/jkikke/code/git/quickshell/SettingsView.qml) - Morphed settings window inside the center pill with iOS-style toggles for 24h clock, seconds display, battery indicator, media view, top bar behavior, and dock settings.
+- [`settings.json`](file:///home/jkikke/code/git/quickshell/settings.json) - JSON configuration file persisting user preferences across QuickShell restarts.
 - [`SvgIcon.qml`](file:///home/jkikke/code/git/quickshell/SvgIcon.qml) - Scalable vector icons using `QtQuick.Shapes`.
 - [`Theme.qml`](file:///home/jkikke/code/git/quickshell/Theme.qml) - Visual design tokens, dimensions, colors, and configuration.
 - [`run.sh`](file:///home/jkikke/code/git/quickshell/run.sh) - Helper CLI runner for launching and testing.
