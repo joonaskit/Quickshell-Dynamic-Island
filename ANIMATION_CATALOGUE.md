@@ -249,7 +249,7 @@ When auto-hidden pills (`appCluster`, `virtualDesktopsPill`, `appIndicatorPill`)
 - **Entrance/Exit**: Fades in/out at `Theme.animDurationFast` (180 ms) with `Easing.OutCubic`.
 - **Geometry tracking**: `Behavior on x` (360 ms `Easing.OutCubic`) & `Behavior on width` (360 ms `Theme.animEasing` with overshoot 1.08) dynamically tracking the pill's footprint.
 - **Ambient Luma Pulse**: Gentle infinite breathing sine-pulse between 0.70 and 1.00 (950 ms) while hovering.
-- **Layering**: Layer 1 ambient colored halo (accent blue/cyan), Layer 2 OLED white diffuse glow, Layer 3 specular horizontal edge beam, Layer 4 accent core hairline.
+- **Layering**: Layer 1 deep ambient colored halo (`RectangularGlow` with 38 px feathering & pill corner radius), Layer 2 OLED white diffuse glow (`RectangularGlow` with 16 px feathering), Layer 3 specular rounded edge beam (fully rounded pill with feathered ends), Layer 4 accent core pill.
 
 ---
 
