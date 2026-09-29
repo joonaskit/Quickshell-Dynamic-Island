@@ -49,6 +49,8 @@ Item {
     readonly property real targetHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
     readonly property real pillHeight: root.isTopBarMode ? Theme.px(26) : Theme.compactHeight
 
+    width: pillBackground.width
+    height: root.targetHeight
     implicitWidth: pillBackground.width
     implicitHeight: root.targetHeight
 

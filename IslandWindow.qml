@@ -329,12 +329,6 @@ PanelWindow {
             }
         }
 
-        Behavior on x {
-            NumberAnimation {
-                duration: Theme.animDuration
-                easing.type: Easing.OutCubic
-            }
-        }
 
         Behavior on y {
             NumberAnimation {

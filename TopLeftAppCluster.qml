@@ -75,6 +75,8 @@ Item {
         return root.menuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
+    width: clusterBackground.width
+    height: clusterBackground.height
     implicitWidth: clusterBackground.width
     implicitHeight: clusterBackground.height
 

@@ -235,11 +235,11 @@ Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
 | Element | Y-slide lines | Opacity lines |
 |---|---|---|
-| `appCluster` | L296–301 | L304 |
-| `virtualDesktopsPill` | L339–344 | L347 |
-| `islandPill` | L363–368 | L371 |
-| `appIndicatorPill` | L421–426 | — |
-| `statusCluster` | L487–492 | L494–496 |
+| `appCluster` | L296–301 | L303 |
+| `virtualDesktopsPill` | L333–338 | L340 |
+| `islandPill` | L357–362 | L364 |
+| `appIndicatorPill` | L415–420 | — |
+| `statusCluster` | L481–486 | L488–490 |
 | `topBarWings` | — | L264–266 |
 
 ---
