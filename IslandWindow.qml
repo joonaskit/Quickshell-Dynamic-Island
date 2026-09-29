@@ -225,7 +225,7 @@ PanelWindow {
         id: topLeftEdgeTrigger
         anchors.top: parent.top
         x: 0
-        height: 6
+        height: Math.max(8, Theme.px(8))
         width: Math.max(160, (appCluster.visible ? (appCluster.x + appCluster.width) : 0) + (virtualDesktopsPill.visible ? (virtualDesktopsPill.width + 16) : 0))
         visible: (SettingsService.autoHideWindowControls && SettingsService.showWindowControls) ||
                  (SettingsService.autoHideVirtualDesktops && SettingsService.showVirtualDesktops)
@@ -249,7 +249,7 @@ PanelWindow {
         id: appIndicatorEdgeTrigger
         anchors.top: parent.top
         x: appIndicatorPill.x
-        height: 6
+        height: Math.max(8, Theme.px(8))
         width: Math.max(48, appIndicatorPill.width)
         visible: SettingsService.showAppTrayPill && SettingsService.autoHideAppTrayPill && appIndicatorPill.appCount > 0
 
@@ -266,6 +266,35 @@ PanelWindow {
             }
         }
     }
+
+    // Elegant ambient glows for hidden elements when mouse comes near
+    HiddenElementGlow {
+        id: appClusterGlow
+        z: 10
+        targetX: appCluster.x
+        targetWidth: appCluster.width
+        active: window.appClusterShouldHide && SettingsService.showWindowControls && !window.hasFullscreenApp && edgeHoverHandler.hovered
+        accentColor: Theme.accentBlue
+    }
+
+    HiddenElementGlow {
+        id: virtualDesktopsGlow
+        z: 10
+        targetX: virtualDesktopsPill.x
+        targetWidth: virtualDesktopsPill.width
+        active: window.virtualDesktopsShouldHide && SettingsService.showVirtualDesktops && (virtualDesktopsPill.desktopCount > 0) && !window.hasFullscreenApp && edgeHoverHandler.hovered
+        accentColor: Theme.accentCyan
+    }
+
+    HiddenElementGlow {
+        id: appIndicatorGlow
+        z: 10
+        targetX: appIndicatorPill.x
+        targetWidth: appIndicatorPill.width
+        active: window.appIndicatorShouldHide && SettingsService.showAppTrayPill && (appIndicatorPill.appCount > 0) && !window.hasFullscreenApp && appIndicatorEdgeHoverHandler.hovered
+        accentColor: Theme.accentBlue
+    }
+
 
     // Top Bar Wings (expands left and right when maximized)
     TopBarWings {

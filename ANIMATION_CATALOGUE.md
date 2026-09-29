@@ -244,6 +244,13 @@ Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 | `statusCluster` | L481–486 | L488–490 |
 | `topBarWings` | — | L264–266 |
 
+#### Auto-Hide Proximity Glow (`HiddenElementGlow.qml` & `IslandWindow.qml`)
+When auto-hidden pills (`appCluster`, `virtualDesktopsPill`, `appIndicatorPill`) are retracted off-screen and the cursor approaches their top-edge trigger zones, an elegant multi-layer ambient glow illuminates the edge above the hidden element:
+- **Entrance/Exit**: Fades in/out at `Theme.animDurationFast` (180 ms) with `Easing.OutCubic`.
+- **Geometry tracking**: `Behavior on x` (360 ms `Easing.OutCubic`) & `Behavior on width` (360 ms `Theme.animEasing` with overshoot 1.08) dynamically tracking the pill's footprint.
+- **Ambient Luma Pulse**: Gentle infinite breathing sine-pulse between 0.70 and 1.00 (950 ms) while hovering.
+- **Layering**: Layer 1 ambient colored halo (accent blue/cyan), Layer 2 OLED white diffuse glow, Layer 3 specular horizontal edge beam, Layer 4 accent core hairline.
+
 ---
 
 ## Pattern D — Scale Spring Entrance
