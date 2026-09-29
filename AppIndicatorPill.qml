@@ -28,9 +28,8 @@ Item {
     property var appItems: []
     readonly property int appCount: appItems.length
 
-    property var hoveredAppItem: null
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
-    readonly property bool isPillHovered: (pillHoverHandler.hovered || hoveredAppItem !== null) && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property bool isPillHovered: pillHoverHandler.hovered && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
     readonly property bool isEnabled: SettingsService.showAppTrayPill
     onIsEnabledChanged: {
@@ -458,7 +457,12 @@ Item {
 
                         readonly property bool isSelectedForMenu: root.selectedMenuItem === modelData
 
-                        color: isSelectedForMenu ? Qt.rgba(1, 1, 1, 0.22) : (mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.20) : "transparent")
+                        HoverHandler {
+                            id: itemHoverHandler
+                            enabled: !root.isTopBarMode && !root.hasFullscreenApp
+                        }
+
+                        color: isSelectedForMenu ? Qt.rgba(1, 1, 1, 0.22) : (mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.20) : (itemHoverHandler.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"))
 
                         scale: mouseArea.pressed ? 0.90 : 1.0
 
@@ -493,22 +497,12 @@ Item {
                             }
                         }
 
-                        // Interactive click & hover handler (Left = Focus, Right = Morph into Context Menu)
+                        // Interactive click handler (Left = Focus, Right = Morph into Context Menu)
                         MouseArea {
                             id: mouseArea
                             anchors.fill: parent
-                            hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                             cursorShape: Qt.PointingHandCursor
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                            onEntered: {
-                                if (!root.isTopBarMode && !root.hasFullscreenApp) {
-                                    root.hoveredAppItem = modelData;
-                                }
-                            }
-                            onExited: {
-                                if (root.hoveredAppItem === modelData) root.hoveredAppItem = null;
-                            }
 
                             onClicked: function(mouse) {
                                 if (root.isIslandExpanded) {
@@ -542,8 +536,8 @@ Item {
                             border.color: Theme.islandBorder
                             z: 300
 
-                            opacity: (mouseArea.containsMouse && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
-                            scale: (mouseArea.containsMouse && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.85
+                            opacity: (itemHoverHandler.hovered && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
+                            scale: (itemHoverHandler.hovered && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.85
                             visible: opacity > 0.01
 
                             Behavior on opacity {

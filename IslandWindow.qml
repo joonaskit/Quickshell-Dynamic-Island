@@ -133,6 +133,17 @@ PanelWindow {
 
     readonly property bool isTopLeftHovered: edgeHoverHandler.hovered || appCluster.isClusterHovered || virtualDesktopsPill.isPillHovered
 
+    onIsTopLeftHoveredChanged: {
+        if (isTopLeftHovered) {
+            topLeftUnhoverTimer.stop();
+        } else {
+            topLeftDwellTimer.stop();
+            if (!appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
+                topLeftUnhoverTimer.start();
+            }
+        }
+    }
+
     // Dwell timer: user must hold the mouse at the top edge for 220ms before revealing
     Timer {
         id: topLeftDwellTimer
@@ -171,6 +182,17 @@ PanelWindow {
     // Auto-hide reveal state for app indicator pill
     property bool appIndicatorRevealed: false
     readonly property bool isAppIndicatorHovered: appIndicatorEdgeHoverHandler.hovered || appIndicatorPill.isPillHovered
+
+    onIsAppIndicatorHoveredChanged: {
+        if (isAppIndicatorHovered) {
+            appIndicatorUnhoverTimer.stop();
+        } else {
+            appIndicatorDwellTimer.stop();
+            if (!appIndicatorPill.contextMenuOpen) {
+                appIndicatorUnhoverTimer.start();
+            }
+        }
+    }
 
     Timer {
         id: appIndicatorDwellTimer
@@ -217,9 +239,6 @@ PanelWindow {
                     topLeftDwellTimer.start();
                 } else {
                     topLeftDwellTimer.stop();
-                    if (!window.isTopLeftHovered && !appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
-                        topLeftUnhoverTimer.start();
-                    }
                 }
             }
         }
@@ -243,9 +262,6 @@ PanelWindow {
                     appIndicatorDwellTimer.start();
                 } else {
                     appIndicatorDwellTimer.stop();
-                    if (!window.isAppIndicatorHovered && !appIndicatorPill.contextMenuOpen) {
-                        appIndicatorUnhoverTimer.start();
-                    }
                 }
             }
         }
@@ -279,14 +295,6 @@ PanelWindow {
         opacity: (!window.hasFullscreenApp && SettingsService.showWindowControls) ? 1.0 : 0.0
         visible: opacity > 0.01
 
-        onIsClusterHoveredChanged: {
-            if (isClusterHovered) {
-                topLeftUnhoverTimer.stop();
-            } else if (!window.isTopLeftHovered && !appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
-                topLeftUnhoverTimer.start();
-            }
-        }
-
         onMenuOpenChanged: {
             if (!menuOpen && !window.isTopLeftHovered) {
                 topLeftUnhoverTimer.start();
@@ -314,14 +322,6 @@ PanelWindow {
         hasFullscreenApp: window.hasFullscreenApp
         opacity: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops) ? 1.0 : 0.0
         visible: opacity > 0.01
-
-        onIsPillHoveredChanged: {
-            if (isPillHovered) {
-                topLeftUnhoverTimer.stop();
-            } else if (!window.isTopLeftHovered && !appCluster.menuOpen && !virtualDesktopsPill.menuOpen) {
-                topLeftUnhoverTimer.start();
-            }
-        }
 
         onMenuOpenChanged: {
             if (!menuOpen && !window.isTopLeftHovered) {
@@ -395,14 +395,6 @@ PanelWindow {
 
         onCollapseIslandRequested: {
             islandPill.collapse();
-        }
-
-        onIsPillHoveredChanged: {
-            if (isPillHovered) {
-                appIndicatorUnhoverTimer.stop();
-            } else if (!window.isAppIndicatorHovered && !contextMenuOpen) {
-                appIndicatorUnhoverTimer.start();
-            }
         }
 
         onContextMenuOpenChanged: {

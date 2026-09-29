@@ -48,8 +48,8 @@ Item {
     }
 
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
-    readonly property bool isHovered: (headerMouse.containsMouse || clusterHoverHandler.hovered) && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
-    readonly property bool isClusterHovered: (headerMouse.containsMouse || clusterHoverHandler.hovered) && !root.hasFullscreenApp
+    readonly property bool isHovered: clusterHoverHandler.hovered && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.hasFullscreenApp
 
     // Dimensions
     readonly property real compactWidth: contentRow.implicitWidth + (root.isTopBarMode ? Theme.px(20) : Theme.px(28)) + (root.isHovered ? Theme.px(8) : 0)
@@ -221,7 +221,7 @@ Item {
                 SvgIcon {
                     name: "chevron-down"
                     size: 9
-                    color: (headerMouse.containsMouse || root.menuOpen) ? Theme.textPrimary : Theme.textTertiary
+                    color: (clusterHoverHandler.hovered || root.menuOpen) ? Theme.textPrimary : Theme.textTertiary
                     opacity: 0.8
                     rotation: root.menuOpen ? 180 : 0
 
@@ -235,7 +235,6 @@ Item {
                 id: headerMouse
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: root.toggleMenu()
             }
