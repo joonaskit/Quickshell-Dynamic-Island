@@ -76,19 +76,19 @@ Trigger: `isExpanded` / `isSettingsOpen` booleans. Lines: 178–205.
 #### `TopRightStatusCluster.qml` — Quick Settings Cluster
 ```qml
 Behavior on width {
-    enabled: !root.isTopBarMode
     NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animOvershoot }
 }
 Behavior on height {
     NumberAnimation {
-        duration: root.isTopBarMode ? 260 : Theme.animDuration
-        easing.type: (!root.isTopBarMode && root.anyMenuOpen) ? Theme.animEasing : Easing.OutCubic
-        easing.overshoot: (!root.isTopBarMode && root.anyMenuOpen) ? Theme.animOvershoot : 1.0
+        duration: root.isTopBarMode ? Theme.animDurationTopBar : Theme.animDuration
+        easing.type: root.anyMenuOpen ? Theme.animEasing : Easing.OutCubic
+        easing.overshoot: root.anyMenuOpen ? Theme.animOvershoot : 1.0
     }
 }
+Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 // + all four corner radii at 360ms / OutCubic
 ```
-Trigger: `root.anyMenuOpen`. Lines: 258–284.
+Trigger: `root.anyMenuOpen`. Lines: 260–288.
 
 ---
 
@@ -99,11 +99,12 @@ Behavior on width {
 }
 Behavior on height {
     NumberAnimation {
-        duration: root.isTopBarMode ? 260 : Theme.animDuration
-        easing.type: (!root.isTopBarMode && root.menuOpen) ? Theme.animEasing : Easing.OutCubic
-        easing.overshoot: (!root.isTopBarMode && root.menuOpen) ? Theme.animOvershoot : 1.0
+        duration: root.isTopBarMode ? Theme.animDurationTopBar : Theme.animDuration
+        easing.type: root.menuOpen ? Theme.animEasing : Easing.OutCubic
+        easing.overshoot: root.menuOpen ? Theme.animOvershoot : 1.0
     }
 }
+Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 // + all four corner radii at 360ms / OutCubic
 ```
 Trigger: `root.menuOpen`. Lines: 132–159.
@@ -122,9 +123,10 @@ Behavior on height {
         easing.overshoot: root.contextMenuOpen ? Theme.animOvershoot : 1.0
     }
 }
+Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 // + all four corner radii at 360ms / OutCubic
 ```
-Trigger: `root.contextMenuOpen`. Lines: 398–423.
+Trigger: `root.contextMenuOpen`. Lines: 400–427.
 
 ---
 

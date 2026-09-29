@@ -101,7 +101,6 @@ Item {
     function expand() {
         root.isExpanded = true;
         root.isSettingsOpen = false;
-        NotificationService.markAllRead();
     }
 
     function collapse() {

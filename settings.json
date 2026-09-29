@@ -1,5 +1,5 @@
 {
-  "uiScale": 1,
+  "uiScale": 1.1,
   "fontScale": 1.1,
   "use24Hour": true,
   "showSeconds": false,
@@ -35,5 +35,5 @@
   "showExpandedNotifications": true,
   "showExpandedAudioSink": true,
   "showExpandedVolume": true,
-  "showExpandedBrightness": false
+  "showExpandedBrightness": true
 }

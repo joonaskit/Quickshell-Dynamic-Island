@@ -776,21 +776,7 @@ Item {
 
                         SettingDivider {}
 
-                        // 3. Notification Center
-                        SettingToggle {
-                            title: "Notification List"
-                            description: "Recent unread notification cards with quick action buttons"
-                            iconName: "bell"
-                            iconColor: Theme.accentOrange
-                            checked: SettingsService.showExpandedNotifications
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showExpandedNotifications", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 4. Audio Output Selector
+                        // 3. Audio Output Selector
                         SettingToggle {
                             title: "Audio Output Selector"
                             description: "Quickly switch active audio playback device (speakers, headphones, HDMI)"
@@ -804,7 +790,7 @@ Item {
 
                         SettingDivider {}
 
-                        // 5. Volume Slider
+                        // 4. Volume Slider
                         SettingToggle {
                             title: "Volume Slider"
                             description: "Interactive slider for master speaker output volume"
@@ -818,7 +804,7 @@ Item {
 
                         SettingDivider {}
 
-                        // 6. Brightness Slider
+                        // 5. Brightness Slider
                         SettingToggle {
                             title: "Brightness Slider"
                             description: "Interactive slider for screen backlight brightness"

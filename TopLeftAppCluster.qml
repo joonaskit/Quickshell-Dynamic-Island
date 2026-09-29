@@ -100,7 +100,7 @@ Item {
         bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
-        opacity: (root.isTopBarMode && !root.menuOpen) ? 0.0 : (root.menuOpen ? 0.65 : 0.45)
+        opacity: (root.isTopBarMode && !root.menuOpen && clusterBackground.height <= root.compactHeight + 1) ? 0.0 : (root.menuOpen ? 0.65 : 0.45)
         visible: opacity > 0.01
 
         Behavior on opacity {
@@ -127,9 +127,13 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.menuOpen) ? "transparent" : Theme.islandBackground
+        color: (root.isTopBarMode && !root.menuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
         border.width: 0
         border.color: "transparent"
+
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
 
         Behavior on width {
             NumberAnimation {
@@ -142,8 +146,8 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: root.isTopBarMode ? Theme.animDurationTopBar : Theme.animDuration
-                easing.type: (!root.isTopBarMode && root.menuOpen) ? Theme.animEasing : Easing.OutCubic
-                easing.overshoot: (!root.isTopBarMode && root.menuOpen) ? Theme.animOvershoot : 1.0
+                easing.type: root.menuOpen ? Theme.animEasing : Easing.OutCubic
+                easing.overshoot: root.menuOpen ? Theme.animOvershoot : 1.0
             }
         }
 

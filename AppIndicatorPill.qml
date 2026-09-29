@@ -364,7 +364,7 @@ Item {
         bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
-        opacity: (root.isTopBarMode && !root.contextMenuOpen) ? 0.0 : (root.contextMenuOpen ? 0.65 : 0.45)
+        opacity: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? 0.0 : (root.contextMenuOpen ? 0.65 : 0.45)
         visible: opacity > 0.01 && root.appCount > 0
 
         Behavior on opacity {
@@ -391,9 +391,13 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.contextMenuOpen) ? "transparent" : Theme.islandBackground
+        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
         border.width: root.isTopBarMode ? 0 : 1
         border.color: Theme.islandBorder
+
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
 
         Behavior on width {
             NumberAnimation {

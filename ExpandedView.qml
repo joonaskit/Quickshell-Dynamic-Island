@@ -15,7 +15,6 @@ Item {
     // Card visibility bindings directly referenced from services to avoid layout cycle / forward reference errors
     readonly property bool showCalendar: SettingsService.showExpandedCalendar
     readonly property bool showMedia: SettingsService.showExpandedMedia && (root.player !== null)
-    readonly property bool showNotifications: SettingsService.showExpandedNotifications && NotificationService.notifications.length > 0
     readonly property bool showAudioSink: SettingsService.showExpandedAudioSink
     readonly property bool showVolume: SettingsService.showExpandedVolume
     readonly property bool showBrightness: SettingsService.showExpandedBrightness && BrightnessService.isAvailable
@@ -189,7 +188,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showCalendar && (root.showMedia || root.showNotifications || root.showControls)
+                visible: root.showCalendar && (root.showMedia || root.showControls)
             }
 
             // Media Player Section
@@ -205,22 +204,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showMedia && (root.showNotifications || root.showControls)
-            }
-
-            // Notification List Section (visible when enabled and there are notifications)
-            NotificationListView {
-                id: notificationList
-                Layout.fillWidth: true
-                visible: root.showNotifications
-            }
-
-            // Divider after notifications
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showNotifications && root.showControls
+                visible: root.showMedia && root.showControls
             }
 
             // System Controls Section (Audio Output, Volume & Brightness)

@@ -376,7 +376,10 @@ PanelWindow {
         isTopBarMode: window.isMaximized
 
         onClicked: {
-            islandPill.expand();
+            if (islandPill.isExpanded || islandPill.isSettingsOpen) {
+                islandPill.collapse();
+            }
+            statusCluster.openNotificationMenu();
         }
     }
 

@@ -134,6 +134,12 @@ Item {
         }
     }
 
+    function openNotificationMenu() {
+        root.closeAllMenus();
+        root.notificationMenuOpen = true;
+        NotificationService.markAllRead();
+    }
+
     function toggleMicMenu() {
         let next = !root.micMenuOpen;
         root.closeAllMenus();
@@ -177,7 +183,7 @@ Item {
         return contentRow.implicitWidth + (root.isTopBarMode ? Theme.px(14) : Theme.px(26)) + (root.isClusterHovered ? Theme.px(8) : 0);
     }
     readonly property real expandedWidth: Math.max(Theme.px(350), compactWidth)
-    readonly property real targetWidth: (root.anyMenuOpen && !root.isTopBarMode) ? expandedWidth : compactWidth
+    readonly property real targetWidth: root.anyMenuOpen ? expandedWidth : compactWidth
 
     readonly property real compactHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
 
@@ -223,7 +229,7 @@ Item {
         bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
-        opacity: (root.isTopBarMode && !root.anyMenuOpen) ? 0.0 : (root.anyMenuOpen ? 0.65 : (root.targetWidth > 0 ? 0.45 : 0.0))
+        opacity: (root.isTopBarMode && !root.anyMenuOpen && clusterBackground.height <= root.compactHeight + 1) ? 0.0 : (root.anyMenuOpen ? 0.65 : (root.targetWidth > 0 ? 0.45 : 0.0))
         visible: opacity > 0.01
 
         Behavior on opacity {
@@ -251,12 +257,15 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.anyMenuOpen) ? "transparent" : Theme.islandBackground
+        color: (root.isTopBarMode && !root.anyMenuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
         border.width: root.isTopBarMode ? 0 : 1
         border.color: Theme.islandBorder
 
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
+
         Behavior on width {
-            enabled: !root.isTopBarMode
             NumberAnimation {
                 duration: Theme.animDuration
                 easing.type: Theme.animEasing
@@ -266,8 +275,8 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: root.isTopBarMode ? Theme.animDurationTopBar : Theme.animDuration
-                easing.type: (!root.isTopBarMode && root.anyMenuOpen) ? Theme.animEasing : Easing.OutCubic
-                easing.overshoot: (!root.isTopBarMode && root.anyMenuOpen) ? Theme.animOvershoot : 1.0
+                easing.type: root.anyMenuOpen ? Theme.animEasing : Easing.OutCubic
+                easing.overshoot: root.anyMenuOpen ? Theme.animOvershoot : 1.0
             }
         }
         Behavior on topLeftRadius {

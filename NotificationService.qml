@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import Quickshell.Services.Notifications
 
 Singleton {
     id: root
@@ -24,74 +24,81 @@ Singleton {
         }
     }
 
-    // Process restart timer in case the python daemon exits
-    Timer {
-        id: restartTimer
-        interval: 2000
-        repeat: false
-        onTriggered: {
-            if (!trackerProc.running) {
-                trackerProc.running = true;
-            }
-        }
-    }
+    // Native Quickshell Notification Server: claims org.freedesktop.Notifications with 0ms delay
+    NotificationServer {
+        id: server
+        keepOnReload: true
+        actionsSupported: true
+        bodySupported: true
+        bodyMarkupSupported: true
+        imageSupported: true
 
-    // Process to run the DBus notification monitoring daemon
-    Process {
-        id: trackerProc
-        command: ["python3", "-u", Quickshell.shellDir + "/notification_tracker.py"]
-        running: true
-
-        onRunningChanged: {
-            if (!running) {
-                restartTimer.start();
-            }
-        }
-
-        stdout: SplitParser {
-            onRead: function(line) {
-                let t = line.trim();
-                if (t.length > 0) {
-                    root.handleNotificationJson(t);
-                }
-            }
+        onNotification: (notif) => {
+            root.handleNotification(notif);
         }
     }
 
     Component.onCompleted: {
-        console.warn("[NotificationService] Initialized and monitoring notifications");
+        console.warn("[NotificationService] Initialized native NotificationServer");
     }
 
-    function handleNotificationJson(rawJson) {
-        try {
-            let data = JSON.parse(rawJson);
-            if (!data || !data.summary && !data.body) return;
+    function handleNotification(notif) {
+        if (!notif) return;
+        let summary = notif.summary || "";
+        let body = notif.body || "";
+        if (!summary && !body) return;
 
-            root.latestNotification = data;
-            root.unreadCount += 1;
+        notif.tracked = true;
 
-            let list = (root.notifications || []).slice();
-            list.unshift(data);
-            if (list.length > root.maxHistory) {
-                list = list.slice(0, root.maxHistory);
-            }
-            root.notifications = list;
+        let now = new Date();
+        let hours = String(now.getHours()).padStart(2, '0');
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        let timeStr = hours + ":" + minutes;
+        let uid = notif.id ? String(notif.id) : ("notif_" + Date.now() + "_" + Math.floor(Math.random() * 900 + 100));
 
-            // Trigger island alert banner animation
-            console.warn("[NotificationService] Received notification:", data.appName, "-", data.summary);
-            root.isAlerting = true;
-            alertTimer.restart();
+        let data = {
+            "id": uid,
+            "appName": notif.appName || "System",
+            "appIcon": notif.appIcon || "",
+            "summary": summary,
+            "body": body,
+            "time": timeStr,
+            "timestamp": Date.now(),
+            "_raw": notif
+        };
 
-            root.notificationReceived(data);
-        } catch (e) {
-            console.warn("Error parsing notification JSON: " + e);
+        // When closed by sender or expiry
+        notif.closed.connect(function() {
+            root.dismissNotification(uid, false);
+        });
+
+        root.latestNotification = data;
+        root.unreadCount += 1;
+
+        let list = (root.notifications || []).slice();
+        list.unshift(data);
+        if (list.length > root.maxHistory) {
+            list = list.slice(0, root.maxHistory);
         }
+        root.notifications = list;
+
+        // Trigger island alert banner animation
+        console.warn("[NotificationService] Received notification:", data.appName, "-", data.summary);
+        root.isAlerting = true;
+        alertTimer.restart();
+
+        root.notificationReceived(data);
     }
 
-    function dismissNotification(id) {
+    function dismissNotification(id, callDismiss) {
+        if (callDismiss === undefined) callDismiss = true;
         let list = (root.notifications || []).slice();
         let idx = list.findIndex(n => n.id === id);
         if (idx !== -1) {
+            let item = list[idx];
+            if (callDismiss && item && item._raw && typeof item._raw.dismiss === "function") {
+                try { item._raw.dismiss(); } catch(e) {}
+            }
             list.splice(idx, 1);
             root.notifications = list;
             if (root.unreadCount > 0) {
@@ -104,6 +111,13 @@ Singleton {
     }
 
     function clearAll() {
+        let list = (root.notifications || []).slice();
+        for (let i = 0; i < list.length; i++) {
+            let item = list[i];
+            if (item && item._raw && typeof item._raw.dismiss === "function") {
+                try { item._raw.dismiss(); } catch(e) {}
+            }
+        }
         root.notifications = [];
         root.unreadCount = 0;
         root.latestNotification = null;
