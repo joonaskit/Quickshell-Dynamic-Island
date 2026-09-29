@@ -1,6 +1,6 @@
 {
-  "uiScale": 1.1,
-  "fontScale": 1,
+  "uiScale": 1,
+  "fontScale": 1.1,
   "use24Hour": true,
   "showSeconds": false,
   "showBattery": true,
@@ -23,7 +23,7 @@
   "showNotificationIcon": true,
   "pinNotificationIcon": false,
   "showBatteryIcon": true,
-  "showWindowControls": false,
+  "showWindowControls": true,
   "autoHideWindowControls": false,
   "showVirtualDesktops": true,
   "autoHideVirtualDesktops": false,
@@ -35,5 +35,5 @@
   "showExpandedNotifications": true,
   "showExpandedAudioSink": true,
   "showExpandedVolume": true,
-  "showExpandedBrightness": true
+  "showExpandedBrightness": false
 }
