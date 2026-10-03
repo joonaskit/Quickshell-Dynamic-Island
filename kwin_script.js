@@ -94,19 +94,49 @@ function getWindowDesktopIds(w) {
     return list;
 }
 
+function getWindowGeometry(win) {
+    if (!win) return null;
+    try {
+        if (win.frameGeometry) {
+            return {
+                x: Math.round(win.frameGeometry.x || 0),
+                y: Math.round(win.frameGeometry.y || 0),
+                width: Math.round(win.frameGeometry.width || 0),
+                height: Math.round(win.frameGeometry.height || 0)
+            };
+        }
+        if (typeof win.x !== "undefined" && typeof win.y !== "undefined") {
+            return {
+                x: Math.round(win.x || 0),
+                y: Math.round(win.y || 0),
+                width: Math.round(win.width || 0),
+                height: Math.round(win.height || 0)
+            };
+        }
+    } catch(e) {}
+    return null;
+}
+
 function getWindowSummary() {
     var wins = workspace.windowList();
     var list = [];
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
         if (w && w.normalWindow !== false && !w.hidden) {
+            var g = getWindowGeometry(w);
             list.push({
                 id: String(w.internalId),
                 app: getApp(w),
                 title: getTitle(w),
+                screen: getScreen(w),
+                x: g ? g.x : 0,
+                y: g ? g.y : 0,
+                width: g ? g.width : 0,
+                height: g ? g.height : 0,
                 active: (w === workspace.activeWindow),
                 minimized: !!w.minimized,
                 maximized: isMax(w),
+                fullscreen: isFull(w),
                 onCurrent: isOnCurrent(w),
                 desktops: getWindowDesktopIds(w)
             });
@@ -116,6 +146,15 @@ function getWindowSummary() {
         return JSON.stringify(list);
     } catch(e) {
         return "[]";
+    }
+}
+
+var lastSendTime = 0;
+function sendStateThrottled() {
+    var now = (new Date()).getTime();
+    if (now - lastSendTime > 80) {
+        lastSendTime = now;
+        sendState();
     }
 }
 
@@ -146,6 +185,22 @@ function hookWindow(win) {
     var id = String(win.internalId);
     if (hookedWindows[id]) return;
     hookedWindows[id] = true;
+
+    try {
+        if (win.frameGeometryChanged) {
+            win.frameGeometryChanged.connect(function() {
+                sendStateThrottled();
+            });
+        }
+    } catch (e) {}
+
+    try {
+        if (win.interactiveMoveResizeFinished) {
+            win.interactiveMoveResizeFinished.connect(function() {
+                sendState();
+            });
+        }
+    } catch (e) {}
 
     try {
         win.maximizedChanged.connect(function() {

@@ -14,6 +14,9 @@ Item {
     property bool appPickerOpen: appPicker.isOpen
     property bool trashMenuOpen: trashMenu.isOpen
 
+    readonly property real capsuleWidth: dockCapsule.width
+    readonly property real capsuleX: dockCapsule.x
+
     implicitHeight: (appPickerOpen || contextMenuOpen || trashMenuOpen) ? 500 : Theme.dockHeight
     implicitWidth: Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
     width: implicitWidth

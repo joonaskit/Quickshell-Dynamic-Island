@@ -978,6 +978,40 @@ Item {
                                 SettingsService.setSetting("dockAutoHideOnFullscreen", val);
                             }
                         }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
+                        SettingToggle {
+                            title: "Auto-Hide Dock from Windows"
+                            description: "Automatically drops the dock down when a window moves over or overlaps its area"
+                            iconName: "window"
+                            iconColor: Theme.accentBlue
+                            checked: SettingsService.dockAutoHideFromWindows
+                            onToggled: function(val) {
+                                SettingsService.setSetting("dockAutoHideFromWindows", val);
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
+                        SettingToggle {
+                            title: "Always Auto-Hide Dock"
+                            description: "Keeps the dock hidden off-screen until you hover over the bottom edge"
+                            iconName: "chevron-down"
+                            iconColor: Theme.accentCyan
+                            checked: SettingsService.dockAutoHideAlways
+                            onToggled: function(val) {
+                                SettingsService.setSetting("dockAutoHideAlways", val);
+                            }
+                        }
                     }
                 }
             }

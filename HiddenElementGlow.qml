@@ -8,10 +8,12 @@ Item {
     property real targetWidth: 100
     property bool active: false
     property color accentColor: Theme.accentBlue
+    property bool atBottom: false
 
     // Purely visual overlay - do not intercept clicks.
-    // Anchored at the top screen edge and follows the hidden element's horizontal footprint.
-    anchors.top: parent.top
+    // Anchored at top or bottom screen edge and follows the hidden element's horizontal footprint.
+    anchors.top: root.atBottom ? undefined : parent.top
+    anchors.bottom: root.atBottom ? parent.bottom : undefined
     x: root.targetX
     width: root.targetWidth
     implicitHeight: Theme.px(48)
@@ -55,9 +57,11 @@ Item {
     // Layer 1: Soft Feathered Ambient Colored Halo (Radiates out as a round diffuse aura)
     RectangularGlow {
         id: ambientHalo
-        anchors.top: parent.top
+        anchors.top: root.atBottom ? undefined : parent.top
+        anchors.bottom: root.atBottom ? parent.bottom : undefined
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: -height / 2
+        anchors.topMargin: root.atBottom ? 0 : -height / 2
+        anchors.bottomMargin: root.atBottom ? -height / 2 : 0
         width: parent.width + Theme.px(24)
         height: Theme.px(24)
 
@@ -72,9 +76,11 @@ Item {
     // Layer 2: Inner Diffuse White Glow (OLED high-luminance core)
     RectangularGlow {
         id: innerWhiteGlow
-        anchors.top: parent.top
+        anchors.top: root.atBottom ? undefined : parent.top
+        anchors.bottom: root.atBottom ? parent.bottom : undefined
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: -height / 2
+        anchors.topMargin: root.atBottom ? 0 : -height / 2
+        anchors.bottomMargin: root.atBottom ? -height / 2 : 0
         width: parent.width
         height: Theme.px(16)
 
@@ -89,7 +95,8 @@ Item {
     // Layer 3: Specular Edge Pill (Crisp rounded glass highlight at bezel)
     Rectangle {
         id: edgeBeam
-        anchors.top: parent.top
+        anchors.top: root.atBottom ? undefined : parent.top
+        anchors.bottom: root.atBottom ? parent.bottom : undefined
         anchors.horizontalCenter: parent.horizontalCenter
         width: Math.max(Theme.px(28), parent.width - Theme.px(12))
         height: Theme.px(3)
@@ -108,7 +115,8 @@ Item {
     // Layer 4: Accent Color Core Glow Pill (Gives distinct color identity to the element)
     Rectangle {
         id: accentLine
-        anchors.top: parent.top
+        anchors.top: root.atBottom ? undefined : parent.top
+        anchors.bottom: root.atBottom ? parent.bottom : undefined
         anchors.horizontalCenter: parent.horizontalCenter
         width: Math.max(Theme.px(20), parent.width - Theme.px(20))
         height: Theme.px(2)

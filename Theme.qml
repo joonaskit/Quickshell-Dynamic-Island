@@ -117,6 +117,8 @@ Singleton {
     property real dockScaleAdjacent: 1.12
     property bool dockReserveSpace: false
     property bool dockAutoHideOnFullscreen: true
+    property bool dockAutoHideFromWindows: true
+    property bool dockAutoHideAlways: false
     readonly property color dockBackground: Qt.rgba(0.08, 0.08, 0.10, 0.85)
     readonly property color dockBorder: Qt.rgba(1, 1, 1, 0.14)
     readonly property color dockShadow: Qt.rgba(0, 0, 0, 0.40)

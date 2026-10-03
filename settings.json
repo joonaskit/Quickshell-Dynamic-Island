@@ -10,6 +10,8 @@
   "hideOnFullscreen": true,
   "autoCollapseTimeout": 3000,
   "dockAutoHideOnFullscreen": true,
+  "dockAutoHideFromWindows": true,
+  "dockAutoHideAlways": false,
   "dockScaleHover": 1.28,
   "showCaffeineIcon": true,
   "showWifiIcon": true,

@@ -13,7 +13,7 @@ ShellRoot {
     }
 
     // Floating Dock (disabled for now)
-    /*
+    
     Variants {
         model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
 
@@ -21,5 +21,5 @@ ShellRoot {
             DockWindow {}
         }
     }
-    */
+    
 }
