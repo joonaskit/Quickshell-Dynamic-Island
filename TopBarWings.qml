@@ -26,7 +26,7 @@ Item {
     // Bar visibility: visible when maximized or while fluidly growing/retracting
     visible: root.isMaximized || barBackground.width > (root.compactCenterWidth + 2)
 
-    // Full-width continuous top bar background that grows fluidly from the center Dynamic Island
+    // Full-width continuous top bar background that grows fluidly from the center Island
     Rectangle {
         id: barBackground
         anchors.horizontalCenter: parent.horizontalCenter

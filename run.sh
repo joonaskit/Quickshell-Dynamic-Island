@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# QuickShell Apple Dynamic Island Runner Script
+# QuickShell Island Runner Script
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 case "$1" in
     kill|-k|--kill)
-        echo "Stopping Quickshell Dynamic Island..."
+        echo "Stopping Quickshell Island..."
         quickshell kill -p "$DIR" 2>/dev/null || pkill -f "quickshell.*$DIR"
         ;;
     toggle|-t|--toggle)
-        echo "Toggling Dynamic Island..."
+        echo "Toggling Island..."
         quickshell ipc -p "$DIR" call island toggle
         ;;
     expand|-e|--expand)
@@ -19,12 +19,12 @@ case "$1" in
         quickshell ipc -p "$DIR" call island collapse
         ;;
     daemon|-d|--daemon)
-        echo "Starting Quickshell Dynamic Island in background..."
+        echo "Starting Quickshell Island in background..."
         quickshell kill -p "$DIR" 2>/dev/null || true
         quickshell -p "$DIR" --daemonize
         ;;
     *)
-        echo "Starting Quickshell Dynamic Island..."
+        echo "Starting Quickshell Island..."
         quickshell kill -p "$DIR" 2>/dev/null || true
         exec quickshell -p "$DIR"
         ;;

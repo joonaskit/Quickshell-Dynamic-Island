@@ -149,7 +149,7 @@ Item {
         }
     }
 
-    // Dynamic Island Body
+    // Island Body
     Rectangle {
         id: pillBody
         anchors.top: parent.top

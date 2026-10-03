@@ -237,7 +237,7 @@ Item {
         }
     }
 
-    // Morphed Cluster Background capsule: Exactly matches the Dynamic Island physics and styling
+    // Morphed Cluster Background capsule: Exactly matches the Island physics and styling
     Rectangle {
         id: clusterBackground
         anchors.top: parent.top
@@ -684,7 +684,7 @@ Item {
                     }
                 }
 
-                // 9. Interactive iPhone-Style Battery Button (triggers Power Menu)
+                // 9. Interactive Battery Button (triggers Power Menu)
                 Rectangle {
                     id: batteryButton
                     visible: root.showBattery
@@ -700,7 +700,7 @@ Item {
                     Behavior on color { ColorAnimation { duration: 180 } }
                     Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
-                    IPhoneBattery {
+                    BatteryIndicator {
                         id: batteryContent
                         anchors.centerIn: parent
                         showPercentage: true

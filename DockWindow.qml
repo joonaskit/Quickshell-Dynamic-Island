@@ -24,7 +24,7 @@ PanelWindow {
     aboveWindows: true
 
     WlrLayershell.layer: WlrLayer.Top
-    WlrLayershell.namespace: "apple-dock"
+    WlrLayershell.namespace: "quickshell-dock"
     WlrLayershell.keyboardFocus: dockBar.appPickerOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     // Check if this screen is active or primary

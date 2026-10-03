@@ -29,7 +29,7 @@ PanelWindow {
 
     // Top layer sits above regular/maximized windows but below fullscreen windows
     WlrLayershell.layer: WlrLayer.Top
-    WlrLayershell.namespace: "apple-dynamic-island"
+    WlrLayershell.namespace: "quickshell-island"
 
     // Check if the active window is on this screen (or screen is unspecified)
     readonly property bool isThisScreenActive: {
@@ -371,7 +371,7 @@ PanelWindow {
         }
     }
 
-    // Dynamic Island container positioned at top center
+    // Island container positioned at top center
     IslandPill {
         id: islandPill
         z: (islandPill.isExpanded || islandPill.isSettingsOpen) ? 300 : 20
@@ -395,11 +395,11 @@ PanelWindow {
         }
     }
 
-    // Secondary Detached Island Circle (iPhone dual-island notification bubble)
+    // Secondary Detached Island Circle (dual-island notification bubble)
     IslandDetachedBubble {
         id: notifBubble
-        anchors.left: islandPill.right
-        anchors.leftMargin: 8
+        // Tracks the pill body's actual animated right edge (same frame, same curve)
+        x: islandPill.x + islandPill.hitBox.x + islandPill.hitBox.width + 8
         anchors.verticalCenter: islandPill.verticalCenter
         isExpanded: islandPill.isExpanded || islandPill.isSettingsOpen
         isTopBarMode: window.isMaximized
@@ -489,7 +489,7 @@ PanelWindow {
         }
     }
 
-    // iPhone-style Status Cluster positioned at top-right corner
+    // Status Cluster positioned at top-right corner
     TopRightStatusCluster {
         id: statusCluster
         anchors.right: parent.right

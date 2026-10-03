@@ -13,7 +13,7 @@ Singleton {
     // Background process holding systemd-inhibit idle & sleep block
     Process {
         id: inhibitProc
-        command: ["systemd-inhibit", "--what=idle:sleep", "--who=Dynamic Island Caffeine", "--why=Prevent screen dimming and shutdown", "sleep", "infinity"]
+        command: ["systemd-inhibit", "--what=idle:sleep", "--who=Island Caffeine", "--why=Prevent screen dimming and shutdown", "sleep", "infinity"]
     }
 
     // Process to call DBus Inhibit on FreeDesktop / KDE ScreenSaver

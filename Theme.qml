@@ -5,7 +5,7 @@ import Quickshell
 Singleton {
     id: theme
 
-    // Apple OLED true black and sleek translucent border
+    // OLED true black and sleek translucent border
     readonly property color islandBackground: "#000000"
     readonly property color islandBorder: Qt.rgba(1, 1, 1, 0)
     readonly property color islandBorderHover: Qt.rgba(1, 1, 1, 0)
@@ -18,12 +18,12 @@ Singleton {
     readonly property color controlBackgroundHover: Qt.rgba(1, 1, 1, 0)
     readonly property color controlBackgroundActive: Qt.rgba(1, 1, 1, 0)
 
-    // Text colors (iOS standard label hierarchy)
+    // Text colors (standard label hierarchy)
     readonly property color textPrimary: "#ffffff"
     readonly property color textSecondary: "#98989d"
     readonly property color textTertiary: "#636366"
 
-    // Apple accent colors
+    // Accent colors
     readonly property color accentGreen: "#30d158"
     readonly property color accentBlue: "#0a84ff"
     readonly property color accentOrange: "#ff9f0a"
@@ -39,8 +39,8 @@ Singleton {
     readonly property color sliderHandle: "#ffffff"
 
     // Fonts
-    readonly property string fontFamily: "SF Pro Text, Cantarell, Noto Sans, Liberation Sans, -apple-system, sans-serif"
-    readonly property string fontDisplay: "SF Pro Display, Cantarell, Noto Sans, Liberation Sans, -apple-system, sans-serif"
+    readonly property string fontFamily: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
+    readonly property string fontDisplay: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
 
     // UI Scaling & DPI (limits: 0.80 to 1.25)
     property real uiScale: 1.0

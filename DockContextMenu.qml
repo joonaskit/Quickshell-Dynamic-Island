@@ -33,7 +33,7 @@ Item {
     x: Math.max(8, Math.min(parent.width - width - 8, targetX - width / 2))
     y: targetY - height - 10
 
-    // macOS styled popup card
+    // Styled popup card
     Rectangle {
         id: bg
         anchors.fill: parent

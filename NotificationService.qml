@@ -14,7 +14,7 @@ Singleton {
 
     signal notificationReceived(var notification)
 
-    // Timer to automatically finish the dynamic island alert expansion
+    // Timer to automatically finish the island alert expansion
     Timer {
         id: alertTimer
         interval: 4500

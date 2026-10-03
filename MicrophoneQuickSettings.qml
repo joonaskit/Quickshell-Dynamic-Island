@@ -167,7 +167,7 @@ Item {
                     }
                 }
 
-                // iOS-Style Slider Track
+                // Rounded Slider Track
                 Rectangle {
                     id: sliderTrack
                     Layout.fillWidth: true

@@ -1,6 +1,6 @@
-# Quickshell Dynamic Island
+# Quickshell Island
 
-An Apple-style "Dynamic Island" top bar for KDE Plasma (Wayland), built with [Quickshell](https://quickshell.org) and QML.
+A floating, morphing "island" top bar for KDE Plasma (Wayland), built with [Quickshell](https://quickshell.org) and QML.
 
 A compact pill at the top of the screen shows the clock, media and notifications. It expands on hover or click into a full panel. It can also morph into a full-width top bar when a window is maximized.
 

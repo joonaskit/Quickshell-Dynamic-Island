@@ -29,7 +29,7 @@ BrightnessSlider 1.0 BrightnessSlider.qml
 AudioVisualizer 1.0 AudioVisualizer.qml
 SvgIcon 1.0 SvgIcon.qml
 TopBarWings 1.0 TopBarWings.qml
-IPhoneBattery 1.0 IPhoneBattery.qml
+BatteryIndicator 1.0 BatteryIndicator.qml
 AppIndicatorPill 1.0 AppIndicatorPill.qml
 TopRightStatusCluster 1.0 TopRightStatusCluster.qml
 WifiQuickSettings 1.0 WifiQuickSettings.qml

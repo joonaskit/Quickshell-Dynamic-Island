@@ -1,4 +1,4 @@
-// KWin Script to track active window, maximization, and fullscreen state for Quickshell Dynamic Island
+// KWin Script to track active window, maximization, and fullscreen state for Quickshell Island
 
 function getApp(win) {
     if (!win) return "";

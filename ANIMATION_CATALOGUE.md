@@ -49,7 +49,7 @@ The pill expands from its compact size to an open/menu size. `width` + `height` 
 
 ### Instances
 
-#### `IslandPill.qml` — Dynamic Island Pill
+#### `IslandPill.qml` — Island Pill
 ```qml
 // Width
 Behavior on width {
@@ -421,5 +421,5 @@ File: `CompactNotificationAlertView.qml` L81–85.
 | `DockItem.qml` L27 | `140` ms dock icon magnification scale | Part of a carefully tuned dock physics feel; changing would alter the magnification responsiveness |
 | `DockItem.qml` L36–37 | `160` ms / `140` ms bounce keyframes | Fixed keyframe durations in a `SequentialAnimation`; semantically different from a `Behavior` |
 | `AudioVisualizer.qml` | `250` / `260` / `300` ms waveform beat animations | Artistic timing tied to audio rhythm, not UI transitions |
-| `IPhoneBattery.qml` | `300` ms battery fill | Deliberate slow fill effect |
+| `BatteryIndicator.qml` | `300` ms battery fill | Deliberate slow fill effect |
 

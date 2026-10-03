@@ -819,7 +819,7 @@ Item {
                 }
             }
 
-            // Section 6: Dynamic Island Behavior & Timing
+            // Section 6: Island Behavior & Timing
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 6
@@ -830,7 +830,7 @@ Item {
                     spacing: 6
 
                     Text {
-                        text: "DYNAMIC ISLAND BEHAVIOR & TIMING"
+                        text: "ISLAND BEHAVIOR & TIMING"
                         font.family: Theme.fontFamily
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
@@ -877,7 +877,7 @@ Item {
                         // 2. Morph to Top Bar When Maximized
                         SettingToggle {
                             title: "Morph to Top Bar When Windows Maximized"
-                            description: "Liquidly flattens the island into a full-width macOS/GNOME top bar"
+                            description: "Liquidly flattens the island into a full-width GNOME-style top bar"
                             iconName: "window"
                             iconColor: Theme.accentBlue
                             checked: SettingsService.morphToTopBarWhenMaximized
@@ -907,7 +907,7 @@ Item {
                         // 3. Auto-Hide Island on Fullscreen
                         SettingToggle {
                             title: "Auto-Hide Island on Fullscreen"
-                            description: "Collapses and completely hides the Dynamic Island when games or fullscreen apps are active"
+                            description: "Collapses and completely hides the Island when games or fullscreen apps are active"
                             iconName: "desktop"
                             iconColor: Theme.accentBlue
                             checked: SettingsService.hideOnFullscreen
@@ -1062,7 +1062,7 @@ Item {
         }
     }
 
-    // Subtle Apple iOS-style fading scroll indicator (anchored strictly to card viewport, hidden when idle)
+    // Subtle Subtle fading scroll indicator (anchored strictly to card viewport, hidden when idle)
     Item {
         id: scrollTrack
         anchors.top: scrollContainer.top
@@ -1216,7 +1216,7 @@ Item {
                 }
             }
 
-            // Apple iOS Switch
+            // Toggle switch
             Rectangle {
                 Layout.preferredWidth: 44
                 Layout.preferredHeight: 24
@@ -1241,7 +1241,7 @@ Item {
         }
     }
 
-    // Inline Reusable SettingSegmented component (Apple iOS style segmented picker)
+    // Inline Reusable SettingSegmented component (Segmented segmented picker)
     component SettingSegmented: Rectangle {
         id: segRow
         property string title: ""
@@ -1320,7 +1320,7 @@ Item {
                 }
             }
 
-            // Apple iOS Style Segmented Picker Bar
+            // Segmented Picker Bar
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 32

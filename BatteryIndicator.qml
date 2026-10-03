@@ -41,7 +41,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
         }
 
-        // iPhone-style battery capsule (when battery is present)
+        // battery capsule (when battery is present)
         Row {
             visible: root.isPresent
             Layout.alignment: Qt.AlignVCenter

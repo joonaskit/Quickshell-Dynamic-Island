@@ -202,7 +202,7 @@ Item {
                                 Behavior on color { ColorAnimation { duration: 110 } }
                             }
 
-                            // macOS Spaces style open window activity dot
+                            // Workspace-style open window activity dot
                             Rectangle {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: 3

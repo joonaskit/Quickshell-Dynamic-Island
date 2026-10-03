@@ -522,7 +522,7 @@ Item {
                             }
                         }
 
-                        // Apple OLED Floating Tooltip Badge
+                        // OLED Floating Tooltip Badge
                         Rectangle {
                             id: tooltipBadge
                             anchors.top: parent.bottom

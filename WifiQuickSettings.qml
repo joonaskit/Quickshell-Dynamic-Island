@@ -42,7 +42,7 @@ Item {
             anchors.margins: root.embedded ? 10 : 14
             spacing: 12
 
-            // Top Header: Wi-Fi Badge, Status, and iOS Switch Toggle
+            // Top Header: Wi-Fi Badge, Status, and Toggle Toggle
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 12
@@ -102,7 +102,7 @@ Item {
                     }
                 }
 
-                // Apple iOS Switch
+                // Toggle switch
                 Rectangle {
                     Layout.preferredWidth: 46
                     Layout.preferredHeight: 26

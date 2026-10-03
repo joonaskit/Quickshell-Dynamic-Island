@@ -69,7 +69,7 @@ Item {
         opacity: root.pulseFactor
     }
 
-    // Layer 2: Inner Diffuse White Glow (Apple OLED high-luminance core)
+    // Layer 2: Inner Diffuse White Glow (OLED high-luminance core)
     RectangularGlow {
         id: innerWhiteGlow
         anchors.top: parent.top
