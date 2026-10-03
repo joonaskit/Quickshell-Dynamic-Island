@@ -56,12 +56,19 @@ function isIgnoredApp(app) {
     return a === "quickshell" || a === "plasmashell" || a === "org.kde.plasmashell";
 }
 
-// Checks if ANY visible normal window is maximized on the current virtual desktop
+function isTiled(win) {
+    if (!win) return false;
+    if (win.tile) return true;
+    if (typeof win.quickTileMode !== "undefined" && win.quickTileMode > 0) return true;
+    return false;
+}
+
+// Checks if ANY visible normal window is maximized or tiled on the current virtual desktop
 function anyMaximized() {
     var wins = workspace.windowList();
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
-        if (w && w.normalWindow !== false && !w.minimized && !w.hidden && isMax(w)) {
+        if (w && w.normalWindow !== false && !w.minimized && !w.hidden && (isMax(w) || isTiled(w))) {
             if (isIgnoredApp(getApp(w))) continue;
             if (!isOnCurrent(w)) continue;
             return true;
@@ -146,6 +153,7 @@ function getWindowSummary() {
                 active: (w === workspace.activeWindow),
                 minimized: !!w.minimized,
                 maximized: isMax(w),
+                tiled: isTiled(w),
                 fullscreen: isFull(w),
                 onCurrent: isOnCurrent(w),
                 desktops: getWindowDesktopIds(w)
@@ -196,6 +204,14 @@ function hookWindow(win) {
     var id = String(win.internalId);
     if (hookedWindows[id]) return;
     hookedWindows[id] = true;
+
+    try {
+        if (win.tileChanged) {
+            win.tileChanged.connect(function() {
+                sendState();
+            });
+        }
+    } catch (e) {}
 
     try {
         if (win.frameGeometryChanged) {

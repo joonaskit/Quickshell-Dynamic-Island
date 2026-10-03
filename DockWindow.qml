@@ -115,8 +115,8 @@ PanelWindow {
     // Reveal state when user dwells near bottom edge
     property bool dockRevealed: false
 
-    // Overall hover state - seamless transition between edge trigger and revealed dock capsule
-    readonly property bool isDockHovered: dockBar.isMouseInside || dockEdgeHoverHandler.hovered || (window.dockRevealed && dockRevealedHoverHandler.hovered)
+    // Overall hover state
+    readonly property bool isDockHovered: dockBar.isMouseInside || dockEdgeHoverHandler.hovered
 
     onIsDockHoveredChanged: {
         if (isDockHovered) {
@@ -140,7 +140,7 @@ PanelWindow {
         }
     }
 
-    // Dwell timer: user holds cursor at bottom edge for 180ms to reveal dock
+    // Dwell timer: user holds cursor at bottom edge to reveal dock
     Timer {
         id: dockDwellTimer
         interval: 180
@@ -150,7 +150,7 @@ PanelWindow {
         }
     }
 
-    // Unhover timer: keeps dock visible for 800ms after mouse leaves before retracting
+    // Unhover timer: keeps dock visible briefly after mouse leaves
     Timer {
         id: dockUnhoverTimer
         interval: 800
@@ -175,75 +175,11 @@ PanelWindow {
     // Dedicated drop margin calculation to avoid dynamic height changes during popup open/close
     readonly property real dropTargetMargin: -Theme.dockHeight - Theme.dockBottomMargin - 24
 
-    // Full dock interaction zone when revealed: captures input over the entire capsule area
-    // preventing any dead-zone or dropouts while moving cursor from edge trigger to dock icons
-    Item {
-        id: dockRevealedHitBox
-        z: 3
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.max((dockBar.capsuleWidth || 300) + 40, Theme.px(360))
-        height: Theme.dockHeight + Theme.dockBottomMargin + 24
-        visible: window.dockRevealed && !window.hasFullscreenApp
-
-        HoverHandler {
-            id: dockRevealedHoverHandler
-            enabled: dockRevealedHitBox.visible
-            onHoveredChanged: {
-                if (hovered) {
-                    dockUnhoverTimer.stop();
-                } else if (!hasOpenPopups && !dockBar.isMouseInside && !dockEdgeHoverHandler.hovered) {
-                    dockUnhoverTimer.start();
-                }
-            }
-        }
-    }
-
-    // Edge trigger strip at the bottom of the screen when dock is retracted
-    Item {
-        id: dockEdgeTrigger
-        z: 2
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: Math.max(12, Theme.px(12))
-        width: Math.max((dockBar.capsuleWidth || 300) + 60, Theme.px(360))
-        visible: window.isDockHidden && !window.hasFullscreenApp
-
-        HoverHandler {
-            id: dockEdgeHoverHandler
-            enabled: dockEdgeTrigger.visible
-            onHoveredChanged: {
-                if (hovered) {
-                    dockUnhoverTimer.stop();
-                    if (window.isDockHidden && !window.dockRevealed) {
-                        dockDwellTimer.start();
-                    }
-                } else {
-                    dockDwellTimer.stop();
-                    if (!hasOpenPopups && window.dockRevealed && !dockBar.isMouseInside && !dockRevealedHoverHandler.hovered) {
-                        dockUnhoverTimer.start();
-                    }
-                }
-            }
-        }
-
-        TapHandler {
-            onTapped: {
-                dockUnhoverTimer.stop();
-                dockDwellTimer.stop();
-                window.dockRevealed = true;
-            }
-        }
-    }
-
     // Transparent click-through mask:
-    // Captures clicks only over the dock capsule, revealed interaction zone, edge trigger, and popups
+    // ONLY the dock capsule (when visible), tooltips, context menus, dismiss overlay, and edge trigger capture clicks!
     mask: Region {
         Region {
             item: (!window.hasFullscreenApp && (!window.isDockHidden || window.dockRevealed)) ? dockBar.hitBox : null
-        }
-        Region {
-            item: (!window.hasFullscreenApp && window.dockRevealed) ? dockRevealedHitBox : null
         }
         Region {
             item: (!window.hasFullscreenApp && dockBar.contextMenuOpen) ? dockBar.contextMenuHitBox : null
@@ -271,6 +207,43 @@ PanelWindow {
         targetWidth: dockBar.capsuleWidth > 0 ? dockBar.capsuleWidth : Theme.px(400)
         active: window.isDockHidden && !window.dockRevealed && !window.hasFullscreenApp && dockEdgeHoverHandler.hovered
         accentColor: Theme.accentBlue
+    }
+
+    // Edge trigger strip at the bottom of the screen when dock is retracted
+    Item {
+        id: dockEdgeTrigger
+        z: 2
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: Math.max(12, Theme.px(12))
+        width: Math.max((dockBar.capsuleWidth || 300) + 60, Theme.px(360))
+        visible: window.isDockHidden && !window.hasFullscreenApp
+
+        HoverHandler {
+            id: dockEdgeHoverHandler
+            enabled: dockEdgeTrigger.visible
+            onHoveredChanged: {
+                if (hovered) {
+                    dockUnhoverTimer.stop();
+                    if (window.isDockHidden && !window.dockRevealed) {
+                        dockDwellTimer.start();
+                    }
+                } else {
+                    dockDwellTimer.stop();
+                    if (!hasOpenPopups && window.dockRevealed && !dockBar.isMouseInside) {
+                        dockUnhoverTimer.start();
+                    }
+                }
+            }
+        }
+
+        TapHandler {
+            onTapped: {
+                dockUnhoverTimer.stop();
+                dockDwellTimer.stop();
+                window.dockRevealed = true;
+            }
+        }
     }
 
     // Full dismiss overlay when popup is open

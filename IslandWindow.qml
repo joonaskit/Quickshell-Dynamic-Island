@@ -38,8 +38,34 @@ PanelWindow {
         return WindowService.activeScreen === window.screen.name;
     }
 
-    // Show full bar whenever any window is maximized
-    readonly property bool isMaximized: WindowService.isMaximized && Theme.morphToTopBarWhenMaximized && !window.hasFullscreenApp
+    // Check if any window on this screen is tiled (split screen) or touching the top edge
+    readonly property bool hasTiledWindow: {
+        if (!WindowService.windowList || WindowService.windowList.length === 0) return false;
+        let scrName = (window.screen && window.screen.name) ? window.screen.name : "";
+        let scrH = (window.screen && window.screen.height > 0) ? window.screen.height : 1080;
+        let scrY = (window.screen && window.screen.y !== undefined) ? window.screen.y : 0;
+
+        for (let i = 0; i < WindowService.windowList.length; i++) {
+            let w = WindowService.windowList[i];
+            if (!w || w.minimized || w.onCurrent === false) continue;
+            let wApp = (w.app || "").toLowerCase();
+            if (wApp === "quickshell" || wApp === "plasmashell" || wApp === "org.kde.plasmashell") continue;
+            if (w.screen && scrName && w.screen !== scrName) continue;
+
+            // Explicitly tiled window in KWin
+            if (w.tiled) return true;
+
+            // Geometry check: touching top edge and spanning significant vertical space (split screen)
+            let wy = w.y !== undefined ? w.y : 9999;
+            let wh = w.height !== undefined ? w.height : 0;
+            if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) wy += scrY;
+            if (wy <= (scrY + 12) && wh >= (scrH * 0.55)) return true;
+        }
+        return false;
+    }
+
+    // Show full bar whenever any window is maximized or tiled/split
+    readonly property bool isMaximized: ((WindowService.isMaximized && isThisScreenActive) || hasTiledWindow) && Theme.morphToTopBarWhenMaximized && !window.hasFullscreenApp
 
     // Friendly application name for the active window
     readonly property string activeAppTitle: isThisScreenActive ? WindowService.activeAppTitle : ""
