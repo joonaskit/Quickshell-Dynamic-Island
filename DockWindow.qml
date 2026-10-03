@@ -140,6 +140,21 @@ PanelWindow {
         }
     }
 
+    // Handle global shortcut / DBus trigger to toggle the app launcher
+    Connections {
+        target: DockService
+        function onToggleAppLauncherRequested() {
+            if (window.isThisScreenActive) {
+                if (dockBar.appPickerOpen) {
+                    dockBar.closeAllPopups();
+                } else {
+                    window.dockRevealed = true;
+                    dockBar.toggleAppPicker();
+                }
+            }
+        }
+    }
+
     // Dwell timer: user holds cursor at bottom edge to reveal dock
     Timer {
         id: dockDwellTimer

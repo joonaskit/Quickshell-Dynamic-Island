@@ -441,6 +441,11 @@ class WindowBridge(dbus.service.Object):
         except Exception as e:
             sys.stderr.write(f"removeDesktop error: {e}\n")
 
+    @dbus.service.method(BUS_NAME, in_signature="", out_signature="")
+    def toggleAppLauncher(self):
+        sys.stdout.write("LAUNCHER_TOGGLE\n")
+        sys.stdout.flush()
+
 def main():
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     try:

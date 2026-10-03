@@ -74,6 +74,7 @@ Singleton {
 
     // Signals
     signal stateUpdated()
+    signal toggleAppLauncherRequested()
 
     Component.onCompleted: {
         loadPinnedApps();

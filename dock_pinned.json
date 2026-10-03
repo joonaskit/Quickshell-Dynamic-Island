@@ -40,12 +40,5 @@
     "icon": "preferences-system",
     "desktopFile": "systemsettings.desktop",
     "command": "systemsettings"
-  },
-  {
-    "id": "com.microsoft.VSCode",
-    "name": "Visual Studio Code",
-    "icon": "vscode",
-    "desktopFile": "com.microsoft.VSCode.desktop",
-    "command": "com.microsoft.VSCode"
   }
 ]

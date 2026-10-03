@@ -215,6 +215,10 @@ Singleton {
         stdout: SplitParser {
             onRead: function(line) {
                 let t = line.trim();
+                if (t === "LAUNCHER_TOGGLE") {
+                    DockService.toggleAppLauncherRequested();
+                    return;
+                }
                 if (t.length === 0) return;
                 let parts = t.split("|");
                 if (parts.length >= 4) {

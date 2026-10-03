@@ -10,9 +10,9 @@ Item {
     property alias appPickerHitBox: appPicker
     property alias trashMenuHitBox: trashMenu
 
-    property bool contextMenuOpen: contextMenu.isOpen
-    property bool appPickerOpen: appPicker.isOpen
-    property bool trashMenuOpen: trashMenu.isOpen
+    property alias contextMenuOpen: contextMenu.isOpen
+    property alias appPickerOpen: appPicker.isOpen
+    property alias trashMenuOpen: trashMenu.isOpen
 
     readonly property real capsuleWidth: dockCapsule.width
     readonly property real capsuleX: dockCapsule.x
@@ -30,6 +30,12 @@ Item {
         contextMenu.isOpen = false;
         appPicker.isOpen = false;
         trashMenu.isOpen = false;
+    }
+
+    function toggleAppPicker() {
+        contextMenu.isOpen = false;
+        trashMenu.isOpen = false;
+        appPicker.isOpen = !appPicker.isOpen;
     }
 
     // Extended hitbox covering capsule, icon magnification overshoot, and indicator dots
