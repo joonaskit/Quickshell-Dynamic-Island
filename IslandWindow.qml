@@ -38,28 +38,38 @@ PanelWindow {
         return WindowService.activeScreen === window.screen.name;
     }
 
-    // Check if any window on this screen is tiled (split screen) or touching the top edge
+    // Check if any window on this screen is tiled (split screen) or spans from top to bottom
     readonly property bool hasTiledWindow: {
         if (!WindowService.windowList || WindowService.windowList.length === 0) return false;
         let scrName = (window.screen && window.screen.name) ? window.screen.name : "";
+        let scrW = (window.screen && window.screen.width > 0) ? window.screen.width : 1920;
         let scrH = (window.screen && window.screen.height > 0) ? window.screen.height : 1080;
+        let scrX = (window.screen && window.screen.x !== undefined) ? window.screen.x : 0;
         let scrY = (window.screen && window.screen.y !== undefined) ? window.screen.y : 0;
 
         for (let i = 0; i < WindowService.windowList.length; i++) {
             let w = WindowService.windowList[i];
-            if (!w || w.minimized || w.onCurrent === false) continue;
+            if (!w || w.minimized || w.onCurrent === false || w.moving) continue;
             let wApp = (w.app || "").toLowerCase();
             if (wApp === "quickshell" || wApp === "plasmashell" || wApp === "org.kde.plasmashell") continue;
             if (w.screen && scrName && w.screen !== scrName) continue;
 
-            // Explicitly tiled window in KWin
+            // Explicitly tiled window in KWin (QuickTile or Custom Tiling)
             if (w.tiled) return true;
 
-            // Geometry check: touching top edge and spanning significant vertical space (split screen)
+            // Geometry check: window manually placed going from top to bottom of screen (vertical split)
+            let wx = w.x !== undefined ? w.x : 0;
             let wy = w.y !== undefined ? w.y : 9999;
+            let ww = w.width !== undefined ? w.width : 0;
             let wh = w.height !== undefined ? w.height : 0;
             if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) wy += scrY;
-            if (wy <= (scrY + 12) && wh >= (scrH * 0.55)) return true;
+            if (scrX > 0 && wx < scrX && (wx + ww) <= scrW) wx += scrX;
+
+            let touchesTop = (wy <= (scrY + 8));
+            let reachesBottom = ((wy + wh) >= (scrY + scrH - 80));
+            let isSplitWidth = (ww >= (scrW * 0.25) && ww <= (scrW * 0.85));
+
+            if (touchesTop && reachesBottom && isSplitWidth) return true;
         }
         return false;
     }

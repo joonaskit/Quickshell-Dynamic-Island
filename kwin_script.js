@@ -58,17 +58,21 @@ function isIgnoredApp(app) {
 
 function isTiled(win) {
     if (!win) return false;
-    if (win.tile) return true;
-    if (typeof win.quickTileMode !== "undefined" && win.quickTileMode > 0) return true;
+    // Don't treat a window actively being moved or resized by the user as tiled
+    if (win.move || win.resize) return false;
+    // KWin QuickTileMode: 1=Left, 2=Right, 4=Top, 8=Bottom, or corners (5,6,9,10). 15 is Maximize (handled by isMax).
+    if (typeof win.quickTileMode !== "undefined" && win.quickTileMode > 0 && win.quickTileMode < 15) return true;
+    // KWin 6 Custom Tiling: tile exists and has a parent tile (meaning inside a split layout, not root container)
+    if (win.tile && win.tile.parent) return true;
     return false;
 }
 
-// Checks if ANY visible normal window is maximized or tiled on the current virtual desktop
+// Checks if ANY visible normal window is maximized on the current virtual desktop
 function anyMaximized() {
     var wins = workspace.windowList();
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
-        if (w && w.normalWindow !== false && !w.minimized && !w.hidden && (isMax(w) || isTiled(w))) {
+        if (w && w.normalWindow !== false && !w.minimized && !w.hidden && isMax(w)) {
             if (isIgnoredApp(getApp(w))) continue;
             if (!isOnCurrent(w)) continue;
             return true;
@@ -154,6 +158,7 @@ function getWindowSummary() {
                 minimized: !!w.minimized,
                 maximized: isMax(w),
                 tiled: isTiled(w),
+                moving: !!(w.move || w.resize),
                 fullscreen: isFull(w),
                 onCurrent: isOnCurrent(w),
                 desktops: getWindowDesktopIds(w)
@@ -208,6 +213,14 @@ function hookWindow(win) {
     try {
         if (win.tileChanged) {
             win.tileChanged.connect(function() {
+                sendState();
+            });
+        }
+    } catch (e) {}
+
+    try {
+        if (win.quickTileModeChanged) {
+            win.quickTileModeChanged.connect(function() {
                 sendState();
             });
         }

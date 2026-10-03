@@ -116,7 +116,7 @@ PanelWindow {
     property bool dockRevealed: false
 
     // Overall hover state
-    readonly property bool isDockHovered: dockBar.isMouseInside || dockEdgeHoverHandler.hovered
+    readonly property bool isDockHovered: dockStaticHoverHandler.hovered || dockBar.isMouseInside || dockEdgeHoverHandler.hovered
 
     onIsDockHoveredChanged: {
         if (isDockHovered) {
@@ -175,11 +175,29 @@ PanelWindow {
     // Dedicated drop margin calculation to avoid dynamic height changes during popup open/close
     readonly property real dropTargetMargin: -Theme.dockHeight - Theme.dockBottomMargin - 24
 
+    // Static hitbox covering the entire interaction zone of the revealed dock.
+    // Anchored directly to parent.bottom (never moves during dockBar slide animations),
+    // preventing wl_surface.set_input_region thrashing/hangs in KWin Wayland!
+    Item {
+        id: dockStaticHitBox
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
+        height: Theme.dockHeight + Theme.dockBottomMargin + 48
+        visible: !window.hasFullscreenApp && (!window.isDockHidden || window.dockRevealed)
+
+        HoverHandler {
+            id: dockStaticHoverHandler
+            enabled: dockStaticHitBox.visible
+        }
+    }
+
     // Transparent click-through mask:
-    // ONLY the dock capsule (when visible), tooltips, context menus, dismiss overlay, and edge trigger capture clicks!
+    // Captures clicks only over the static dock interaction zone, edge trigger, and popups.
+    // Never references moving items to prevent Wayland compositor stalls!
     mask: Region {
         Region {
-            item: (!window.hasFullscreenApp && (!window.isDockHidden || window.dockRevealed)) ? dockBar.hitBox : null
+            item: dockStaticHitBox.visible ? dockStaticHitBox : null
         }
         Region {
             item: (!window.hasFullscreenApp && dockBar.contextMenuOpen) ? dockBar.contextMenuHitBox : null
@@ -216,28 +234,16 @@ PanelWindow {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         height: Math.max(12, Theme.px(12))
-        width: Math.max((dockBar.capsuleWidth || 300) + 60, Theme.px(360))
-        visible: window.isDockHidden && !window.hasFullscreenApp
+        width: Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
+        visible: window.isDockHidden && !window.dockRevealed && !window.hasFullscreenApp
 
         HoverHandler {
             id: dockEdgeHoverHandler
             enabled: dockEdgeTrigger.visible
-            onHoveredChanged: {
-                if (hovered) {
-                    dockUnhoverTimer.stop();
-                    if (window.isDockHidden && !window.dockRevealed) {
-                        dockDwellTimer.start();
-                    }
-                } else {
-                    dockDwellTimer.stop();
-                    if (!hasOpenPopups && window.dockRevealed && !dockBar.isMouseInside) {
-                        dockUnhoverTimer.start();
-                    }
-                }
-            }
         }
 
         TapHandler {
+            enabled: dockEdgeTrigger.visible
             onTapped: {
                 dockUnhoverTimer.stop();
                 dockDwellTimer.stop();
