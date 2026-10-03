@@ -50,12 +50,19 @@ function isOnCurrent(w) {
     return true;
 }
 
+function isIgnoredApp(app) {
+    if (!app) return false;
+    var a = app.toLowerCase();
+    return a === "quickshell" || a === "plasmashell" || a === "org.kde.plasmashell";
+}
+
 // Checks if ANY visible normal window is maximized on the current virtual desktop
 function anyMaximized() {
     var wins = workspace.windowList();
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
         if (w && w.normalWindow !== false && !w.minimized && !w.hidden && isMax(w)) {
+            if (isIgnoredApp(getApp(w))) continue;
             if (!isOnCurrent(w)) continue;
             return true;
         }
@@ -69,6 +76,7 @@ function anyFullscreen() {
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
         if (w && w.normalWindow !== false && !w.minimized && !w.hidden && isFull(w)) {
+            if (isIgnoredApp(getApp(w))) continue;
             if (!isOnCurrent(w)) continue;
             return true;
         }
@@ -123,10 +131,12 @@ function getWindowSummary() {
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
         if (w && w.normalWindow !== false && !w.hidden) {
+            var app = getApp(w);
+            if (isIgnoredApp(app)) continue;
             var g = getWindowGeometry(w);
             list.push({
                 id: String(w.internalId),
-                app: getApp(w),
+                app: app,
                 title: getTitle(w),
                 screen: getScreen(w),
                 x: g ? g.x : 0,
@@ -182,6 +192,7 @@ var hookedWindows = {};
 
 function hookWindow(win) {
     if (!win) return;
+    if (isIgnoredApp(getApp(win))) return;
     var id = String(win.internalId);
     if (hookedWindows[id]) return;
     hookedWindows[id] = true;
