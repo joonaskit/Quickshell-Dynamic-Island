@@ -76,6 +76,19 @@ Item {
         }
     }
 
+    // Soft shadow under dock capsule to ground it and enhance glass depth
+    Rectangle {
+        id: dockShadow
+        anchors.horizontalCenter: dockCapsule.horizontalCenter
+        anchors.bottom: dockCapsule.bottom
+        anchors.bottomMargin: -3
+        width: dockCapsule.width + 6
+        height: dockCapsule.height
+        radius: dockCapsule.radius + 2
+        color: Qt.rgba(0, 0, 0, 0.32)
+        z: -1
+    }
+
     // Dock capsule background
     Rectangle {
         id: dockCapsule
@@ -86,9 +99,26 @@ Item {
         radius: Theme.dockRadius
         color: Theme.dockBackground
         border.color: Theme.dockBorder
-        border.width: 1
+        border.width: Theme.dockShowBorder ? 1 : 0
 
-        // Top subtle highlight edge
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
+
+        // Frosted glass inner specular reflection & depth gradient
+        Rectangle {
+            anchors.fill: parent
+            radius: parent.radius
+            visible: Theme.dockTransparent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.12) }
+                GradientStop { position: 0.30; color: Qt.rgba(1, 1, 1, 0.03) }
+                GradientStop { position: 0.70; color: Qt.rgba(0, 0, 0, 0.02) }
+                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.14) }
+            }
+        }
+
+        // Top subtle highlight edge (specular glass rim)
         Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
@@ -97,7 +127,8 @@ Item {
             anchors.rightMargin: 16
             height: 1
             radius: Theme.dockRadius
-            color: Qt.rgba(1, 1, 1, 0.22)
+            color: Qt.rgba(1, 1, 1, 0.25)
+            visible: Theme.dockShowBorder
         }
 
         // Horizontal Row containing all dock items
@@ -111,6 +142,20 @@ Item {
                 id: launchpadItem
                 width: Theme.dockIconSize + 8
                 height: Theme.dockHeight
+
+                property real bounceHeight: 0
+                property real pressScale: 1.0
+
+                Behavior on pressScale {
+                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                }
+
+                SequentialAnimation {
+                    id: launchpadBounceAnim
+                    alwaysRunToEnd: true
+                    NumberAnimation { target: launchpadItem; property: "bounceHeight"; to: 12; duration: 100; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: launchpadItem; property: "bounceHeight"; to: 0; duration: 150; easing.type: Easing.OutBounce }
+                }
 
                 property real dockScale: {
                     if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
@@ -130,12 +175,12 @@ Item {
                     id: launchpadBg
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10
+                    anchors.bottomMargin: 10 + launchpadItem.bounceHeight
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
                     radius: 12
                     transformOrigin: Item.Bottom
-                    scale: launchpadItem.dockScale
+                    scale: launchpadItem.dockScale * launchpadItem.pressScale
 
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#2c2c2e" }
@@ -211,7 +256,19 @@ Item {
                         root.currentMouseX = p.x;
                     }
 
+                    onPressed: {
+                        launchpadItem.pressScale = 0.88;
+                    }
+                    onReleased: {
+                        launchpadItem.pressScale = 1.0;
+                    }
+                    onCanceled: {
+                        launchpadItem.pressScale = 1.0;
+                    }
+
                     onClicked: function(mouse) {
+                        launchpadItem.pressScale = 1.0;
+                        launchpadBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) {
                             appPicker.isOpen = !appPicker.isOpen;
                             contextMenu.isOpen = false;
@@ -395,6 +452,20 @@ Item {
                 width: Theme.dockIconSize + 8
                 height: Theme.dockHeight
 
+                property real bounceHeight: 0
+                property real pressScale: 1.0
+
+                Behavior on pressScale {
+                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                }
+
+                SequentialAnimation {
+                    id: trashBounceAnim
+                    alwaysRunToEnd: true
+                    NumberAnimation { target: trashItem; property: "bounceHeight"; to: 12; duration: 100; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: trashItem; property: "bounceHeight"; to: 0; duration: 150; easing.type: Easing.OutBounce }
+                }
+
                 property real dockScale: {
                     if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
                     let center = trashItem.x + trashItem.width / 2;
@@ -413,11 +484,11 @@ Item {
                     id: trashIconContainer
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10
+                    anchors.bottomMargin: 10 + trashItem.bounceHeight
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
                     transformOrigin: Item.Bottom
-                    scale: trashItem.dockScale
+                    scale: trashItem.dockScale * trashItem.pressScale
 
                     // System Trash icon
                     Image {
@@ -496,7 +567,19 @@ Item {
                         root.currentMouseX = p.x;
                     }
 
+                    onPressed: {
+                        trashItem.pressScale = 0.88;
+                    }
+                    onReleased: {
+                        trashItem.pressScale = 1.0;
+                    }
+                    onCanceled: {
+                        trashItem.pressScale = 1.0;
+                    }
+
                     onClicked: function(mouse) {
+                        trashItem.pressScale = 1.0;
+                        trashBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) {
                             let mapped = trashItem.mapToItem(root, trashItem.width / 2, 0);
                             trashMenu.targetX = mapped.x;

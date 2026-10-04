@@ -119,7 +119,10 @@ Singleton {
     property bool dockAutoHideOnFullscreen: true
     property bool dockAutoHideFromWindows: true
     property bool dockAutoHideAlways: false
-    readonly property color dockBackground: Qt.rgba(0.08, 0.08, 0.10, 0.85)
-    readonly property color dockBorder: Qt.rgba(1, 1, 1, 0.14)
-    readonly property color dockShadow: Qt.rgba(0, 0, 0, 0.40)
+    property bool dockShowBorder: false
+    property bool dockTransparent: false
+    // Frosted glass translucent tint when transparent mode is enabled, or deep OLED dark when solid
+    readonly property color dockBackground: dockTransparent ? Qt.rgba(0.12, 0.13, 0.16, 0.35) : Qt.rgba(0.08, 0.08, 0.10, 0.85)
+    readonly property color dockBorder: Qt.rgba(1, 1, 1, 0.18)
+    readonly property color dockShadow: Qt.rgba(0, 0, 0, 0.35)
 }

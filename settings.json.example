@@ -12,6 +12,8 @@
   "dockAutoHideOnFullscreen": true,
   "dockAutoHideFromWindows": true,
   "dockAutoHideAlways": false,
+  "dockShowBorder": false,
+  "dockTransparent": false,
   "dockScaleHover": 1.28,
   "showCaffeineIcon": true,
   "showWifiIcon": true,

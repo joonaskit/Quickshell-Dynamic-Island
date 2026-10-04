@@ -12,6 +12,14 @@ Item {
     property bool isDraggable: false
     property int itemIndex: -1
     property bool isDragging: false
+    property real launchBounceHeight: 0
+    property real clickBounceHeight: 0
+    readonly property real bounceHeight: launchBounceHeight + clickBounceHeight
+    property real pressScale: 1.0
+
+    Behavior on pressScale {
+        NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+    }
 
     signal requestContextMenu(var app, real x, real y)
     signal mouseMoved(real contentRowX)
@@ -33,21 +41,42 @@ Item {
         NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
     }
 
+    // Simple, snappy bounce animation on click
+    SequentialAnimation {
+        id: clickBounceAnim
+        alwaysRunToEnd: true
+
+        NumberAnimation {
+            target: root
+            property: "clickBounceHeight"
+            to: 12
+            duration: 100
+            easing.type: Easing.OutQuad
+        }
+        NumberAnimation {
+            target: root
+            property: "clickBounceHeight"
+            to: 0
+            duration: 150
+            easing.type: Easing.OutBounce
+        }
+    }
+
     // Launch bounce animation
     SequentialAnimation {
         id: bounceAnim
         loops: 3
-        NumberAnimation { target: root; property: "bounceOffset"; to: -22; duration: 200; easing.type: Easing.OutQuad }
-        NumberAnimation { target: root; property: "bounceOffset"; to: 0; duration: 180; easing.type: Easing.InQuad }
-        NumberAnimation { target: root; property: "bounceOffset"; to: -12; duration: 160; easing.type: Easing.OutQuad }
-        NumberAnimation { target: root; property: "bounceOffset"; to: 0; duration: 140; easing.type: Easing.InQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 22; duration: 200; easing.type: Easing.OutQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 0; duration: 180; easing.type: Easing.InQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 12; duration: 160; easing.type: Easing.OutQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 0; duration: 140; easing.type: Easing.InQuad }
     }
 
     // Stop bounce if window appears
     onIsRunningChanged: {
         if (isRunning && bounceAnim.running) {
             bounceAnim.stop();
-            bounceOffset = 0;
+            launchBounceHeight = 0;
         }
     }
 
@@ -56,13 +85,12 @@ Item {
         id: iconContainer
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10
+        anchors.bottomMargin: 10 + root.bounceHeight
         width: Theme.dockIconSize
         height: Theme.dockIconSize
 
         transformOrigin: Item.Bottom
-        scale: root.dockScale
-        y: root.bounceOffset
+        scale: root.dockScale * root.pressScale
 
         // Application icon image
         Image {
@@ -197,6 +225,7 @@ Item {
                 pressStartContentX = mapped.x;
                 pressStartContentY = mapped.y;
                 hasDragged = false;
+                root.pressScale = 0.88;
             }
         }
 
@@ -207,6 +236,7 @@ Item {
                 let dy = mapped.y - pressStartContentY;
                 if (!hasDragged && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
                     hasDragged = true;
+                    root.pressScale = 1.0;
                     root.isDragging = true;
                     root.dragStarted(root.itemIndex, pressStartContentX);
                 }
@@ -220,6 +250,7 @@ Item {
 
         onReleased: function(mouse) {
             if (mouse.button === Qt.LeftButton) {
+                root.pressScale = 1.0;
                 if (hasDragged) {
                     hasDragged = false;
                     root.isDragging = false;
@@ -230,6 +261,7 @@ Item {
         }
 
         onCanceled: {
+            root.pressScale = 1.0;
             if (hasDragged) {
                 hasDragged = false;
                 root.isDragging = false;
@@ -242,6 +274,8 @@ Item {
                 let mapPos = root.mapToItem(null, root.width / 2, 0);
                 root.requestContextMenu(root.appData, mapPos.x, mapPos.y);
             } else if (!hasDragged && !root.isDragging) {
+                root.pressScale = 1.0;
+                clickBounceAnim.restart();
                 if (!root.isRunning) {
                     bounceAnim.restart();
                 }
