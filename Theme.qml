@@ -111,11 +111,11 @@ Singleton {
     property string dockPosition: "bottom"
     property int baseDockIconSize: 44
     property int dockIconSize: px(baseDockIconSize)
-    property int dockHeight: px(Math.round(dockIconSize + 18))
-    property int dockRadius: px(Math.min(22, Math.round(dockHeight / 3)))
-    property int dockBottomMargin: px(baseDockBottomMargin)
     property real dockScaleHover: 1.28
     property real dockScaleAdjacent: 1.12
+    property int dockHeight: Math.round(dockIconSize * Math.max(1.2, dockScaleHover) + px(16))
+    property int dockRadius: px(Math.min(22, Math.round(dockHeight / 3)))
+    property int dockBottomMargin: px(baseDockBottomMargin)
     property bool dockReserveSpace: false
     property bool dockAutoHideOnFullscreen: true
     property bool dockAutoHideFromWindows: true

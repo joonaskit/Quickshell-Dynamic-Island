@@ -30,11 +30,33 @@ Item {
 
     property bool shouldDropDock: false
 
-    implicitWidth: isVertical ? (hasOpenPopups ? 520 : Theme.dockHeight) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
-    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 520 : Theme.dockHeight)
+    readonly property real dockContentLength: {
+        let slotSize = Theme.dockIconSize + 8;
+        let pinnedCount = (DockService.pinnedApps && DockService.pinnedApps.length) ? DockService.pinnedApps.length : 0;
+        let unpinnedCount = (DockService.runningUnpinnedApps && DockService.runningUnpinnedApps.length) ? DockService.runningUnpinnedApps.length : 0;
+        let slots = 3 + pinnedCount + unpinnedCount;
+        let dividers = 2 + (unpinnedCount > 0 ? 1 : 0);
+        let totalItems = slots + dividers;
+        let spacing = 2;
+        return (slots * slotSize) + (dividers * 1) + (Math.max(0, totalItems - 1) * spacing);
+    }
 
-    width: implicitWidth
-    height: implicitHeight
+    onDockContentLengthChanged: {
+        Qt.callLater(contentContainer.forceLayout);
+    }
+
+    Connections {
+        target: DockService
+        function onPinnedAppsChanged() {
+            Qt.callLater(contentContainer.forceLayout);
+        }
+        function onRunningUnpinnedAppsChanged() {
+            Qt.callLater(contentContainer.forceLayout);
+        }
+    }
+
+    implicitWidth: isVertical ? (hasOpenPopups ? 520 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
+    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 520 : (dockCapsule.height + Theme.dockBottomMargin))
 
     // Mouse tracking for fluid magnification wave
     property real currentMouseX: -9999
@@ -95,8 +117,8 @@ Item {
         anchors.left: (root.dockPosition === "left") ? parent.left : undefined
         anchors.right: (root.dockPosition === "right") ? parent.right : undefined
 
-        width: root.isVertical ? (Theme.dockHeight + 24) : (dockCapsule.width + 16)
-        height: root.isVertical ? (dockCapsule.height + 16) : (Theme.dockHeight + 24)
+        width: root.isVertical ? (dockCapsule.width + Theme.dockBottomMargin + 16) : (dockCapsule.width + 16)
+        height: root.isVertical ? (dockCapsule.height + 16) : (dockCapsule.height + Theme.dockBottomMargin + 16)
 
         // MouseArea over the entire dock to calculate fluid magnification wave
         MouseArea {
@@ -132,20 +154,32 @@ Item {
         anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
 
         anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+        anchors.bottomMargin: (!root.isVertical) ? Theme.dockBottomMargin : 0
 
-        width: root.isVertical ? Theme.dockHeight : (contentContainer.implicitWidth + 24)
-        height: root.isVertical ? (contentContainer.implicitHeight + 24) : Theme.dockHeight
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? Theme.dockBottomMargin : 0
+
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? Theme.dockBottomMargin : 0
+
+        width: root.isVertical ? Theme.dockHeight : (root.dockContentLength + 32)
+        height: root.isVertical ? (root.dockContentLength + 32) : Theme.dockHeight
         radius: Theme.dockRadius
         color: Theme.dockBackground
         border.color: Theme.dockBorder
         border.width: Theme.dockShowBorder ? 1 : 0
 
+        Behavior on width {
+            NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
+        }
+        Behavior on height {
+            NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
+        }
+
         transform: Translate {
             x: {
                 if (!root.isVertical || !root.shouldDropDock) return 0;
-                return (root.dockPosition === "left") ? (-dockCapsule.width - 24) : (dockCapsule.width + 24);
+                return (root.dockPosition === "left") ? (-dockCapsule.width - Theme.dockBottomMargin - 24) : (dockCapsule.width + Theme.dockBottomMargin + 24);
             }
             y: {
                 if (root.isVertical || !root.shouldDropDock) return 0;
@@ -200,6 +234,12 @@ Item {
             anchors.centerIn: parent
             columns: root.isVertical ? 1 : 999
             spacing: 2
+            width: root.isVertical ? Theme.dockHeight : root.dockContentLength
+            height: root.isVertical ? root.dockContentLength : Theme.dockHeight
+
+            Component.onCompleted: Qt.callLater(contentContainer.forceLayout)
+            onWidthChanged: Qt.callLater(contentContainer.forceLayout)
+            onHeightChanged: Qt.callLater(contentContainer.forceLayout)
 
             // Launchpad / App Picker Icon
             Item {
@@ -236,10 +276,10 @@ Item {
                     height: Theme.dockIconSize
                     radius: 12
 
-                    x: root.isVertical ? (root.dockPosition === "left" ? (10 + launchpadItem.bounceHeight) : (parent.width - width - 10 - launchpadItem.bounceHeight)) : Math.round((parent.width - width) / 2)
-                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - launchpadItem.bounceHeight)
+                    x: root.isVertical ? (Math.round((parent.width - width) / 2) + (root.dockPosition === "left" ? launchpadItem.bounceHeight : -launchpadItem.bounceHeight)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (Math.round((parent.height - height) / 2) - launchpadItem.bounceHeight)
 
-                    transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
+                    transformOrigin: Item.Center
                     scale: launchpadItem.dockScale * launchpadItem.pressScale
 
                     gradient: Gradient {
@@ -353,6 +393,8 @@ Item {
             Repeater {
                 id: pinnedRepeater
                 model: DockService.pinnedApps
+                onCountChanged: Qt.callLater(contentContainer.forceLayout)
+                onModelChanged: Qt.callLater(contentContainer.forceLayout)
 
                 delegate: DockItem {
                     id: pinnedItem
@@ -462,8 +504,9 @@ Item {
             // Divider between Pinned and Running Unpinned apps
             Item {
                 visible: DockService.runningUnpinnedApps.length > 0
-                width: root.isVertical ? Theme.dockHeight : 1
-                height: root.isVertical ? 1 : Theme.dockHeight
+                width: visible ? (root.isVertical ? Theme.dockHeight : 1) : 0
+                height: visible ? (root.isVertical ? 1 : Theme.dockHeight) : 0
+                onVisibleChanged: Qt.callLater(contentContainer.forceLayout)
 
                 Rectangle {
                     anchors.centerIn: parent
@@ -477,6 +520,8 @@ Item {
             Repeater {
                 id: unpinnedRepeater
                 model: DockService.runningUnpinnedApps
+                onCountChanged: Qt.callLater(contentContainer.forceLayout)
+                onModelChanged: Qt.callLater(contentContainer.forceLayout)
 
                 delegate: DockItem {
                     id: unpinnedItem
@@ -569,10 +614,10 @@ Item {
                     height: Theme.dockIconSize
                     radius: 12
 
-                    x: root.isVertical ? (root.dockPosition === "left" ? (10 + downloadsItem.bounceHeight) : (parent.width - width - 10 - downloadsItem.bounceHeight)) : Math.round((parent.width - width) / 2)
-                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - downloadsItem.bounceHeight)
+                    x: root.isVertical ? (Math.round((parent.width - width) / 2) + (root.dockPosition === "left" ? downloadsItem.bounceHeight : -downloadsItem.bounceHeight)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (Math.round((parent.height - height) / 2) - downloadsItem.bounceHeight)
 
-                    transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
+                    transformOrigin: Item.Center
                     scale: downloadsItem.dockScale * downloadsItem.pressScale
 
                     gradient: Gradient {
@@ -693,10 +738,10 @@ Item {
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
 
-                    x: root.isVertical ? (root.dockPosition === "left" ? (10 + trashItem.bounceHeight) : (parent.width - width - 10 - trashItem.bounceHeight)) : Math.round((parent.width - width) / 2)
-                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - trashItem.bounceHeight)
+                    x: root.isVertical ? (Math.round((parent.width - width) / 2) + (root.dockPosition === "left" ? trashItem.bounceHeight : -trashItem.bounceHeight)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (Math.round((parent.height - height) / 2) - trashItem.bounceHeight)
 
-                    transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
+                    transformOrigin: Item.Center
                     scale: trashItem.dockScale * trashItem.pressScale
 
                     // System Trash icon

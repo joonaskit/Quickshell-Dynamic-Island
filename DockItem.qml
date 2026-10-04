@@ -122,10 +122,10 @@ Item {
         width: Theme.dockIconSize
         height: Theme.dockIconSize
 
-        x: root.isVertical ? (root.dockPosition === "left" ? (10 + root.bounceHeight) : (parent.width - width - 10 - root.bounceHeight)) : Math.round((parent.width - width) / 2)
-        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - root.bounceHeight)
+        x: root.isVertical ? (Math.round((parent.width - width) / 2) + (root.dockPosition === "left" ? root.bounceHeight : -root.bounceHeight)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : (Math.round((parent.height - height) / 2) - root.bounceHeight)
 
-        transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
+        transformOrigin: Item.Center
         scale: root.dockScale * root.pressScale
 
         // Application icon image
@@ -218,8 +218,8 @@ Item {
         color: Qt.rgba(10/255, 132/255, 255/255, 0.45)
         opacity: (root.isRunning && root.isFocused) ? 1.0 : 0.0
 
-        x: root.isVertical ? (root.dockPosition === "left" ? 1 : (parent.width - width - 1)) : Math.round((parent.width - width) / 2)
-        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 1)
+        x: root.isVertical ? (root.dockPosition === "left" ? Math.round(4 + (4 - width) / 2) : Math.round(parent.width - 4 - 4 + (4 - width) / 2)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : Math.round(parent.height - 4 - 4 + (4 - height) / 2)
 
         Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
         Behavior on width { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
@@ -237,8 +237,8 @@ Item {
         color: root.isFocused ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.75)
         opacity: root.isRunning ? 1.0 : 0.0
 
-        x: root.isVertical ? (root.dockPosition === "left" ? 3 : (parent.width - width - 3)) : Math.round((parent.width - width) / 2)
-        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 3)
+        x: root.isVertical ? (root.dockPosition === "left" ? 4 : (parent.width - width - 4)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 4)
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
