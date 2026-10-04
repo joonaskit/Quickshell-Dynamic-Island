@@ -2,7 +2,10 @@
 
 function getApp(win) {
     if (!win) return "";
-    var app = win.resourceClass || win.desktopFileName || win.resourceName || "";
+    var app = win.desktopFileName || win.resourceClass || win.resourceName || "";
+    if (!app && typeof win.appId !== "undefined") {
+        app = win.appId || "";
+    }
     return String(app);
 }
 
@@ -141,7 +144,12 @@ function getWindowSummary() {
     var list = [];
     for (var i = 0; i < wins.length; i++) {
         var w = wins[i];
-        if (w && w.normalWindow !== false && !w.hidden) {
+        if (w && !w.deleted) {
+            // Exclude desktop backgrounds, panels/docks, notifications, and splashes
+            if (w.dock || w.desktopWindow || w.notification || w.splash) continue;
+            // Exclude non-normal windows unless they are dialogs
+            if (typeof w.normalWindow !== "undefined" && !w.normalWindow && !w.dialog) continue;
+
             var app = getApp(w);
             if (isIgnoredApp(app)) continue;
             var g = getWindowGeometry(w);
@@ -209,6 +217,22 @@ function hookWindow(win) {
     var id = String(win.internalId);
     if (hookedWindows[id]) return;
     hookedWindows[id] = true;
+
+    try {
+        if (win.desktopFileNameChanged) {
+            win.desktopFileNameChanged.connect(function() {
+                sendState();
+            });
+        }
+    } catch (e) {}
+
+    try {
+        if (win.captionChanged) {
+            win.captionChanged.connect(function() {
+                sendState();
+            });
+        }
+    } catch (e) {}
 
     try {
         if (win.tileChanged) {

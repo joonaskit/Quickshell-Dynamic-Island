@@ -220,6 +220,64 @@ Singleton {
                     return;
                 }
                 if (t.length === 0) return;
+
+                if (t.startsWith("{")) {
+                    try {
+                        let data = JSON.parse(t);
+                        root.isMaximized = !!data.is_max;
+                        root.hasFullscreenApp = !!data.is_full;
+                        let rawApp = data.app || "";
+                        let rawTitle = data.title || "";
+                        root.activeScreen = data.screen || "";
+
+                        root.activeAppId = rawApp;
+                        root.activeWindowTitle = rawTitle;
+
+                        root.windowList = Array.isArray(data.wins) ? data.wins : [];
+                        root.virtualDesktops = Array.isArray(data.desktops) ? data.desktops : [];
+
+                        if (root.windowList && root.windowList.length > 0) {
+                            let activeWin = root.windowList.find(function(w) { return w.active; });
+                            root.activeWindowId = activeWin ? activeWin.id : "";
+                            root.isFocusedWindowMaximized = activeWin ? (activeWin.maximized !== undefined ? !!activeWin.maximized : root.isMaximized) : false;
+                        } else {
+                            root.activeWindowId = "";
+                            root.isFocusedWindowMaximized = (rawApp !== "" && rawApp !== "Desktop") ? root.isMaximized : false;
+                        }
+
+                        // Clean formatted app name
+                        let appName = "";
+                        if (rawApp.length > 0) {
+                            let segments = rawApp.split(".");
+                            let last = segments[segments.length - 1];
+                            if (last.toLowerCase() === "desktop" && segments.length > 1) {
+                                last = segments[segments.length - 2];
+                            }
+                            if (last.length > 0) {
+                                appName = last.charAt(0).toUpperCase() + last.slice(1);
+                            }
+                        }
+                        if (appName === "" && rawTitle.length > 0) {
+                            let dash = rawTitle.split(" — ");
+                            if (dash.length > 1) {
+                                appName = dash[dash.length - 1];
+                            } else {
+                                dash = rawTitle.split(" - ");
+                                if (dash.length > 1) {
+                                    appName = dash[dash.length - 1];
+                                } else {
+                                    appName = rawTitle;
+                                }
+                            }
+                        }
+
+                        root.activeAppTitle = appName !== "" ? appName : "Desktop";
+                        return;
+                    } catch(e) {
+                        console.warn("[WindowService] Error parsing tracker JSON: " + e);
+                    }
+                }
+
                 let parts = t.split("|");
                 if (parts.length >= 4) {
                     root.isMaximized = (parts[0] === "1");

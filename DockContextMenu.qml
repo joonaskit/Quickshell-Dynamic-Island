@@ -393,6 +393,7 @@ Item {
             color: Qt.rgba(1, 1, 1, 0.08)
         }
 
+        // New Window button
         // New Window button (hidden if native desktopActions already contains New Window)
         Rectangle {
             visible: !root.desktopActions.some(function(act) {

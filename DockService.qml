@@ -334,6 +334,7 @@ Singleton {
         let list = [];
         let idLower = (app.id || "").toLowerCase().replace(/\.desktop$/, "");
         let deskLower = (app.desktopFile || "").toLowerCase().replace(/\.desktop$/, "");
+        let rawLower = (app.rawAppId || "").toLowerCase().replace(/\.desktop$/, "");
         let cmdLower = (app.command || "").toLowerCase();
         let nameLower = (app.name || "").toLowerCase();
 
@@ -342,8 +343,11 @@ Singleton {
             if (!w || !w.appId) continue;
             let wApp = w.appId.toLowerCase().replace(/\.desktop$/, "");
 
-            let match = (wApp === idLower || wApp === deskLower);
+            let match = (wApp === idLower || wApp === deskLower || (rawLower.length > 0 && wApp === rawLower));
             if (!match && idLower.length > 2 && (wApp.endsWith("." + idLower) || deskLower.endsWith("." + wApp) || idLower.indexOf(wApp) >= 0 || wApp.indexOf(idLower) >= 0)) {
+                match = true;
+            }
+            if (!match && rawLower.length > 2 && (wApp.endsWith("." + rawLower) || rawLower.indexOf(wApp) >= 0 || wApp.indexOf(rawLower) >= 0)) {
                 match = true;
             }
             if (!match && cmdLower.length > 2 && (wApp === cmdLower || wApp.indexOf(cmdLower) >= 0 || cmdLower.indexOf(wApp) >= 0)) {
@@ -622,18 +626,43 @@ Singleton {
     }
 
 
+    // Helper to resolve desktop entry across various naming patterns (e.g. vivaldi vs vivaldi-stable)
+    function findDesktopEntry(appId) {
+        if (!appId) return null;
+        let clean = appId.replace(/\.desktop$/, "");
+        let entry = DesktopEntries.byId(clean);
+        if (!entry) entry = DesktopEntries.heuristicLookup(clean);
+        if (!entry && clean.endsWith("-stable")) entry = DesktopEntries.byId(clean.replace(/-stable$/, ""));
+        if (!entry) entry = DesktopEntries.byId(clean + "-stable");
+        if (!entry && DesktopEntries.applications && DesktopEntries.applications.values) {
+            let vals = DesktopEntries.applications.values;
+            let cLow = clean.toLowerCase();
+            for (let i = 0; i < vals.length; i++) {
+                let e = vals[i];
+                if (!e) continue;
+                let eId = (e.id || "").toLowerCase();
+                let eName = (e.name || "").toLowerCase();
+                if (eId === cLow || eId.indexOf(cLow) >= 0 || cLow.indexOf(eId) >= 0 || eName === cLow) {
+                    return e;
+                }
+            }
+        }
+        return entry;
+    }
+
     // Launch app process
     function launchApp(app) {
         if (!app) return;
 
         // Try DesktopEntry lookup
-        if (app.desktopFile) {
-            let cleanId = app.desktopFile.replace(/\.desktop$/, "");
-            let entry = DesktopEntries.byId(cleanId);
-            if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
-            if (entry) {
+        let targetId = app.desktopFile || app.id || "";
+        let entry = findDesktopEntry(targetId);
+        if (entry) {
+            try {
                 entry.execute();
                 return;
+            } catch(e) {
+                console.warn("[DockService] Error executing desktop entry: " + e);
             }
         }
 
@@ -655,14 +684,18 @@ Singleton {
 
         let newMap = {};
         let unpinnedMap = {};
+        let pinnedWinIds = {};
 
-        // Track pinned apps status
+        // Track pinned apps status and index their open windows
         for (let i = 0; i < root.pinnedApps.length; i++) {
             let app = root.pinnedApps[i];
             let matchingWins = findToplevels(app);
             let count = matchingWins.length;
             let focused = matchingWins.some(function(w) { return w.activated; });
             newMap[app.id] = { running: count > 0, focused: focused, count: count };
+            for (let m = 0; m < matchingWins.length; m++) {
+                pinnedWinIds[matchingWins[m].id] = true;
+            }
         }
 
         let ignoreList = ["xwaylandvideobridge", "quickshell", "plasmashell", "kded", "krunner", "polkit", "kaccess", "plasmawindowed"];
@@ -677,26 +710,25 @@ Singleton {
                 continue;
             }
 
-            let isAlreadyPinned = false;
-
-            for (let k = 0; k < root.pinnedApps.length; k++) {
-                let p = root.pinnedApps[k];
-                let pToplevels = findToplevels(p);
-                if (pToplevels.some(function(tw) { return tw.id === w.id || (tw.appId === w.appId && tw.title === w.title); })) {
-                    isAlreadyPinned = true;
-                    break;
-                }
-            }
+            // Check if this window already belongs to a pinned app
+            let isAlreadyPinned = !!pinnedWinIds[w.id] || root.isPinned(appId);
 
             if (!isAlreadyPinned) {
-                let key = appId.toLowerCase();
-                if (!unpinnedMap[key]) {
-                    // Try to resolve desktop entry metadata
-                    let entry = DesktopEntries.byId(appId.replace(/\.desktop$/, ""));
-                    if (!entry) entry = DesktopEntries.heuristicLookup(appId);
+                // Try to resolve desktop entry metadata
+                let entry = root.findDesktopEntry(appId);
+                let effectiveId = entry ? entry.id : appId;
+                let effectiveKey = effectiveId.toLowerCase().replace(/\.desktop$/, "");
 
+                // Check again with effective desktop ID
+                if (root.isPinned(effectiveId)) {
+                    continue;
+                }
+
+                if (!unpinnedMap[effectiveKey]) {
                     let appName = entry ? entry.name : appId;
                     let iconName = entry ? entry.icon : appId;
+                    let deskFile = entry ? (entry.id.endsWith(".desktop") ? entry.id : (entry.id + ".desktop")) : (appId.endsWith(".desktop") ? appId : (appId + ".desktop"));
+                    let execCmd = entry ? (entry.execString || entry.command || appId) : appId;
 
                     // Clean formatted app name if fallback
                     if (!entry) {
@@ -710,12 +742,13 @@ Singleton {
                         }
                     }
 
-                    unpinnedMap[key] = {
-                        id: appId,
+                    unpinnedMap[effectiveKey] = {
+                        id: effectiveId,
+                        rawAppId: appId,
                         name: appName,
                         icon: iconName,
-                        desktopFile: appId.endsWith(".desktop") ? appId : (appId + ".desktop"),
-                        command: appId,
+                        desktopFile: deskFile,
+                        command: execCmd,
                         isUnpinned: true
                     };
                 }
@@ -729,6 +762,9 @@ Singleton {
             let count = matchingWins.length;
             let focused = matchingWins.some(function(w) { return w.activated; });
             newMap[item.id] = { running: count > 0, focused: focused, count: count };
+            if (item.rawAppId && item.rawAppId !== item.id) {
+                newMap[item.rawAppId] = newMap[item.id];
+            }
             unpinnedList.push(item);
         }
 

@@ -95,8 +95,26 @@ class WindowBridge(dbus.service.Object):
 
     def emit_state(self):
         s = self.last_state
-        d_json = self.get_desktops_json()
-        sys.stdout.write(f"{s['is_max']}|{s['is_full']}|{s['app']}|{s['title']}|{s['screen']}|{s['wins']}|{d_json}\n")
+        try:
+            wins_obj = json.loads(s["wins"]) if isinstance(s["wins"], str) and s["wins"].strip() else []
+        except Exception:
+            wins_obj = []
+        try:
+            d_obj = json.loads(self.get_desktops_json())
+        except Exception:
+            d_obj = []
+
+        payload = {
+            "type": "state",
+            "is_max": s["is_max"],
+            "is_full": s["is_full"],
+            "app": s["app"],
+            "title": s["title"],
+            "screen": s["screen"],
+            "wins": wins_obj,
+            "desktops": d_obj
+        }
+        sys.stdout.write(json.dumps(payload) + "\n")
         sys.stdout.flush()
 
     def on_vdm_signal(self, *args, **kwargs):
@@ -107,10 +125,10 @@ class WindowBridge(dbus.service.Object):
         self.last_state = {
             "is_max": 1 if is_maximized else 0,
             "is_full": 1 if is_fullscreen else 0,
-            "app": str(app_id).replace("\n", " ").replace("|", " "),
-            "title": str(title).replace("\n", " ").replace("|", " "),
-            "screen": str(screen_name).replace("\n", " ").replace("|", " "),
-            "wins": str(win_list_json).replace("\n", " ")
+            "app": str(app_id),
+            "title": str(title),
+            "screen": str(screen_name),
+            "wins": str(win_list_json)
         }
         self.emit_state()
 
