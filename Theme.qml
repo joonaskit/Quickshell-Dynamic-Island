@@ -69,7 +69,6 @@ Singleton {
 
     readonly property int baseTopBarHeight: 34
     readonly property int baseDockHeight: 64
-    readonly property int baseDockIconSize: 44
     readonly property int baseDockRadius: 20
     readonly property int baseDockBottomMargin: 12
 

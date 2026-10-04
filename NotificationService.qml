@@ -128,4 +128,22 @@ Singleton {
     function markAllRead() {
         root.unreadCount = 0;
     }
+
+    function getUnreadCountForApp(appId, appName) {
+        if (!root.notifications || root.notifications.length === 0) return 0;
+        let count = 0;
+        let idLower = (appId || "").toLowerCase().replace(/\.desktop$/, "");
+        let nameLower = (appName || "").toLowerCase();
+        for (let i = 0; i < root.notifications.length; i++) {
+            let n = root.notifications[i];
+            let nApp = (n.appName || "").toLowerCase();
+            let nIcon = (n.appIcon || "").toLowerCase();
+            if (idLower && (nApp.indexOf(idLower) >= 0 || idLower.indexOf(nApp) >= 0 || nIcon.indexOf(idLower) >= 0)) {
+                count++;
+            } else if (nameLower && (nApp.indexOf(nameLower) >= 0 || nameLower.indexOf(nApp) >= 0)) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

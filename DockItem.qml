@@ -122,17 +122,8 @@ Item {
         width: Theme.dockIconSize
         height: Theme.dockIconSize
 
-        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-        anchors.bottomMargin: (!root.isVertical) ? (10 + root.bounceHeight) : undefined
-
-        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-        anchors.leftMargin: (root.dockPosition === "left") ? (10 + root.bounceHeight) : undefined
-
-        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-        anchors.rightMargin: (root.dockPosition === "right") ? (10 + root.bounceHeight) : undefined
+        x: root.isVertical ? (root.dockPosition === "left" ? (10 + root.bounceHeight) : (parent.width - width - 10 - root.bounceHeight)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - root.bounceHeight)
 
         transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
         scale: root.dockScale * root.pressScale
@@ -221,23 +212,14 @@ Item {
         id: pipGlow
         z: 1
 
-        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-        anchors.bottomMargin: (!root.isVertical) ? 1 : undefined
-
-        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-        anchors.leftMargin: (root.dockPosition === "left") ? 1 : undefined
-
-        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-        anchors.rightMargin: (root.dockPosition === "right") ? 1 : undefined
-
         width: root.isVertical ? 8 : (root.isFocused ? 22 : 0)
         height: root.isVertical ? (root.isFocused ? 22 : 0) : 8
         radius: 4
         color: Qt.rgba(10/255, 132/255, 255/255, 0.45)
         opacity: (root.isRunning && root.isFocused) ? 1.0 : 0.0
+
+        x: root.isVertical ? (root.dockPosition === "left" ? 1 : (parent.width - width - 1)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 1)
 
         Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
         Behavior on width { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
@@ -249,23 +231,14 @@ Item {
         id: runningDot
         z: 2
 
-        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-        anchors.bottomMargin: (!root.isVertical) ? 3 : undefined
-
-        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-        anchors.leftMargin: (root.dockPosition === "left") ? 3 : undefined
-
-        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-        anchors.rightMargin: (root.dockPosition === "right") ? 3 : undefined
-
         width: root.isVertical ? 4 : (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4))
         height: root.isVertical ? (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4)) : 4
         radius: 2
         color: root.isFocused ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.75)
         opacity: root.isRunning ? 1.0 : 0.0
+
+        x: root.isVertical ? (root.dockPosition === "left" ? 3 : (parent.width - width - 3)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 3)
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
@@ -285,20 +258,12 @@ Item {
     Item {
         id: tooltipContainer
 
-        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-        anchors.bottom: (!root.isVertical) ? iconContainer.top : undefined
-        anchors.bottomMargin: (!root.isVertical) ? (14 + (root.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-        anchors.left: (root.dockPosition === "left") ? iconContainer.right : undefined
-        anchors.leftMargin: (root.dockPosition === "left") ? (14 + (root.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-        anchors.right: (root.dockPosition === "right") ? iconContainer.left : undefined
-        anchors.rightMargin: (root.dockPosition === "right") ? (14 + (root.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
         width: tooltipBg.width
         height: tooltipBg.height
+
+        x: root.isVertical ? (root.dockPosition === "left" ? (iconContainer.x + iconContainer.width + 14 + (root.dockScale - 1.0) * Theme.dockIconSize) : (iconContainer.x - width - 14 - (root.dockScale - 1.0) * Theme.dockIconSize)) : Math.round((parent.width - width) / 2)
+        y: root.isVertical ? Math.round((parent.height - height) / 2) : (iconContainer.y - height - 14 - (root.dockScale - 1.0) * Theme.dockIconSize)
+
         opacity: (!root.isDragging && root.isHovered && root.dockScale > 1.1 && root.windowCount <= 1) ? 1.0 : 0.0
         visible: opacity > 0.01
 
