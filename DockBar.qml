@@ -9,21 +9,34 @@ Item {
     property alias contextMenuHitBox: contextMenu
     property alias appPickerHitBox: appPicker
     property alias trashMenuHitBox: trashMenu
+    property alias downloadsStackHitBox: downloadsStack
+    property alias windowPickerHitBox: windowPicker
 
     property alias contextMenuOpen: contextMenu.isOpen
     property alias appPickerOpen: appPicker.isOpen
     property alias trashMenuOpen: trashMenu.isOpen
+    property alias downloadsStackOpen: downloadsStack.isOpen
+    property alias windowPickerOpen: windowPicker.isOpen
+
+    readonly property bool isVertical: Theme.dockPosition === "left" || Theme.dockPosition === "right"
+    readonly property string dockPosition: Theme.dockPosition
 
     readonly property real capsuleWidth: dockCapsule.width
+    readonly property real capsuleHeight: dockCapsule.height
     readonly property real capsuleX: dockCapsule.x
+    readonly property real capsuleY: dockCapsule.y
 
-    implicitHeight: (appPickerOpen || contextMenuOpen || trashMenuOpen) ? 500 : Theme.dockHeight
-    implicitWidth: Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
+    readonly property bool hasOpenPopups: appPickerOpen || contextMenuOpen || trashMenuOpen || downloadsStackOpen || windowPickerOpen
+
+    implicitWidth: isVertical ? (hasOpenPopups ? 520 : Theme.dockHeight) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
+    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 520 : Theme.dockHeight)
+
     width: implicitWidth
     height: implicitHeight
 
-    // Mouse tracking for magnification wave
+    // Mouse tracking for fluid magnification wave
     property real currentMouseX: -9999
+    property real currentMouseY: -9999
     property bool isMouseInside: false
 
     // Drag and drop state for reordering pinned apps
@@ -32,25 +45,54 @@ Item {
     property real dragOffset: 0
     readonly property bool isDraggingPinned: draggedIndex >= 0
 
+    function calcDockScale(itemCenter) {
+        if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
+        let mouseCoord = root.isVertical ? root.currentMouseY : root.currentMouseX;
+        let dist = Math.abs(mouseCoord - itemCenter);
+        if (dist < 85) {
+            return 1.0 + (Theme.dockScaleHover - 1.0) * Math.cos((dist / 85) * (Math.PI / 2));
+        }
+        return 1.0;
+    }
+
     function closeAllPopups() {
         contextMenu.isOpen = false;
         appPicker.isOpen = false;
         trashMenu.isOpen = false;
+        downloadsStack.isOpen = false;
+        windowPicker.isOpen = false;
     }
 
     function toggleAppPicker() {
-        contextMenu.isOpen = false;
-        trashMenu.isOpen = false;
-        appPicker.isOpen = !appPicker.isOpen;
+        let wasOpen = appPicker.isOpen;
+        closeAllPopups();
+        appPicker.isOpen = !wasOpen;
+    }
+
+    function toggleDownloadsStack() {
+        let wasOpen = downloadsStack.isOpen;
+        closeAllPopups();
+        if (!wasOpen) {
+            let mapped = downloadsItem.mapToItem(root, downloadsItem.width / 2, downloadsItem.height / 2);
+            downloadsStack.targetX = mapped.x;
+            downloadsStack.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+            downloadsStack.isOpen = true;
+        }
     }
 
     // Extended hitbox covering capsule, icon magnification overshoot, and indicator dots
     Item {
         id: dockHitBox
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        height: Theme.dockHeight + 24
-        width: dockCapsule.width + 16
+
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+
+        width: root.isVertical ? (Theme.dockHeight + 24) : (dockCapsule.width + 16)
+        height: root.isVertical ? (dockCapsule.height + 16) : (Theme.dockHeight + 24)
 
         // MouseArea over the entire dock to calculate fluid magnification wave
         MouseArea {
@@ -66,24 +108,32 @@ Item {
             onExited: {
                 root.isMouseInside = false;
                 root.currentMouseX = -9999;
+                root.currentMouseY = -9999;
             }
 
             onPositionChanged: function(mouse) {
                 if (root.isDraggingPinned) return;
-                let mapped = mapToItem(contentRow, mouse.x, mouse.y);
+                let mapped = mapToItem(contentContainer, mouse.x, mouse.y);
                 root.currentMouseX = mapped.x;
+                root.currentMouseY = mapped.y;
             }
         }
     }
 
-    // Soft shadow under dock capsule to ground it and enhance glass depth
+    // Soft shadow under dock capsule
     Rectangle {
         id: dockShadow
-        anchors.horizontalCenter: dockCapsule.horizontalCenter
-        anchors.bottom: dockCapsule.bottom
-        anchors.bottomMargin: -3
-        width: dockCapsule.width + 6
-        height: dockCapsule.height
+        anchors.horizontalCenter: root.isVertical ? undefined : dockCapsule.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? dockCapsule.verticalCenter : undefined
+        anchors.bottom: (!root.isVertical) ? dockCapsule.bottom : undefined
+        anchors.bottomMargin: (!root.isVertical) ? -3 : 0
+        anchors.left: (root.dockPosition === "left") ? dockCapsule.left : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? -3 : 0
+        anchors.right: (root.dockPosition === "right") ? dockCapsule.right : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? -3 : 0
+
+        width: dockCapsule.width + (root.isVertical ? 4 : 6)
+        height: dockCapsule.height + (root.isVertical ? 6 : 4)
         radius: dockCapsule.radius + 2
         color: Qt.rgba(0, 0, 0, 0.32)
         z: -1
@@ -92,10 +142,16 @@ Item {
     // Dock capsule background
     Rectangle {
         id: dockCapsule
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        height: Theme.dockHeight
-        width: contentRow.implicitWidth + 24
+
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+
+        width: root.isVertical ? Theme.dockHeight : (contentContainer.implicitWidth + 24)
+        height: root.isVertical ? (contentContainer.implicitHeight + 24) : Theme.dockHeight
         radius: Theme.dockRadius
         color: Theme.dockBackground
         border.color: Theme.dockBorder
@@ -118,30 +174,36 @@ Item {
             }
         }
 
-        // Top subtle highlight edge (specular glass rim)
+        // Highlight rim edge
         Rectangle {
             anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.right: root.isVertical ? undefined : parent.right
             anchors.top: parent.top
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-            height: 1
+            anchors.bottom: root.isVertical ? parent.bottom : undefined
+            anchors.leftMargin: root.isVertical ? 0 : 16
+            anchors.rightMargin: root.isVertical ? 0 : 16
+            anchors.topMargin: root.isVertical ? 16 : 0
+            anchors.bottomMargin: root.isVertical ? 16 : 0
+            width: root.isVertical ? 1 : undefined
+            height: root.isVertical ? undefined : 1
             radius: Theme.dockRadius
             color: Qt.rgba(1, 1, 1, 0.25)
             visible: Theme.dockShowBorder
         }
 
-        // Horizontal Row containing all dock items
-        Row {
-            id: contentRow
+        // Content Container (Grid: acts as Row when horizontal, Column when vertical)
+        Grid {
+            id: contentContainer
             anchors.centerIn: parent
+            columns: root.isVertical ? 1 : 999
+            rows: root.isVertical ? 999 : 1
             spacing: 2
 
             // Launchpad / App Picker Icon
             Item {
                 id: launchpadItem
-                width: Theme.dockIconSize + 8
-                height: Theme.dockHeight
+                width: root.isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
+                height: root.isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
 
                 property real bounceHeight: 0
                 property real pressScale: 1.0
@@ -158,13 +220,8 @@ Item {
                 }
 
                 property real dockScale: {
-                    if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
-                    let center = launchpadItem.x + launchpadItem.width / 2;
-                    let dist = Math.abs((root.currentMouseX - 12) - center);
-                    if (dist < 80) {
-                        return 1.0 + (Theme.dockScaleHover - 1.0) * Math.cos((dist / 80) * (Math.PI / 2));
-                    }
-                    return 1.0;
+                    let center = root.isVertical ? (launchpadItem.y + launchpadItem.height / 2) : (launchpadItem.x + launchpadItem.width / 2);
+                    return root.calcDockScale(center);
                 }
 
                 Behavior on dockScale {
@@ -173,13 +230,23 @@ Item {
 
                 Rectangle {
                     id: launchpadBg
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10 + launchpadItem.bounceHeight
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
                     radius: 12
-                    transformOrigin: Item.Bottom
+
+                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+                    anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+                    anchors.bottomMargin: (!root.isVertical) ? (10 + launchpadItem.bounceHeight) : undefined
+
+                    anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+                    anchors.leftMargin: (root.dockPosition === "left") ? (10 + launchpadItem.bounceHeight) : undefined
+
+                    anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+                    anchors.rightMargin: (root.dockPosition === "right") ? (10 + launchpadItem.bounceHeight) : undefined
+
+                    transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
                     scale: launchpadItem.dockScale * launchpadItem.pressScale
 
                     gradient: Gradient {
@@ -210,9 +277,18 @@ Item {
 
                 // Tooltip
                 Item {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: launchpadBg.top
-                    anchors.bottomMargin: 14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize
+                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+                    anchors.bottom: (!root.isVertical) ? launchpadBg.top : undefined
+                    anchors.bottomMargin: (!root.isVertical) ? (14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    anchors.left: (root.dockPosition === "left") ? launchpadBg.right : undefined
+                    anchors.leftMargin: (root.dockPosition === "left") ? (14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    anchors.right: (root.dockPosition === "right") ? launchpadBg.left : undefined
+                    anchors.rightMargin: (root.dockPosition === "right") ? (14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
                     width: launchpadTipBg.width
                     height: launchpadTipBg.height
                     opacity: (launchpadMouse.containsMouse && launchpadItem.dockScale > 1.1) ? 1.0 : 0.0
@@ -251,9 +327,10 @@ Item {
                     onEntered: { root.isMouseInside = true; }
                     onPositionChanged: function(mouse) {
                         if (root.isDraggingPinned) return;
-                        let p = launchpadMouse.mapToItem(contentRow, mouse.x, mouse.y);
+                        let p = launchpadMouse.mapToItem(contentContainer, mouse.x, mouse.y);
                         root.isMouseInside = true;
                         root.currentMouseX = p.x;
+                        root.currentMouseY = p.y;
                     }
 
                     onPressed: {
@@ -269,22 +346,17 @@ Item {
                     onClicked: function(mouse) {
                         launchpadItem.pressScale = 1.0;
                         launchpadBounceAnim.restart();
-                        if (mouse.button === Qt.RightButton) {
-                            appPicker.isOpen = !appPicker.isOpen;
-                            contextMenu.isOpen = false;
-                        } else {
-                            appPicker.isOpen = !appPicker.isOpen;
-                            contextMenu.isOpen = false;
-                        }
+                        root.toggleAppPicker();
                     }
                 }
             }
 
             // Divider between Launchpad and Pinned apps
             Rectangle {
-                width: 1
-                height: 28
-                anchors.verticalCenter: parent.verticalCenter
+                width: root.isVertical ? 28 : 1
+                height: root.isVertical ? 1 : 28
+                anchors.horizontalCenter: root.isVertical ? parent.horizontalCenter : undefined
+                anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
                 color: Qt.rgba(1, 1, 1, 0.15)
             }
 
@@ -300,7 +372,7 @@ Item {
                     itemIndex: index
 
                     readonly property bool isBeingDragged: root.draggedIndex === index
-                    readonly property real itemStep: pinnedItem.width + contentRow.spacing
+                    readonly property real itemStep: (root.isVertical ? pinnedItem.height : pinnedItem.width) + contentContainer.spacing
 
                     readonly property real displacement: {
                         if (root.draggedIndex < 0) return 0;
@@ -309,26 +381,24 @@ Item {
                         let fromIdx = root.draggedIndex;
                         let toIdx = root.dragTargetIndex;
                         if (toIdx > fromIdx) {
-                            if (index > fromIdx && index <= toIdx) {
-                                return -itemStep;
-                            }
+                            if (index > fromIdx && index <= toIdx) return -itemStep;
                         } else if (toIdx < fromIdx) {
-                            if (index < fromIdx && index >= toIdx) {
-                                return itemStep;
-                            }
+                            if (index < fromIdx && index >= toIdx) return itemStep;
                         }
                         return 0;
                     }
 
                     transform: Translate {
-                        x: pinnedItem.displacement
+                        x: root.isVertical ? 0 : pinnedItem.displacement
+                        y: root.isVertical ? pinnedItem.displacement : 0
 
                         Behavior on x {
-                            enabled: !pinnedItem.isBeingDragged
-                            NumberAnimation {
-                                duration: 180
-                                easing.type: Easing.OutCubic
-                            }
+                            enabled: !pinnedItem.isBeingDragged && !root.isVertical
+                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                        }
+                        Behavior on y {
+                            enabled: !pinnedItem.isBeingDragged && root.isVertical
+                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
                         }
                     }
 
@@ -336,35 +406,29 @@ Item {
                     opacity: isBeingDragged ? 0.92 : 1.0
 
                     dockScale: {
-                        if (root.isDraggingPinned) {
-                            return isBeingDragged ? 1.15 : 1.0;
-                        }
-                        if (!root.isMouseInside) return 1.0;
-                        let itemCenterX = pinnedItem.x + pinnedItem.width / 2;
-                        let dist = Math.abs(root.currentMouseX - itemCenterX);
-                        if (dist < 85) {
-                            return 1.0 + (Theme.dockScaleHover - 1.0) * Math.cos((dist / 85) * (Math.PI / 2));
-                        }
-                        return 1.0;
+                        if (root.isDraggingPinned) return isBeingDragged ? 1.15 : 1.0;
+                        let center = root.isVertical ? (pinnedItem.y + pinnedItem.height / 2) : (pinnedItem.x + pinnedItem.width / 2);
+                        return root.calcDockScale(center);
                     }
 
-                    onMouseMoved: function(cx) {
+                    onMouseMoved: function(coord) {
                         if (!root.isDraggingPinned) {
                             root.isMouseInside = true;
-                            root.currentMouseX = cx;
+                            if (root.isVertical) root.currentMouseY = coord;
+                            else root.currentMouseX = coord;
                         }
                     }
 
-                    onDragStarted: function(idx, startX) {
+                    onDragStarted: function(idx, startPos) {
                         root.closeAllPopups();
                         root.draggedIndex = idx;
                         root.dragTargetIndex = idx;
                         root.dragOffset = 0;
                     }
 
-                    onDragMoved: function(idx, dx, currentX) {
-                        root.dragOffset = dx;
-                        let shift = Math.round(dx / pinnedItem.itemStep);
+                    onDragMoved: function(idx, delta, currentPos) {
+                        root.dragOffset = delta;
+                        let shift = Math.round(delta / pinnedItem.itemStep);
                         let maxIdx = DockService.pinnedApps.length - 1;
                         let newTarget = Math.max(0, Math.min(maxIdx, idx + shift));
                         root.dragTargetIndex = newTarget;
@@ -383,11 +447,25 @@ Item {
 
                     onRequestContextMenu: function(app, x, y) {
                         contextMenu.appData = app;
-                        let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, 0);
+                        let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, pinnedItem.height / 2);
                         contextMenu.targetX = mapped.x;
-                        contextMenu.targetY = dockCapsule.y;
+                        contextMenu.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                        closeAllPopups();
                         contextMenu.isOpen = true;
-                        appPicker.isOpen = false;
+                    }
+
+                    onRequestWindowPicker: function(app, x, y) {
+                        if (!contextMenu.isOpen && !appPicker.isOpen && !downloadsStack.isOpen) {
+                            windowPicker.appData = app;
+                            let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, pinnedItem.height / 2);
+                            windowPicker.targetX = mapped.x;
+                            windowPicker.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                            windowPicker.isOpen = true;
+                        }
+                    }
+
+                    onRequestCloseWindowPicker: function() {
+                        windowPicker.isOpen = false;
                     }
                 }
             }
@@ -395,9 +473,10 @@ Item {
             // Divider between Pinned and Running Unpinned apps
             Rectangle {
                 visible: DockService.runningUnpinnedApps.length > 0
-                width: 1
-                height: 28
-                anchors.verticalCenter: parent.verticalCenter
+                width: root.isVertical ? 28 : 1
+                height: root.isVertical ? 1 : 28
+                anchors.horizontalCenter: root.isVertical ? parent.horizontalCenter : undefined
+                anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
                 color: Qt.rgba(1, 1, 1, 0.15)
             }
 
@@ -411,46 +490,200 @@ Item {
                     appData: modelData
 
                     dockScale: {
-                        if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
-                        let itemCenterX = unpinnedItem.x + unpinnedItem.width / 2;
-                        let dist = Math.abs(root.currentMouseX - itemCenterX);
-                        if (dist < 85) {
-                            return 1.0 + (Theme.dockScaleHover - 1.0) * Math.cos((dist / 85) * (Math.PI / 2));
-                        }
-                        return 1.0;
+                        if (root.isDraggingPinned) return 1.0;
+                        let center = root.isVertical ? (unpinnedItem.y + unpinnedItem.height / 2) : (unpinnedItem.x + unpinnedItem.width / 2);
+                        return root.calcDockScale(center);
                     }
 
-                    onMouseMoved: function(cx) {
+                    onMouseMoved: function(coord) {
                         if (!root.isDraggingPinned) {
                             root.isMouseInside = true;
-                            root.currentMouseX = cx;
+                            if (root.isVertical) root.currentMouseY = coord;
+                            else root.currentMouseX = coord;
                         }
                     }
 
                     onRequestContextMenu: function(app, x, y) {
                         contextMenu.appData = app;
-                        let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, 0);
+                        let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, unpinnedItem.height / 2);
                         contextMenu.targetX = mapped.x;
-                        contextMenu.targetY = dockCapsule.y;
+                        contextMenu.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                        closeAllPopups();
                         contextMenu.isOpen = true;
-                        appPicker.isOpen = false;
+                    }
+
+                    onRequestWindowPicker: function(app, x, y) {
+                        if (!contextMenu.isOpen && !appPicker.isOpen && !downloadsStack.isOpen) {
+                            windowPicker.appData = app;
+                            let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, unpinnedItem.height / 2);
+                            windowPicker.targetX = mapped.x;
+                            windowPicker.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                            windowPicker.isOpen = true;
+                        }
+                    }
+
+                    onRequestCloseWindowPicker: function() {
+                        windowPicker.isOpen = false;
                     }
                 }
             }
 
-            // Divider before Trash
+            // Divider before Downloads & Trash
             Rectangle {
-                width: 1
-                height: 28
-                anchors.verticalCenter: parent.verticalCenter
+                width: root.isVertical ? 28 : 1
+                height: root.isVertical ? 1 : 28
+                anchors.horizontalCenter: root.isVertical ? parent.horizontalCenter : undefined
+                anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
                 color: Qt.rgba(1, 1, 1, 0.15)
+            }
+
+            // Downloads / Recent Files Stack Icon
+            Item {
+                id: downloadsItem
+                width: root.isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
+                height: root.isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
+
+                property real bounceHeight: 0
+                property real pressScale: 1.0
+
+                Behavior on pressScale {
+                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                }
+
+                SequentialAnimation {
+                    id: downloadsBounceAnim
+                    alwaysRunToEnd: true
+                    NumberAnimation { target: downloadsItem; property: "bounceHeight"; to: 12; duration: 100; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: downloadsItem; property: "bounceHeight"; to: 0; duration: 150; easing.type: Easing.OutBounce }
+                }
+
+                property real dockScale: {
+                    let center = root.isVertical ? (downloadsItem.y + downloadsItem.height / 2) : (downloadsItem.x + downloadsItem.width / 2);
+                    return root.calcDockScale(center);
+                }
+
+                Behavior on dockScale {
+                    NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
+                }
+
+                Rectangle {
+                    id: downloadsIconContainer
+                    width: Theme.dockIconSize
+                    height: Theme.dockIconSize
+                    radius: 12
+
+                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+                    anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+                    anchors.bottomMargin: (!root.isVertical) ? (10 + downloadsItem.bounceHeight) : undefined
+
+                    anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+                    anchors.leftMargin: (root.dockPosition === "left") ? (10 + downloadsItem.bounceHeight) : undefined
+
+                    anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+                    anchors.rightMargin: (root.dockPosition === "right") ? (10 + downloadsItem.bounceHeight) : undefined
+
+                    transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
+                    scale: downloadsItem.dockScale * downloadsItem.pressScale
+
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: "#2c2c2e" }
+                        GradientStop { position: 1.0; color: "#1c1c1e" }
+                    }
+                    border.color: Qt.rgba(1, 1, 1, 0.16)
+                    border.width: 1
+
+                    // Downloads Folder Stack Icon
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "folder"
+                        size: 22
+                        color: Theme.accentBlue
+                    }
+                }
+
+                // Tooltip
+                Item {
+                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+                    anchors.bottom: (!root.isVertical) ? downloadsIconContainer.top : undefined
+                    anchors.bottomMargin: (!root.isVertical) ? (14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    anchors.left: (root.dockPosition === "left") ? downloadsIconContainer.right : undefined
+                    anchors.leftMargin: (root.dockPosition === "left") ? (14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    anchors.right: (root.dockPosition === "right") ? downloadsIconContainer.left : undefined
+                    anchors.rightMargin: (root.dockPosition === "right") ? (14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    width: downloadsTipBg.width
+                    height: downloadsTipBg.height
+                    opacity: (downloadsMouse.containsMouse && downloadsItem.dockScale > 1.1) ? 1.0 : 0.0
+                    visible: opacity > 0.01
+
+                    Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
+
+                    Rectangle {
+                        id: downloadsTipBg
+                        width: downloadsTipText.implicitWidth + 16
+                        height: 24
+                        radius: 6
+                        color: "#1c1c1e"
+                        border.color: Qt.rgba(1, 1, 1, 0.18)
+                        border.width: 1
+
+                        Text {
+                            id: downloadsTipText
+                            anchors.centerIn: parent
+                            text: "Downloads Stack"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            font.weight: Font.Medium
+                            color: Theme.textPrimary
+                        }
+                    }
+                }
+
+                MouseArea {
+                    id: downloadsMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    cursorShape: Qt.PointingHandCursor
+
+                    onEntered: { root.isMouseInside = true; }
+                    onPositionChanged: function(mouse) {
+                        if (root.isDraggingPinned) return;
+                        let p = downloadsMouse.mapToItem(contentContainer, mouse.x, mouse.y);
+                        root.isMouseInside = true;
+                        root.currentMouseX = p.x;
+                        root.currentMouseY = p.y;
+                    }
+
+                    onPressed: {
+                        downloadsItem.pressScale = 0.88;
+                    }
+                    onReleased: {
+                        downloadsItem.pressScale = 1.0;
+                    }
+                    onCanceled: {
+                        downloadsItem.pressScale = 1.0;
+                    }
+
+                    onClicked: function(mouse) {
+                        downloadsItem.pressScale = 1.0;
+                        downloadsBounceAnim.restart();
+                        root.toggleDownloadsStack();
+                    }
+                }
             }
 
             // Trash Icon
             Item {
                 id: trashItem
-                width: Theme.dockIconSize + 8
-                height: Theme.dockHeight
+                width: root.isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
+                height: root.isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
 
                 property real bounceHeight: 0
                 property real pressScale: 1.0
@@ -467,13 +700,8 @@ Item {
                 }
 
                 property real dockScale: {
-                    if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
-                    let center = trashItem.x + trashItem.width / 2;
-                    let dist = Math.abs(root.currentMouseX - center);
-                    if (dist < 85) {
-                        return 1.0 + (Theme.dockScaleHover - 1.0) * Math.cos((dist / 85) * (Math.PI / 2));
-                    }
-                    return 1.0;
+                    let center = root.isVertical ? (trashItem.y + trashItem.height / 2) : (trashItem.x + trashItem.width / 2);
+                    return root.calcDockScale(center);
                 }
 
                 Behavior on dockScale {
@@ -482,12 +710,22 @@ Item {
 
                 Item {
                     id: trashIconContainer
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10 + trashItem.bounceHeight
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
-                    transformOrigin: Item.Bottom
+
+                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+                    anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+                    anchors.bottomMargin: (!root.isVertical) ? (10 + trashItem.bounceHeight) : undefined
+
+                    anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+                    anchors.leftMargin: (root.dockPosition === "left") ? (10 + trashItem.bounceHeight) : undefined
+
+                    anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+                    anchors.rightMargin: (root.dockPosition === "right") ? (10 + trashItem.bounceHeight) : undefined
+
+                    transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
                     scale: trashItem.dockScale * trashItem.pressScale
 
                     // System Trash icon
@@ -521,9 +759,18 @@ Item {
 
                 // Tooltip
                 Item {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: trashIconContainer.top
-                    anchors.bottomMargin: 14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize
+                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+                    anchors.bottom: (!root.isVertical) ? trashIconContainer.top : undefined
+                    anchors.bottomMargin: (!root.isVertical) ? (14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    anchors.left: (root.dockPosition === "left") ? trashIconContainer.right : undefined
+                    anchors.leftMargin: (root.dockPosition === "left") ? (14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+                    anchors.right: (root.dockPosition === "right") ? trashIconContainer.left : undefined
+                    anchors.rightMargin: (root.dockPosition === "right") ? (14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
                     width: trashTipBg.width
                     height: trashTipBg.height
                     opacity: (trashMouse.containsMouse && trashItem.dockScale > 1.1) ? 1.0 : 0.0
@@ -562,9 +809,10 @@ Item {
                     onEntered: { root.isMouseInside = true; }
                     onPositionChanged: function(mouse) {
                         if (root.isDraggingPinned) return;
-                        let p = trashMouse.mapToItem(contentRow, mouse.x, mouse.y);
+                        let p = trashMouse.mapToItem(contentContainer, mouse.x, mouse.y);
                         root.isMouseInside = true;
                         root.currentMouseX = p.x;
+                        root.currentMouseY = p.y;
                     }
 
                     onPressed: {
@@ -581,12 +829,11 @@ Item {
                         trashItem.pressScale = 1.0;
                         trashBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) {
-                            let mapped = trashItem.mapToItem(root, trashItem.width / 2, 0);
+                            let mapped = trashItem.mapToItem(root, trashItem.width / 2, trashItem.height / 2);
                             trashMenu.targetX = mapped.x;
-                            trashMenu.targetY = dockCapsule.y;
+                            trashMenu.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                            closeAllPopups();
                             trashMenu.isOpen = true;
-                            contextMenu.isOpen = false;
-                            appPicker.isOpen = false;
                         } else {
                             DockService.openTrash();
                         }
@@ -604,6 +851,23 @@ Item {
         }
     }
 
+    // Multi-Window Preview / Picker Popup
+    DockWindowPicker {
+        id: windowPicker
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+        onClosed: {
+            appData = null;
+        }
+    }
+
+    // Downloads Stack Popup
+    DockDownloadsStack {
+        id: downloadsStack
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+    }
+
     // Trash Context Menu
     Item {
         id: trashMenu
@@ -614,7 +878,7 @@ Item {
         visible: opacity > 0.001
         opacity: isOpen ? 1.0 : 0.0
         scale: isOpen ? 1.0 : 0.92
-        transformOrigin: Item.Bottom
+        transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
@@ -625,8 +889,19 @@ Item {
 
         width: 150
         height: trashCol.implicitHeight + 16
-        x: Math.max(8, Math.min(root.width - width - 8, targetX - width / 2))
-        y: targetY - height - 10
+
+        x: {
+            if (root.isVertical) {
+                return root.dockPosition === "left" ? (targetX + 14) : (targetX - width - 14);
+            }
+            return Math.max(8, Math.min(root.width - width - 8, targetX - width / 2));
+        }
+        y: {
+            if (root.isVertical) {
+                return Math.max(8, Math.min(root.height - height - 8, targetY - height / 2));
+            }
+            return targetY - height - 10;
+        }
 
         Rectangle {
             anchors.fill: parent
@@ -703,9 +978,16 @@ Item {
     // App Picker Popup
     DockAppPicker {
         id: appPicker
-        anchors.bottom: dockCapsule.top
-        anchors.bottomMargin: 14
-        anchors.horizontalCenter: dockCapsule.horizontalCenter
+        anchors.bottom: (!root.isVertical) ? dockCapsule.top : undefined
+        anchors.bottomMargin: (!root.isVertical) ? 14 : undefined
+        anchors.horizontalCenter: (!root.isVertical) ? dockCapsule.horizontalCenter : undefined
+
+        anchors.left: (root.dockPosition === "left") ? dockCapsule.right : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? 14 : undefined
+        anchors.verticalCenter: root.isVertical ? dockCapsule.verticalCenter : undefined
+
+        anchors.right: (root.dockPosition === "right") ? dockCapsule.left : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? 14 : undefined
     }
 
     // Dismiss overlay to close popups on outside click
@@ -713,10 +995,9 @@ Item {
         id: dismissOverlay
         anchors.fill: parent
         z: -1
-        enabled: contextMenu.isOpen || appPicker.isOpen || trashMenu.isOpen
+        enabled: root.hasOpenPopups
         onClicked: {
             root.closeAllPopups();
-            trashMenu.isOpen = false;
         }
     }
 }

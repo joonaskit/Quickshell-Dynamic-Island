@@ -14,6 +14,8 @@
   "dockAutoHideAlways": false,
   "dockShowBorder": false,
   "dockTransparent": false,
+  "dockPosition": "bottom",
+  "dockIconSize": 44,
   "dockScaleHover": 1.28,
   "showCaffeineIcon": true,
   "showWifiIcon": true,

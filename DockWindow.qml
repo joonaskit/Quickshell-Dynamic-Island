@@ -10,16 +10,20 @@ PanelWindow {
 
     color: "transparent"
 
+    readonly property bool isVertical: Theme.dockPosition === "left" || Theme.dockPosition === "right"
+    readonly property string dockPosition: Theme.dockPosition
+
     anchors {
-        bottom: true
-        left: true
-        right: true
+        bottom: window.dockPosition === "bottom" || window.isVertical
+        top: window.isVertical
+        left: window.dockPosition !== "right"
+        right: window.dockPosition !== "left"
     }
 
-    // Ample height to allow magnification wave, bouncing icons, tooltips, and app picker popups
-    implicitHeight: 520
+    implicitHeight: window.isVertical ? (window.screen ? window.screen.height : 1080) : 520
+    implicitWidth: window.isVertical ? 520 : (window.screen ? window.screen.width : 1920)
 
-    // Reserve space at bottom if configured in Theme and not hidden
+    // Reserve space at dock screen edge if configured in Theme and not hidden
     exclusiveZone: (Theme.dockReserveSpace && !window.shouldDropDock) ? (Theme.dockHeight + Theme.dockBottomMargin) : 0
     aboveWindows: true
 
@@ -38,7 +42,7 @@ PanelWindow {
     readonly property bool hasFullscreenApp: Theme.dockAutoHideOnFullscreen && WindowService.hasFullscreenApp && isThisScreenActive
 
     // Popups currently open
-    readonly property bool hasOpenPopups: dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen
+    readonly property bool hasOpenPopups: dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen || dockBar.downloadsStackOpen || dockBar.windowPickerOpen
 
     // Detect if any normal window overlaps or touches the dock area on this screen
     readonly property bool windowOverlapsDock: {
@@ -55,11 +59,25 @@ PanelWindow {
 
         // Dock bounding box in global desktop coordinates
         let dWidth = Math.max(dockBar.capsuleWidth || 300, 300);
-        let dHeight = Theme.dockHeight + Theme.dockBottomMargin + 10;
-        let dLeft = scrX + (scrW - dWidth) / 2;
-        let dRight = dLeft + dWidth;
-        let dTop = scrY + scrH - dHeight;
-        let dBottom = scrY + scrH;
+        let dHeight = Math.max(dockBar.capsuleHeight || 60, Theme.dockHeight + Theme.dockBottomMargin + 10);
+
+        let dLeft, dRight, dTop, dBottom;
+        if (window.dockPosition === "left") {
+            dLeft = scrX;
+            dRight = scrX + Theme.dockHeight + Theme.dockBottomMargin + 10;
+            dTop = scrY + (scrH - dHeight) / 2;
+            dBottom = dTop + dHeight;
+        } else if (window.dockPosition === "right") {
+            dLeft = scrX + scrW - (Theme.dockHeight + Theme.dockBottomMargin + 10);
+            dRight = scrX + scrW;
+            dTop = scrY + (scrH - dHeight) / 2;
+            dBottom = dTop + dHeight;
+        } else {
+            dLeft = scrX + (scrW - dWidth) / 2;
+            dRight = dLeft + dWidth;
+            dTop = scrY + scrH - dHeight;
+            dBottom = scrY + scrH;
+        }
 
         for (let i = 0; i < WindowService.windowList.length; i++) {
             let w = WindowService.windowList[i];
@@ -84,35 +102,28 @@ PanelWindow {
             let wx = w.x || 0;
             let wy = w.y || 0;
 
-            // Compensate if coordinates are screen-local instead of global virtual desktop
-            if (scrX > 0 && wx < scrX && (wx + ww) <= scrW) {
-                wx += scrX;
-            }
-            if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) {
-                wy += scrY;
-            }
+            if (scrX > 0 && wx < scrX && (wx + ww) <= scrW) wx += scrX;
+            if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) wy += scrY;
 
             let wRight = wx + ww;
             let wBottom = wy + wh;
 
-            // Check AABB intersection with the bottom dock footprint
+            // Check AABB intersection
             let intersects = !(wRight <= dLeft || wx >= dRight || wBottom <= dTop || wy >= dBottom);
-            if (intersects) {
-                return true;
-            }
+            if (intersects) return true;
         }
 
         return false;
     }
 
-    // Auto-hide configuration conditions (directly driven by SettingsService)
+    // Auto-hide configuration conditions
     readonly property bool shouldAutoHideFromWindows: SettingsService.dockAutoHideFromWindows && windowOverlapsDock
     readonly property bool shouldAutoHideAlways: SettingsService.dockAutoHideAlways
 
     // Should the dock be hidden
     readonly property bool isDockHidden: (shouldAutoHideFromWindows || shouldAutoHideAlways) && !hasOpenPopups
 
-    // Reveal state when user dwells near bottom edge
+    // Reveal state when user dwells near edge
     property bool dockRevealed: false
 
     // Overall hover state
@@ -155,7 +166,7 @@ PanelWindow {
         }
     }
 
-    // Dwell timer: user holds cursor at bottom edge to reveal dock
+    // Dwell timer: user holds cursor at screen edge to reveal dock
     Timer {
         id: dockDwellTimer
         interval: 180
@@ -184,21 +195,23 @@ PanelWindow {
         }
     }
 
-    // Whether the dock should currently drop down off screen
+    // Whether the dock should currently drop off screen
     readonly property bool shouldDropDock: window.hasFullscreenApp || (window.isDockHidden && !window.dockRevealed)
 
-    // Dedicated drop margin calculation to avoid dynamic height changes during popup open/close
+    // Dedicated drop margin calculation
     readonly property real dropTargetMargin: -Theme.dockHeight - Theme.dockBottomMargin - 24
 
-    // Static hitbox covering the entire interaction zone of the revealed dock.
-    // Anchored directly to parent.bottom (never moves during dockBar slide animations),
-    // preventing wl_surface.set_input_region thrashing/hangs in KWin Wayland!
+    // Static hitbox covering the interaction zone
     Item {
         id: dockStaticHitBox
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
-        height: Theme.dockHeight + Theme.dockBottomMargin + 48
+        anchors.bottom: (!window.isVertical) ? parent.bottom : undefined
+        anchors.horizontalCenter: (!window.isVertical) ? parent.horizontalCenter : undefined
+        anchors.left: (window.dockPosition === "left") ? parent.left : undefined
+        anchors.right: (window.dockPosition === "right") ? parent.right : undefined
+        anchors.verticalCenter: window.isVertical ? parent.verticalCenter : undefined
+
+        width: window.isVertical ? (Theme.dockHeight + Theme.dockBottomMargin + 48) : Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
+        height: window.isVertical ? Math.round(Math.max((dockBar.capsuleHeight || 0) + 60, Theme.px(420))) : (Theme.dockHeight + Theme.dockBottomMargin + 48)
         visible: !window.hasFullscreenApp && (!window.isDockHidden || window.dockRevealed)
 
         HoverHandler {
@@ -207,9 +220,7 @@ PanelWindow {
         }
     }
 
-    // Transparent click-through mask:
-    // Captures clicks only over the static dock interaction zone, edge trigger, and popups.
-    // Never references moving items to prevent Wayland compositor stalls!
+    // Transparent click-through mask
     mask: Region {
         Region {
             item: dockStaticHitBox.visible ? dockStaticHitBox : null
@@ -224,32 +235,31 @@ PanelWindow {
             item: (!window.hasFullscreenApp && dockBar.trashMenuOpen) ? dockBar.trashMenuHitBox : null
         }
         Region {
-            item: (!window.hasFullscreenApp && (dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen)) ? fullDismissOverlay : null
+            item: (!window.hasFullscreenApp && dockBar.downloadsStackOpen) ? dockBar.downloadsStackHitBox : null
+        }
+        Region {
+            item: (!window.hasFullscreenApp && dockBar.windowPickerOpen) ? dockBar.windowPickerHitBox : null
+        }
+        Region {
+            item: (!window.hasFullscreenApp && window.hasOpenPopups) ? fullDismissOverlay : null
         }
         Region {
             item: (!window.hasFullscreenApp && dockEdgeTrigger.visible) ? dockEdgeTrigger : null
         }
     }
 
-    // Ambient edge glow when the retracted dock is approached by the cursor
-    HiddenElementGlow {
-        id: dockGlow
-        z: 1
-        atBottom: true
-        targetX: Math.round((parent.width - targetWidth) / 2)
-        targetWidth: dockBar.capsuleWidth > 0 ? dockBar.capsuleWidth : Theme.px(400)
-        active: window.isDockHidden && !window.dockRevealed && !window.hasFullscreenApp && dockEdgeHoverHandler.hovered
-        accentColor: Theme.accentBlue
-    }
-
-    // Edge trigger strip at the bottom of the screen when dock is retracted
+    // Edge trigger strip when dock is retracted
     Item {
         id: dockEdgeTrigger
         z: 2
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: Math.max(12, Theme.px(12))
-        width: Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
+        anchors.bottom: (!window.isVertical) ? parent.bottom : undefined
+        anchors.horizontalCenter: (!window.isVertical) ? parent.horizontalCenter : undefined
+        anchors.left: (window.dockPosition === "left") ? parent.left : undefined
+        anchors.right: (window.dockPosition === "right") ? parent.right : undefined
+        anchors.verticalCenter: window.isVertical ? parent.verticalCenter : undefined
+
+        width: window.isVertical ? Math.max(12, Theme.px(12)) : Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
+        height: window.isVertical ? Math.round(Math.max((dockBar.capsuleHeight || 0) + 60, Theme.px(420))) : Math.max(12, Theme.px(12))
         visible: window.isDockHidden && !window.dockRevealed && !window.hasFullscreenApp
 
         HoverHandler {
@@ -272,7 +282,7 @@ PanelWindow {
         id: fullDismissOverlay
         z: 5
         anchors.fill: parent
-        enabled: !window.hasFullscreenApp && (dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen)
+        enabled: !window.hasFullscreenApp && window.hasOpenPopups
         onClicked: {
             dockBar.closeAllPopups();
         }
@@ -282,9 +292,18 @@ PanelWindow {
     DockBar {
         id: dockBar
         z: 10
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin
+
+        anchors.horizontalCenter: (!window.isVertical) ? parent.horizontalCenter : undefined
+        anchors.verticalCenter: window.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!window.isVertical) ? parent.bottom : undefined
+        anchors.bottomMargin: (!window.isVertical) ? (window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin) : undefined
+
+        anchors.left: (window.dockPosition === "left") ? parent.left : undefined
+        anchors.leftMargin: (window.dockPosition === "left") ? (window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin) : undefined
+
+        anchors.right: (window.dockPosition === "right") ? parent.right : undefined
+        anchors.rightMargin: (window.dockPosition === "right") ? (window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin) : undefined
 
         // Smooth hide animation when dropped or fullscreen
         opacity: window.hasFullscreenApp ? 0.0 : (window.shouldDropDock ? 0.0 : 1.0)
@@ -293,6 +312,12 @@ PanelWindow {
             NumberAnimation { duration: Theme.animDurationFast }
         }
         Behavior on anchors.bottomMargin {
+            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on anchors.leftMargin {
+            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on anchors.rightMargin {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
     }

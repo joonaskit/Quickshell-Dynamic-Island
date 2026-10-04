@@ -109,9 +109,11 @@ Singleton {
     property int autoCollapseTimeout: 6000
 
     // Dock Styling & Dimensions
-    property int dockHeight: px(baseDockHeight)
+    property string dockPosition: "bottom"
+    property int baseDockIconSize: 44
     property int dockIconSize: px(baseDockIconSize)
-    property int dockRadius: px(baseDockRadius)
+    property int dockHeight: px(Math.round(dockIconSize + 18))
+    property int dockRadius: px(Math.min(22, Math.round(dockHeight / 3)))
     property int dockBottomMargin: px(baseDockBottomMargin)
     property real dockScaleHover: 1.28
     property real dockScaleAdjacent: 1.12
