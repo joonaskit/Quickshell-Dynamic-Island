@@ -211,23 +211,6 @@ Item {
             }
         }
 
-        // Highlight rim edge
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: root.isVertical ? undefined : parent.right
-            anchors.top: parent.top
-            anchors.bottom: root.isVertical ? parent.bottom : undefined
-            anchors.leftMargin: root.isVertical ? 0 : 16
-            anchors.rightMargin: root.isVertical ? 0 : 16
-            anchors.topMargin: root.isVertical ? 16 : 0
-            anchors.bottomMargin: root.isVertical ? 16 : 0
-            width: root.isVertical ? 1 : undefined
-            height: root.isVertical ? undefined : 1
-            radius: Theme.dockRadius
-            color: Qt.rgba(1, 1, 1, 0.25)
-            visible: Theme.dockShowBorder
-        }
-
         // Content Container (Grid: acts as Row when horizontal, Column when vertical)
         Grid {
             id: contentContainer
