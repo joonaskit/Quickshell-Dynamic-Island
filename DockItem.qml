@@ -12,8 +12,7 @@ Item {
     property bool isDraggable: false
     property int itemIndex: -1
     property bool isDragging: false
-    property real jiggleAngle: 0
-    property real pressScale: 1.0
+    property real clickBounceOffset: 0
 
     signal requestContextMenu(var app, real x, real y)
     signal mouseMoved(real contentRowX)
@@ -35,26 +34,24 @@ Item {
         NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
     }
 
-    // Interactive press squish & tactile jiggle animation on click
+    // Simple, snappy bounce animation on click
     SequentialAnimation {
-        id: jiggleAnim
+        id: clickBounceAnim
         alwaysRunToEnd: true
 
-        ParallelAnimation {
-            SequentialAnimation {
-                NumberAnimation { target: root; property: "jiggleAngle"; to: -7; duration: 45; easing.type: Easing.OutQuad }
-                NumberAnimation { target: root; property: "jiggleAngle"; to: 6; duration: 45; easing.type: Easing.InOutQuad }
-                NumberAnimation { target: root; property: "jiggleAngle"; to: -4; duration: 40; easing.type: Easing.InOutQuad }
-                NumberAnimation { target: root; property: "jiggleAngle"; to: 3; duration: 40; easing.type: Easing.InOutQuad }
-                NumberAnimation { target: root; property: "jiggleAngle"; to: -1.5; duration: 35; easing.type: Easing.InOutQuad }
-                NumberAnimation { target: root; property: "jiggleAngle"; to: 0; duration: 30; easing.type: Easing.OutQuad }
-            }
-            SequentialAnimation {
-                NumberAnimation { target: root; property: "pressScale"; to: 0.88; duration: 40; easing.type: Easing.OutQuad }
-                NumberAnimation { target: root; property: "pressScale"; to: 1.08; duration: 80; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
-                NumberAnimation { target: root; property: "pressScale"; to: 0.97; duration: 50; easing.type: Easing.InOutQuad }
-                NumberAnimation { target: root; property: "pressScale"; to: 1.0; duration: 65; easing.type: Easing.OutQuad }
-            }
+        NumberAnimation {
+            target: root
+            property: "clickBounceOffset"
+            to: -8
+            duration: 90
+            easing.type: Easing.OutQuad
+        }
+        NumberAnimation {
+            target: root
+            property: "clickBounceOffset"
+            to: 0
+            duration: 130
+            easing.type: Easing.OutBounce
         }
     }
 
@@ -86,9 +83,8 @@ Item {
         height: Theme.dockIconSize
 
         transformOrigin: Item.Bottom
-        scale: root.dockScale * root.pressScale
-        rotation: root.jiggleAngle
-        y: root.bounceOffset
+        scale: root.dockScale
+        y: root.bounceOffset + root.clickBounceOffset
 
         // Application icon image
         Image {
@@ -223,7 +219,6 @@ Item {
                 pressStartContentX = mapped.x;
                 pressStartContentY = mapped.y;
                 hasDragged = false;
-                root.pressScale = 0.90;
             }
         }
 
@@ -234,7 +229,6 @@ Item {
                 let dy = mapped.y - pressStartContentY;
                 if (!hasDragged && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
                     hasDragged = true;
-                    root.pressScale = 1.0;
                     root.isDragging = true;
                     root.dragStarted(root.itemIndex, pressStartContentX);
                 }
@@ -252,17 +246,12 @@ Item {
                     hasDragged = false;
                     root.isDragging = false;
                     root.dragFinished(root.itemIndex);
-                    root.pressScale = 1.0;
                     return;
-                }
-                if (!jiggleAnim.running) {
-                    root.pressScale = 1.0;
                 }
             }
         }
 
         onCanceled: {
-            root.pressScale = 1.0;
             if (hasDragged) {
                 hasDragged = false;
                 root.isDragging = false;
@@ -275,7 +264,7 @@ Item {
                 let mapPos = root.mapToItem(null, root.width / 2, 0);
                 root.requestContextMenu(root.appData, mapPos.x, mapPos.y);
             } else if (!hasDragged && !root.isDragging) {
-                jiggleAnim.restart();
+                clickBounceAnim.restart();
                 if (!root.isRunning) {
                     bounceAnim.restart();
                 }

@@ -99,7 +99,11 @@ Item {
         radius: Theme.dockRadius
         color: Theme.dockBackground
         border.color: Theme.dockBorder
-        border.width: (Theme.dockShowBorder || Theme.dockTransparent) ? 1 : 0
+        border.width: Theme.dockShowBorder ? 1 : 0
+
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
 
         // Frosted glass inner specular reflection & depth gradient
         Rectangle {
@@ -123,8 +127,8 @@ Item {
             anchors.rightMargin: 16
             height: 1
             radius: Theme.dockRadius
-            color: Theme.dockTransparent ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(1, 1, 1, 0.22)
-            visible: Theme.dockShowBorder || Theme.dockTransparent
+            color: Qt.rgba(1, 1, 1, 0.25)
+            visible: Theme.dockShowBorder
         }
 
         // Horizontal Row containing all dock items
@@ -139,29 +143,13 @@ Item {
                 width: Theme.dockIconSize + 8
                 height: Theme.dockHeight
 
-                property real jiggleAngle: 0
-                property real pressScale: 1.0
+                property real clickBounceOffset: 0
 
                 SequentialAnimation {
-                    id: launchpadJiggleAnim
+                    id: launchpadBounceAnim
                     alwaysRunToEnd: true
-
-                    ParallelAnimation {
-                        SequentialAnimation {
-                            NumberAnimation { target: launchpadItem; property: "jiggleAngle"; to: -7; duration: 45; easing.type: Easing.OutQuad }
-                            NumberAnimation { target: launchpadItem; property: "jiggleAngle"; to: 6; duration: 45; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: launchpadItem; property: "jiggleAngle"; to: -4; duration: 40; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: launchpadItem; property: "jiggleAngle"; to: 3; duration: 40; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: launchpadItem; property: "jiggleAngle"; to: -1.5; duration: 35; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: launchpadItem; property: "jiggleAngle"; to: 0; duration: 30; easing.type: Easing.OutQuad }
-                        }
-                        SequentialAnimation {
-                            NumberAnimation { target: launchpadItem; property: "pressScale"; to: 0.88; duration: 40; easing.type: Easing.OutQuad }
-                            NumberAnimation { target: launchpadItem; property: "pressScale"; to: 1.08; duration: 80; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
-                            NumberAnimation { target: launchpadItem; property: "pressScale"; to: 0.97; duration: 50; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: launchpadItem; property: "pressScale"; to: 1.0; duration: 65; easing.type: Easing.OutQuad }
-                        }
-                    }
+                    NumberAnimation { target: launchpadItem; property: "clickBounceOffset"; to: -8; duration: 90; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: launchpadItem; property: "clickBounceOffset"; to: 0; duration: 130; easing.type: Easing.OutBounce }
                 }
 
                 property real dockScale: {
@@ -183,12 +171,12 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 10
+                    y: launchpadItem.clickBounceOffset
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
                     radius: 12
                     transformOrigin: Item.Bottom
-                    scale: launchpadItem.dockScale * launchpadItem.pressScale
-                    rotation: launchpadItem.jiggleAngle
+                    scale: launchpadItem.dockScale
 
                     gradient: Gradient {
                         GradientStop { position: 0.0; color: "#2c2c2e" }
@@ -264,18 +252,8 @@ Item {
                         root.currentMouseX = p.x;
                     }
 
-                    onPressed: {
-                        launchpadItem.pressScale = 0.90;
-                    }
-                    onReleased: {
-                        if (!launchpadJiggleAnim.running) launchpadItem.pressScale = 1.0;
-                    }
-                    onCanceled: {
-                        launchpadItem.pressScale = 1.0;
-                    }
-
                     onClicked: function(mouse) {
-                        launchpadJiggleAnim.restart();
+                        launchpadBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) {
                             appPicker.isOpen = !appPicker.isOpen;
                             contextMenu.isOpen = false;
@@ -459,29 +437,13 @@ Item {
                 width: Theme.dockIconSize + 8
                 height: Theme.dockHeight
 
-                property real jiggleAngle: 0
-                property real pressScale: 1.0
+                property real clickBounceOffset: 0
 
                 SequentialAnimation {
-                    id: trashJiggleAnim
+                    id: trashBounceAnim
                     alwaysRunToEnd: true
-
-                    ParallelAnimation {
-                        SequentialAnimation {
-                            NumberAnimation { target: trashItem; property: "jiggleAngle"; to: -7; duration: 45; easing.type: Easing.OutQuad }
-                            NumberAnimation { target: trashItem; property: "jiggleAngle"; to: 6; duration: 45; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: trashItem; property: "jiggleAngle"; to: -4; duration: 40; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: trashItem; property: "jiggleAngle"; to: 3; duration: 40; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: trashItem; property: "jiggleAngle"; to: -1.5; duration: 35; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: trashItem; property: "jiggleAngle"; to: 0; duration: 30; easing.type: Easing.OutQuad }
-                        }
-                        SequentialAnimation {
-                            NumberAnimation { target: trashItem; property: "pressScale"; to: 0.88; duration: 40; easing.type: Easing.OutQuad }
-                            NumberAnimation { target: trashItem; property: "pressScale"; to: 1.08; duration: 80; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
-                            NumberAnimation { target: trashItem; property: "pressScale"; to: 0.97; duration: 50; easing.type: Easing.InOutQuad }
-                            NumberAnimation { target: trashItem; property: "pressScale"; to: 1.0; duration: 65; easing.type: Easing.OutQuad }
-                        }
-                    }
+                    NumberAnimation { target: trashItem; property: "clickBounceOffset"; to: -8; duration: 90; easing.type: Easing.OutQuad }
+                    NumberAnimation { target: trashItem; property: "clickBounceOffset"; to: 0; duration: 130; easing.type: Easing.OutBounce }
                 }
 
                 property real dockScale: {
@@ -503,11 +465,11 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 10
+                    y: trashItem.clickBounceOffset
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
                     transformOrigin: Item.Bottom
-                    scale: trashItem.dockScale * trashItem.pressScale
-                    rotation: trashItem.jiggleAngle
+                    scale: trashItem.dockScale
 
                     // System Trash icon
                     Image {
@@ -586,18 +548,8 @@ Item {
                         root.currentMouseX = p.x;
                     }
 
-                    onPressed: {
-                        trashItem.pressScale = 0.90;
-                    }
-                    onReleased: {
-                        if (!trashJiggleAnim.running) trashItem.pressScale = 1.0;
-                    }
-                    onCanceled: {
-                        trashItem.pressScale = 1.0;
-                    }
-
                     onClicked: function(mouse) {
-                        trashJiggleAnim.restart();
+                        trashBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) {
                             let mapped = trashItem.mapToItem(root, trashItem.width / 2, 0);
                             trashMenu.targetX = mapped.x;
