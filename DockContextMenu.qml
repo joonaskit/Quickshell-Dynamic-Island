@@ -9,13 +9,18 @@ Item {
     property bool isOpen: false
     property real targetX: 0
     property real targetY: 0
+    property real dockCapsuleX: 0
+    property real dockCapsuleY: 0
+    property real dockCapsuleWidth: 0
+    property bool isVertical: false
+    property string dockPosition: "bottom"
 
     signal closed()
 
     visible: opacity > 0.001
     opacity: isOpen ? 1.0 : 0.0
     scale: isOpen ? 1.0 : 0.92
-    transformOrigin: Item.Bottom
+    transformOrigin: isVertical ? (dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
 
     Behavior on opacity {
         NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
@@ -32,8 +37,18 @@ Item {
     width: 220
     height: menuColumn.implicitHeight + 16
 
-    x: Math.max(8, Math.min(parent.width - width - 8, targetX - width / 2))
-    y: targetY - height - 10
+    x: {
+        if (isVertical) {
+            return dockPosition === "left" ? (dockCapsuleX + dockCapsuleWidth + 14) : (dockCapsuleX - width - 14);
+        }
+        return Math.max(8, Math.min(parent ? (parent.width - width - 8) : 500, targetX - width / 2));
+    }
+    y: {
+        if (isVertical) {
+            return Math.max(8, Math.min(parent ? (parent.height - height - 8) : 500, targetY - height / 2));
+        }
+        return (dockCapsuleY > 0 ? dockCapsuleY : (parent ? parent.height - Theme.dockHeight : targetY)) - height - 10;
+    }
 
     // Styled popup card
     Rectangle {

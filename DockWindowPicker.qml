@@ -9,6 +9,9 @@ Item {
     property bool isOpen: false
     property real targetX: 0
     property real targetY: 0
+    property real dockCapsuleX: 0
+    property real dockCapsuleY: 0
+    property real dockCapsuleWidth: 0
     property bool isVertical: false
     property string dockPosition: "bottom"
 
@@ -33,15 +36,15 @@ Item {
 
     x: {
         if (isVertical) {
-            return dockPosition === "left" ? (targetX + 14) : (targetX - width - 14);
+            return dockPosition === "left" ? (dockCapsuleX + dockCapsuleWidth + 14) : (dockCapsuleX - width - 14);
         }
-        return Math.max(8, Math.min(parent.width - width - 8, targetX - width / 2));
+        return Math.max(8, Math.min(parent ? (parent.width - width - 8) : 500, targetX - width / 2));
     }
     y: {
         if (isVertical) {
-            return Math.max(8, Math.min(parent.height - height - 8, targetY - height / 2));
+            return Math.max(8, Math.min(parent ? (parent.height - height - 8) : 500, targetY - height / 2));
         }
-        return targetY - height - 12;
+        return (dockCapsuleY > 0 ? dockCapsuleY : (parent ? parent.height - Theme.dockHeight : targetY)) - height - 12;
     }
 
     // Card background
