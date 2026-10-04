@@ -28,6 +28,7 @@ Item {
 
     onIsOpenChanged: {
         if (isOpen) {
+            DockService.updateInstalledApps();
             searchInput.text = "";
             root.searchText = "";
             appListView.currentIndex = 0;

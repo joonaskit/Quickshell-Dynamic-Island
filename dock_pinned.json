@@ -21,6 +21,13 @@
     "command": "konsole"
   },
   {
+    "id": "antigravity-ide",
+    "name": "Antigravity",
+    "icon": "/home/jkikke/Lataukset/Antigravity IDE/resources/app/resources/linux/code.png",
+    "desktopFile": "",
+    "command": "\"/home/jkikke/Lataukset/Antigravity IDE/antigravity-ide\""
+  },
+  {
     "id": "zed",
     "name": "Zed",
     "icon": "dev.zed.Zed",
@@ -40,5 +47,19 @@
     "icon": "preferences-system",
     "desktopFile": "systemsettings.desktop",
     "command": "systemsettings"
+  },
+  {
+    "id": "steam",
+    "name": "Steam",
+    "icon": "steam",
+    "desktopFile": "steam.desktop",
+    "command": "steam"
+  },
+  {
+    "id": "com.microsoft.VSCode",
+    "name": "Visual Studio Code",
+    "icon": "vscode",
+    "desktopFile": "com.microsoft.VSCode.desktop",
+    "command": "com.microsoft.VSCode"
   }
 ]

@@ -83,6 +83,24 @@ Singleton {
         checkTrash();
     }
 
+    // Debounce timer for updating installed apps when desktop entries finish scanning
+    Timer {
+        id: appEntriesUpdateTimer
+        interval: 150
+        repeat: false
+        onTriggered: {
+            root.updateInstalledApps();
+            root.updateRunningApps();
+        }
+    }
+
+    Connections {
+        target: DesktopEntries.applications ? DesktopEntries.applications : null
+        function onValuesChanged() {
+            appEntriesUpdateTimer.restart();
+        }
+    }
+
     // Timer for keeping state updated
     Timer {
         id: refreshTimer
