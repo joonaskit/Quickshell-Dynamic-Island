@@ -20,8 +20,8 @@ PanelWindow {
         right: window.dockPosition !== "left"
     }
 
-    implicitHeight: window.isVertical ? (window.screen ? window.screen.height : 1080) : 580
-    implicitWidth: window.isVertical ? 580 : (window.screen ? window.screen.width : 1920)
+    implicitHeight: window.isVertical ? (window.screen ? window.screen.height : 1080) : 660
+    implicitWidth: window.isVertical ? 660 : (window.screen ? window.screen.width : 1920)
 
     // Reserve space at dock screen edge if configured in Theme and not hidden
     exclusiveZone: (Theme.dockReserveSpace && !window.shouldDropDock) ? (Theme.dockHeight + Theme.dockBottomMargin) : 0

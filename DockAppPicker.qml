@@ -11,6 +11,13 @@ Item {
     property string selectedCategory: "All"
     property string viewMode: SettingsService.launcherDefaultView || "grid"
 
+    property bool isVertical: false
+    property string dockPosition: "bottom"
+    property real dockCapsuleX: 0
+    property real dockCapsuleY: 0
+    property real dockCapsuleWidth: 0
+    property real dockCapsuleHeight: 0
+
     readonly property bool isGrid: viewMode === "grid"
     readonly property bool isCompact: SettingsService.launcherDensity === "compact"
     readonly property int gridCols: Math.max(3, Math.min(6, SettingsService.launcherGridColumns || 4))
@@ -20,7 +27,7 @@ Item {
     visible: opacity > 0.001
     opacity: isOpen ? 1.0 : 0.0
     scale: isOpen ? 1.0 : 0.92
-    transformOrigin: Item.Bottom
+    transformOrigin: isVertical ? (dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
 
     Behavior on opacity {
         NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
@@ -29,7 +36,7 @@ Item {
         NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
     }
 
-    width: gridCols >= 5 ? 520 : 460
+    width: gridCols >= 5 ? 540 : 460
     height: isCompact ? 440 : 480
 
     Behavior on width {
@@ -37,6 +44,31 @@ Item {
     }
     Behavior on height {
         NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+    }
+
+    x: {
+        if (isVertical) {
+            if (dockPosition === "left") {
+                return dockCapsuleX + dockCapsuleWidth + 14;
+            } else {
+                return Math.max(14, dockCapsuleX - width - 14);
+            }
+        }
+        let target = dockCapsuleX + (dockCapsuleWidth - width) / 2;
+        let minX = 14;
+        let maxX = parent ? (parent.width - width - 14) : 1000;
+        return Math.max(minX, Math.min(maxX, target));
+    }
+
+    y: {
+        if (isVertical) {
+            let target = dockCapsuleY + (dockCapsuleHeight - height) / 2;
+            let minY = 14;
+            let maxY = parent ? (parent.height - height - 14) : 1000;
+            return Math.max(minY, Math.min(maxY, target));
+        }
+        let target = (dockCapsuleY > 0 ? dockCapsuleY : (parent ? parent.height - Theme.dockHeight - Theme.dockBottomMargin : 0)) - height - 14;
+        return Math.max(14, target);
     }
 
     readonly property var categoryList: [
@@ -543,127 +575,132 @@ Item {
 
                 model: root.filteredApps
 
-                delegate: Rectangle {
-                    id: gridTile
-                    width: appGridView.cellWidth - 6
-                    height: appGridView.cellHeight - 6
-                    x: (appGridView.cellWidth - width) / 2
-                    y: (appGridView.cellHeight - height) / 2
-                    radius: 10
+                delegate: Item {
+                    id: gridCell
+                    width: appGridView.cellWidth
+                    height: appGridView.cellHeight
 
                     readonly property bool isSelected: index === appGridView.currentIndex
                     readonly property bool pinned: DockService.isPinned(modelData.id)
 
-                    color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.24) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
-                    border.color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.6) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
-                    border.width: 1
-
-                    Behavior on color { ColorAnimation { duration: 100 } }
-
-                    Column {
+                    Rectangle {
+                        id: gridTile
                         anchors.centerIn: parent
-                        spacing: root.isCompact ? 4 : 6
-                        width: parent.width - 8
+                        width: parent.width - 6
+                        height: parent.height - 6
+                        radius: 10
 
-                        // App Icon
-                        Item {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: root.isCompact ? 36 : 46
-                            height: width
+                        color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.24) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
+                        border.color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.6) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                        border.width: 1
 
-                            Image {
-                                anchors.centerIn: parent
+                        Behavior on color { ColorAnimation { duration: 100 } }
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: root.isCompact ? 4 : 6
+                            width: parent.width - 8
+
+                            // App Icon
+                            Item {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: root.isCompact ? 36 : 46
+                                height: width
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: parent.width
+                                    height: parent.height
+                                    source: DockService.resolveIcon(modelData.icon)
+                                    sourceSize.width: 96
+                                    sourceSize.height: 96
+                                    fillMode: Image.PreserveAspectFit
+                                    mipmap: true
+                                    smooth: true
+                                    scale: gridMouse.containsMouse ? 1.08 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                }
+                            }
+
+                            // App Name
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width
-                                height: parent.height
-                                source: DockService.resolveIcon(modelData.icon)
-                                sourceSize.width: 96
-                                sourceSize.height: 96
-                                fillMode: Image.PreserveAspectFit
-                                mipmap: true
-                                smooth: true
-                                scale: gridMouse.containsMouse ? 1.08 : 1.0
-                                Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                text: modelData.name
+                                font.family: Theme.fontFamily
+                                font.pixelSize: root.isCompact ? 10 : 11
+                                font.weight: gridCell.isSelected ? Font.DemiBold : Font.Normal
+                                color: Theme.textPrimary
+                                horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
+                                maximumLineCount: 1
                             }
                         }
 
-                        // App Name
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: parent.width
-                            text: modelData.name
-                            font.family: Theme.fontFamily
-                            font.pixelSize: root.isCompact ? 10 : 11
-                            font.weight: gridTile.isSelected ? Font.DemiBold : Font.Normal
-                            color: Theme.textPrimary
-                            horizontalAlignment: Text.AlignHCenter
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-                    }
-
-                    // Pinned Indicator Badge
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.right: parent.right
-                        anchors.margins: 4
-                        width: 6
-                        height: 6
-                        radius: 3
-                        color: Theme.accentBlue
-                        visible: gridTile.pinned
-                    }
-
-                    // Pin toggle badge on hover
-                    Rectangle {
-                        anchors.top: parent.top
-                        anchors.right: parent.right
-                        anchors.margins: 4
-                        width: 18
-                        height: 18
-                        radius: 9
-                        color: gridPinMouse.containsMouse ? Qt.rgba(0.04, 0.52, 1, 0.4) : Qt.rgba(0, 0, 0, 0.6)
-                        visible: gridMouse.containsMouse && !root.isCompact
-
-                        SvgIcon {
-                            anchors.centerIn: parent
-                            name: "pin"
-                            size: 9
-                            color: gridTile.pinned ? Theme.accentBlue : Theme.textSecondary
+                        // Pinned Indicator Badge
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.margins: 4
+                            width: 6
+                            height: 6
+                            radius: 3
+                            color: Theme.accentBlue
+                            visible: gridCell.pinned
                         }
 
-                        MouseArea {
-                            id: gridPinMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                if (gridTile.pinned) {
-                                    DockService.unpinApp(modelData.id);
-                                } else {
-                                    DockService.pinApp(modelData);
+                        // Pin toggle badge on hover
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.margins: 4
+                            width: 18
+                            height: 18
+                            radius: 9
+                            color: gridPinMouse.containsMouse ? Qt.rgba(0.04, 0.52, 1, 0.4) : Qt.rgba(0, 0, 0, 0.6)
+                            visible: gridMouse.containsMouse && !root.isCompact
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: "pin"
+                                size: 9
+                                color: gridCell.pinned ? Theme.accentBlue : Theme.textSecondary
+                            }
+
+                            MouseArea {
+                                id: gridPinMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (gridCell.pinned) {
+                                        DockService.unpinApp(modelData.id);
+                                    } else {
+                                        DockService.pinApp(modelData);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    MouseArea {
-                        id: gridMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton
-                        cursorShape: Qt.PointingHandCursor
-                        onEntered: {
-                            appGridView.currentIndex = index;
-                        }
-                        onClicked: function(mouse) {
-                            if (mouse.button === Qt.RightButton) {
-                                DockService.openAppProperties(modelData.desktopFile || modelData.id);
-                                root.isOpen = false;
-                                root.closed();
-                            } else {
-                                DockService.activateOrLaunch(modelData);
-                                root.isOpen = false;
-                                root.closed();
+                        MouseArea {
+                            id: gridMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: {
+                                appGridView.currentIndex = index;
+                            }
+                            onClicked: function(mouse) {
+                                if (mouse.button === Qt.RightButton) {
+                                    DockService.openAppProperties(modelData.desktopFile || modelData.id);
+                                    root.isOpen = false;
+                                    root.closed();
+                                } else {
+                                    DockService.activateOrLaunch(modelData);
+                                    root.isOpen = false;
+                                    root.closed();
+                                }
                             }
                         }
                     }

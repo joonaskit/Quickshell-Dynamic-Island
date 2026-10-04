@@ -55,8 +55,8 @@ Item {
         }
     }
 
-    implicitWidth: isVertical ? (hasOpenPopups ? 580 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
-    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 580 : (dockCapsule.height + Theme.dockBottomMargin))
+    implicitWidth: isVertical ? (hasOpenPopups ? 660 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 40) : 0)
+    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 40) : 0) : (hasOpenPopups ? 660 : (dockCapsule.height + Theme.dockBottomMargin))
 
     // Mouse tracking for fluid magnification wave
     property real currentMouseX: -9999
@@ -980,16 +980,12 @@ Item {
     // App Picker Popup
     DockAppPicker {
         id: appPicker
-        anchors.bottom: (!root.isVertical) ? dockCapsule.top : undefined
-        anchors.bottomMargin: (!root.isVertical) ? 14 : undefined
-        anchors.horizontalCenter: (!root.isVertical) ? dockCapsule.horizontalCenter : undefined
-
-        anchors.left: (root.dockPosition === "left") ? dockCapsule.right : undefined
-        anchors.leftMargin: (root.dockPosition === "left") ? 14 : undefined
-        anchors.verticalCenter: root.isVertical ? dockCapsule.verticalCenter : undefined
-
-        anchors.right: (root.dockPosition === "right") ? dockCapsule.left : undefined
-        anchors.rightMargin: (root.dockPosition === "right") ? 14 : undefined
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+        dockCapsuleX: dockCapsule.x
+        dockCapsuleY: dockCapsule.y
+        dockCapsuleWidth: dockCapsule.width
+        dockCapsuleHeight: dockCapsule.height
     }
 
     // Dismiss overlay to close popups on outside click
