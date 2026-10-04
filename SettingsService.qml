@@ -64,6 +64,13 @@ Singleton {
     property bool showExpandedVolume: true
     property bool showExpandedBrightness: true
 
+    // App Launcher Customization
+    property string launcherDefaultView: "grid"
+    property string launcherDensity: "comfortable"
+    property bool launcherShowCategories: true
+    property int launcherGridColumns: 4
+    property bool launcherShowGenericNames: true
+
     property bool isLoaded: false
     property string lastSavedTime: ""
 
@@ -156,6 +163,18 @@ Singleton {
         if (data.showExpandedVolume !== undefined) root.showExpandedVolume = !!data.showExpandedVolume;
         if (data.showExpandedBrightness !== undefined) root.showExpandedBrightness = !!data.showExpandedBrightness;
 
+        if (data.launcherDefaultView !== undefined && (data.launcherDefaultView === "grid" || data.launcherDefaultView === "list")) {
+            root.launcherDefaultView = data.launcherDefaultView;
+        }
+        if (data.launcherDensity !== undefined && (data.launcherDensity === "comfortable" || data.launcherDensity === "compact")) {
+            root.launcherDensity = data.launcherDensity;
+        }
+        if (data.launcherShowCategories !== undefined) root.launcherShowCategories = !!data.launcherShowCategories;
+        if (data.launcherGridColumns !== undefined && !isNaN(data.launcherGridColumns)) {
+            root.launcherGridColumns = Math.max(3, Math.min(6, parseInt(data.launcherGridColumns)));
+        }
+        if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
+
         // Sync with Theme singleton
         root.syncToTheme();
         root.isLoaded = true;
@@ -245,6 +264,12 @@ Singleton {
         root.showExpandedVolume = true;
         root.showExpandedBrightness = true;
 
+        root.launcherDefaultView = "grid";
+        root.launcherDensity = "comfortable";
+        root.launcherShowCategories = true;
+        root.launcherGridColumns = 4;
+        root.launcherShowGenericNames = true;
+
         root.syncToTheme();
         root.settingsChanged();
         saveTimer.restart();
@@ -310,7 +335,12 @@ Singleton {
             "showExpandedNotifications": root.showExpandedNotifications,
             "showExpandedAudioSink": root.showExpandedAudioSink,
             "showExpandedVolume": root.showExpandedVolume,
-            "showExpandedBrightness": root.showExpandedBrightness
+            "showExpandedBrightness": root.showExpandedBrightness,
+            "launcherDefaultView": root.launcherDefaultView,
+            "launcherDensity": root.launcherDensity,
+            "launcherShowCategories": root.launcherShowCategories,
+            "launcherGridColumns": root.launcherGridColumns,
+            "launcherShowGenericNames": root.launcherShowGenericNames
         };
         let jsonStr = JSON.stringify(data, null, 2);
         saveProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.settingsFilePath, jsonStr];

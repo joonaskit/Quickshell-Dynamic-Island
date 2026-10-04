@@ -72,6 +72,25 @@ Singleton {
 
     // Full list of installed apps for App Picker
     property var installedApps: []
+    property var appCategoriesMap: ({})
+
+    // Process to scan desktop entry categories
+    Process {
+        id: categoriesScanProc
+        command: ["python3", "-c", "import glob, os, json\ndef cat_group(cats):\n    s = set(cats)\n    if s & {'WebBrowser', 'Email', 'Network', 'Chat', 'IRCClient', 'Feed', 'FileTransfer'}: return 'Internet'\n    if s & {'Development', 'IDE', 'Debugger', 'GUIDesigner', 'Profiling', 'RevisionControl', 'Translation'}: return 'Development'\n    if s & {'AudioVideo', 'Audio', 'Video', 'Player', 'Recorder', 'Music', 'Midi'}: return 'Multimedia'\n    if s & {'Graphics', '2DGraphics', 'VectorGraphics', 'RasterGraphics', 'Photography', 'Viewer'}: return 'Graphics'\n    if s & {'Office', 'WordProcessor', 'Spreadsheet', 'Presentation', 'ContactManagement', 'Calendar'}: return 'Office'\n    if s & {'Game', 'ActionGame', 'ArcadeGame', 'BoardGame', 'CardGame', 'Emulator'}: return 'Games'\n    if s & {'System', 'Monitor', 'Security', 'TerminalEmulator', 'FileManager'}: return 'System'\n    if s & {'Utility', 'Settings', 'Accessibility', 'Archiving', 'Calculator', 'Clock', 'TextEditor'}: return 'Utilities'\n    return 'Utilities'\nres = {}\nfor d in ['/usr/share/applications', os.path.expanduser('~/.local/share/applications')]:\n    for f in glob.glob(d + '/**/*.desktop', recursive=True):\n        bn = os.path.basename(f)\n        try:\n            with open(f, 'r', errors='ignore') as fp:\n                for line in fp:\n                    if line.startswith('Categories='):\n                        raw = [c.strip() for c in line.split('=', 1)[1].split(';') if c.strip()]\n                        res[bn] = cat_group(raw)\n                        break\n        except: pass\nprint(json.dumps(res))"]
+        running: true
+        stdout: StdioCollector {
+            onTextChanged: {
+                let t = text.trim();
+                if (t.length > 0) {
+                    try {
+                        root.appCategoriesMap = JSON.parse(t);
+                        root.updateInstalledApps();
+                    } catch(e) {}
+                }
+            }
+        }
+    }
 
     // Signals
     signal stateUpdated()
@@ -835,6 +854,18 @@ Singleton {
         root.stateUpdated();
     }
 
+    function guessCategory(name, generic, comment) {
+        let text = ((name || "") + " " + (generic || "") + " " + (comment || "")).toLowerCase();
+        if (/browser|web|mail|chat|irc|torrent|download|sync|vpn/.test(text)) return "Internet";
+        if (/code|develop|git|ide|debug|terminal|bash|shell|compiler/.test(text)) return "Development";
+        if (/music|audio|video|player|mp3|movie|media|sound|recorder/.test(text)) return "Multimedia";
+        if (/photo|image|draw|paint|vector|graphics|viewer|screenshot/.test(text)) return "Graphics";
+        if (/calc|document|sheet|office|writer|pdf|word|slide/.test(text)) return "Office";
+        if (/game|play|steam|arcade|craft/.test(text)) return "Games";
+        if (/system|monitor|process|task|disk|partition|device/.test(text)) return "System";
+        return "Utilities";
+    }
+
     // Helper to populate installed applications list for App Picker
     function updateInstalledApps() {
         if (!DesktopEntries.applications || !DesktopEntries.applications.values) return;
@@ -843,13 +874,16 @@ Singleton {
         for (let i = 0; i < raw.length; i++) {
             let entry = raw[i];
             if (!entry || entry.noDisplay || !entry.name) continue;
+            let desktopFile = entry.id.endsWith(".desktop") ? entry.id : (entry.id + ".desktop");
+            let cat = root.appCategoriesMap[desktopFile] || root.appCategoriesMap[entry.id] || root.guessCategory(entry.name, entry.genericName, entry.comment);
             list.push({
                 id: entry.id,
                 name: entry.name,
                 genericName: entry.genericName || "",
                 comment: entry.comment || "",
                 icon: entry.icon || "application-x-executable",
-                desktopFile: entry.id.endsWith(".desktop") ? entry.id : (entry.id + ".desktop")
+                desktopFile: desktopFile,
+                category: cat
             });
         }
         list.sort(function(a, b) {

@@ -8,6 +8,12 @@ Item {
 
     property bool isOpen: false
     property string searchText: ""
+    property string selectedCategory: "All"
+    property string viewMode: SettingsService.launcherDefaultView || "grid"
+
+    readonly property bool isGrid: viewMode === "grid"
+    readonly property bool isCompact: SettingsService.launcherDensity === "compact"
+    readonly property int gridCols: Math.max(3, Math.min(6, SettingsService.launcherGridColumns || 4))
 
     signal closed()
 
@@ -23,15 +29,44 @@ Item {
         NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
     }
 
-    width: 380
-    height: 420
+    width: gridCols >= 5 ? 520 : 460
+    height: isCompact ? 440 : 480
+
+    Behavior on width {
+        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+    }
+    Behavior on height {
+        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+    }
+
+    readonly property var categoryList: [
+        "All", "Internet", "Development", "Multimedia", "Graphics", "Office", "Games", "System", "Utilities"
+    ]
+
+    readonly property var filteredApps: {
+        let all = DockService.installedApps || [];
+        let cat = root.selectedCategory;
+        let query = root.searchText ? root.searchText.trim().toLowerCase() : "";
+        return all.filter(function(app) {
+            if (cat !== "All" && app.category !== cat) {
+                return false;
+            }
+            if (!query) return true;
+            return (app.name && app.name.toLowerCase().indexOf(query) >= 0) ||
+                   (app.genericName && app.genericName.toLowerCase().indexOf(query) >= 0) ||
+                   (app.comment && app.comment.toLowerCase().indexOf(query) >= 0);
+        });
+    }
 
     onIsOpenChanged: {
         if (isOpen) {
             DockService.updateInstalledApps();
             searchInput.text = "";
             root.searchText = "";
-            appListView.currentIndex = 0;
+            root.selectedCategory = "All";
+            root.viewMode = SettingsService.launcherDefaultView || "grid";
+            if (appGridView) appGridView.currentIndex = 0;
+            if (appListView) appListView.currentIndex = 0;
             searchInput.forceActiveFocus();
             focusTimer.restart();
         } else {
@@ -54,9 +89,9 @@ Item {
     }
 
     function launchCurrentApp() {
-        let list = appListView.model;
+        let list = root.filteredApps;
         if (list && list.length > 0) {
-            let idx = appListView.currentIndex;
+            let idx = root.isGrid ? (appGridView ? appGridView.currentIndex : 0) : (appListView ? appListView.currentIndex : 0);
             if (idx < 0 || idx >= list.length) idx = 0;
             let targetApp = list[idx];
             if (targetApp) {
@@ -67,16 +102,16 @@ Item {
         }
     }
 
-    // Background card with blur and subtle border
+    // Background card with sleek border
     Rectangle {
         id: bg
         anchors.fill: parent
         radius: 18
-        color: "#1c1c1e"
+        color: Theme.dockTransparent ? Qt.rgba(0.11, 0.12, 0.15, 0.96) : "#1c1c1e"
         border.color: Theme.dockBorder
         border.width: Theme.dockShowBorder ? 1 : 0
 
-        // Clicking anywhere on picker background returns focus to search
+        // Clicking on card background returns focus to search input
         MouseArea {
             anchors.fill: parent
             z: -1
@@ -89,27 +124,94 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 14
-        spacing: 12
+        spacing: 10
 
-        // Header with title, KRunner button, and close button
+        // Header: Title + count badge, View Mode switcher, Edit Menu, KRunner, Close
         RowLayout {
             Layout.fillWidth: true
+            Layout.preferredHeight: 28
+            spacing: 6
 
-            Text {
-                text: "Applications"
-                font.family: Theme.fontDisplay
-                font.pixelSize: 17
-                font.weight: Font.DemiBold
-                color: Theme.textPrimary
+            RowLayout {
+                spacing: 8
+
+                Text {
+                    text: "Applications"
+                    font.family: Theme.fontDisplay
+                    font.pixelSize: 16
+                    font.weight: Font.DemiBold
+                    color: Theme.textPrimary
+                }
+
+                // App count pill
+                Rectangle {
+                    Layout.preferredHeight: 18
+                    Layout.preferredWidth: appCountText.implicitWidth + 12
+                    radius: 9
+                    color: Qt.rgba(1, 1, 1, 0.08)
+
+                    Text {
+                        id: appCountText
+                        anchors.centerIn: parent
+                        text: "" + root.filteredApps.length
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 10
+                        font.weight: Font.Medium
+                        color: Theme.textSecondary
+                    }
+                }
             }
 
             Item { Layout.fillWidth: true }
 
+            // View Mode Toggle (Grid ⇄ List)
+            Rectangle {
+                Layout.preferredHeight: 26
+                Layout.preferredWidth: viewToggleRow.implicitWidth + 14
+                radius: 13
+                color: viewToggleMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+                border.color: Qt.rgba(1, 1, 1, 0.1)
+                border.width: 1
+
+                Row {
+                    id: viewToggleRow
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    SvgIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        name: root.isGrid ? "list" : "grid"
+                        size: 12
+                        color: Theme.accentCyan
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.isGrid ? "List" : "Grid"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        color: Theme.textPrimary
+                    }
+                }
+
+                MouseArea {
+                    id: viewToggleMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        let nextMode = root.isGrid ? "list" : "grid";
+                        root.viewMode = nextMode;
+                        SettingsService.setSetting("launcherDefaultView", nextMode);
+                    }
+                }
+            }
+
             // Edit Menu button (KDE Menu Editor)
             Rectangle {
-                Layout.preferredHeight: 24
+                Layout.preferredHeight: 26
                 Layout.preferredWidth: editMenuRow.implicitWidth + 14
-                radius: 12
+                radius: 13
                 color: editMenuMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
 
                 Row {
@@ -125,7 +227,7 @@ Item {
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "Edit Menu"
+                        text: "Edit"
                         font.family: Theme.fontFamily
                         font.pixelSize: 11
                         font.weight: Font.Medium
@@ -146,10 +248,11 @@ Item {
                 }
             }
 
+            // KRunner button
             Rectangle {
-                Layout.preferredHeight: 24
+                Layout.preferredHeight: 26
                 Layout.preferredWidth: krunnerRow.implicitWidth + 14
-                radius: 12
+                radius: 13
                 color: krunnerMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
 
                 Row {
@@ -186,9 +289,10 @@ Item {
                 }
             }
 
+            // Close button
             Rectangle {
-                width: 26
-                height: 26
+                Layout.preferredWidth: 26
+                Layout.preferredHeight: 26
                 radius: 13
                 color: closeHover.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.08)
 
@@ -215,7 +319,8 @@ Item {
         // Search Input Bar
         Rectangle {
             Layout.fillWidth: true
-            height: 34
+            Layout.preferredHeight: 34
+            height: Layout.preferredHeight
             radius: 9
             color: Qt.rgba(1, 1, 1, 0.08)
             border.color: searchInput.activeFocus ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.08)
@@ -248,7 +353,8 @@ Item {
                     cursorVisible: activeFocus
                     onTextChanged: {
                         root.searchText = text.toLowerCase();
-                        appListView.currentIndex = 0;
+                        if (appGridView) appGridView.currentIndex = 0;
+                        if (appListView) appListView.currentIndex = 0;
                     }
 
                     onAccepted: {
@@ -262,19 +368,49 @@ Item {
                     }
 
                     Keys.onDownPressed: function(event) {
-                        if (appListView.count > 0) {
-                            appListView.currentIndex = Math.min(appListView.count - 1, appListView.currentIndex + 1);
-                            appListView.positionViewAtIndex(appListView.currentIndex, ListView.Contain);
+                        if (root.isGrid) {
+                            if (appGridView && appGridView.count > 0) {
+                                appGridView.currentIndex = Math.min(appGridView.count - 1, appGridView.currentIndex + root.gridCols);
+                                appGridView.positionViewAtIndex(appGridView.currentIndex, GridView.Contain);
+                            }
+                        } else {
+                            if (appListView && appListView.count > 0) {
+                                appListView.currentIndex = Math.min(appListView.count - 1, appListView.currentIndex + 1);
+                                appListView.positionViewAtIndex(appListView.currentIndex, ListView.Contain);
+                            }
                         }
                         event.accepted = true;
                     }
 
                     Keys.onUpPressed: function(event) {
-                        if (appListView.count > 0) {
-                            appListView.currentIndex = Math.max(0, appListView.currentIndex - 1);
-                            appListView.positionViewAtIndex(appListView.currentIndex, ListView.Contain);
+                        if (root.isGrid) {
+                            if (appGridView && appGridView.count > 0) {
+                                appGridView.currentIndex = Math.max(0, appGridView.currentIndex - root.gridCols);
+                                appGridView.positionViewAtIndex(appGridView.currentIndex, GridView.Contain);
+                            }
+                        } else {
+                            if (appListView && appListView.count > 0) {
+                                appListView.currentIndex = Math.max(0, appListView.currentIndex - 1);
+                                appListView.positionViewAtIndex(appListView.currentIndex, ListView.Contain);
+                            }
                         }
                         event.accepted = true;
+                    }
+
+                    Keys.onRightPressed: function(event) {
+                        if (root.isGrid && appGridView && appGridView.count > 0) {
+                            appGridView.currentIndex = Math.min(appGridView.count - 1, appGridView.currentIndex + 1);
+                            appGridView.positionViewAtIndex(appGridView.currentIndex, GridView.Contain);
+                            event.accepted = true;
+                        }
+                    }
+
+                    Keys.onLeftPressed: function(event) {
+                        if (root.isGrid && appGridView && appGridView.count > 0) {
+                            appGridView.currentIndex = Math.max(0, appGridView.currentIndex - 1);
+                            appGridView.positionViewAtIndex(appGridView.currentIndex, GridView.Contain);
+                            event.accepted = true;
+                        }
                     }
 
                     Text {
@@ -287,7 +423,7 @@ Item {
                     }
                 }
 
-                // Clear button when text is entered
+                // Clear button
                 Item {
                     Layout.preferredWidth: 18
                     Layout.preferredHeight: 18
@@ -321,136 +457,187 @@ Item {
             }
         }
 
-        // Applications List View
-        ListView {
-            id: appListView
+        // Category Filter Tabs (horizontal scrollable pills)
+        Flickable {
+            id: categoryFlickable
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: SettingsService.launcherShowCategories ? 26 : 0
+            height: Layout.preferredHeight
+            visible: SettingsService.launcherShowCategories
+            contentWidth: categoryRow.implicitWidth
+            contentHeight: height
             clip: true
-            spacing: 4
-            currentIndex: 0
             boundsBehavior: Flickable.StopAtBounds
 
-            model: {
-                if (!root.searchText || root.searchText.trim() === "") {
-                    return DockService.installedApps;
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                onWheel: function(wheel) {
+                    categoryFlickable.contentX = Math.max(0, Math.min(categoryFlickable.contentWidth - categoryFlickable.width, categoryFlickable.contentX - (wheel.angleDelta.y || wheel.angleDelta.x)));
                 }
-                return DockService.installedApps.filter(function(app) {
-                    return app.name.toLowerCase().indexOf(root.searchText) >= 0 ||
-                           (app.genericName && app.genericName.toLowerCase().indexOf(root.searchText) >= 0);
-                });
             }
 
-            delegate: Rectangle {
-                id: itemDelegate
-                width: appListView.width
-                height: 42
-                radius: 8
-                readonly property bool isSelected: index === appListView.currentIndex
-                color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.22) : (itemMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
-                border.color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.5) : "transparent"
-                border.width: isSelected ? 1 : 0
+            Row {
+                id: categoryRow
+                spacing: 6
+                height: parent.height
 
-                readonly property bool pinned: DockService.isPinned(modelData.id)
+                Repeater {
+                    model: root.categoryList
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    spacing: 10
-
-                    // App Icon
-                    Image {
-                        Layout.preferredWidth: 28
-                        Layout.preferredHeight: 28
-                        source: DockService.resolveIcon(modelData.icon)
-                        sourceSize.width: 64
-                        sourceSize.height: 64
-                        fillMode: Image.PreserveAspectFit
-                        mipmap: true
-                        smooth: true
-                    }
-
-                    // App Title & Generic Name
-                    Column {
-                        Layout.fillWidth: true
-                        spacing: 1
-
-                        Text {
-                            text: modelData.name
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 13
-                            font.weight: isSelected ? Font.DemiBold : Font.Medium
-                            color: Theme.textPrimary
-                            elide: Text.ElideRight
-                            width: parent.width
-                        }
-
-                        Text {
-                            text: modelData.genericName || modelData.comment || ""
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 10
-                            color: isSelected ? Qt.rgba(1, 1, 1, 0.8) : Theme.textSecondary
-                            elide: Text.ElideRight
-                            width: parent.width
-                            visible: text.length > 0
-                        }
-                    }
-
-                    // Edit Application Settings / Icon Button
                     Rectangle {
-                        Layout.preferredWidth: 24
-                        Layout.preferredHeight: 24
-                        radius: 6
-                        color: editBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.06)
-                        border.color: Qt.rgba(1, 1, 1, 0.1)
+                        id: catPill
+                        readonly property bool isSelected: root.selectedCategory === modelData
+                        height: 24
+                        width: catText.implicitWidth + 16
+                        radius: 12
+                        color: isSelected ? Theme.accentBlue : (catMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06))
+                        border.color: isSelected ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.08)
                         border.width: 1
 
-                        SvgIcon {
+                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                        Text {
+                            id: catText
                             anchors.centerIn: parent
-                            name: "settings"
-                            size: 11
-                            color: editBtnMouse.containsMouse ? Theme.accentOrange : Theme.textSecondary
+                            text: modelData
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 11
+                            font.weight: catPill.isSelected ? Font.DemiBold : Font.Medium
+                            color: catPill.isSelected ? "#ffffff" : (catMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                         }
 
                         MouseArea {
-                            id: editBtnMouse
+                            id: catMouse
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                DockService.openAppProperties(modelData.desktopFile || modelData.id);
-                                root.isOpen = false;
-                                root.closed();
+                                root.selectedCategory = modelData;
+                                if (appGridView) appGridView.currentIndex = 0;
+                                if (appListView) appListView.currentIndex = 0;
                             }
                         }
                     }
+                }
+            }
+        }
 
-                    // Pin / Unpin Action Button
-                    Rectangle {
-                        Layout.preferredWidth: 64
-                        Layout.preferredHeight: 24
-                        radius: 6
-                        color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Qt.rgba(0.04, 0.52, 1, 0.25)) : (pinned ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0.04, 0.52, 1, 0.15))
-                        border.color: pinned ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0.04, 0.52, 1, 0.4)
-                        border.width: 1
+        // Main App Display Container
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
+            // 1. Grid View Mode
+            GridView {
+                id: appGridView
+                anchors.fill: parent
+                anchors.bottomMargin: 6
+                visible: root.isGrid && root.filteredApps.length > 0
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                currentIndex: 0
+
+                cellWidth: Math.floor(width / root.gridCols)
+                cellHeight: root.isCompact ? 76 : 90
+
+                model: root.filteredApps
+
+                delegate: Rectangle {
+                    id: gridTile
+                    width: appGridView.cellWidth - 6
+                    height: appGridView.cellHeight - 6
+                    x: (appGridView.cellWidth - width) / 2
+                    y: (appGridView.cellHeight - height) / 2
+                    radius: 10
+
+                    readonly property bool isSelected: index === appGridView.currentIndex
+                    readonly property bool pinned: DockService.isPinned(modelData.id)
+
+                    color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.24) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
+                    border.color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.6) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                    border.width: 1
+
+                    Behavior on color { ColorAnimation { duration: 100 } }
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: root.isCompact ? 4 : 6
+                        width: parent.width - 8
+
+                        // App Icon
+                        Item {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: root.isCompact ? 36 : 46
+                            height: width
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: parent.width
+                                height: parent.height
+                                source: DockService.resolveIcon(modelData.icon)
+                                sourceSize.width: 96
+                                sourceSize.height: 96
+                                fillMode: Image.PreserveAspectFit
+                                mipmap: true
+                                smooth: true
+                                scale: gridMouse.containsMouse ? 1.08 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                            }
+                        }
+
+                        // App Name
                         Text {
-                            anchors.centerIn: parent
-                            text: pinned ? "Pinned" : "+ Pin"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width
+                            text: modelData.name
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
-                            font.weight: Font.Medium
-                            color: pinned ? Theme.textSecondary : Theme.accentBlue
+                            font.pixelSize: root.isCompact ? 10 : 11
+                            font.weight: gridTile.isSelected ? Font.DemiBold : Font.Normal
+                            color: Theme.textPrimary
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                        }
+                    }
+
+                    // Pinned Indicator Badge
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.margins: 4
+                        width: 6
+                        height: 6
+                        radius: 3
+                        color: Theme.accentBlue
+                        visible: gridTile.pinned
+                    }
+
+                    // Pin toggle badge on hover
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.margins: 4
+                        width: 18
+                        height: 18
+                        radius: 9
+                        color: gridPinMouse.containsMouse ? Qt.rgba(0.04, 0.52, 1, 0.4) : Qt.rgba(0, 0, 0, 0.6)
+                        visible: gridMouse.containsMouse && !root.isCompact
+
+                        SvgIcon {
+                            anchors.centerIn: parent
+                            name: "pin"
+                            size: 9
+                            color: gridTile.pinned ? Theme.accentBlue : Theme.textSecondary
                         }
 
                         MouseArea {
-                            id: pinBtnMouse
+                            id: gridPinMouse
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (pinned) {
+                                if (gridTile.pinned) {
                                     DockService.unpinApp(modelData.id);
                                 } else {
                                     DockService.pinApp(modelData);
@@ -458,60 +645,215 @@ Item {
                             }
                         }
                     }
-                }
 
-                // Click to launch (Left click) or edit settings (Right click)
-                MouseArea {
-                    id: itemMouse
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.rightMargin: 100
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    hoverEnabled: true
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    cursorShape: Qt.PointingHandCursor
-                    onEntered: {
-                        appListView.currentIndex = index;
-                    }
-                    onClicked: function(mouse) {
-                        if (mouse.button === Qt.RightButton) {
-                            DockService.openAppProperties(modelData.desktopFile || modelData.id);
-                            root.isOpen = false;
-                            root.closed();
-                        } else {
-                            DockService.activateOrLaunch(modelData);
-                            root.isOpen = false;
-                            root.closed();
+                    MouseArea {
+                        id: gridMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: {
+                            appGridView.currentIndex = index;
+                        }
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.RightButton) {
+                                DockService.openAppProperties(modelData.desktopFile || modelData.id);
+                                root.isOpen = false;
+                                root.closed();
+                            } else {
+                                DockService.activateOrLaunch(modelData);
+                                root.isOpen = false;
+                                root.closed();
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Empty state when search yields no matches
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: appListView.count === 0
+            // 2. List View Mode
+            ListView {
+                id: appListView
+                anchors.fill: parent
+                anchors.bottomMargin: 6
+                visible: !root.isGrid && root.filteredApps.length > 0
+                clip: true
+                spacing: 3
+                currentIndex: 0
+                boundsBehavior: Flickable.StopAtBounds
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 8
+                model: root.filteredApps
 
-                SvgIcon {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    name: "search"
-                    size: 32
-                    color: Qt.rgba(1, 1, 1, 0.2)
+                delegate: Rectangle {
+                    id: listItemDelegate
+                    width: appListView.width
+                    height: root.isCompact ? 34 : 42
+                    radius: 8
+                    readonly property bool isSelected: index === appListView.currentIndex
+                    readonly property bool pinned: DockService.isPinned(modelData.id)
+
+                    color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.22) : (itemMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+                    border.color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.5) : "transparent"
+                    border.width: isSelected ? 1 : 0
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 10
+
+                        // App Icon
+                        Image {
+                            Layout.preferredWidth: root.isCompact ? 22 : 28
+                            Layout.preferredHeight: root.isCompact ? 22 : 28
+                            source: DockService.resolveIcon(modelData.icon)
+                            sourceSize.width: 64
+                            sourceSize.height: 64
+                            fillMode: Image.PreserveAspectFit
+                            mipmap: true
+                            smooth: true
+                        }
+
+                        // App Title & Generic Name
+                        Column {
+                            Layout.fillWidth: true
+                            spacing: 1
+
+                            Text {
+                                text: modelData.name
+                                font.family: Theme.fontFamily
+                                font.pixelSize: root.isCompact ? 12 : 13
+                                font.weight: isSelected ? Font.DemiBold : Font.Medium
+                                color: Theme.textPrimary
+                                elide: Text.ElideRight
+                                width: parent.width
+                            }
+
+                            Text {
+                                text: modelData.genericName || modelData.comment || ""
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 10
+                                color: isSelected ? Qt.rgba(1, 1, 1, 0.8) : Theme.textSecondary
+                                elide: Text.ElideRight
+                                width: parent.width
+                                visible: SettingsService.launcherShowGenericNames && !root.isCompact && text.length > 0
+                            }
+                        }
+
+                        // Edit Application Properties Button
+                        Rectangle {
+                            Layout.preferredWidth: root.isCompact ? 22 : 24
+                            Layout.preferredHeight: root.isCompact ? 22 : 24
+                            radius: 6
+                            color: editBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.06)
+                            border.color: Qt.rgba(1, 1, 1, 0.1)
+                            border.width: 1
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: "settings"
+                                size: root.isCompact ? 10 : 11
+                                color: editBtnMouse.containsMouse ? Theme.accentOrange : Theme.textSecondary
+                            }
+
+                            MouseArea {
+                                id: editBtnMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    DockService.openAppProperties(modelData.desktopFile || modelData.id);
+                                    root.isOpen = false;
+                                    root.closed();
+                                }
+                            }
+                        }
+
+                        // Pin / Unpin Action Button
+                        Rectangle {
+                            Layout.preferredWidth: root.isCompact ? 54 : 64
+                            Layout.preferredHeight: root.isCompact ? 22 : 24
+                            radius: 6
+                            color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Qt.rgba(0.04, 0.52, 1, 0.25)) : (pinned ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0.04, 0.52, 1, 0.15))
+                            border.color: pinned ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0.04, 0.52, 1, 0.4)
+                            border.width: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: pinned ? "Pinned" : "+ Pin"
+                                font.family: Theme.fontFamily
+                                font.pixelSize: root.isCompact ? 10 : 11
+                                font.weight: Font.Medium
+                                color: pinned ? Theme.textSecondary : Theme.accentBlue
+                            }
+
+                            MouseArea {
+                                id: pinBtnMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (pinned) {
+                                        DockService.unpinApp(modelData.id);
+                                    } else {
+                                        DockService.pinApp(modelData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Click to launch (Left click) or edit settings (Right click)
+                    MouseArea {
+                        id: itemMouse
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.rightMargin: 90
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        hoverEnabled: true
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: {
+                            appListView.currentIndex = index;
+                        }
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.RightButton) {
+                                DockService.openAppProperties(modelData.desktopFile || modelData.id);
+                                root.isOpen = false;
+                                root.closed();
+                            } else {
+                                DockService.activateOrLaunch(modelData);
+                                root.isOpen = false;
+                                root.closed();
+                            }
+                        }
+                    }
                 }
+            }
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "No applications found"
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 13
-                    color: Theme.textSecondary
+            // Empty state when search or category yields no matches
+            Item {
+                anchors.fill: parent
+                visible: root.filteredApps.length === 0
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 8
+
+                    SvgIcon {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        name: "search"
+                        size: 32
+                        color: Qt.rgba(1, 1, 1, 0.2)
+                    }
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.selectedCategory !== "All" ? ("No apps found in " + root.selectedCategory) : "No applications found"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 13
+                        color: Theme.textSecondary
+                    }
                 }
             }
         }

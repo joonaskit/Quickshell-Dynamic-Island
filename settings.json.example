@@ -41,5 +41,10 @@
   "showExpandedNotifications": true,
   "showExpandedAudioSink": true,
   "showExpandedVolume": true,
-  "showExpandedBrightness": true
+  "showExpandedBrightness": true,
+  "launcherDefaultView": "grid",
+  "launcherDensity": "comfortable",
+  "launcherShowCategories": true,
+  "launcherGridColumns": 4,
+  "launcherShowGenericNames": true
 }

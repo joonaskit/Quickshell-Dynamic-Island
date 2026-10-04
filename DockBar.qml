@@ -55,8 +55,8 @@ Item {
         }
     }
 
-    implicitWidth: isVertical ? (hasOpenPopups ? 520 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
-    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 520 : (dockCapsule.height + Theme.dockBottomMargin))
+    implicitWidth: isVertical ? (hasOpenPopups ? 580 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
+    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 580 : (dockCapsule.height + Theme.dockBottomMargin))
 
     // Mouse tracking for fluid magnification wave
     property real currentMouseX: -9999
