@@ -75,8 +75,9 @@ Item {
         if (!wasOpen) {
             let mapped = downloadsItem.mapToItem(root, downloadsItem.width / 2, downloadsItem.height / 2);
             downloadsStack.targetX = mapped.x;
-            downloadsStack.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+            downloadsStack.targetY = mapped.y;
             downloadsStack.isOpen = true;
+            DownloadsService.refresh();
         }
     }
 
@@ -435,7 +436,7 @@ Item {
                         contextMenu.appData = app;
                         let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, pinnedItem.height / 2);
                         contextMenu.targetX = mapped.x;
-                        contextMenu.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                        contextMenu.targetY = mapped.y;
                         closeAllPopups();
                         contextMenu.isOpen = true;
                     }
@@ -445,7 +446,7 @@ Item {
                             windowPicker.appData = app;
                             let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, pinnedItem.height / 2);
                             windowPicker.targetX = mapped.x;
-                            windowPicker.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                            windowPicker.targetY = mapped.y;
                             windowPicker.isOpen = true;
                         }
                     }
@@ -497,7 +498,7 @@ Item {
                         contextMenu.appData = app;
                         let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, unpinnedItem.height / 2);
                         contextMenu.targetX = mapped.x;
-                        contextMenu.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                        contextMenu.targetY = mapped.y;
                         closeAllPopups();
                         contextMenu.isOpen = true;
                     }
@@ -507,7 +508,7 @@ Item {
                             windowPicker.appData = app;
                             let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, unpinnedItem.height / 2);
                             windowPicker.targetX = mapped.x;
-                            windowPicker.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                            windowPicker.targetY = mapped.y;
                             windowPicker.isOpen = true;
                         }
                     }
@@ -791,7 +792,7 @@ Item {
                         if (mouse.button === Qt.RightButton) {
                             let mapped = trashItem.mapToItem(root, trashItem.width / 2, trashItem.height / 2);
                             trashMenu.targetX = mapped.x;
-                            trashMenu.targetY = root.isVertical ? mapped.y : dockCapsule.y;
+                            trashMenu.targetY = mapped.y;
                             closeAllPopups();
                             trashMenu.isOpen = true;
                         } else {
@@ -806,6 +807,11 @@ Item {
     // Context Menu for Applications
     DockContextMenu {
         id: contextMenu
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+        dockCapsuleX: dockCapsule.x
+        dockCapsuleY: dockCapsule.y
+        dockCapsuleWidth: dockCapsule.width
         onClosed: {
             appData = null;
         }
@@ -816,6 +822,9 @@ Item {
         id: windowPicker
         isVertical: root.isVertical
         dockPosition: root.dockPosition
+        dockCapsuleX: dockCapsule.x
+        dockCapsuleY: dockCapsule.y
+        dockCapsuleWidth: dockCapsule.width
         onClosed: {
             windowPicker.appData = null;
         }
@@ -826,6 +835,9 @@ Item {
         id: downloadsStack
         isVertical: root.isVertical
         dockPosition: root.dockPosition
+        dockCapsuleX: dockCapsule.x
+        dockCapsuleY: dockCapsule.y
+        dockCapsuleWidth: dockCapsule.width
     }
 
     // Trash Context Menu
@@ -852,7 +864,7 @@ Item {
 
         x: {
             if (root.isVertical) {
-                return root.dockPosition === "left" ? (targetX + 14) : (targetX - width - 14);
+                return root.dockPosition === "left" ? (dockCapsule.x + dockCapsule.width + 14) : (dockCapsule.x - width - 14);
             }
             return Math.max(8, Math.min(root.width - width - 8, targetX - width / 2));
         }
@@ -860,7 +872,7 @@ Item {
             if (root.isVertical) {
                 return Math.max(8, Math.min(root.height - height - 8, targetY - height / 2));
             }
-            return targetY - height - 10;
+            return (dockCapsule.y > 0 ? dockCapsule.y : (root.height - Theme.dockHeight)) - height - 10;
         }
 
         Rectangle {
