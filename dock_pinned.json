@@ -21,13 +21,6 @@
     "command": "konsole"
   },
   {
-    "id": "antigravity-ide",
-    "name": "Antigravity",
-    "icon": "/home/jkikke/Lataukset/Antigravity IDE/resources/app/resources/linux/code.png",
-    "desktopFile": "",
-    "command": "\"/home/jkikke/Lataukset/Antigravity IDE/antigravity-ide\""
-  },
-  {
     "id": "zed",
     "name": "Zed",
     "icon": "dev.zed.Zed",

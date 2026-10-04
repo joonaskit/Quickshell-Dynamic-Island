@@ -10,9 +10,6 @@ Item {
     property alias appPickerHitBox: appPicker
     property alias trashMenuHitBox: trashMenu
 
-    property bool contextMenuOpen: contextMenu.isOpen
-    property bool appPickerOpen: appPicker.isOpen
-    property bool trashMenuOpen: trashMenu.isOpen
     property alias contextMenuOpen: contextMenu.isOpen
     property alias appPickerOpen: appPicker.isOpen
     property alias trashMenuOpen: trashMenu.isOpen
