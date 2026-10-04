@@ -486,6 +486,50 @@ Item {
             }
         }
 
+        // Edit Application... (KDE Properties / Menu Editor)
+        Rectangle {
+            visible: root.appData !== null && (root.appData.desktopFile || root.appData.id)
+            width: parent.width
+            height: 28
+            radius: 7
+            color: editAppMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                spacing: 8
+
+                SvgIcon {
+                    name: "settings"
+                    size: 14
+                    color: Theme.accentOrange
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: "Edit Application..."
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 13
+                    color: Theme.textPrimary
+                }
+            }
+
+            MouseArea {
+                id: editAppMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (root.appData) {
+                        DockService.openAppProperties(root.appData.desktopFile || root.appData.id);
+                    }
+                    root.isOpen = false;
+                    root.closed();
+                }
+            }
+        }
+
         // Close / Quit button (visible if running)
         Rectangle {
             visible: root.isRunning

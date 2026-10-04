@@ -175,6 +175,68 @@ Singleton {
         Quickshell.execDetached(["qdbus-qt6", "org.kde.krunner", "/App", "display"]);
     }
 
+    // Open KDE Menu Editor (kmenuedit) - optionally targeting a specific desktop file
+    function openMenuEditor(desktopFile) {
+        let entry = DesktopEntries.byId("org.kde.kmenuedit");
+        if (!entry) entry = DesktopEntries.heuristicLookup("kmenuedit");
+        if (entry) {
+            try {
+                entry.execute();
+                return;
+            } catch(e) {}
+        }
+        if (desktopFile && desktopFile.length > 0) {
+            let df = desktopFile.endsWith(".desktop") ? desktopFile : (desktopFile + ".desktop");
+            Quickshell.execDetached(["kmenuedit", df]);
+        } else {
+            Quickshell.execDetached(["kmenuedit"]);
+        }
+    }
+
+    // Open KDE Application properties dialog (kioclient openProperties / kmenuedit)
+    function openAppProperties(desktopFile) {
+        if (!desktopFile || desktopFile.length === 0) {
+            openMenuEditor();
+            return;
+        }
+
+        let pyScript =
+            "import os, sys, subprocess\n" +
+            "def find_file(df):\n" +
+            "    clean = df[:-8] if df.endswith('.desktop') else df\n" +
+            "    search_dirs = [os.path.expanduser('~/.local/share/applications'), '/usr/share/applications', '/usr/local/share/applications']\n" +
+            "    candidates = [df if df.endswith('.desktop') else (df + '.desktop'), clean + '.desktop', clean + '-stable.desktop']\n" +
+            "    for d in search_dirs:\n" +
+            "        for cand in candidates:\n" +
+            "            p = os.path.join(d, cand)\n" +
+            "            if os.path.exists(p): return p\n" +
+            "    clean_lower = clean.lower()\n" +
+            "    for d in search_dirs:\n" +
+            "        if not os.path.exists(d): continue\n" +
+            "        try:\n" +
+            "            for f in os.listdir(d):\n" +
+            "                if not f.endswith('.desktop'): continue\n" +
+            "                base = f[:-8].lower()\n" +
+            "                if clean_lower in base.split('.') or base == clean_lower:\n" +
+            "                    return os.path.join(d, f)\n" +
+            "        except Exception: pass\n" +
+            "    return ''\n" +
+            "arg = sys.argv[1] if len(sys.argv) > 1 else ''\n" +
+            "target = find_file(arg)\n" +
+            "if target:\n" +
+            "    try:\n" +
+            "        subprocess.Popen(['kioclient', 'openProperties', target])\n" +
+            "        sys.exit(0)\n" +
+            "    except Exception: pass\n" +
+            "base_name = os.path.basename(target) if target else (arg if arg.endswith('.desktop') else (arg + '.desktop'))\n" +
+            "try:\n" +
+            "    subprocess.Popen(['kmenuedit', base_name])\n" +
+            "except Exception:\n" +
+            "    subprocess.Popen(['kmenuedit'])\n";
+
+        Quickshell.execDetached(["python3", "-c", pyScript, String(desktopFile)]);
+    }
+
     // File loading/saving for pinned apps persistence
     readonly property string configFilePath: Quickshell.shellDir + "/dock_pinned.json"
 

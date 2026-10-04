@@ -27,7 +27,14 @@ Item {
     readonly property real capsuleY: dockCapsule.y
 
     readonly property bool hasOpenPopups: appPickerOpen || contextMenuOpen || trashMenuOpen || downloadsStackOpen || windowPickerOpen
+
     property bool shouldDropDock: false
+
+    implicitWidth: isVertical ? (hasOpenPopups ? 520 : Theme.dockHeight) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 20) : 0)
+    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 20) : 0) : (hasOpenPopups ? 520 : Theme.dockHeight)
+
+    width: implicitWidth
+    height: implicitHeight
 
     // Mouse tracking for fluid magnification wave
     property real currentMouseX: -9999
@@ -70,6 +77,7 @@ Item {
         if (!wasOpen) {
             let mapped = downloadsItem.mapToItem(root, downloadsItem.width / 2, downloadsItem.height / 2);
             downloadsStack.targetX = mapped.x;
+            downloadsStack.targetY = root.isVertical ? mapped.y : dockCapsule.y;
             downloadsStack.targetY = mapped.y;
             downloadsStack.isOpen = true;
             DownloadsService.refresh();
@@ -79,7 +87,14 @@ Item {
     // Extended hitbox covering capsule, icon magnification overshoot, and indicator dots
     Item {
         id: dockHitBox
-        anchors.centerIn: dockCapsule
+
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+
         width: root.isVertical ? (Theme.dockHeight + 24) : (dockCapsule.width + 16)
         height: root.isVertical ? (dockCapsule.height + 16) : (Theme.dockHeight + 24)
 
@@ -113,42 +128,40 @@ Item {
     Rectangle {
         id: dockCapsule
 
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+
         width: root.isVertical ? Theme.dockHeight : (contentContainer.implicitWidth + 24)
         height: root.isVertical ? (contentContainer.implicitHeight + 24) : Theme.dockHeight
         radius: Theme.dockRadius
-
-        x: {
-            if (!root.isVertical) {
-                return Math.round((parent.width - width) / 2);
-            }
-            if (root.dockPosition === "left") {
-                return root.shouldDropDock ? (-width - 24) : Theme.dockBottomMargin;
-            } else {
-                return root.shouldDropDock ? (parent.width + 24) : (parent.width - width - Theme.dockBottomMargin);
-            }
-        }
-
-        y: {
-            if (root.isVertical) {
-                return Math.round((parent.height - height) / 2);
-            }
-            return root.shouldDropDock ? (parent.height + 24) : (parent.height - height - Theme.dockBottomMargin);
-        }
-
         color: Theme.dockBackground
         border.color: Theme.dockBorder
         border.width: Theme.dockShowBorder ? 1 : 0
 
+        transform: Translate {
+            x: {
+                if (!root.isVertical || !root.shouldDropDock) return 0;
+                return (root.dockPosition === "left") ? (-dockCapsule.width - 24) : (dockCapsule.width + 24);
+            }
+            y: {
+                if (root.isVertical || !root.shouldDropDock) return 0;
+                return dockCapsule.height + Theme.dockBottomMargin + 24;
+            }
+
+            Behavior on x {
+                NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+            }
+            Behavior on y {
+                NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+            }
+        }
+
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }
-        }
-        Behavior on x {
-            enabled: root.isVertical
-            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
-        }
-        Behavior on y {
-            enabled: !root.isVertical
-            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
 
         // Frosted glass inner specular reflection & depth gradient
@@ -166,10 +179,16 @@ Item {
 
         // Highlight rim edge
         Rectangle {
-            x: root.isVertical ? (root.dockPosition === "left" ? (parent.width - 1) : 0) : 16
-            y: root.isVertical ? 16 : 0
-            width: root.isVertical ? 1 : (parent.width - 32)
-            height: root.isVertical ? (parent.height - 32) : 1
+            anchors.left: parent.left
+            anchors.right: root.isVertical ? undefined : parent.right
+            anchors.top: parent.top
+            anchors.bottom: root.isVertical ? parent.bottom : undefined
+            anchors.leftMargin: root.isVertical ? 0 : 16
+            anchors.rightMargin: root.isVertical ? 0 : 16
+            anchors.topMargin: root.isVertical ? 16 : 0
+            anchors.bottomMargin: root.isVertical ? 16 : 0
+            width: root.isVertical ? 1 : undefined
+            height: root.isVertical ? undefined : 1
             radius: Theme.dockRadius
             color: Qt.rgba(1, 1, 1, 0.25)
             visible: Theme.dockShowBorder
@@ -862,8 +881,8 @@ Item {
             anchors.fill: parent
             radius: 12
             color: "#1c1c1e"
-            border.color: Theme.dockBorder
-            border.width: Theme.dockShowBorder ? 1 : 0
+            border.color: Qt.rgba(1, 1, 1, 0.14)
+            border.width: 1
         }
 
         Column {
@@ -933,8 +952,16 @@ Item {
     // App Picker Popup
     DockAppPicker {
         id: appPicker
-        x: root.dockPosition === "left" ? (dockCapsule.x + dockCapsule.width + 14) : (root.dockPosition === "right" ? (dockCapsule.x - width - 14) : Math.round(dockCapsule.x + (dockCapsule.width - width) / 2))
-        y: root.isVertical ? Math.round(dockCapsule.y + (dockCapsule.height - height) / 2) : (dockCapsule.y - height - 14)
+        anchors.bottom: (!root.isVertical) ? dockCapsule.top : undefined
+        anchors.bottomMargin: (!root.isVertical) ? 14 : undefined
+        anchors.horizontalCenter: (!root.isVertical) ? dockCapsule.horizontalCenter : undefined
+
+        anchors.left: (root.dockPosition === "left") ? dockCapsule.right : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? 14 : undefined
+        anchors.verticalCenter: root.isVertical ? dockCapsule.verticalCenter : undefined
+
+        anchors.right: (root.dockPosition === "right") ? dockCapsule.left : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? 14 : undefined
     }
 
     // Dismiss overlay to close popups on outside click

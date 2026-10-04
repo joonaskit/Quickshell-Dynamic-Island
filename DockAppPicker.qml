@@ -105,6 +105,47 @@ Item {
 
             Item { Layout.fillWidth: true }
 
+            // Edit Menu button (KDE Menu Editor)
+            Rectangle {
+                Layout.preferredHeight: 24
+                Layout.preferredWidth: editMenuRow.implicitWidth + 14
+                radius: 12
+                color: editMenuMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+
+                Row {
+                    id: editMenuRow
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    SvgIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        name: "settings"
+                        size: 11
+                        color: Theme.accentOrange
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Edit Menu"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        color: Theme.textPrimary
+                    }
+                }
+
+                MouseArea {
+                    id: editMenuMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        DockService.openMenuEditor();
+                        root.isOpen = false;
+                        root.closed();
+                    }
+                }
+            }
+
             Rectangle {
                 Layout.preferredHeight: 24
                 Layout.preferredWidth: krunnerRow.implicitWidth + 14
@@ -356,6 +397,35 @@ Item {
                         }
                     }
 
+                    // Edit Application Settings / Icon Button
+                    Rectangle {
+                        Layout.preferredWidth: 24
+                        Layout.preferredHeight: 24
+                        radius: 6
+                        color: editBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.06)
+                        border.color: Qt.rgba(1, 1, 1, 0.1)
+                        border.width: 1
+
+                        SvgIcon {
+                            anchors.centerIn: parent
+                            name: "settings"
+                            size: 11
+                            color: editBtnMouse.containsMouse ? Theme.accentOrange : Theme.textSecondary
+                        }
+
+                        MouseArea {
+                            id: editBtnMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                DockService.openAppProperties(modelData.desktopFile || modelData.id);
+                                root.isOpen = false;
+                                root.closed();
+                            }
+                        }
+                    }
+
                     // Pin / Unpin Action Button
                     Rectangle {
                         Layout.preferredWidth: 64
@@ -390,23 +460,30 @@ Item {
                     }
                 }
 
-                // Click to launch
+                // Click to launch (Left click) or edit settings (Right click)
                 MouseArea {
                     id: itemMouse
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.rightMargin: 70
+                    anchors.rightMargin: 100
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     cursorShape: Qt.PointingHandCursor
                     onEntered: {
                         appListView.currentIndex = index;
                     }
-                    onClicked: {
-                        DockService.activateOrLaunch(modelData);
-                        root.isOpen = false;
-                        root.closed();
+                    onClicked: function(mouse) {
+                        if (mouse.button === Qt.RightButton) {
+                            DockService.openAppProperties(modelData.desktopFile || modelData.id);
+                            root.isOpen = false;
+                            root.closed();
+                        } else {
+                            DockService.activateOrLaunch(modelData);
+                            root.isOpen = false;
+                            root.closed();
+                        }
                     }
                 }
             }
