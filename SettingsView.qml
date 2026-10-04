@@ -1012,6 +1012,40 @@ Item {
                                 SettingsService.setSetting("dockAutoHideAlways", val);
                             }
                         }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
+                        SettingToggle {
+                            title: "Show Dock Border"
+                            description: "Display a subtle border outline and top highlight on the dock capsule"
+                            iconName: "square"
+                            iconColor: Theme.accentPurple
+                            checked: SettingsService.dockShowBorder
+                            onToggled: function(val) {
+                                SettingsService.setSetting("dockShowBorder", val);
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
+                        SettingToggle {
+                            title: "Transparent Dock"
+                            description: "Make the dock capsule background completely transparent"
+                            iconName: "contrast"
+                            iconColor: Theme.accentIndigo
+                            checked: SettingsService.dockTransparent
+                            onToggled: function(val) {
+                                SettingsService.setSetting("dockTransparent", val);
+                            }
+                        }
                     }
                 }
             }

@@ -86,7 +86,7 @@ Item {
         radius: Theme.dockRadius
         color: Theme.dockBackground
         border.color: Theme.dockBorder
-        border.width: 1
+        border.width: Theme.dockShowBorder ? 1 : 0
 
         // Top subtle highlight edge
         Rectangle {
@@ -98,6 +98,7 @@ Item {
             height: 1
             radius: Theme.dockRadius
             color: Qt.rgba(1, 1, 1, 0.22)
+            visible: Theme.dockShowBorder && !Theme.dockTransparent
         }
 
         // Horizontal Row containing all dock items
