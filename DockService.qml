@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Services.Mpris
 
 Singleton {
     id: root
@@ -443,6 +444,183 @@ Singleton {
             }
         }
     }
+
+    // Find active MPRIS media player associated with an application
+    function getMprisPlayerForApp(app) {
+        if (!app || !Mpris.players || !Mpris.players.values) return null;
+        let players = Mpris.players.values;
+        let appId = (app.id || "").toLowerCase().replace(/\.desktop$/, "");
+        let appName = (app.name || "").toLowerCase();
+        let appCmd = (app.command || "").toLowerCase();
+        let desktopFile = (app.desktopFile || "").toLowerCase().replace(/\.desktop$/, "");
+
+        for (let i = 0; i < players.length; i++) {
+            let p = players[i];
+            if (!p) continue;
+            let pEntry = (p.desktopEntry || "").toLowerCase().replace(/\.desktop$/, "");
+            let pIdent = (p.identity || "").toLowerCase();
+            let pBus = (p.dbusName || "").toLowerCase();
+
+            // Match desktop entry
+            if (pEntry && (pEntry === appId || pEntry === desktopFile || appId.indexOf(pEntry) >= 0 || desktopFile.indexOf(pEntry) >= 0 || pEntry.indexOf(appId) >= 0)) {
+                return p;
+            }
+            // Match identity / name
+            if (pIdent && (pIdent === appName || appName.indexOf(pIdent) >= 0 || pIdent.indexOf(appName) >= 0)) {
+                return p;
+            }
+            // Match dbus name
+            if (pBus && ((appId && pBus.indexOf(appId) >= 0) || (appCmd && pBus.indexOf(appCmd) >= 0))) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    // Get contextual actions for an application (native desktop actions & app-specific shortcuts)
+    function getActionsForApp(app) {
+        if (!app) return [];
+        let actions = [];
+        let addedNames = {};
+
+        function addAction(name, icon, execFn) {
+            let key = (name || "").toLowerCase().trim();
+            if (key.length === 0 || addedNames[key]) return;
+            addedNames[key] = true;
+            actions.push({
+                name: name,
+                icon: icon || "chevron-right",
+                execute: execFn
+            });
+        }
+
+        // 1. Native DesktopEntry actions
+        let entry = null;
+        if (app.desktopFile) {
+            let cleanId = app.desktopFile.replace(/\.desktop$/, "");
+            entry = DesktopEntries.byId(cleanId);
+            if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
+        }
+        if (!entry && app.id) {
+            let cleanId2 = app.id.replace(/\.desktop$/, "");
+            entry = DesktopEntries.byId(cleanId2);
+            if (!entry) entry = DesktopEntries.heuristicLookup(cleanId2);
+        }
+
+        if (entry && entry.actions) {
+            let acts = entry.actions;
+            for (let i = 0; i < acts.length; i++) {
+                let act = acts[i];
+                if (!act || !act.name) continue;
+                let nLow = act.name.toLowerCase();
+                let icon = "chevron-right";
+                if (nLow.indexOf("private") >= 0 || nLow.indexOf("incognito") >= 0 || nLow.indexOf("secret") >= 0 || nLow.indexOf("window") >= 0 || nLow.indexOf("workspace") >= 0) {
+                    icon = "window";
+                } else if (nLow.indexOf("tab") >= 0 || nLow.indexOf("new") >= 0 || nLow.indexOf("add") >= 0 || nLow.indexOf("compose") >= 0) {
+                    icon = "plus";
+                } else if (nLow.indexOf("terminal") >= 0 || nLow.indexOf("shell") >= 0) {
+                    icon = "terminal";
+                } else if (nLow.indexOf("folder") >= 0 || nLow.indexOf("document") >= 0 || nLow.indexOf("directory") >= 0) {
+                    icon = "folder";
+                } else if (nLow.indexOf("setting") >= 0 || nLow.indexOf("pref") >= 0) {
+                    icon = "settings";
+                } else if (nLow.indexOf("search") >= 0 || nLow.indexOf("find") >= 0) {
+                    icon = "search";
+                }
+
+                (function(actionObj) {
+                    addAction(actionObj.name, icon, function() {
+                        try {
+                            actionObj.execute();
+                        } catch(e) {
+                            console.warn("[DockService] Error executing action:", e);
+                        }
+                    });
+                })(act);
+            }
+        }
+
+        // 2. Custom app-specific shortcuts
+        let idLow = (app.id || "").toLowerCase();
+        let nameLow = (app.name || "").toLowerCase();
+        let homeDir = Quickshell.env("HOME") || "";
+
+        // File Managers (Dolphin, Nautilus, etc.)
+        let isFileManager = idLow.indexOf("dolphin") >= 0 || idLow.indexOf("nautilus") >= 0 ||
+                            idLow.indexOf("thunar") >= 0 || idLow.indexOf("nemo") >= 0 ||
+                            idLow.indexOf("pcmanfm") >= 0 || nameLow === "files" || nameLow.indexOf("file manager") >= 0;
+
+        if (isFileManager && homeDir) {
+            addAction("Home", "folder", function() {
+                Quickshell.execDetached(["xdg-open", homeDir]);
+            });
+            addAction("Downloads", "folder", function() {
+                Quickshell.execDetached(["xdg-open", homeDir + "/Downloads"]);
+            });
+            addAction("Documents", "folder", function() {
+                Quickshell.execDetached(["xdg-open", homeDir + "/Documents"]);
+            });
+        }
+
+        // Web Browsers (Firefox, Chrome, Brave, Chromium, Zen, Vivaldi, etc.)
+        let isBrowser = idLow.indexOf("firefox") >= 0 || idLow.indexOf("chrome") >= 0 ||
+                        idLow.indexOf("brave") >= 0 || idLow.indexOf("chromium") >= 0 ||
+                        idLow.indexOf("zen") >= 0 || idLow.indexOf("vivaldi") >= 0;
+
+        if (isBrowser) {
+            let hasPrivate = false;
+            for (let k = 0; k < actions.length; k++) {
+                let ak = actions[k].name.toLowerCase();
+                if (ak.indexOf("private") >= 0 || ak.indexOf("incognito") >= 0) {
+                    hasPrivate = true;
+                    break;
+                }
+            }
+            if (!hasPrivate) {
+                if (idLow.indexOf("firefox") >= 0 || idLow.indexOf("zen") >= 0) {
+                    addAction("New Private Window", "window", function() {
+                        Quickshell.execDetached([app.command || "firefox", "--private-window"]);
+                    });
+                } else {
+                    addAction("New Incognito Window", "window", function() {
+                        Quickshell.execDetached([app.command || "google-chrome", "--incognito"]);
+                    });
+                }
+            }
+        }
+
+        // Terminal Emulators
+        let isTerminal = idLow.indexOf("terminal") >= 0 || idLow.indexOf("konsole") >= 0 ||
+                         idLow.indexOf("kitty") >= 0 || idLow.indexOf("alacritty") >= 0 ||
+                         idLow.indexOf("foot") >= 0 || idLow.indexOf("wezterm") >= 0;
+
+        if (isTerminal && actions.length === 0) {
+            addAction("New Window", "terminal", function() {
+                if (app.command) {
+                    Quickshell.execDetached(["sh", "-c", app.command]);
+                } else {
+                    launchApp(app);
+                }
+            });
+        }
+
+        // Code editors
+        let isEditor = idLow.indexOf("code") >= 0 || idLow.indexOf("zed") >= 0;
+        if (isEditor && actions.length === 0) {
+            if (idLow.indexOf("code") >= 0) {
+                addAction("New Empty Window", "window", function() {
+                    Quickshell.execDetached(["code", "--new-window"]);
+                });
+            } else if (idLow.indexOf("zed") >= 0) {
+                addAction("New Workspace", "window", function() {
+                    Quickshell.execDetached(["zed", "--new"]);
+                });
+            }
+        }
+
+        return actions;
+    }
+
 
     // Launch app process
     function launchApp(app) {

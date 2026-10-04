@@ -33,8 +33,9 @@ Item {
     readonly property bool isPinned: appData ? DockService.isPinned(appData.id) : false
     readonly property var openWindows: appData ? DockService.findToplevels(appData) : []
     readonly property var desktopActions: appData ? DockService.getActionsForApp(appData) : []
+    readonly property var mprisPlayer: appData ? DockService.getMprisPlayerForApp(appData) : null
 
-    width: 220
+    width: 230
     height: menuColumn.implicitHeight + 16
 
     x: {
@@ -79,13 +80,160 @@ Item {
                 anchors.right: parent.right
                 anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
-                text: appData ? appData.name : ""
+                text: root.appData ? root.appData.name : ""
                 font.family: Theme.fontFamily
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
                 color: Theme.textSecondary
                 elide: Text.ElideRight
             }
+        }
+
+        // MPRIS Media Controls Section (active when app has a media player)
+        Item {
+            visible: root.mprisPlayer !== null
+            width: parent.width
+            height: visible ? 52 : 0
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 8
+                color: Qt.rgba(1, 1, 1, 0.06)
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    spacing: 8
+
+                    Rectangle {
+                        Layout.preferredWidth: 26
+                        Layout.preferredHeight: 26
+                        radius: 6
+                        color: Qt.rgba(1, 1, 1, 0.08)
+
+                        SvgIcon {
+                            anchors.centerIn: parent
+                            name: "music"
+                            size: 13
+                            color: Theme.accentOrange
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: (root.mprisPlayer && root.mprisPlayer.trackTitle) ? root.mprisPlayer.trackTitle : "Playing"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 11
+                            font.weight: Font.DemiBold
+                            color: Theme.textPrimary
+                            elide: Text.ElideRight
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: (root.mprisPlayer && root.mprisPlayer.trackArtist) ? root.mprisPlayer.trackArtist : (root.mprisPlayer && root.mprisPlayer.identity ? root.mprisPlayer.identity : "")
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 10
+                            color: Theme.textSecondary
+                            elide: Text.ElideRight
+                            visible: text.length > 0
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 2
+
+                        // Previous
+                        Rectangle {
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            radius: 11
+                            color: prevMprisMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: "previous"
+                                size: 10
+                                color: Theme.textPrimary
+                            }
+
+                            MouseArea {
+                                id: prevMprisMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (root.mprisPlayer) root.mprisPlayer.previous();
+                                }
+                            }
+                        }
+
+                        // Play / Pause
+                        Rectangle {
+                            Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
+                            radius: 12
+                            color: playMprisMouse.containsMouse ? Qt.rgba(1, 1, 1, 1.0) : Qt.rgba(1, 1, 1, 0.85)
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: (root.mprisPlayer && root.mprisPlayer.isPlaying) ? "pause" : "play"
+                                size: 11
+                                color: "#000000"
+                            }
+
+                            MouseArea {
+                                id: playMprisMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (root.mprisPlayer) root.mprisPlayer.togglePlaying();
+                                }
+                            }
+                        }
+
+                        // Next
+                        Rectangle {
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            radius: 11
+                            color: nextMprisMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: "next"
+                                size: 10
+                                color: Theme.textPrimary
+                            }
+
+                            MouseArea {
+                                id: nextMprisMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (root.mprisPlayer) root.mprisPlayer.next();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Separator after MPRIS
+        Rectangle {
+            visible: root.mprisPlayer !== null
+            width: parent.width - 12
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 1
+            color: Qt.rgba(1, 1, 1, 0.08)
         }
 
         // Open Windows Section (if running and has open windows)
@@ -106,8 +254,8 @@ Item {
                     spacing: 8
 
                     Rectangle {
-                        width: 6
-                        height: 6
+                        Layout.preferredWidth: 6
+                        Layout.preferredHeight: 6
                         radius: 3
                         color: modelData.activated ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.45)
                     }
@@ -201,9 +349,9 @@ Item {
                     spacing: 8
 
                     SvgIcon {
-                        name: "arrow-right"
-                        size: 12
-                        color: Theme.accentCyan
+                        name: modelData.icon || "chevron-right"
+                        size: 13
+                        color: actionMouse.containsMouse ? Theme.accentCyan : Theme.textSecondary
                     }
 
                     Text {
@@ -223,7 +371,9 @@ Item {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         try {
-                            modelData.execute();
+                            if (modelData.execute) {
+                                modelData.execute();
+                            }
                         } catch(e) {
                             console.warn("[DockContextMenu] Error executing action:", e);
                         }
@@ -243,8 +393,12 @@ Item {
             color: Qt.rgba(1, 1, 1, 0.08)
         }
 
-        // New Window button
+        // New Window button (hidden if native desktopActions already contains New Window)
         Rectangle {
+            visible: !root.desktopActions.some(function(act) {
+                let nm = (act.name || "").toLowerCase();
+                return nm === "new window" || nm === "new-window" || nm === "new window...";
+            })
             width: parent.width
             height: 28
             radius: 7
@@ -277,7 +431,7 @@ Item {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    if (appData) DockService.newWindow(appData);
+                    if (root.appData) DockService.newWindow(root.appData);
                     root.isOpen = false;
                     root.closed();
                 }
@@ -318,11 +472,11 @@ Item {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    if (appData) {
+                    if (root.appData) {
                         if (root.isPinned) {
-                            DockService.unpinApp(appData.id);
+                            DockService.unpinApp(root.appData.id);
                         } else {
-                            DockService.pinApp(appData);
+                            DockService.pinApp(root.appData);
                         }
                     }
                     root.isOpen = false;
@@ -366,7 +520,7 @@ Item {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    if (appData) DockService.quitApp(appData);
+                    if (root.appData) DockService.quitApp(root.appData);
                     root.isOpen = false;
                     root.closed();
                 }
