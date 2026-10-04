@@ -50,3 +50,7 @@ DockAppPicker 1.0 DockAppPicker.qml
 TopLeftAppCluster 1.0 TopLeftAppCluster.qml
 VirtualDesktopsPill 1.0 VirtualDesktopsPill.qml
 HiddenElementGlow 1.0 HiddenElementGlow.qml
+DockWindowPicker 1.0 DockWindowPicker.qml
+DockDownloadsStack 1.0 DockDownloadsStack.qml
+singleton DownloadsService 1.0 DownloadsService.qml
+

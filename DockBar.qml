@@ -196,7 +196,6 @@ Item {
             id: contentContainer
             anchors.centerIn: parent
             columns: root.isVertical ? 1 : 999
-            rows: root.isVertical ? 999 : 1
             spacing: 2
 
             // Launchpad / App Picker Icon
@@ -234,17 +233,8 @@ Item {
                     height: Theme.dockIconSize
                     radius: 12
 
-                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-                    anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-                    anchors.bottomMargin: (!root.isVertical) ? (10 + launchpadItem.bounceHeight) : undefined
-
-                    anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-                    anchors.leftMargin: (root.dockPosition === "left") ? (10 + launchpadItem.bounceHeight) : undefined
-
-                    anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-                    anchors.rightMargin: (root.dockPosition === "right") ? (10 + launchpadItem.bounceHeight) : undefined
+                    x: root.isVertical ? (root.dockPosition === "left" ? (10 + launchpadItem.bounceHeight) : (parent.width - width - 10 - launchpadItem.bounceHeight)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - launchpadItem.bounceHeight)
 
                     transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
                     scale: launchpadItem.dockScale * launchpadItem.pressScale
@@ -277,20 +267,12 @@ Item {
 
                 // Tooltip
                 Item {
-                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-                    anchors.bottom: (!root.isVertical) ? launchpadBg.top : undefined
-                    anchors.bottomMargin: (!root.isVertical) ? (14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-                    anchors.left: (root.dockPosition === "left") ? launchpadBg.right : undefined
-                    anchors.leftMargin: (root.dockPosition === "left") ? (14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-                    anchors.right: (root.dockPosition === "right") ? launchpadBg.left : undefined
-                    anchors.rightMargin: (root.dockPosition === "right") ? (14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
                     width: launchpadTipBg.width
                     height: launchpadTipBg.height
+
+                    x: root.isVertical ? (root.dockPosition === "left" ? (launchpadBg.x + launchpadBg.width + 14 + (launchpadItem.dockScale - 1.0) * Theme.dockIconSize) : (launchpadBg.x - width - 14 - (launchpadItem.dockScale - 1.0) * Theme.dockIconSize)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (launchpadBg.y - height - 14 - (launchpadItem.dockScale - 1.0) * Theme.dockIconSize)
+
                     opacity: (launchpadMouse.containsMouse && launchpadItem.dockScale > 1.1) ? 1.0 : 0.0
                     visible: opacity > 0.01
 
@@ -352,12 +334,16 @@ Item {
             }
 
             // Divider between Launchpad and Pinned apps
-            Rectangle {
-                width: root.isVertical ? 28 : 1
-                height: root.isVertical ? 1 : 28
-                anchors.horizontalCenter: root.isVertical ? parent.horizontalCenter : undefined
-                anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
-                color: Qt.rgba(1, 1, 1, 0.15)
+            Item {
+                width: root.isVertical ? Theme.dockHeight : 1
+                height: root.isVertical ? 1 : Theme.dockHeight
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: root.isVertical ? 28 : 1
+                    height: root.isVertical ? 1 : 28
+                    color: Qt.rgba(1, 1, 1, 0.15)
+                }
             }
 
             // Pinned Applications Repeater
@@ -471,13 +457,17 @@ Item {
             }
 
             // Divider between Pinned and Running Unpinned apps
-            Rectangle {
+            Item {
                 visible: DockService.runningUnpinnedApps.length > 0
-                width: root.isVertical ? 28 : 1
-                height: root.isVertical ? 1 : 28
-                anchors.horizontalCenter: root.isVertical ? parent.horizontalCenter : undefined
-                anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
-                color: Qt.rgba(1, 1, 1, 0.15)
+                width: root.isVertical ? Theme.dockHeight : 1
+                height: root.isVertical ? 1 : Theme.dockHeight
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: root.isVertical ? 28 : 1
+                    height: root.isVertical ? 1 : 28
+                    color: Qt.rgba(1, 1, 1, 0.15)
+                }
             }
 
             // Running Unpinned Applications Repeater
@@ -529,12 +519,16 @@ Item {
             }
 
             // Divider before Downloads & Trash
-            Rectangle {
-                width: root.isVertical ? 28 : 1
-                height: root.isVertical ? 1 : 28
-                anchors.horizontalCenter: root.isVertical ? parent.horizontalCenter : undefined
-                anchors.verticalCenter: root.isVertical ? undefined : parent.verticalCenter
-                color: Qt.rgba(1, 1, 1, 0.15)
+            Item {
+                width: root.isVertical ? Theme.dockHeight : 1
+                height: root.isVertical ? 1 : Theme.dockHeight
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: root.isVertical ? 28 : 1
+                    height: root.isVertical ? 1 : 28
+                    color: Qt.rgba(1, 1, 1, 0.15)
+                }
             }
 
             // Downloads / Recent Files Stack Icon
@@ -572,17 +566,8 @@ Item {
                     height: Theme.dockIconSize
                     radius: 12
 
-                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-                    anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-                    anchors.bottomMargin: (!root.isVertical) ? (10 + downloadsItem.bounceHeight) : undefined
-
-                    anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-                    anchors.leftMargin: (root.dockPosition === "left") ? (10 + downloadsItem.bounceHeight) : undefined
-
-                    anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-                    anchors.rightMargin: (root.dockPosition === "right") ? (10 + downloadsItem.bounceHeight) : undefined
+                    x: root.isVertical ? (root.dockPosition === "left" ? (10 + downloadsItem.bounceHeight) : (parent.width - width - 10 - downloadsItem.bounceHeight)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - downloadsItem.bounceHeight)
 
                     transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
                     scale: downloadsItem.dockScale * downloadsItem.pressScale
@@ -605,20 +590,12 @@ Item {
 
                 // Tooltip
                 Item {
-                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-                    anchors.bottom: (!root.isVertical) ? downloadsIconContainer.top : undefined
-                    anchors.bottomMargin: (!root.isVertical) ? (14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-                    anchors.left: (root.dockPosition === "left") ? downloadsIconContainer.right : undefined
-                    anchors.leftMargin: (root.dockPosition === "left") ? (14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-                    anchors.right: (root.dockPosition === "right") ? downloadsIconContainer.left : undefined
-                    anchors.rightMargin: (root.dockPosition === "right") ? (14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
                     width: downloadsTipBg.width
                     height: downloadsTipBg.height
+
+                    x: root.isVertical ? (root.dockPosition === "left" ? (downloadsIconContainer.x + downloadsIconContainer.width + 14 + (downloadsItem.dockScale - 1.0) * Theme.dockIconSize) : (downloadsIconContainer.x - width - 14 - (downloadsItem.dockScale - 1.0) * Theme.dockIconSize)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (downloadsIconContainer.y - height - 14 - (downloadsItem.dockScale - 1.0) * Theme.dockIconSize)
+
                     opacity: (downloadsMouse.containsMouse && downloadsItem.dockScale > 1.1) ? 1.0 : 0.0
                     visible: opacity > 0.01
 
@@ -713,17 +690,8 @@ Item {
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
 
-                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-                    anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-                    anchors.bottomMargin: (!root.isVertical) ? (10 + trashItem.bounceHeight) : undefined
-
-                    anchors.left: (root.dockPosition === "left") ? parent.left : undefined
-                    anchors.leftMargin: (root.dockPosition === "left") ? (10 + trashItem.bounceHeight) : undefined
-
-                    anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-                    anchors.rightMargin: (root.dockPosition === "right") ? (10 + trashItem.bounceHeight) : undefined
+                    x: root.isVertical ? (root.dockPosition === "left" ? (10 + trashItem.bounceHeight) : (parent.width - width - 10 - trashItem.bounceHeight)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height - 10 - trashItem.bounceHeight)
 
                     transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
                     scale: trashItem.dockScale * trashItem.pressScale
@@ -759,20 +727,12 @@ Item {
 
                 // Tooltip
                 Item {
-                    anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
-
-                    anchors.bottom: (!root.isVertical) ? trashIconContainer.top : undefined
-                    anchors.bottomMargin: (!root.isVertical) ? (14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-                    anchors.left: (root.dockPosition === "left") ? trashIconContainer.right : undefined
-                    anchors.leftMargin: (root.dockPosition === "left") ? (14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
-                    anchors.right: (root.dockPosition === "right") ? trashIconContainer.left : undefined
-                    anchors.rightMargin: (root.dockPosition === "right") ? (14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : undefined
-
                     width: trashTipBg.width
                     height: trashTipBg.height
+
+                    x: root.isVertical ? (root.dockPosition === "left" ? (trashIconContainer.x + trashIconContainer.width + 14 + (trashItem.dockScale - 1.0) * Theme.dockIconSize) : (trashIconContainer.x - width - 14 - (trashItem.dockScale - 1.0) * Theme.dockIconSize)) : Math.round((parent.width - width) / 2)
+                    y: root.isVertical ? Math.round((parent.height - height) / 2) : (trashIconContainer.y - height - 14 - (trashItem.dockScale - 1.0) * Theme.dockIconSize)
+
                     opacity: (trashMouse.containsMouse && trashItem.dockScale > 1.1) ? 1.0 : 0.0
                     visible: opacity > 0.01
 
@@ -857,7 +817,7 @@ Item {
         isVertical: root.isVertical
         dockPosition: root.dockPosition
         onClosed: {
-            appData = null;
+            windowPicker.appData = null;
         }
     }
 
