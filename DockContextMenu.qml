@@ -26,8 +26,10 @@ Item {
 
     readonly property bool isRunning: appData ? (DockService.runningStateMap[appData.id] ? DockService.runningStateMap[appData.id].running : false) : false
     readonly property bool isPinned: appData ? DockService.isPinned(appData.id) : false
+    readonly property var openWindows: appData ? DockService.findToplevels(appData) : []
+    readonly property var desktopActions: appData ? DockService.getActionsForApp(appData) : []
 
-    width: 180
+    width: 220
     height: menuColumn.implicitHeight + 16
 
     x: Math.max(8, Math.min(parent.width - width - 8, targetX - width / 2))
@@ -82,8 +84,155 @@ Item {
             }
         }
 
-        // Separator
+        // Open Windows Section (if running and has open windows)
+        Repeater {
+            model: root.openWindows
+
+            delegate: Rectangle {
+                id: winItem
+                width: parent.width
+                height: 28
+                radius: 7
+                color: winMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    spacing: 8
+
+                    Rectangle {
+                        width: 6
+                        height: 6
+                        radius: 3
+                        color: modelData.activated ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.45)
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: (modelData.title && modelData.title.trim().length > 0) ? modelData.title : ("Window " + (index + 1))
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 12
+                        font.weight: modelData.activated ? Font.DemiBold : Font.Normal
+                        color: modelData.activated ? Theme.accentBlue : Theme.textPrimary
+                        elide: Text.ElideRight
+                    }
+
+                    // Direct close window button
+                    Rectangle {
+                        Layout.preferredWidth: 18
+                        Layout.preferredHeight: 18
+                        radius: 9
+                        color: closeWinMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : "transparent"
+                        opacity: winMouse.containsMouse ? 1.0 : 0.0
+
+                        Behavior on opacity { NumberAnimation { duration: 100 } }
+
+                        SvgIcon {
+                            anchors.centerIn: parent
+                            name: "close"
+                            size: 10
+                            color: closeWinMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                        }
+
+                        MouseArea {
+                            id: closeWinMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                if (modelData.isKWin) {
+                                    WindowService.closeWindow(modelData.id);
+                                } else if (modelData.raw) {
+                                    try { modelData.raw.close(); } catch(e) {}
+                                }
+                            }
+                        }
+                    }
+                }
+
+                MouseArea {
+                    id: winMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (modelData.isKWin) {
+                            WindowService.activateWindow(modelData.id);
+                        } else if (modelData.raw) {
+                            if (modelData.raw.minimized) modelData.raw.minimized = false;
+                            modelData.raw.activate();
+                        }
+                        root.isOpen = false;
+                        root.closed();
+                    }
+                }
+            }
+        }
+
+        // Separator after open windows
         Rectangle {
+            visible: root.openWindows.length > 0
+            width: parent.width - 12
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 1
+            color: Qt.rgba(1, 1, 1, 0.08)
+        }
+
+        // Desktop Actions / Jumplists (e.g. New Private Window, New Tab, etc.)
+        Repeater {
+            model: root.desktopActions
+
+            delegate: Rectangle {
+                id: actionItem
+                width: parent.width
+                height: 28
+                radius: 7
+                color: actionMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    spacing: 8
+
+                    SvgIcon {
+                        name: "arrow-right"
+                        size: 12
+                        color: Theme.accentCyan
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: modelData.name || "Action"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 13
+                        color: Theme.textPrimary
+                        elide: Text.ElideRight
+                    }
+                }
+
+                MouseArea {
+                    id: actionMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        try {
+                            modelData.execute();
+                        } catch(e) {
+                            console.warn("[DockContextMenu] Error executing action:", e);
+                        }
+                        root.isOpen = false;
+                        root.closed();
+                    }
+                }
+            }
+        }
+
+        // Separator after Desktop Actions
+        Rectangle {
+            visible: root.desktopActions.length > 0
             width: parent.width - 12
             anchors.horizontalCenter: parent.horizontalCenter
             height: 1

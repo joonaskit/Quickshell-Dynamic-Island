@@ -8,7 +8,6 @@ Item {
     property var appData: null
     property real dockScale: 1.0
     property bool isHovered: false
-    property real bounceOffset: 0
     property bool isDraggable: false
     property int itemIndex: -1
     property bool isDragging: false
@@ -17,31 +16,37 @@ Item {
     readonly property real bounceHeight: launchBounceHeight + clickBounceHeight
     property real pressScale: 1.0
 
+    readonly property bool isVertical: Theme.dockPosition === "left" || Theme.dockPosition === "right"
+    readonly property string dockPosition: Theme.dockPosition
+
     Behavior on pressScale {
         NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
     }
 
     signal requestContextMenu(var app, real x, real y)
-    signal mouseMoved(real contentRowX)
+    signal requestWindowPicker(var app, real x, real y)
+    signal requestCloseWindowPicker()
+    signal mouseMoved(real contentCoord)
     signal mouseExited()
-    signal dragStarted(int index, real startX)
-    signal dragMoved(int index, real deltaX, real currentX)
+    signal dragStarted(int index, real startPos)
+    signal dragMoved(int index, real delta, real currentPos)
     signal dragFinished(int index)
 
     readonly property var stateObj: (appData && DockService.runningStateMap[appData.id]) ? DockService.runningStateMap[appData.id] : ({ running: false, focused: false, count: 0 })
     readonly property bool isRunning: stateObj.running
     readonly property bool isFocused: stateObj.focused
     readonly property int windowCount: stateObj.count
+    readonly property int unreadNotifCount: (root.appData && NotificationService.notifications) ? NotificationService.getUnreadCountForApp(root.appData.id, root.appData.name) : 0
 
-    width: Theme.dockIconSize + 8
-    height: Theme.dockHeight
+    width: isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
+    height: isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
 
     // Smooth scaling behavior
     Behavior on dockScale {
         NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
     }
 
-    // Simple, snappy bounce animation on click
+    // Snappy bounce animation on click
     SequentialAnimation {
         id: clickBounceAnim
         alwaysRunToEnd: true
@@ -80,16 +85,56 @@ Item {
         }
     }
 
+    // Multi-window hover picker trigger
+    onIsHoveredChanged: {
+        if (isHovered) {
+            if (windowCount > 1 && !isDragging) {
+                hoverPickerTimer.restart();
+            }
+        } else {
+            hoverPickerTimer.stop();
+            root.requestCloseWindowPicker();
+        }
+    }
+
+    Timer {
+        id: hoverPickerTimer
+        interval: 220
+        repeat: false
+        onTriggered: {
+            if (root.isHovered && root.windowCount > 1 && !root.isDragging) {
+                let mapped = root.mapToItem(null, root.width / 2, root.height / 2);
+                root.requestWindowPicker(root.appData, mapped.x, mapped.y);
+            }
+        }
+    }
+
+    Timer {
+        id: wheelResetTimer
+        interval: 120
+        repeat: false
+        onTriggered: root.pressScale = 1.0
+    }
+
     // Main Icon Container that scales and bounces
     Item {
         id: iconContainer
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 10 + root.bounceHeight
         width: Theme.dockIconSize
         height: Theme.dockIconSize
 
-        transformOrigin: Item.Bottom
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.bottomMargin: (!root.isVertical) ? (10 + root.bounceHeight) : undefined
+
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? (10 + root.bounceHeight) : undefined
+
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? (10 + root.bounceHeight) : undefined
+
+        transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
         scale: root.dockScale * root.pressScale
 
         // Application icon image
@@ -137,16 +182,87 @@ Item {
                 color: "#ffffff"
             }
         }
+
+        // Unread Notification Badge
+        Rectangle {
+            id: notifBadge
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: -4
+            anchors.rightMargin: -4
+            z: 10
+            height: 18
+            width: Math.max(18, badgeText.implicitWidth + 8)
+            radius: 9
+            color: Theme.accentRed
+            border.color: "#1c1c1e"
+            border.width: 1.5
+            visible: opacity > 0.01
+            opacity: root.unreadNotifCount > 0 ? 1.0 : 0.0
+            scale: root.unreadNotifCount > 0 ? 1.0 : 0.0
+
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutBack } }
+
+            Text {
+                id: badgeText
+                anchors.centerIn: parent
+                text: root.unreadNotifCount > 99 ? "99+" : String(root.unreadNotifCount)
+                font.family: Theme.fontFamily
+                font.pixelSize: 10
+                font.weight: Font.Bold
+                color: "#ffffff"
+            }
+        }
     }
 
-    // Running indicator dot directly underneath the icon
+    // Active Window Glow Halo
+    Rectangle {
+        id: pipGlow
+        z: 1
+
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.bottomMargin: (!root.isVertical) ? 1 : undefined
+
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? 1 : undefined
+
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? 1 : undefined
+
+        width: root.isVertical ? 8 : (root.isFocused ? 22 : 0)
+        height: root.isVertical ? (root.isFocused ? 22 : 0) : 8
+        radius: 4
+        color: Qt.rgba(10/255, 132/255, 255/255, 0.45)
+        opacity: (root.isRunning && root.isFocused) ? 1.0 : 0.0
+
+        Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+        Behavior on width { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+    }
+
+    // Running indicator dot / active pill
     Rectangle {
         id: runningDot
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 3
-        width: root.isFocused ? 10 : 4
-        height: 4
+        z: 2
+
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
+        anchors.bottomMargin: (!root.isVertical) ? 3 : undefined
+
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? 3 : undefined
+
+        anchors.right: (root.dockPosition === "right") ? parent.right : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? 3 : undefined
+
+        width: root.isVertical ? 4 : (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4))
+        height: root.isVertical ? (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4)) : 4
         radius: 2
         color: root.isFocused ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.75)
         opacity: root.isRunning ? 1.0 : 0.0
@@ -157,20 +273,33 @@ Item {
         Behavior on width {
             NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
         }
+        Behavior on height {
+            NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
+        }
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }
         }
     }
 
-    // Tooltip floating above icon
+    // Tooltip floating above or beside icon (shown only when 1 or 0 windows)
     Item {
         id: tooltipContainer
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: iconContainer.top
-        anchors.bottomMargin: 14 + (root.dockScale - 1.0) * Theme.dockIconSize
+
+        anchors.horizontalCenter: root.isVertical ? undefined : parent.horizontalCenter
+        anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
+
+        anchors.bottom: (!root.isVertical) ? iconContainer.top : undefined
+        anchors.bottomMargin: (!root.isVertical) ? (14 + (root.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+        anchors.left: (root.dockPosition === "left") ? iconContainer.right : undefined
+        anchors.leftMargin: (root.dockPosition === "left") ? (14 + (root.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
+        anchors.right: (root.dockPosition === "right") ? iconContainer.left : undefined
+        anchors.rightMargin: (root.dockPosition === "right") ? (14 + (root.dockScale - 1.0) * Theme.dockIconSize) : undefined
+
         width: tooltipBg.width
         height: tooltipBg.height
-        opacity: (!root.isDragging && root.isHovered && root.dockScale > 1.1) ? 1.0 : 0.0
+        opacity: (!root.isDragging && root.isHovered && root.dockScale > 1.1 && root.windowCount <= 1) ? 1.0 : 0.0
         visible: opacity > 0.01
 
         Behavior on opacity {
@@ -198,7 +327,7 @@ Item {
         }
     }
 
-    // Mouse area for click, drag, and hover
+    // Mouse area for click, drag, scroll, and hover
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -206,8 +335,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: (root.isDraggable && root.isDragging) ? Qt.ClosedHandCursor : Qt.PointingHandCursor
 
-        property real pressStartContentX: 0
-        property real pressStartContentY: 0
+        property real pressStartCoord: 0
         property bool hasDragged: false
 
         onEntered: {
@@ -219,11 +347,45 @@ Item {
             root.mouseExited();
         }
 
+        // Scroll wheel to cycle through open windows!
+        onWheel: function(wheel) {
+            if (!root.appData || !root.isRunning) return;
+            let wins = DockService.findToplevels(root.appData);
+            if (wins.length <= 1) return;
+
+            let activeIdx = -1;
+            for (let i = 0; i < wins.length; i++) {
+                if (wins[i].activated) {
+                    activeIdx = i;
+                    break;
+                }
+            }
+
+            let nextIdx = 0;
+            if (wheel.angleDelta.y < 0) {
+                // Scroll down: cycle next window
+                nextIdx = (activeIdx + 1) % wins.length;
+            } else {
+                // Scroll up: cycle previous window
+                nextIdx = (activeIdx - 1 + wins.length) % wins.length;
+            }
+
+            let nw = wins[nextIdx];
+            if (nw.isKWin) {
+                WindowService.activateWindow(nw.id);
+            } else if (nw.raw) {
+                if (nw.raw.minimized) nw.raw.minimized = false;
+                nw.raw.activate();
+            }
+
+            root.pressScale = 0.92;
+            wheelResetTimer.restart();
+        }
+
         onPressed: function(mouse) {
             if (mouse.button === Qt.LeftButton) {
                 let mapped = root.mapToItem(root.parent, mouse.x, mouse.y);
-                pressStartContentX = mapped.x;
-                pressStartContentY = mapped.y;
+                pressStartCoord = root.isVertical ? mapped.y : mapped.x;
                 hasDragged = false;
                 root.pressScale = 0.88;
             }
@@ -231,21 +393,22 @@ Item {
 
         onPositionChanged: function(mouse) {
             let mapped = root.mapToItem(root.parent, mouse.x, mouse.y);
+            let currentCoord = root.isVertical ? mapped.y : mapped.x;
+
             if ((mouse.buttons & Qt.LeftButton) && root.isDraggable) {
-                let dx = mapped.x - pressStartContentX;
-                let dy = mapped.y - pressStartContentY;
-                if (!hasDragged && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+                let delta = currentCoord - pressStartCoord;
+                if (!hasDragged && Math.abs(delta) > 6) {
                     hasDragged = true;
                     root.pressScale = 1.0;
                     root.isDragging = true;
-                    root.dragStarted(root.itemIndex, pressStartContentX);
+                    root.dragStarted(root.itemIndex, pressStartCoord);
                 }
                 if (hasDragged) {
-                    root.dragMoved(root.itemIndex, dx, mapped.x);
+                    root.dragMoved(root.itemIndex, delta, currentCoord);
                     return;
                 }
             }
-            root.mouseMoved(mapped.x);
+            root.mouseMoved(currentCoord);
         }
 
         onReleased: function(mouse) {
@@ -271,7 +434,7 @@ Item {
 
         onClicked: function(mouse) {
             if (mouse.button === Qt.RightButton) {
-                let mapPos = root.mapToItem(null, root.width / 2, 0);
+                let mapPos = root.mapToItem(null, root.width / 2, root.height / 2);
                 root.requestContextMenu(root.appData, mapPos.x, mapPos.y);
             } else if (!hasDragged && !root.isDragging) {
                 root.pressScale = 1.0;
