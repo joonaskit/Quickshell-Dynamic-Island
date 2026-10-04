@@ -73,17 +73,8 @@ Item {
         anchors.fill: parent
         radius: 18
         color: "#1c1c1e"
-        border.color: Qt.rgba(1, 1, 1, 0.16)
-        border.width: 1
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: 1
-            radius: 18
-            color: Qt.rgba(1, 1, 1, 0.22)
-        }
+        border.color: Theme.dockBorder
+        border.width: Theme.dockShowBorder ? 1 : 0
 
         // Clicking anywhere on picker background returns focus to search
         MouseArea {

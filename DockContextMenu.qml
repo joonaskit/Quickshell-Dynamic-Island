@@ -56,19 +56,8 @@ Item {
         anchors.fill: parent
         radius: 14
         color: "#1c1c1e"
-        border.color: (WindowService.isMaximized || WindowService.hasFullscreenApp) ? "transparent" : Qt.rgba(1, 1, 1, 0.14)
-        border.width: (WindowService.isMaximized || WindowService.hasFullscreenApp) ? 0 : 1
-
-        // Subtle top highlight border
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: 1
-            radius: 14
-            color: Qt.rgba(1, 1, 1, 0.20)
-            visible: !(WindowService.isMaximized || WindowService.hasFullscreenApp)
-        }
+        border.color: Theme.dockBorder
+        border.width: Theme.dockShowBorder ? 1 : 0
     }
 
     Column {

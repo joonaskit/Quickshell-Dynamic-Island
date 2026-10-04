@@ -968,9 +968,89 @@ Item {
                         anchors.top: parent.top
                         spacing: 0
 
+                        // 1. Dock Screen Edge Position
+                        SettingSegmented {
+                            title: "Dock Position"
+                            description: "Screen edge where the dock is pinned (Bottom, Left, or Right)"
+                            iconName: "desktop"
+                            iconColor: Theme.accentBlue
+                            currentValue: SettingsService.dockPosition
+                            options: [
+                                { label: "Bottom", value: "bottom" },
+                                { label: "Left", value: "left" },
+                                { label: "Right", value: "right" }
+                            ]
+                            onSelected: function(val) {
+                                SettingsService.setSetting("dockPosition", val);
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
+                        // 2. Dock Base Icon Size Slider
+                        SettingSlider {
+                            title: "Dock Icon Size"
+                            description: "Base icon dimension in the dock capsule (36px – 64px)"
+                            iconName: "sliders"
+                            iconColor: Theme.accentCyan
+                            value: SettingsService.dockIconSize
+                            minimumValue: 36
+                            maximumValue: 64
+                            stepSize: 2
+                            valueDisplay: SettingsService.dockIconSize + "px"
+                            presets: [
+                                { label: "36px", value: 36 },
+                                { label: "44px (Default)", value: 44 },
+                                { label: "52px", value: 52 },
+                                { label: "64px", value: 64 }
+                            ]
+                            onValueModified: function(val) {
+                                SettingsService.setSetting("dockIconSize", Math.round(val));
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
+                        // 3. Hover Magnification Scale Slider
+                        SettingSlider {
+                            title: "Hover Magnification"
+                            description: "Cursor proximity wave zoom effect (1.0x = disabled, up to 1.5x)"
+                            iconName: "search"
+                            iconColor: Theme.accentPurple
+                            value: SettingsService.dockScaleHover
+                            minimumValue: 1.00
+                            maximumValue: 1.50
+                            stepSize: 0.01
+                            valueDisplay: SettingsService.dockScaleHover <= 1.01 ? "Disabled" : (SettingsService.dockScaleHover.toFixed(2) + "x")
+                            presets: [
+                                { label: "Disabled", value: 1.00 },
+                                { label: "1.15x", value: 1.15 },
+                                { label: "1.28x (Default)", value: 1.28 },
+                                { label: "1.40x", value: 1.40 },
+                                { label: "1.50x", value: 1.50 }
+                            ]
+                            onValueModified: function(val) {
+                                SettingsService.setSetting("dockScaleHover", val);
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(1, 1, 1, 0.06)
+                        }
+
                         SettingToggle {
                             title: "Auto-Hide Dock on Fullscreen"
-                            description: "Automatically hides the bottom dock when games or fullscreen apps are active"
+                            description: "Automatically hides the dock when games or fullscreen apps are active"
                             iconName: "desktop"
                             iconColor: Theme.accentBlue
                             checked: SettingsService.dockAutoHideOnFullscreen
@@ -1004,7 +1084,7 @@ Item {
 
                         SettingToggle {
                             title: "Always Auto-Hide Dock"
-                            description: "Keeps the dock hidden off-screen until you hover over the bottom edge"
+                            description: "Keeps the dock hidden off-screen until you hover over its screen edge"
                             iconName: "chevron-down"
                             iconColor: Theme.accentCyan
                             checked: SettingsService.dockAutoHideAlways
@@ -1454,6 +1534,7 @@ Item {
         property real maximumValue: 1.25
         property real stepSize: 0.05
         property var presets: []
+        property string valueDisplay: ""
 
         signal valueModified(real newValue)
 
@@ -1517,9 +1598,9 @@ Item {
                     }
                 }
 
-                // Live Percentage Badge
+                // Live Value Badge
                 Rectangle {
-                    Layout.preferredWidth: 50
+                    Layout.preferredWidth: Math.max(50, valueBadgeText.implicitWidth + 16)
                     Layout.preferredHeight: 24
                     radius: 12
                     color: Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.18)
@@ -1527,8 +1608,9 @@ Item {
                     border.color: Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.35)
 
                     Text {
+                        id: valueBadgeText
                         anchors.centerIn: parent
-                        text: Math.round(sliderRow.value * 100) + "%"
+                        text: sliderRow.valueDisplay !== "" ? sliderRow.valueDisplay : (Math.round(sliderRow.value * 100) + "%")
                         font.family: Theme.fontDisplay
                         font.pixelSize: 11
                         font.weight: Font.Bold
@@ -1639,7 +1721,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 24
                         radius: 6
-                        readonly property bool isSelected: Math.abs(sliderRow.value - modelData.value) < 0.02
+                        readonly property bool isSelected: Math.abs(sliderRow.value - modelData.value) <= Math.max(0.01, sliderRow.stepSize * 0.51)
                         color: isSelected ? Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.25) : (presetMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04))
                         border.width: isSelected ? 1 : 0
                         border.color: isSelected ? sliderRow.iconColor : "transparent"

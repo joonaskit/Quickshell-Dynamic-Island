@@ -52,18 +52,8 @@ Item {
         anchors.fill: parent
         radius: 14
         color: Theme.dockTransparent ? Qt.rgba(0.12, 0.13, 0.16, 0.92) : "#1c1c1e"
-        border.color: Qt.rgba(1, 1, 1, 0.16)
-        border.width: 1
-
-        // Top subtle highlight edge
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: 1
-            radius: 14
-            color: Qt.rgba(1, 1, 1, 0.22)
-        }
+        border.color: Theme.dockBorder
+        border.width: Theme.dockShowBorder ? 1 : 0
     }
 
     Column {

@@ -204,14 +204,10 @@ PanelWindow {
     // Static hitbox covering the interaction zone
     Item {
         id: dockStaticHitBox
-        anchors.bottom: (!window.isVertical) ? parent.bottom : undefined
-        anchors.horizontalCenter: (!window.isVertical) ? parent.horizontalCenter : undefined
-        anchors.left: (window.dockPosition === "left") ? parent.left : undefined
-        anchors.right: (window.dockPosition === "right") ? parent.right : undefined
-        anchors.verticalCenter: window.isVertical ? parent.verticalCenter : undefined
-
         width: window.isVertical ? (Theme.dockHeight + Theme.dockBottomMargin + 48) : Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
         height: window.isVertical ? Math.round(Math.max((dockBar.capsuleHeight || 0) + 60, Theme.px(420))) : (Theme.dockHeight + Theme.dockBottomMargin + 48)
+        x: window.dockPosition === "left" ? 0 : (window.dockPosition === "right" ? (parent.width - width) : Math.round((parent.width - width) / 2))
+        y: window.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height)
         visible: !window.hasFullscreenApp && (!window.isDockHidden || window.dockRevealed)
 
         HoverHandler {
@@ -252,14 +248,10 @@ PanelWindow {
     Item {
         id: dockEdgeTrigger
         z: 2
-        anchors.bottom: (!window.isVertical) ? parent.bottom : undefined
-        anchors.horizontalCenter: (!window.isVertical) ? parent.horizontalCenter : undefined
-        anchors.left: (window.dockPosition === "left") ? parent.left : undefined
-        anchors.right: (window.dockPosition === "right") ? parent.right : undefined
-        anchors.verticalCenter: window.isVertical ? parent.verticalCenter : undefined
-
         width: window.isVertical ? Math.max(12, Theme.px(12)) : Math.round(Math.max((dockBar.capsuleWidth || 0) + 60, Theme.px(420)))
         height: window.isVertical ? Math.round(Math.max((dockBar.capsuleHeight || 0) + 60, Theme.px(420))) : Math.max(12, Theme.px(12))
+        x: window.dockPosition === "left" ? 0 : (window.dockPosition === "right" ? (parent.width - width) : Math.round((parent.width - width) / 2))
+        y: window.isVertical ? Math.round((parent.height - height) / 2) : (parent.height - height)
         visible: window.isDockHidden && !window.dockRevealed && !window.hasFullscreenApp
 
         HoverHandler {
@@ -289,36 +281,17 @@ PanelWindow {
     }
 
     // Floating Dock Bar Capsule
+    // Floating Dock Bar Capsule & Popups
     DockBar {
         id: dockBar
         z: 10
+        anchors.fill: parent
+        shouldDropDock: window.shouldDropDock
 
-        anchors.horizontalCenter: (!window.isVertical) ? parent.horizontalCenter : undefined
-        anchors.verticalCenter: window.isVertical ? parent.verticalCenter : undefined
-
-        anchors.bottom: (!window.isVertical) ? parent.bottom : undefined
-        anchors.bottomMargin: (!window.isVertical) ? (window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin) : undefined
-
-        anchors.left: (window.dockPosition === "left") ? parent.left : undefined
-        anchors.leftMargin: (window.dockPosition === "left") ? (window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin) : undefined
-
-        anchors.right: (window.dockPosition === "right") ? parent.right : undefined
-        anchors.rightMargin: (window.dockPosition === "right") ? (window.shouldDropDock ? window.dropTargetMargin : Theme.dockBottomMargin) : undefined
-
-        // Smooth hide animation when dropped or fullscreen
-        opacity: window.hasFullscreenApp ? 0.0 : (window.shouldDropDock ? 0.0 : 1.0)
+        opacity: window.hasFullscreenApp ? 0.0 : 1.0
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
-        }
-        Behavior on anchors.bottomMargin {
-            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
-        }
-        Behavior on anchors.leftMargin {
-            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
-        }
-        Behavior on anchors.rightMargin {
-            NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
     }
 }

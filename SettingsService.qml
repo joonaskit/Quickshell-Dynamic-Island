@@ -27,6 +27,8 @@ Singleton {
     property bool dockAutoHideAlways: false
     property bool dockShowBorder: false
     property bool dockTransparent: false
+    property string dockPosition: "bottom"
+    property int dockIconSize: 44
     property real dockScaleHover: 1.28
 
     // Top Right Status Cluster icon toggles
@@ -114,7 +116,15 @@ Singleton {
         if (data.dockAutoHideAlways !== undefined) root.dockAutoHideAlways = !!data.dockAutoHideAlways;
         if (data.dockShowBorder !== undefined) root.dockShowBorder = !!data.dockShowBorder;
         if (data.dockTransparent !== undefined) root.dockTransparent = !!data.dockTransparent;
-        if (data.dockScaleHover !== undefined && !isNaN(data.dockScaleHover)) root.dockScaleHover = parseFloat(data.dockScaleHover);
+        if (data.dockPosition !== undefined && (data.dockPosition === "bottom" || data.dockPosition === "left" || data.dockPosition === "right")) {
+            root.dockPosition = data.dockPosition;
+        }
+        if (data.dockIconSize !== undefined && !isNaN(data.dockIconSize)) {
+            root.dockIconSize = Math.max(36, Math.min(64, parseInt(data.dockIconSize)));
+        }
+        if (data.dockScaleHover !== undefined && !isNaN(data.dockScaleHover)) {
+            root.dockScaleHover = Math.max(1.0, Math.min(1.5, parseFloat(data.dockScaleHover)));
+        }
         if (data.autoCollapseTimeout !== undefined && !isNaN(data.autoCollapseTimeout)) root.autoCollapseTimeout = parseInt(data.autoCollapseTimeout);
 
         if (data.showCaffeineIcon !== undefined) root.showCaffeineIcon = !!data.showCaffeineIcon;
@@ -167,6 +177,8 @@ Singleton {
         Theme.dockAutoHideAlways = root.dockAutoHideAlways;
         Theme.dockShowBorder = root.dockShowBorder;
         Theme.dockTransparent = root.dockTransparent;
+        Theme.dockPosition = root.dockPosition;
+        Theme.baseDockIconSize = root.dockIconSize;
         Theme.dockScaleHover = root.dockScaleHover;
         Theme.autoCollapseTimeout = root.autoCollapseTimeout;
     }
@@ -200,6 +212,8 @@ Singleton {
         root.dockAutoHideAlways = false;
         root.dockShowBorder = false;
         root.dockTransparent = false;
+        root.dockPosition = "bottom";
+        root.dockIconSize = 44;
         root.dockScaleHover = 1.28;
 
         root.showCaffeineIcon = true;
@@ -269,6 +283,8 @@ Singleton {
             "dockAutoHideAlways": root.dockAutoHideAlways,
             "dockShowBorder": root.dockShowBorder,
             "dockTransparent": root.dockTransparent,
+            "dockPosition": root.dockPosition,
+            "dockIconSize": root.dockIconSize,
             "dockScaleHover": root.dockScaleHover,
             "showCaffeineIcon": root.showCaffeineIcon,
             "showWifiIcon": root.showWifiIcon,
