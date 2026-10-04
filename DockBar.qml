@@ -10,6 +10,9 @@ Item {
     property alias appPickerHitBox: appPicker
     property alias trashMenuHitBox: trashMenu
 
+    property bool contextMenuOpen: contextMenu.isOpen
+    property bool appPickerOpen: appPicker.isOpen
+    property bool trashMenuOpen: trashMenu.isOpen
     property alias contextMenuOpen: contextMenu.isOpen
     property alias appPickerOpen: appPicker.isOpen
     property alias trashMenuOpen: trashMenu.isOpen
@@ -25,6 +28,12 @@ Item {
     // Mouse tracking for magnification wave
     property real currentMouseX: -9999
     property bool isMouseInside: false
+
+    // Drag and drop state for reordering pinned apps
+    property int draggedIndex: -1
+    property int dragTargetIndex: -1
+    property real dragOffset: 0
+    readonly property bool isDraggingPinned: draggedIndex >= 0
 
     function closeAllPopups() {
         contextMenu.isOpen = false;
@@ -63,6 +72,7 @@ Item {
             }
 
             onPositionChanged: function(mouse) {
+                if (root.isDraggingPinned) return;
                 let mapped = mapToItem(contentRow, mouse.x, mouse.y);
                 root.currentMouseX = mapped.x;
             }
@@ -106,7 +116,7 @@ Item {
                 height: Theme.dockHeight
 
                 property real dockScale: {
-                    if (!root.isMouseInside) return 1.0;
+                    if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
                     let center = launchpadItem.x + launchpadItem.width / 2;
                     let dist = Math.abs((root.currentMouseX - 12) - center);
                     if (dist < 80) {
@@ -198,6 +208,7 @@ Item {
 
                     onEntered: { root.isMouseInside = true; }
                     onPositionChanged: function(mouse) {
+                        if (root.isDraggingPinned) return;
                         let p = launchpadMouse.mapToItem(contentRow, mouse.x, mouse.y);
                         root.isMouseInside = true;
                         root.currentMouseX = p.x;
@@ -231,8 +242,49 @@ Item {
                 delegate: DockItem {
                     id: pinnedItem
                     appData: modelData
+                    isDraggable: true
+                    itemIndex: index
+
+                    readonly property bool isBeingDragged: root.draggedIndex === index
+                    readonly property real itemStep: pinnedItem.width + contentRow.spacing
+
+                    readonly property real displacement: {
+                        if (root.draggedIndex < 0) return 0;
+                        if (isBeingDragged) return root.dragOffset;
+
+                        let fromIdx = root.draggedIndex;
+                        let toIdx = root.dragTargetIndex;
+                        if (toIdx > fromIdx) {
+                            if (index > fromIdx && index <= toIdx) {
+                                return -itemStep;
+                            }
+                        } else if (toIdx < fromIdx) {
+                            if (index < fromIdx && index >= toIdx) {
+                                return itemStep;
+                            }
+                        }
+                        return 0;
+                    }
+
+                    transform: Translate {
+                        x: pinnedItem.displacement
+
+                        Behavior on x {
+                            enabled: !pinnedItem.isBeingDragged
+                            NumberAnimation {
+                                duration: 180
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                    }
+
+                    z: isBeingDragged ? 100 : 1
+                    opacity: isBeingDragged ? 0.92 : 1.0
 
                     dockScale: {
+                        if (root.isDraggingPinned) {
+                            return isBeingDragged ? 1.15 : 1.0;
+                        }
                         if (!root.isMouseInside) return 1.0;
                         let itemCenterX = pinnedItem.x + pinnedItem.width / 2;
                         let dist = Math.abs(root.currentMouseX - itemCenterX);
@@ -243,8 +295,36 @@ Item {
                     }
 
                     onMouseMoved: function(cx) {
-                        root.isMouseInside = true;
-                        root.currentMouseX = cx;
+                        if (!root.isDraggingPinned) {
+                            root.isMouseInside = true;
+                            root.currentMouseX = cx;
+                        }
+                    }
+
+                    onDragStarted: function(idx, startX) {
+                        root.closeAllPopups();
+                        root.draggedIndex = idx;
+                        root.dragTargetIndex = idx;
+                        root.dragOffset = 0;
+                    }
+
+                    onDragMoved: function(idx, dx, currentX) {
+                        root.dragOffset = dx;
+                        let shift = Math.round(dx / pinnedItem.itemStep);
+                        let maxIdx = DockService.pinnedApps.length - 1;
+                        let newTarget = Math.max(0, Math.min(maxIdx, idx + shift));
+                        root.dragTargetIndex = newTarget;
+                    }
+
+                    onDragFinished: function(idx) {
+                        let fromIdx = root.draggedIndex;
+                        let toIdx = root.dragTargetIndex;
+                        root.draggedIndex = -1;
+                        root.dragTargetIndex = -1;
+                        root.dragOffset = 0;
+                        if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
+                            DockService.reorderPinnedApps(fromIdx, toIdx);
+                        }
                     }
 
                     onRequestContextMenu: function(app, x, y) {
@@ -277,7 +357,7 @@ Item {
                     appData: modelData
 
                     dockScale: {
-                        if (!root.isMouseInside) return 1.0;
+                        if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
                         let itemCenterX = unpinnedItem.x + unpinnedItem.width / 2;
                         let dist = Math.abs(root.currentMouseX - itemCenterX);
                         if (dist < 85) {
@@ -287,8 +367,10 @@ Item {
                     }
 
                     onMouseMoved: function(cx) {
-                        root.isMouseInside = true;
-                        root.currentMouseX = cx;
+                        if (!root.isDraggingPinned) {
+                            root.isMouseInside = true;
+                            root.currentMouseX = cx;
+                        }
                     }
 
                     onRequestContextMenu: function(app, x, y) {
@@ -317,7 +399,7 @@ Item {
                 height: Theme.dockHeight
 
                 property real dockScale: {
-                    if (!root.isMouseInside) return 1.0;
+                    if (root.isDraggingPinned || !root.isMouseInside) return 1.0;
                     let center = trashItem.x + trashItem.width / 2;
                     let dist = Math.abs(root.currentMouseX - center);
                     if (dist < 85) {
@@ -411,6 +493,7 @@ Item {
 
                     onEntered: { root.isMouseInside = true; }
                     onPositionChanged: function(mouse) {
+                        if (root.isDraggingPinned) return;
                         let p = trashMouse.mapToItem(contentRow, mouse.x, mouse.y);
                         root.isMouseInside = true;
                         root.currentMouseX = p.x;

@@ -9,10 +9,16 @@ Item {
     property real dockScale: 1.0
     property bool isHovered: false
     property real bounceOffset: 0
+    property bool isDraggable: false
+    property int itemIndex: -1
+    property bool isDragging: false
 
     signal requestContextMenu(var app, real x, real y)
     signal mouseMoved(real contentRowX)
     signal mouseExited()
+    signal dragStarted(int index, real startX)
+    signal dragMoved(int index, real deltaX, real currentX)
+    signal dragFinished(int index)
 
     readonly property var stateObj: (appData && DockService.runningStateMap[appData.id]) ? DockService.runningStateMap[appData.id] : ({ running: false, focused: false, count: 0 })
     readonly property bool isRunning: stateObj.running
@@ -136,7 +142,7 @@ Item {
         anchors.bottomMargin: 14 + (root.dockScale - 1.0) * Theme.dockIconSize
         width: tooltipBg.width
         height: tooltipBg.height
-        opacity: (root.isHovered && root.dockScale > 1.1) ? 1.0 : 0.0
+        opacity: (!root.isDragging && root.isHovered && root.dockScale > 1.1) ? 1.0 : 0.0
         visible: opacity > 0.01
 
         Behavior on opacity {
@@ -164,13 +170,17 @@ Item {
         }
     }
 
-    // Mouse area for click and hover
+    // Mouse area for click, drag, and hover
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: (root.isDraggable && root.isDragging) ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+
+        property real pressStartContentX: 0
+        property real pressStartContentY: 0
+        property bool hasDragged: false
 
         onEntered: {
             root.isHovered = true;
@@ -181,16 +191,57 @@ Item {
             root.mouseExited();
         }
 
+        onPressed: function(mouse) {
+            if (mouse.button === Qt.LeftButton) {
+                let mapped = root.mapToItem(root.parent, mouse.x, mouse.y);
+                pressStartContentX = mapped.x;
+                pressStartContentY = mapped.y;
+                hasDragged = false;
+            }
+        }
+
         onPositionChanged: function(mouse) {
             let mapped = root.mapToItem(root.parent, mouse.x, mouse.y);
+            if ((mouse.buttons & Qt.LeftButton) && root.isDraggable) {
+                let dx = mapped.x - pressStartContentX;
+                let dy = mapped.y - pressStartContentY;
+                if (!hasDragged && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+                    hasDragged = true;
+                    root.isDragging = true;
+                    root.dragStarted(root.itemIndex, pressStartContentX);
+                }
+                if (hasDragged) {
+                    root.dragMoved(root.itemIndex, dx, mapped.x);
+                    return;
+                }
+            }
             root.mouseMoved(mapped.x);
+        }
+
+        onReleased: function(mouse) {
+            if (mouse.button === Qt.LeftButton) {
+                if (hasDragged) {
+                    hasDragged = false;
+                    root.isDragging = false;
+                    root.dragFinished(root.itemIndex);
+                    return;
+                }
+            }
+        }
+
+        onCanceled: {
+            if (hasDragged) {
+                hasDragged = false;
+                root.isDragging = false;
+                root.dragFinished(root.itemIndex);
+            }
         }
 
         onClicked: function(mouse) {
             if (mouse.button === Qt.RightButton) {
                 let mapPos = root.mapToItem(null, root.width / 2, 0);
                 root.requestContextMenu(root.appData, mapPos.x, mapPos.y);
-            } else {
+            } else if (!hasDragged && !root.isDragging) {
                 if (!root.isRunning) {
                     bounceAnim.restart();
                 }

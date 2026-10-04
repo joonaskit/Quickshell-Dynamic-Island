@@ -179,17 +179,40 @@ Singleton {
 
     Process {
         id: loadPinnedProc
-        command: ["cat", root.configFilePath]
-        stdout: SplitParser {
-            onRead: function(line) {
-                try {
-                    let parsed = JSON.parse(line.trim());
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        root.pinnedApps = parsed;
-                        root.updateRunningApps();
+        command: ["python3", "-c", "import sys, os; p=sys.argv[1]; sys.stdout.write(open(p).read() if os.path.exists(p) else '')", root.configFilePath]
+        running: true
+
+        stdout: StdioCollector {
+            onTextChanged: {
+                let t = text.trim();
+                if (t.length > 0) {
+                    try {
+                        let parsed = JSON.parse(t);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            root.pinnedApps = parsed;
+                            root.updateRunningApps();
+                        }
+                    } catch(e) {
+                        console.warn("[DockService] Error parsing dock_pinned.json: " + e);
                     }
-                } catch(e) {}
+                }
             }
+        }
+    }
+
+    Process {
+        id: savePinnedProc
+        command: []
+    }
+
+    Timer {
+        id: savePinnedDebounceTimer
+        interval: 100
+        repeat: false
+        onTriggered: {
+            let jsonStr = JSON.stringify(root.pinnedApps, null, 2);
+            savePinnedProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.configFilePath, jsonStr];
+            savePinnedProc.running = true;
         }
     }
 
@@ -200,9 +223,21 @@ Singleton {
     }
 
     function savePinnedApps() {
-        let jsonStr = JSON.stringify(root.pinnedApps, null, 2);
-        let escaped = jsonStr.replace(/'/g, "'\\''");
-        Quickshell.execDetached(["sh", "-c", "echo '" + escaped + "' > '" + root.configFilePath + "'"]);
+        savePinnedDebounceTimer.restart();
+    }
+
+    // Reorder pinned applications
+    function reorderPinnedApps(fromIndex, toIndex) {
+        if (fromIndex === toIndex) return;
+        if (fromIndex < 0 || fromIndex >= root.pinnedApps.length) return;
+        if (toIndex < 0 || toIndex >= root.pinnedApps.length) return;
+
+        let arr = root.pinnedApps.slice();
+        let item = arr.splice(fromIndex, 1)[0];
+        arr.splice(toIndex, 0, item);
+        root.pinnedApps = arr;
+        savePinnedApps();
+        updateRunningApps();
     }
 
     // Pin an application

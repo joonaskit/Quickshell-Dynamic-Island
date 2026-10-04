@@ -49,13 +49,6 @@
     "command": "systemsettings"
   },
   {
-    "id": "steam",
-    "name": "Steam",
-    "icon": "steam",
-    "desktopFile": "steam.desktop",
-    "command": "steam"
-  },
-  {
     "id": "com.microsoft.VSCode",
     "name": "Visual Studio Code",
     "icon": "vscode",
