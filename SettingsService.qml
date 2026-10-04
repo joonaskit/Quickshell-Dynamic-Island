@@ -25,8 +25,6 @@ Singleton {
     property bool dockAutoHideOnFullscreen: true
     property bool dockAutoHideFromWindows: true
     property bool dockAutoHideAlways: false
-    property bool dockShowBorder: false
-    property bool dockTransparent: false
     property real dockScaleHover: 1.28
 
     // Top Right Status Cluster icon toggles
@@ -112,8 +110,6 @@ Singleton {
         if (data.dockAutoHideOnFullscreen !== undefined) root.dockAutoHideOnFullscreen = !!data.dockAutoHideOnFullscreen;
         if (data.dockAutoHideFromWindows !== undefined) root.dockAutoHideFromWindows = !!data.dockAutoHideFromWindows;
         if (data.dockAutoHideAlways !== undefined) root.dockAutoHideAlways = !!data.dockAutoHideAlways;
-        if (data.dockShowBorder !== undefined) root.dockShowBorder = !!data.dockShowBorder;
-        if (data.dockTransparent !== undefined) root.dockTransparent = !!data.dockTransparent;
         if (data.dockScaleHover !== undefined && !isNaN(data.dockScaleHover)) root.dockScaleHover = parseFloat(data.dockScaleHover);
         if (data.autoCollapseTimeout !== undefined && !isNaN(data.autoCollapseTimeout)) root.autoCollapseTimeout = parseInt(data.autoCollapseTimeout);
 
@@ -165,8 +161,6 @@ Singleton {
         Theme.dockAutoHideOnFullscreen = root.dockAutoHideOnFullscreen;
         Theme.dockAutoHideFromWindows = root.dockAutoHideFromWindows;
         Theme.dockAutoHideAlways = root.dockAutoHideAlways;
-        Theme.dockShowBorder = root.dockShowBorder;
-        Theme.dockTransparent = root.dockTransparent;
         Theme.dockScaleHover = root.dockScaleHover;
         Theme.autoCollapseTimeout = root.autoCollapseTimeout;
     }
@@ -198,8 +192,6 @@ Singleton {
         root.dockAutoHideOnFullscreen = true;
         root.dockAutoHideFromWindows = true;
         root.dockAutoHideAlways = false;
-        root.dockShowBorder = false;
-        root.dockTransparent = false;
         root.dockScaleHover = 1.28;
 
         root.showCaffeineIcon = true;
@@ -267,8 +259,6 @@ Singleton {
             "dockAutoHideOnFullscreen": root.dockAutoHideOnFullscreen,
             "dockAutoHideFromWindows": root.dockAutoHideFromWindows,
             "dockAutoHideAlways": root.dockAutoHideAlways,
-            "dockShowBorder": root.dockShowBorder,
-            "dockTransparent": root.dockTransparent,
             "dockScaleHover": root.dockScaleHover,
             "showCaffeineIcon": root.showCaffeineIcon,
             "showWifiIcon": root.showWifiIcon,

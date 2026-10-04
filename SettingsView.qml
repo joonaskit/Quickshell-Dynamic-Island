@@ -1037,8 +1037,8 @@ Item {
                         }
 
                         SettingToggle {
-                            title: "Transparent Dock"
-                            description: "Make the dock capsule background completely transparent"
+                            title: "Transparent Glass Dock"
+                            description: "Use a translucent frosted glass effect with specular highlights for the dock capsule"
                             iconName: "contrast"
                             iconColor: Theme.accentIndigo
                             checked: SettingsService.dockTransparent
