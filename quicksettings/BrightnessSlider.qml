@@ -1,11 +1,11 @@
+import ".."
 import QtQuick
 import QtQuick.Layouts
 
 Item {
     id: root
 
-    property real volume: AudioService.volume
-    property bool isMuted: AudioService.isMuted
+    property real brightness: BrightnessService.brightness
 
     implicitHeight: Theme.px(34)
     implicitWidth: parent ? parent.width : Theme.px(370)
@@ -14,32 +14,18 @@ Item {
         anchors.fill: parent
         spacing: Theme.px(10)
 
-        // Speaker / Mute Toggle Button
+        // Brightness Icon
         Rectangle {
             Layout.preferredWidth: Theme.px(28)
             Layout.preferredHeight: Theme.px(28)
             radius: Theme.px(14)
-            color: muteMouse.containsMouse ? Theme.controlBackgroundHover : "transparent"
+            color: "transparent"
 
             SvgIcon {
                 anchors.centerIn: parent
-                name: {
-                    if (root.isMuted || root.volume <= 0.01) return "volume-mute";
-                    if (root.volume < 0.5) return "volume-low";
-                    return "volume-high";
-                }
+                name: root.brightness < 0.5 ? "brightness-low" : "brightness-high"
                 size: Theme.px(16)
-                color: root.isMuted ? Theme.accentRed : Theme.textPrimary
-            }
-
-            MouseArea {
-                id: muteMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    AudioService.toggleMute();
-                }
+                color: Theme.accentOrange
             }
         }
 
@@ -59,15 +45,15 @@ Item {
                 color: Theme.sliderTrack
                 clip: true
 
-                // Volume Fill
+                // Brightness Fill
                 Rectangle {
                     id: sliderFill
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     radius: Theme.px(9)
-                    color: root.isMuted ? Theme.textTertiary : (dragArea.containsMouse || dragArea.pressed ? Theme.accentBlue : Theme.sliderFill)
-                    width: Math.max(0, Math.min(sliderTrack.width, (root.isMuted ? 0 : root.volume) * sliderTrack.width))
+                    color: (dragArea.containsMouse || dragArea.pressed) ? Theme.accentOrange : Theme.sliderFill
+                    width: Math.max(0, Math.min(sliderTrack.width, root.brightness * sliderTrack.width))
 
                     Behavior on color {
                         ColorAnimation { duration: 150 }
@@ -82,20 +68,20 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 preventStealing: true
 
-                function updateVolume(mouseX) {
-                    let newVol = Math.max(0, Math.min(1.0, mouseX / sliderTrack.width));
-                    AudioService.setVolume(newVol);
+                function updateBrightness(mouseX) {
+                    let newBright = Math.max(0.01, Math.min(1.0, mouseX / sliderTrack.width));
+                    BrightnessService.setBrightness(newBright);
                 }
 
                 onPressed: function(mouse) {
                     releaseTimer.stop();
-                    AudioService.isChanging = true;
-                    updateVolume(mouse.x);
+                    BrightnessService.isChanging = true;
+                    updateBrightness(mouse.x);
                 }
 
                 onPositionChanged: function(mouse) {
                     if (pressed) {
-                        updateVolume(mouse.x);
+                        updateBrightness(mouse.x);
                     }
                 }
 
@@ -105,7 +91,7 @@ Item {
 
                 onWheel: function(wheel) {
                     let step = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
-                    AudioService.setVolume(root.volume + step);
+                    BrightnessService.setBrightness(root.brightness + step);
                 }
             }
 
@@ -113,7 +99,7 @@ Item {
                 id: releaseTimer
                 interval: 250
                 onTriggered: {
-                    AudioService.isChanging = false;
+                    BrightnessService.isChanging = false;
                 }
             }
         }
@@ -122,12 +108,12 @@ Item {
         Text {
             id: percentText
             Layout.preferredWidth: Theme.px(38)
-            text: root.isMuted ? "Mute" : Math.round(root.volume * 100) + "%"
+            text: Math.round(root.brightness * 100) + "%"
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontPx(11)
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
-            color: root.isMuted ? Theme.accentRed : Theme.textSecondary
+            color: Theme.textSecondary
             horizontalAlignment: Text.AlignRight
             Layout.alignment: Qt.AlignVCenter
         }
