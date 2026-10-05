@@ -90,7 +90,7 @@ Singleton {
                 if (t.length > 0) {
                     try {
                         let data = JSON.parse(t);
-                        console.warn("[SettingsService] Settings loaded successfully from settings.json");
+                        console.info("[SettingsService] Settings loaded successfully from settings.json");
                         root.applySettings(data);
                     } catch(e) {
                         console.warn("[SettingsService] Error parsing settings.json: " + e);

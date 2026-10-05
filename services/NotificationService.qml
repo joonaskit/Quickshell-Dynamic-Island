@@ -40,7 +40,7 @@ Singleton {
     }
 
     Component.onCompleted: {
-        console.warn("[NotificationService] Initialized native NotificationServer");
+        console.info("[NotificationService] Initialized native NotificationServer");
     }
 
     function handleNotification(notif) {
@@ -84,7 +84,7 @@ Singleton {
         root.notifications = list;
 
         // Trigger island alert banner animation
-        console.warn("[NotificationService] Received notification:", data.appName, "-", data.summary);
+        console.debug("[NotificationService] Received notification:", data.appName, "-", data.summary);
         root.isAlerting = true;
         alertTimer.restart();
 

@@ -33,13 +33,6 @@ Singleton {
             command: "konsole"
         },
         {
-            id: "antigravity-ide",
-            name: "Antigravity",
-            icon: "/home/jkikke/Lataukset/Antigravity IDE/resources/app/resources/linux/code.png",
-            desktopFile: "",
-            command: "\"/home/jkikke/Lataukset/Antigravity IDE/antigravity-ide\""
-        },
-        {
             id: "zed",
             name: "Zed",
             icon: "dev.zed.Zed",
@@ -917,15 +910,11 @@ Singleton {
             return a.name.localeCompare(b.name);
         });
         root.installedApps = list;
-        Quickshell.execDetached(["bash", "-c", "echo 'installedApps length=" + list.length + "' >> /tmp/qs_dock_debug.log"]);
     }
 
     // Resolve an icon source string to a file URL or image://icon
     function resolveIcon(iconName) {
         if (!iconName || iconName.length === 0) return "";
-        if (iconName.toLowerCase().indexOf("antigravity") >= 0) {
-            return "file:///home/jkikke/Lataukset/Antigravity IDE/resources/app/resources/linux/code.png";
-        }
         if (iconName.startsWith("file://") || iconName.startsWith("image://")) {
             return iconName;
         }
