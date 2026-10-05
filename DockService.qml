@@ -429,12 +429,22 @@ Singleton {
         let cmdLower = (app.command || "").toLowerCase();
         let nameLower = (app.name || "").toLowerCase();
 
+        // Entries declaring StartupWMClass are matched exactly, so that e.g. a
+        // Vivaldi PWA window is not mistaken for the Vivaldi browser itself.
+        let entry = findDesktopEntry(app.desktopFile || app.id || "");
+        let wmClass = ((entry && entry.startupClass) || "").toLowerCase();
+        let strict = wmClass.length > 0;
+
         for (let i = 0; i < wins.length; i++) {
             let w = wins[i];
             if (!w || !w.appId) continue;
             let wApp = w.appId.toLowerCase().replace(/\.desktop$/, "");
 
-            let match = (wApp === idLower || wApp === deskLower || (rawLower.length > 0 && wApp === rawLower));
+            let match = (wApp === idLower || wApp === deskLower || (rawLower.length > 0 && wApp === rawLower) || (strict && wApp === wmClass));
+            if (strict) {
+                if (match) list.push(w);
+                continue;
+            }
             if (!match && idLower.length > 2 && (wApp.endsWith("." + idLower) || deskLower.endsWith("." + wApp) || idLower.indexOf(wApp) >= 0 || wApp.indexOf(idLower) >= 0)) {
                 match = true;
             }

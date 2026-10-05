@@ -2,3 +2,4 @@ settings.json
 dock_pinned.json
 __pycache__/
 *.py[cod]
+CLAUDE.md
