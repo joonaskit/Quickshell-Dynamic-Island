@@ -41,16 +41,16 @@ PowerProfileQuickSettings 1.0 PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 HardwareStatsQuickSettings.qml
 DeviceQuickSettings 1.0 DeviceQuickSettings.qml
 SettingsView 1.0 SettingsView.qml
-singleton DockService 1.0 DockService.qml
-DockWindow 1.0 DockWindow.qml
-DockBar 1.0 DockBar.qml
-DockItem 1.0 DockItem.qml
-DockContextMenu 1.0 DockContextMenu.qml
-DockAppPicker 1.0 DockAppPicker.qml
+singleton DockService 1.0 dock/DockService.qml
+DockWindow 1.0 dock/DockWindow.qml
+DockBar 1.0 dock/DockBar.qml
+DockItem 1.0 dock/DockItem.qml
+DockContextMenu 1.0 dock/DockContextMenu.qml
+DockAppPicker 1.0 dock/DockAppPicker.qml
 TopLeftAppCluster 1.0 TopLeftAppCluster.qml
 VirtualDesktopsPill 1.0 VirtualDesktopsPill.qml
 HiddenElementGlow 1.0 HiddenElementGlow.qml
-DockWindowPicker 1.0 DockWindowPicker.qml
-DockDownloadsStack 1.0 DockDownloadsStack.qml
+DockWindowPicker 1.0 dock/DockWindowPicker.qml
+DockDownloadsStack 1.0 dock/DockDownloadsStack.qml
 singleton DownloadsService 1.0 DownloadsService.qml
 
