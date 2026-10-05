@@ -199,7 +199,8 @@ function sendState() {
     var app = "";
     var scr = "";
 
-    if (win && win.normalWindow !== false) {
+    // Quickshell and Plasma shell surfaces count as the desktop, not an app
+    if (win && win.normalWindow !== false && !isIgnoredApp(getApp(win))) {
         title = getTitle(win);
         app = getApp(win);
         scr = getScreen(win);
