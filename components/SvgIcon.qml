@@ -1,3 +1,4 @@
+import ".."
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Layouts

@@ -13,25 +13,25 @@ singleton PowerProfileService 1.0 services/PowerProfileService.qml
 singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
 singleton DeviceService 1.0 services/DeviceService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
-IslandWindow 1.0 IslandWindow.qml
-IslandPill 1.0 IslandPill.qml
-IslandDetachedBubble 1.0 IslandDetachedBubble.qml
-CompactClockView 1.0 CompactClockView.qml
-CompactMediaView 1.0 CompactMediaView.qml
-CompactNotificationAlertView 1.0 CompactNotificationAlertView.qml
-ExpandedView 1.0 ExpandedView.qml
-NotificationListView 1.0 NotificationListView.qml
-MiniCalendarWidget 1.0 MiniCalendarWidget.qml
-MediaWidget 1.0 MediaWidget.qml
+IslandWindow 1.0 island/IslandWindow.qml
+IslandPill 1.0 island/IslandPill.qml
+IslandDetachedBubble 1.0 island/IslandDetachedBubble.qml
+CompactClockView 1.0 island/CompactClockView.qml
+CompactMediaView 1.0 island/CompactMediaView.qml
+CompactNotificationAlertView 1.0 island/CompactNotificationAlertView.qml
+ExpandedView 1.0 island/ExpandedView.qml
+NotificationListView 1.0 island/NotificationListView.qml
+MiniCalendarWidget 1.0 island/MiniCalendarWidget.qml
+MediaWidget 1.0 island/MediaWidget.qml
 VolumeSlider 1.0 quicksettings/VolumeSlider.qml
 AudioOutputSelector 1.0 quicksettings/AudioOutputSelector.qml
 BrightnessSlider 1.0 quicksettings/BrightnessSlider.qml
-AudioVisualizer 1.0 AudioVisualizer.qml
-SvgIcon 1.0 SvgIcon.qml
-TopBarWings 1.0 TopBarWings.qml
-BatteryIndicator 1.0 BatteryIndicator.qml
-AppIndicatorPill 1.0 AppIndicatorPill.qml
-TopRightStatusCluster 1.0 TopRightStatusCluster.qml
+AudioVisualizer 1.0 components/AudioVisualizer.qml
+SvgIcon 1.0 components/SvgIcon.qml
+TopBarWings 1.0 island/TopBarWings.qml
+BatteryIndicator 1.0 components/BatteryIndicator.qml
+AppIndicatorPill 1.0 island/AppIndicatorPill.qml
+TopRightStatusCluster 1.0 island/TopRightStatusCluster.qml
 WifiQuickSettings 1.0 quicksettings/WifiQuickSettings.qml
 BluetoothQuickSettings 1.0 quicksettings/BluetoothQuickSettings.qml
 PowerQuickSettings 1.0 quicksettings/PowerQuickSettings.qml
@@ -40,16 +40,16 @@ MicrophoneQuickSettings 1.0 quicksettings/MicrophoneQuickSettings.qml
 PowerProfileQuickSettings 1.0 quicksettings/PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 quicksettings/HardwareStatsQuickSettings.qml
 DeviceQuickSettings 1.0 quicksettings/DeviceQuickSettings.qml
-SettingsView 1.0 SettingsView.qml
+SettingsView 1.0 island/SettingsView.qml
 singleton DockService 1.0 dock/DockService.qml
 DockWindow 1.0 dock/DockWindow.qml
 DockBar 1.0 dock/DockBar.qml
 DockItem 1.0 dock/DockItem.qml
 DockContextMenu 1.0 dock/DockContextMenu.qml
 DockAppPicker 1.0 dock/DockAppPicker.qml
-TopLeftAppCluster 1.0 TopLeftAppCluster.qml
-VirtualDesktopsPill 1.0 VirtualDesktopsPill.qml
-HiddenElementGlow 1.0 HiddenElementGlow.qml
+TopLeftAppCluster 1.0 island/TopLeftAppCluster.qml
+VirtualDesktopsPill 1.0 island/VirtualDesktopsPill.qml
+HiddenElementGlow 1.0 components/HiddenElementGlow.qml
 DockWindowPicker 1.0 dock/DockWindowPicker.qml
 DockDownloadsStack 1.0 dock/DockDownloadsStack.qml
 singleton DownloadsService 1.0 services/DownloadsService.qml
