@@ -55,7 +55,7 @@ Singleton {
     }
 
     function openFolder() {
-        let home = Quickshell.env("HOME") || "/home/jkikke";
+        let home = Quickshell.env("HOME");
         let dir = root.downloadsDir || (home + "/Downloads");
         Quickshell.execDetached(["xdg-open", dir]);
     }
