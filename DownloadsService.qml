@@ -13,7 +13,7 @@ Singleton {
     // Scanner process that queries the downloads folder and recent files
     Process {
         id: scanProc
-        command: ["python3", "-u", Quickshell.shellDir + "/downloads_tracker.py"]
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/downloads_tracker.py"]
 
         stdout: StdioCollector {
             onTextChanged: {

@@ -52,7 +52,7 @@ Singleton {
     // Background monitor process: streams device list when added/removed/mounted/unmounted
     Process {
         id: monitorProc
-        command: ["python3", "-u", Quickshell.shellDir + "/devices.py", "monitor"]
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/devices.py", "monitor"]
         running: true
 
         onRunningChanged: {
@@ -77,7 +77,7 @@ Singleton {
     // One-shot scan process for explicit manual refresh
     Process {
         id: scanProc
-        command: ["python3", Quickshell.shellDir + "/devices.py", "list"]
+        command: ["python3", Quickshell.shellDir + "/scripts/devices.py", "list"]
         running: false
 
         stdout: StdioCollector {
@@ -116,7 +116,7 @@ Singleton {
         if (!path) return;
         root.operatingDevice = path;
         root.statusMessage = "Mounting...";
-        let cmd = ["python3", Quickshell.shellDir + "/devices.py", "mount", path];
+        let cmd = ["python3", Quickshell.shellDir + "/scripts/devices.py", "mount", path];
         let p = Qt.createQmlObject('import Quickshell.Io; Process { running: true; }', root);
         p.command = cmd;
         p.exited.connect(function() {
@@ -131,7 +131,7 @@ Singleton {
         if (!path) return;
         root.operatingDevice = path;
         root.statusMessage = "Unmounting...";
-        let cmd = ["python3", Quickshell.shellDir + "/devices.py", "unmount", path];
+        let cmd = ["python3", Quickshell.shellDir + "/scripts/devices.py", "unmount", path];
         let p = Qt.createQmlObject('import Quickshell.Io; Process { running: true; }', root);
         p.command = cmd;
         p.exited.connect(function() {
@@ -146,7 +146,7 @@ Singleton {
         if (!path) return;
         root.operatingDevice = path;
         root.statusMessage = "Safely removing...";
-        let cmd = ["python3", Quickshell.shellDir + "/devices.py", "power-off", path];
+        let cmd = ["python3", Quickshell.shellDir + "/scripts/devices.py", "power-off", path];
         let p = Qt.createQmlObject('import Quickshell.Io; Process { running: true; }', root);
         p.command = cmd;
         p.exited.connect(function() {
@@ -159,7 +159,7 @@ Singleton {
 
     function openDevice(mountpoint) {
         if (!mountpoint) return;
-        let cmd = ["python3", Quickshell.shellDir + "/devices.py", "open", mountpoint];
+        let cmd = ["python3", Quickshell.shellDir + "/scripts/devices.py", "open", mountpoint];
         let p = Qt.createQmlObject('import Quickshell.Io; Process { running: true; }', root);
         p.command = cmd;
         p.exited.connect(function() {

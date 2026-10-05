@@ -203,7 +203,7 @@ Singleton {
 
     Process {
         id: trackerProc
-        command: ["python3", Quickshell.shellDir + "/kwin_window_tracker.py"]
+        command: ["python3", Quickshell.shellDir + "/scripts/kwin_window_tracker.py"]
         running: true
 
         onRunningChanged: {

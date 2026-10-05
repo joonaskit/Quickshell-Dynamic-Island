@@ -69,7 +69,7 @@ Singleton {
     // Process to query audio output sinks
     Process {
         id: sinksProc
-        command: ["python3", Quickshell.shellDir + "/audio_sinks.py", "list"]
+        command: ["python3", Quickshell.shellDir + "/scripts/audio_sinks.py", "list"]
         stdout: StdioCollector {
             onTextChanged: {
                 if (text.length > 0) {
@@ -140,7 +140,7 @@ Singleton {
                 root.currentSinkIcon = root.sinks[i].icon;
             }
         }
-        setSinkProc.command = ["python3", Quickshell.shellDir + "/audio_sinks.py", "set", sinkName];
+        setSinkProc.command = ["python3", Quickshell.shellDir + "/scripts/audio_sinks.py", "set", sinkName];
         setSinkProc.running = true;
     }
 
