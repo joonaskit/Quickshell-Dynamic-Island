@@ -48,7 +48,7 @@ Singleton {
     // Process to query audio sources list
     Process {
         id: sourcesProc
-        command: ["python3", Quickshell.shellDir + "/audio_sources.py", "list"]
+        command: ["python3", Quickshell.shellDir + "/scripts/audio_sources.py", "list"]
         running: false
 
         stdout: StdioCollector {
@@ -143,7 +143,7 @@ Singleton {
     }
 
     function setSource(sourceName) {
-        setSourceProc.command = ["python3", Quickshell.shellDir + "/audio_sources.py", "set", sourceName];
+        setSourceProc.command = ["python3", Quickshell.shellDir + "/scripts/audio_sources.py", "set", sourceName];
         setSourceProc.running = true;
     }
 

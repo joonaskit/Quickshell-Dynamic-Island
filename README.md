@@ -49,9 +49,9 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 | `TopLeftAppCluster.qml`, `TopRightStatusCluster.qml`, `VirtualDesktopsPill.qml`, `AppIndicatorPill.qml` | Top bar clusters |
 | `*QuickSettings.qml` | Popups for each status icon |
 | `*Service.qml` | Backends (audio, network, Bluetooth, brightness, notifications, windows, ...) |
-| `*.py`, `kwin_script.js` | Helper scripts, including the KWin window tracker |
+| `scripts/` | Helper scripts, including the KWin window tracker |
 | `Theme.qml`, `SvgIcon.qml`, `SettingsService.qml`, `SettingsView.qml` | Theming, icons and settings |
-| `ANIMATION_CATALOGUE.md` | Reference for all animations |
+| `docs/ANIMATION_CATALOGUE.md` | Reference for all animations |
 
 ## Configuration
 

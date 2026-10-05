@@ -26,7 +26,7 @@ Singleton {
 
     Process {
         id: statsProc
-        command: ["python3", "-u", Quickshell.shellDir + "/hardware_stats.py"]
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/hardware_stats.py"]
         running: true
 
         onRunningChanged: {
