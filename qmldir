@@ -1,18 +1,18 @@
-singleton Theme 1.0 Theme.qml
-singleton AudioService 1.0 AudioService.qml
-singleton BrightnessService 1.0 BrightnessService.qml
-singleton WindowService 1.0 WindowService.qml
-singleton NetworkService 1.0 NetworkService.qml
-singleton BluetoothService 1.0 BluetoothService.qml
-singleton PowerService 1.0 PowerService.qml
-singleton CaffeineService 1.0 CaffeineService.qml
-singleton ClipboardService 1.0 ClipboardService.qml
-singleton NotificationService 1.0 NotificationService.qml
-singleton MicrophoneService 1.0 MicrophoneService.qml
-singleton PowerProfileService 1.0 PowerProfileService.qml
-singleton HardwareStatsService 1.0 HardwareStatsService.qml
-singleton DeviceService 1.0 DeviceService.qml
-singleton SettingsService 1.0 SettingsService.qml
+singleton Theme 1.0 services/Theme.qml
+singleton AudioService 1.0 services/AudioService.qml
+singleton BrightnessService 1.0 services/BrightnessService.qml
+singleton WindowService 1.0 services/WindowService.qml
+singleton NetworkService 1.0 services/NetworkService.qml
+singleton BluetoothService 1.0 services/BluetoothService.qml
+singleton PowerService 1.0 services/PowerService.qml
+singleton CaffeineService 1.0 services/CaffeineService.qml
+singleton ClipboardService 1.0 services/ClipboardService.qml
+singleton NotificationService 1.0 services/NotificationService.qml
+singleton MicrophoneService 1.0 services/MicrophoneService.qml
+singleton PowerProfileService 1.0 services/PowerProfileService.qml
+singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
+singleton DeviceService 1.0 services/DeviceService.qml
+singleton SettingsService 1.0 services/SettingsService.qml
 IslandWindow 1.0 IslandWindow.qml
 IslandPill 1.0 IslandPill.qml
 IslandDetachedBubble 1.0 IslandDetachedBubble.qml
@@ -52,5 +52,5 @@ VirtualDesktopsPill 1.0 VirtualDesktopsPill.qml
 HiddenElementGlow 1.0 HiddenElementGlow.qml
 DockWindowPicker 1.0 dock/DockWindowPicker.qml
 DockDownloadsStack 1.0 dock/DockDownloadsStack.qml
-singleton DownloadsService 1.0 DownloadsService.qml
+singleton DownloadsService 1.0 services/DownloadsService.qml
 
