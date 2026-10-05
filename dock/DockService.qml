@@ -914,25 +914,6 @@ Singleton {
 
     // Resolve an icon source string to a file URL or image://icon
     function resolveIcon(iconName) {
-        if (!iconName || iconName.length === 0) return "";
-        if (iconName.startsWith("file://") || iconName.startsWith("image://")) {
-            return iconName;
-        }
-        if (iconName.startsWith("/")) {
-            return "file://" + iconName;
-        }
-        if (Quickshell.hasThemeIcon(iconName)) {
-            return "image://icon/" + iconName;
-        }
-        let p = Quickshell.iconPath(iconName);
-        if (p && p.length > 0) {
-            if (p.startsWith("file://") || p.startsWith("image://")) {
-                return p;
-            }
-            if (p.startsWith("/")) {
-                return "file://" + p;
-            }
-        }
-        return "";
+        return WindowService.resolveIconSource(iconName);
     }
 }

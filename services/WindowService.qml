@@ -146,12 +146,8 @@ Singleton {
         Quickshell.execDetached(["loginctl", "lock-session"]);
     }
 
-    function resolveAppIcon(appId) {
-        if (!appId || appId.length === 0) return "";
-        let cleanId = appId.replace(/\.desktop$/, "");
-        let entry = DesktopEntries.byId(cleanId);
-        if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
-        let iconName = entry ? entry.icon : appId;
+    // Resolve an icon name or path to an image source, or "" if not found
+    function resolveIconSource(iconName) {
         if (!iconName || iconName.length === 0) return "";
         if (iconName.startsWith("file://") || iconName.startsWith("image://")) {
             return iconName;
@@ -167,12 +163,19 @@ Singleton {
             if (p.startsWith("file://") || p.startsWith("image://")) {
                 return p;
             }
-            if (p.startsWith("/")) {
-                return "file://" + p;
-            }
             return "file://" + p;
         }
-        return "image://icon/" + iconName;
+        return "";
+    }
+
+    function resolveAppIcon(appId) {
+        if (!appId || appId.length === 0) return "";
+        let cleanId = appId.replace(/\.desktop$/, "");
+        let entry = DesktopEntries.byId(cleanId);
+        if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
+        let iconName = entry ? entry.icon : appId;
+        if (!iconName || iconName.length === 0) return "";
+        return resolveIconSource(iconName) || ("image://icon/" + iconName);
     }
 
     function getAppWindows(appId) {
