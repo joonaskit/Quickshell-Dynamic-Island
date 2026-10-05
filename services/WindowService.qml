@@ -153,9 +153,6 @@ Singleton {
         if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
         let iconName = entry ? entry.icon : appId;
         if (!iconName || iconName.length === 0) return "";
-        if (iconName.toLowerCase().indexOf("antigravity") >= 0) {
-            return "file:///home/jkikke/Lataukset/Antigravity IDE/resources/app/resources/linux/code.png";
-        }
         if (iconName.startsWith("file://") || iconName.startsWith("image://")) {
             return iconName;
         }
