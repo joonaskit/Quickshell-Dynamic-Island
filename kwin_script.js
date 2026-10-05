@@ -155,6 +155,7 @@ function getWindowSummary() {
             var g = getWindowGeometry(w);
             list.push({
                 id: String(w.internalId),
+                pid: (typeof w.pid === "number") ? w.pid : 0,
                 app: app,
                 title: getTitle(w),
                 screen: getScreen(w),

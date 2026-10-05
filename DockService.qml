@@ -387,6 +387,10 @@ Singleton {
                     title: w.title,
                     activated: !!w.active,
                     minimized: !!w.minimized,
+                    rawAppId: w.rawApp || "",
+                    gameName: w.rawApp ? (w.name || "") : "",
+                    gameIcon: w.rawApp ? (w.icon || "") : "",
+                    gameCommand: w.rawApp ? (w.command || "") : "",
                     isKWin: true
                 });
             }
@@ -394,6 +398,12 @@ Singleton {
         if (ToplevelManager.toplevels && ToplevelManager.toplevels.values && ToplevelManager.toplevels.values.length > 0) {
             for (let j = 0; j < ToplevelManager.toplevels.values.length; j++) {
                 let tw = ToplevelManager.toplevels.values[j];
+                let dup = false;
+                for (let k = 0; k < list.length; k++) {
+                    let kw = list[k];
+                    if (kw.isKWin && kw.gameName && kw.rawAppId === tw.appId && kw.title === tw.title) { dup = true; break; }
+                }
+                if (dup) continue;
                 list.push({
                     id: tw.appId,
                     appId: tw.appId,
@@ -796,7 +806,7 @@ Singleton {
 
             if (!isAlreadyPinned) {
                 // Try to resolve desktop entry metadata
-                let entry = root.findDesktopEntry(appId);
+                let entry = w.gameName ? null : root.findDesktopEntry(appId);
                 let effectiveId = entry ? entry.id : appId;
                 let effectiveKey = effectiveId.toLowerCase().replace(/\.desktop$/, "");
 
@@ -821,6 +831,12 @@ Singleton {
                         if (last.length > 0) {
                             appName = last.charAt(0).toUpperCase() + last.slice(1);
                         }
+                    }
+
+                    if (w.gameName) {
+                        appName = w.gameName;
+                        if (w.gameIcon) iconName = w.gameIcon;
+                        execCmd = w.gameCommand || "";
                     }
 
                     unpinnedMap[effectiveKey] = {

@@ -93,12 +93,150 @@ class WindowBridge(dbus.service.Object):
             sys.stderr.write(f"get_desktops_json error: {e}\n")
             return "[]"
 
+    @staticmethod
+    def _is_wine_app(app):
+        a = (app or "").lower()
+        return a.startswith("steam_app_") or "wine" in a or a.endswith(".exe") or a.startswith("proton")
+
+    @staticmethod
+    def _lutris_games():
+        games = {}
+        yml_dir = os.path.expanduser("~/.local/share/lutris/games")
+        try:
+            files = os.listdir(yml_dir)
+        except Exception:
+            return games
+        for f in files:
+            if not f.endswith((".yml", ".yaml")):
+                continue
+            name = slug = exe = None
+            in_game = False
+            try:
+                with open(os.path.join(yml_dir, f), "r", errors="ignore") as fp:
+                    for line in fp:
+                        raw = line.rstrip()
+                        if raw == "game:":
+                            in_game = True
+                        elif raw and not raw[0].isspace():
+                            in_game = False
+                        s = line.strip()
+                        if s.startswith("name:") and not raw[0].isspace():
+                            name = s.split(":", 1)[1].strip().strip("\"'")
+                        elif s.startswith("game_slug:"):
+                            slug = s.split(":", 1)[1].strip().strip("\"'")
+                        elif in_game and s.startswith("exe:"):
+                            exe = s.split(":", 1)[1].strip().strip("\"'")
+            except Exception:
+                continue
+            entry = {"name": name, "slug": slug}
+            if name:
+                games[name.lower()] = entry
+            if slug:
+                games[slug.lower()] = entry
+            if exe:
+                games[os.path.basename(exe).lower()] = entry
+        return games
+
+    def _resolve_wine(self, pid, title):
+        """Walk up the process tree to find Lutris/Wine game info. Returns dict or None."""
+        env = {}
+        cmdline = ""
+        cur = int(pid)
+        seen = set()
+        while cur > 1 and cur not in seen:
+            seen.add(cur)
+            try:
+                with open(f"/proc/{cur}/environ", "rb") as fh:
+                    for e in fh.read().decode(errors="ignore").split("\0"):
+                        if "=" in e:
+                            k, v = e.split("=", 1)
+                            env.setdefault(k, v)
+            except Exception:
+                pass
+            try:
+                with open(f"/proc/{cur}/cmdline", "rb") as fh:
+                    c = fh.read().decode(errors="ignore").replace("\0", " ").strip()
+                    if c and not cmdline:
+                        cmdline = c
+            except Exception:
+                pass
+            try:
+                with open(f"/proc/{cur}/stat", "r") as fh:
+                    cur = int(fh.read().rsplit(")", 1)[1].split()[1])
+            except Exception:
+                break
+
+        games = self._lutris_games()
+        name = env.get("GAME_NAME")
+        exe_path = env.get("EXE") or ""
+        slug = None
+        if name and name.lower() in games:
+            slug = games[name.lower()].get("slug")
+        if not name and exe_path and os.path.basename(exe_path).lower() in games:
+            g = games[os.path.basename(exe_path).lower()]
+            name, slug = g.get("name"), g.get("slug")
+        if not name:
+            import re
+            m = re.search(r"([^\\/\s][^\\/]*?)\.exe", cmdline, re.IGNORECASE)
+            if m:
+                name = m.group(1)
+        if not name and title:
+            name = title
+            for sep in (" - ", " \u2014 ", " v20", " ("):
+                if sep in name:
+                    name = name.split(sep)[0].strip()
+        if not name:
+            return None
+
+        base = slug or name.lower().replace(" ", "-")
+        icon = ""
+        lutris_share = os.path.expanduser("~/.local/share/lutris")
+        cands = [base.lower(), name.lower(), name.lower().replace(" ", "-")]
+        for c in cands:
+            for folder in ("coverart", "banners", "icons"):
+                for ext in (".png", ".jpg", ".jpeg", ".svg"):
+                    p = os.path.join(lutris_share, folder, c + ext)
+                    if not icon and os.path.exists(p):
+                        icon = p
+        if not icon:
+            icon = "lutris" if (env.get("LUTRIS_GAME_UUID") or "lutris" in cmdline.lower()) else "wine"
+        command = f"lutris lutris:rungame/{slug}" if (slug and env.get("LUTRIS_GAME_UUID")) else ""
+        return {"app": "wine-game-" + base.lower(), "name": name, "icon": icon, "command": command}
+
+    def _enrich_wine(self, wins_obj):
+        cache = getattr(self, "_wine_cache", None)
+        if cache is None:
+            cache = self._wine_cache = {}
+        for w in wins_obj:
+            pid = w.get("pid") or 0
+            if not pid or not self._is_wine_app(w.get("app")):
+                continue
+            key = (pid, w.get("app"))
+            if key not in cache:
+                try:
+                    cache[key] = self._resolve_wine(pid, w.get("title"))
+                except Exception as e:
+                    sys.stderr.write(f"resolve_wine error: {e}\n")
+                    cache[key] = None
+            info = cache[key]
+            if info:
+                w["rawApp"] = w.get("app")
+                w["app"] = info["app"]
+                w["name"] = info["name"]
+                w["icon"] = info["icon"]
+                w["command"] = info["command"]
+
     def emit_state(self):
         s = self.last_state
         try:
             wins_obj = json.loads(s["wins"]) if isinstance(s["wins"], str) and s["wins"].strip() else []
         except Exception:
             wins_obj = []
+        self._enrich_wine(wins_obj)
+        active = next((w for w in wins_obj if w.get("active") and w.get("rawApp")), None)
+        if active:
+            s = dict(s)
+            s["app"] = active["app"]
         try:
             d_obj = json.loads(self.get_desktops_json())
         except Exception:
