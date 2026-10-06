@@ -8,26 +8,298 @@ Item {
     signal requestBack()
     signal requestClose()
 
+    readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "About"]
+    property int currentTab: 0
+    readonly property bool hasSearchResults: displaySettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
+                                             || dockSettings.hasMatches || launcherSettings.hasMatches
+
+    // Start from a clean search each time the settings card is opened
+    onVisibleChanged: {
+        if (!visible) searchInput.text = "";
+    }
+
     readonly property real maxAllowedHeight: {
         let scrH = (Screen.height > 0) ? Screen.height : 1080;
         return Math.min(scrH - Theme.px(120), Theme.px(840));
     }
 
-    readonly property real desiredHeight: contentColumn.implicitHeight + bottomGrabberArea.height + Theme.px(28)
+    readonly property real desiredHeight: headerColumn.implicitHeight + contentColumn.implicitHeight + bottomGrabberArea.height + 14 + Theme.px(28)
     readonly property bool needsScroll: desiredHeight > maxAllowedHeight
 
     implicitWidth: Theme.px(540)
     implicitHeight: Math.min(desiredHeight, maxAllowedHeight)
 
+    // Fixed header: title bar, search box and category tabs
+    ColumnLayout {
+        id: headerColumn
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 14
+        spacing: 14
+
+        // Top Header: Back Button, Title with Icon, and Close Button
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+
+            // Back Button (returns to Expanded Island View)
+            Rectangle {
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                radius: 16
+                color: backMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.08)
+                scale: backMouse.pressed ? 0.90 : (backMouse.containsMouse ? 1.05 : 1.0)
+
+                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                SvgIcon {
+                    anchors.centerIn: parent
+                    name: "chevron-left"
+                    size: 16
+                    color: backMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
+                }
+
+                MouseArea {
+                    id: backMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.requestBack()
+                }
+            }
+
+            // Settings Icon & Title
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                Rectangle {
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 34
+                    radius: 17
+                    color: Qt.rgba(10/255, 132/255, 255/255, 0.22)
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "settings"
+                        size: 18
+                        color: Theme.accentBlue
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+
+                    Text {
+                        text: "Settings"
+                        font.family: Theme.fontDisplay
+                        font.pixelSize: 16
+                        font.weight: Font.Bold
+                        color: Theme.textPrimary
+                    }
+
+                    Text {
+                        text: "Preferences & Customization"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 11
+                        color: Theme.textSecondary
+                    }
+                }
+            }
+
+            // Close Button (dismisses the island completely)
+            Rectangle {
+                Layout.preferredWidth: 28
+                Layout.preferredHeight: 28
+                radius: 14
+                color: closeMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : "transparent"
+                scale: closeMouse.pressed ? 0.90 : (closeMouse.containsMouse ? 1.05 : 1.0)
+
+                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                SvgIcon {
+                    anchors.centerIn: parent
+                    name: "close"
+                    size: 14
+                    color: closeMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                }
+
+                MouseArea {
+                    id: closeMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.requestClose()
+                }
+            }
+        }
+
+        // Search box (filters rows across every category)
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 32
+            radius: 10
+            color: Qt.rgba(1, 1, 1, searchInput.activeFocus ? 0.10 : 0.06)
+            border.width: 1
+            border.color: searchInput.activeFocus ? Qt.rgba(10/255, 132/255, 255/255, 0.5) : Qt.rgba(1, 1, 1, 0.08)
+
+            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+            Behavior on border.color { ColorAnimation { duration: Theme.animDurationFast } }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.IBeamCursor
+                onClicked: searchInput.forceActiveFocus()
+            }
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 6
+                spacing: 8
+
+                SvgIcon {
+                    name: "search"
+                    size: 14
+                    color: searchInput.activeFocus ? Theme.accentBlue : Theme.textSecondary
+                }
+
+                TextInput {
+                    id: searchInput
+                    Layout.fillWidth: true
+                    activeFocusOnTab: true
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 12
+                    color: Theme.textPrimary
+                    selectionColor: Qt.rgba(0.04, 0.52, 1, 0.4)
+                    selectedTextColor: Theme.textPrimary
+                    clip: true
+                    selectByMouse: true
+                    onTextChanged: {
+                        SettingsSearch.query = text;
+                        scrollContainer.contentY = 0;
+                    }
+
+                    Keys.onEscapePressed: function(event) {
+                        if (text !== "") {
+                            text = "";
+                        } else {
+                            root.requestBack();
+                        }
+                        event.accepted = true;
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: searchInput.text === ""
+                        text: "Search settings"
+                        font: searchInput.font
+                        color: Theme.textTertiary
+                    }
+                }
+
+                // Clear button
+                Rectangle {
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 20
+                    radius: 10
+                    visible: searchInput.text !== ""
+                    color: clearMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
+
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "close"
+                        size: 11
+                        color: clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
+                    }
+
+                    MouseArea {
+                        id: clearMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            searchInput.text = "";
+                            searchInput.forceActiveFocus();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Category tabs (no tab is highlighted while searching)
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 32
+            radius: 8
+            color: Qt.rgba(1, 1, 1, 0.08)
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 2
+                spacing: 2
+
+                Repeater {
+                    model: root.tabs
+
+                    Rectangle {
+                        id: tabBtn
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        radius: 6
+                        readonly property bool isSelected: !SettingsSearch.active && root.currentTab === index
+                        color: isSelected ? Qt.rgba(1, 1, 1, 0.22) : (tabMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
+
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 11
+                            font.weight: tabBtn.isSelected ? Font.Bold : Font.Normal
+                            color: tabBtn.isSelected ? Theme.textPrimary : Theme.textSecondary
+                        }
+
+                        MouseArea {
+                            id: tabMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                searchInput.text = "";
+                                root.currentTab = index;
+                                scrollContainer.contentY = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Hairline Divider
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Qt.rgba(1, 1, 1, 0.08)
+        }
+    }
+
     // Smooth scrollable container
     Flickable {
         id: scrollContainer
-        anchors.top: parent.top
+        anchors.top: headerColumn.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: bottomGrabberArea.top
         contentWidth: width
-        contentHeight: contentColumn.implicitHeight + 14
+        contentHeight: contentColumn.implicitHeight + 28
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         interactive: root.needsScroll
@@ -51,120 +323,44 @@ Item {
             anchors.topMargin: 14
             spacing: 14
 
-            // Top Header: Back Button, Title with Icon, and Close Button
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-
-                // Back Button (returns to Expanded Island View)
-                Rectangle {
-                    Layout.preferredWidth: 32
-                    Layout.preferredHeight: 32
-                    radius: 16
-                    color: backMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.08)
-                    scale: backMouse.pressed ? 0.90 : (backMouse.containsMouse ? 1.05 : 1.0)
-
-                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-                    SvgIcon {
-                        anchors.centerIn: parent
-                        name: "chevron-left"
-                        size: 16
-                        color: backMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
-                    }
-
-                    MouseArea {
-                        id: backMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.requestBack()
-                    }
-                }
-
-                // Settings Icon & Title
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-
-                    Rectangle {
-                        Layout.preferredWidth: 34
-                        Layout.preferredHeight: 34
-                        radius: 17
-                        color: Qt.rgba(10/255, 132/255, 255/255, 0.22)
-
-                        SvgIcon {
-                            anchors.centerIn: parent
-                            name: "settings"
-                            size: 18
-                            color: Theme.accentBlue
-                        }
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 1
-
-                        Text {
-                            text: "Settings"
-                            font.family: Theme.fontDisplay
-                            font.pixelSize: 16
-                            font.weight: Font.Bold
-                            color: Theme.textPrimary
-                        }
-
-                        Text {
-                            text: "Preferences & Customization"
-                            font.family: Theme.fontFamily
-                            font.pixelSize: 11
-                            color: Theme.textSecondary
-                        }
-                    }
-                }
-
-                // Close Button (dismisses the island completely)
-                Rectangle {
-                    Layout.preferredWidth: 28
-                    Layout.preferredHeight: 28
-                    radius: 14
-                    color: closeMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : "transparent"
-                    scale: closeMouse.pressed ? 0.90 : (closeMouse.containsMouse ? 1.05 : 1.0)
-
-                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-                    SvgIcon {
-                        anchors.centerIn: parent
-                        name: "close"
-                        size: 14
-                        color: closeMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
-                    }
-
-                    MouseArea {
-                        id: closeMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.requestClose()
-                    }
-                }
+            // Categories: the active tab, or every category with matches while searching
+            DisplaySettings {
+                id: displaySettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 0
+            }
+            TopBarSettings {
+                id: topBarSettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 1
+            }
+            IslandSettings {
+                id: islandSettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 2
+            }
+            DockSettings {
+                id: dockSettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 3
+            }
+            LauncherSettings {
+                id: launcherSettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 4
+            }
+            AboutSettings {
+                visible: !SettingsSearch.active && root.currentTab === 5
             }
 
-            // Hairline Divider
-            Rectangle {
+            // Empty search result
+            Text {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+                visible: SettingsSearch.active && !root.hasSearchResults
+                text: "No settings match \"" + SettingsSearch.query.trim() + "\""
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                font.family: Theme.fontFamily
+                font.pixelSize: 12
+                color: Theme.textSecondary
             }
-
-            // Sections
-            DisplaySettings {}
-            TopBarSettings {}
-            IslandSettings {}
-            DockSettings {}
-            LauncherSettings {}
-            AboutSettings {}
         }
     }
 

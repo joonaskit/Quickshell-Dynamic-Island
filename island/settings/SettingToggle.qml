@@ -14,7 +14,10 @@ Rectangle {
     property bool isSubOption: false
     signal toggled(bool val)
 
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
+
     Layout.fillWidth: true
+    visible: matchesSearch
     implicitHeight: descText.text !== "" ? 52 : 42
     color: rowMouse.containsMouse && enabled ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
     radius: 10

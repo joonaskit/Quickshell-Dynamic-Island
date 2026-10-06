@@ -15,7 +15,10 @@ Rectangle {
     property bool isSubOption: false
     signal selected(var val)
 
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
+
     Layout.fillWidth: true
+    visible: matchesSearch
     implicitHeight: segCol.implicitHeight + 20
     color: "transparent"
     opacity: enabled ? 1.0 : 0.4

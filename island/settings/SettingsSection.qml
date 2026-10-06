@@ -10,7 +10,17 @@ ColumnLayout {
     property real titlePixelSize: 10
     default property alias rows: rowsCol.data
 
+    // True when any row matches the search query
+    readonly property bool hasMatches: {
+        let items = rowsCol.children;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].matchesSearch === true) return true;
+        }
+        return false;
+    }
+
     Layout.fillWidth: true
+    visible: !SettingsSearch.active || hasMatches
     spacing: 6
 
     RowLayout {
