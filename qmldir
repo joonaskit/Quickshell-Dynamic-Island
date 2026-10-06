@@ -9,6 +9,8 @@ singleton CaffeineService 1.0 services/CaffeineService.qml
 singleton ClipboardService 1.0 services/ClipboardService.qml
 singleton NotificationService 1.0 services/NotificationService.qml
 singleton OsdService 1.0 services/OsdService.qml
+singleton TimerService 1.0 services/TimerService.qml
+singleton AppMixerService 1.0 services/AppMixerService.qml
 singleton MicrophoneService 1.0 services/MicrophoneService.qml
 singleton PowerProfileService 1.0 services/PowerProfileService.qml
 singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
@@ -21,12 +23,16 @@ CompactClockView 1.0 island/CompactClockView.qml
 CompactMediaView 1.0 island/CompactMediaView.qml
 CompactNotificationAlertView 1.0 island/CompactNotificationAlertView.qml
 CompactOsdView 1.0 island/CompactOsdView.qml
+CompactTimerView 1.0 island/CompactTimerView.qml
+TimerWidget 1.0 island/TimerWidget.qml
 ExpandedView 1.0 island/ExpandedView.qml
+NotificationCard 1.0 island/NotificationCard.qml
 NotificationListView 1.0 island/NotificationListView.qml
 MiniCalendarWidget 1.0 island/MiniCalendarWidget.qml
 MediaWidget 1.0 island/MediaWidget.qml
 VolumeSlider 1.0 quicksettings/VolumeSlider.qml
 AudioOutputSelector 1.0 quicksettings/AudioOutputSelector.qml
+AppVolumeMixer 1.0 quicksettings/AppVolumeMixer.qml
 BrightnessSlider 1.0 quicksettings/BrightnessSlider.qml
 AudioVisualizer 1.0 components/AudioVisualizer.qml
 SvgIcon 1.0 components/SvgIcon.qml

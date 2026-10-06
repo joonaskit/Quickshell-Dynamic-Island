@@ -9,6 +9,33 @@ SettingsCategory {
         title: "EXPANDED ISLAND CARDS"
         subtitle: "Choose cards shown when expanded"
 
+        // Timer & Stopwatch
+        SettingToggle {
+            title: "Timer & Stopwatch"
+            description: "Countdown timer and stopwatch card"
+            iconName: "clock"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.showExpandedTimer
+            onToggled: function(val) {
+                SettingsService.setSetting("showExpandedTimer", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Timer in Island"
+            description: "Show a running timer or stopwatch in the compact island"
+            iconName: "clock"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.showTimerInPill
+            onToggled: function(val) {
+                SettingsService.setSetting("showTimerInPill", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 1. Mini Calendar
         SettingToggle {
             title: "Mini Calendar"
@@ -52,6 +79,19 @@ SettingsCategory {
         SettingDivider {}
 
         // 4. Volume Slider
+        SettingToggle {
+            title: "App Volume Mixer"
+            description: "Per-app volume sliders for apps that are playing audio"
+            iconName: "music"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.showExpandedAppMixer
+            onToggled: function(val) {
+                SettingsService.setSetting("showExpandedAppMixer", val);
+            }
+        }
+
+        SettingDivider {}
+
         SettingToggle {
             title: "Volume Slider"
             description: "Interactive slider for master speaker output volume"

@@ -59,12 +59,15 @@ Singleton {
     property bool autoHideAppTrayPill: false
     property bool showDetachedNotifBubble: true
     property bool showOsd: true
+    property bool showTimerInPill: true
+    property bool showExpandedTimer: true
 
     // Expanded Island Widget Cards
     property bool showExpandedCalendar: true
     property bool showExpandedMedia: true
     property bool showExpandedNotifications: true
     property bool showExpandedAudioSink: true
+    property bool showExpandedAppMixer: true
     property bool showExpandedVolume: true
     property bool showExpandedBrightness: true
 
@@ -162,11 +165,14 @@ Singleton {
         if (data.autoHideAppTrayPill !== undefined) root.autoHideAppTrayPill = !!data.autoHideAppTrayPill;
         if (data.showDetachedNotifBubble !== undefined) root.showDetachedNotifBubble = !!data.showDetachedNotifBubble;
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
+        if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
+        if (data.showExpandedTimer !== undefined) root.showExpandedTimer = !!data.showExpandedTimer;
 
         if (data.showExpandedCalendar !== undefined) root.showExpandedCalendar = !!data.showExpandedCalendar;
         if (data.showExpandedMedia !== undefined) root.showExpandedMedia = !!data.showExpandedMedia;
         if (data.showExpandedNotifications !== undefined) root.showExpandedNotifications = !!data.showExpandedNotifications;
         if (data.showExpandedAudioSink !== undefined) root.showExpandedAudioSink = !!data.showExpandedAudioSink;
+        if (data.showExpandedAppMixer !== undefined) root.showExpandedAppMixer = !!data.showExpandedAppMixer;
         if (data.showExpandedVolume !== undefined) root.showExpandedVolume = !!data.showExpandedVolume;
         if (data.showExpandedBrightness !== undefined) root.showExpandedBrightness = !!data.showExpandedBrightness;
 
@@ -266,11 +272,14 @@ Singleton {
         root.autoHideAppTrayPill = false;
         root.showDetachedNotifBubble = true;
         root.showOsd = true;
+        root.showTimerInPill = true;
+        root.showExpandedTimer = true;
 
         root.showExpandedCalendar = true;
         root.showExpandedMedia = true;
         root.showExpandedNotifications = true;
         root.showExpandedAudioSink = true;
+        root.showExpandedAppMixer = true;
         root.showExpandedVolume = true;
         root.showExpandedBrightness = true;
 
@@ -343,10 +352,13 @@ Singleton {
             "autoHideAppTrayPill": root.autoHideAppTrayPill,
             "showDetachedNotifBubble": root.showDetachedNotifBubble,
             "showOsd": root.showOsd,
+            "showTimerInPill": root.showTimerInPill,
+            "showExpandedTimer": root.showExpandedTimer,
             "showExpandedCalendar": root.showExpandedCalendar,
             "showExpandedMedia": root.showExpandedMedia,
             "showExpandedNotifications": root.showExpandedNotifications,
             "showExpandedAudioSink": root.showExpandedAudioSink,
+            "showExpandedAppMixer": root.showExpandedAppMixer,
             "showExpandedVolume": root.showExpandedVolume,
             "showExpandedBrightness": root.showExpandedBrightness,
             "launcherDefaultView": root.launcherDefaultView,

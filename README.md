@@ -7,7 +7,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 ## Features
 
 - **Island pill:** clock, battery, now-playing media and notification alerts, with smooth expand and collapse animations.
-- **Expanded view:** calendar, media controls, notifications, audio output selector, and volume and brightness sliders.
+- **Expanded view:** calendar, timer and stopwatch (running ones show in the pill), media controls, notifications, audio output selector, per-app volume mixer, and volume and brightness sliders. Notifications are grouped by app and support action buttons and inline replies.
 - **Status cluster:** Do Not Disturb, Wi-Fi, Bluetooth, microphone, clipboard history, power profile, hardware stats, USB devices, caffeine (inhibit idle) and battery. Each has a quick-settings popup.
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
@@ -40,7 +40,7 @@ cd ~/.config/quickshell/island
 | `./run.sh -e` / `-c` | Expand / collapse |
 | `./run.sh -i <target> <function>` | Call any IPC function, for example `-i system volumeUp` |
 
-The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext` and `mediaPrevious`. You can bind these commands to a global shortcut.
+The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. You can bind these commands to a global shortcut.
 
 ## Project layout
 
