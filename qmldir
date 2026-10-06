@@ -8,6 +8,7 @@ singleton PowerService 1.0 services/PowerService.qml
 singleton CaffeineService 1.0 services/CaffeineService.qml
 singleton ClipboardService 1.0 services/ClipboardService.qml
 singleton NotificationService 1.0 services/NotificationService.qml
+singleton OsdService 1.0 services/OsdService.qml
 singleton MicrophoneService 1.0 services/MicrophoneService.qml
 singleton PowerProfileService 1.0 services/PowerProfileService.qml
 singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
@@ -19,6 +20,7 @@ IslandDetachedBubble 1.0 island/IslandDetachedBubble.qml
 CompactClockView 1.0 island/CompactClockView.qml
 CompactMediaView 1.0 island/CompactMediaView.qml
 CompactNotificationAlertView 1.0 island/CompactNotificationAlertView.qml
+CompactOsdView 1.0 island/CompactOsdView.qml
 ExpandedView 1.0 island/ExpandedView.qml
 NotificationListView 1.0 island/NotificationListView.qml
 MiniCalendarWidget 1.0 island/MiniCalendarWidget.qml

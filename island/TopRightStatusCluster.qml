@@ -46,6 +46,7 @@ Item {
 
     // Hoisted service-backed visibility properties
     readonly property bool showCaffeine: SettingsService.showCaffeineIcon
+    readonly property bool showDnd: SettingsService.showDndIcon
     readonly property bool showWifi: SettingsService.showWifiIcon
     readonly property bool showBluetooth: SettingsService.showBluetoothIcon
     readonly property bool showMic: SettingsService.showMicIcon
@@ -58,6 +59,7 @@ Item {
 
     // Count of currently visible icons
     readonly property int visibleIconCount: (showCaffeine ? 1 : 0) +
+                                           (showDnd ? 1 : 0) +
                                            (showWifi ? 1 : 0) +
                                            (showBluetooth ? 1 : 0) +
                                            (showMic ? 1 : 0) +
@@ -362,6 +364,36 @@ Item {
                         hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: CaffeineService.toggle()
+                    }
+                }
+
+                // Do Not Disturb (suppresses notification banners, history is kept)
+                Rectangle {
+                    id: dndButton
+                    visible: root.showDnd
+                    Layout.preferredWidth: visible ? root.buttonSize : 0
+                    Layout.preferredHeight: root.buttonSize
+                    radius: root.buttonSize / 2
+                    color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : "transparent"
+                    scale: dndMouse.pressed ? 0.90 : 1.0
+
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "bell-off"
+                        size: root.iconSize
+                        color: SettingsService.dndEnabled ? Theme.accentPurple : (dndMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38))
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    }
+
+                    MouseArea {
+                        id: dndMouse
+                        anchors.fill: parent
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: NotificationService.toggleDnd()
                     }
                 }
 

@@ -87,6 +87,20 @@ SettingsCategory {
 
         SettingDivider {}
 
+        // Do Not Disturb
+        SettingToggle {
+            title: "Do Not Disturb"
+            description: "Quick toggle that silences notification banners; they still go to history"
+            iconName: "bell-off"
+            iconColor: Theme.accentPurple
+            checked: SettingsService.showDndIcon
+            onToggled: function(val) {
+                SettingsService.setSetting("showDndIcon", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 2. Wi-Fi
         SettingToggle {
             title: "Wi-Fi & Network"

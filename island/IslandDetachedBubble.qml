@@ -75,9 +75,9 @@ Item {
 
         SvgIcon {
             anchors.centerIn: parent
-            name: "bell"
+            name: SettingsService.dndEnabled ? "bell-off" : "bell"
             size: Theme.px(15)
-            color: Theme.accentOrange
+            color: SettingsService.dndEnabled ? Theme.textTertiary : Theme.accentOrange
         }
 
         // Unread Badge Badge in Top Right

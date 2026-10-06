@@ -85,10 +85,17 @@ Singleton {
 
         // Trigger island alert banner animation
         console.debug("[NotificationService] Received notification:", data.appName, "-", data.summary);
+        // Do Not Disturb keeps the notification in history but suppresses the banner
+        if (SettingsService.dndEnabled) return;
+
         root.isAlerting = true;
         alertTimer.restart();
 
         root.notificationReceived(data);
+    }
+
+    function toggleDnd() {
+        SettingsService.setSetting("dndEnabled", !SettingsService.dndEnabled);
     }
 
     function dismissNotification(id, callDismiss) {

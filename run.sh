@@ -22,6 +22,10 @@ case "$1" in
     collapse|-c|--collapse)
         quickshell ipc -p "$DIR" call island collapse
         ;;
+    ipc|-i|--ipc)
+        shift
+        quickshell ipc -p "$DIR" call "$@"
+        ;;
     daemon|-d|--daemon)
         echo "Starting Quickshell Island in background..."
         quickshell kill -p "$DIR" 2>/dev/null || true
