@@ -354,7 +354,7 @@ Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } 
 |---|---|
 | `WifiQuickSettings.qml` | L126–128 |
 | `BluetoothQuickSettings.qml` | L128–130 |
-| `SettingsView.qml` | L1246–1247 |
+| `settings/SettingToggle.qml` | L107–109 |
 
 ### App launch bounce (dock icon)
 
