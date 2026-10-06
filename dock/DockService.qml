@@ -169,7 +169,7 @@ Singleton {
     }
 
     function openTrash() {
-        Quickshell.execDetached(["dolphin", "trash:/"]);
+        WindowService.launchCommand(["dolphin", "trash:/"], "org.kde.dolphin");
     }
 
     function emptyTrash() {
@@ -194,15 +194,15 @@ Singleton {
         if (!entry) entry = DesktopEntries.heuristicLookup("kmenuedit");
         if (entry) {
             try {
-                entry.execute();
+                WindowService.launchEntry(entry);
                 return;
             } catch(e) {}
         }
         if (desktopFile && desktopFile.length > 0) {
             let df = desktopFile.endsWith(".desktop") ? desktopFile : (desktopFile + ".desktop");
-            Quickshell.execDetached(["kmenuedit", df]);
+            WindowService.launchCommand(["kmenuedit", df], "org.kde.kmenuedit");
         } else {
-            Quickshell.execDetached(["kmenuedit"]);
+            WindowService.launchCommand(["kmenuedit"], "org.kde.kmenuedit");
         }
     }
 
@@ -630,7 +630,7 @@ Singleton {
                 (function(actionObj) {
                     addAction(actionObj.name, icon, function() {
                         try {
-                            actionObj.execute();
+                            WindowService.launchEntry(actionObj, entry.id);
                         } catch(e) {
                             console.warn("[DockService] Error executing action:", e);
                         }
@@ -641,6 +641,7 @@ Singleton {
 
         // 2. Custom app-specific shortcuts
         let idLow = (app.id || "").toLowerCase();
+        let scopeId = entry ? entry.id : (app.desktopFile || app.id);
         let nameLow = (app.name || "").toLowerCase();
         let homeDir = Quickshell.env("HOME") || "";
 
@@ -678,11 +679,11 @@ Singleton {
             if (!hasPrivate) {
                 if (idLow.indexOf("firefox") >= 0 || idLow.indexOf("zen") >= 0) {
                     addAction("New Private Window", "window", function() {
-                        Quickshell.execDetached([app.command || "firefox", "--private-window"]);
+                        WindowService.launchCommand([app.command || "firefox", "--private-window"], scopeId);
                     });
                 } else {
                     addAction("New Incognito Window", "window", function() {
-                        Quickshell.execDetached([app.command || "google-chrome", "--incognito"]);
+                        WindowService.launchCommand([app.command || "google-chrome", "--incognito"], scopeId);
                     });
                 }
             }
@@ -696,7 +697,7 @@ Singleton {
         if (isTerminal && actions.length === 0) {
             addAction("New Window", "terminal", function() {
                 if (app.command) {
-                    Quickshell.execDetached(["sh", "-c", app.command]);
+                    WindowService.launchCommand(["sh", "-c", app.command], scopeId);
                 } else {
                     launchApp(app);
                 }
@@ -708,11 +709,11 @@ Singleton {
         if (isEditor && actions.length === 0) {
             if (idLow.indexOf("code") >= 0) {
                 addAction("New Empty Window", "window", function() {
-                    Quickshell.execDetached(["code", "--new-window"]);
+                    WindowService.launchCommand(["code", "--new-window"], scopeId);
                 });
             } else if (idLow.indexOf("zed") >= 0) {
                 addAction("New Workspace", "window", function() {
-                    Quickshell.execDetached(["zed", "--new"]);
+                    WindowService.launchCommand(["zed", "--new"], scopeId);
                 });
             }
         }
@@ -754,7 +755,7 @@ Singleton {
         let entry = findDesktopEntry(targetId);
         if (entry) {
             try {
-                entry.execute();
+                WindowService.launchEntry(entry);
                 return;
             } catch(e) {
                 console.warn("[DockService] Error executing desktop entry: " + e);
@@ -763,13 +764,13 @@ Singleton {
 
         // Try gtk-launch
         if (app.desktopFile) {
-            Quickshell.execDetached(["gtk-launch", app.desktopFile]);
+            WindowService.launchCommand(["gtk-launch", app.desktopFile], targetId);
             return;
         }
 
         // Try command
         if (app.command) {
-            Quickshell.execDetached(["sh", "-c", app.command]);
+            WindowService.launchCommand(["sh", "-c", app.command], targetId);
         }
     }
 
