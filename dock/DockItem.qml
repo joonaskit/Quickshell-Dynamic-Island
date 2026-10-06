@@ -24,6 +24,9 @@ Item {
         NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
     }
 
+    // True while the dock's context menu is showing for this icon
+    property bool contextMenuOpen: false
+
     signal requestContextMenu(var app, real x, real y)
     signal requestWindowPicker(var app, real x, real y)
     signal requestCloseWindowPicker()
@@ -402,6 +405,9 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 let mapPos = root.mapToItem(null, root.width / 2, root.height / 2);
                 root.requestContextMenu(root.appData, mapPos.x, mapPos.y);
+            } else if (root.contextMenuOpen) {
+                // Clicking the icon again just dismisses its menu
+                root.requestContextMenu(root.appData, 0, 0);
             } else if (!hasDragged && !root.isDragging) {
                 root.pressScale = 1.0;
                 clickBounceAnim.restart();

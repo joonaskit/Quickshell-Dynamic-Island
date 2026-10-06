@@ -67,6 +67,8 @@ DockWindow 1.0 dock/DockWindow.qml
 DockBar 1.0 dock/DockBar.qml
 DockItem 1.0 dock/DockItem.qml
 DockContextMenu 1.0 dock/DockContextMenu.qml
+DockFlyoutGeometry 1.0 dock/DockFlyoutGeometry.qml
+DockFlyoutBackground 1.0 dock/DockFlyoutBackground.qml
 DockAppPicker 1.0 dock/DockAppPicker.qml
 TopLeftAppCluster 1.0 island/TopLeftAppCluster.qml
 VirtualDesktopsPill 1.0 island/VirtualDesktopsPill.qml

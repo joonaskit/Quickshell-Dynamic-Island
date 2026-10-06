@@ -165,6 +165,17 @@ PanelWindow {
                 }
             }
         }
+
+        function onWindowSwitcherRequested() {
+            if (window.isThisScreenActive) {
+                if (dockBar.appPickerOpen) {
+                    dockBar.closeAllPopups();
+                } else {
+                    window.dockRevealed = true;
+                    dockBar.openAppPicker("Windows");
+                }
+            }
+        }
     }
 
     // Dwell timer: user holds cursor at screen edge to reveal dock

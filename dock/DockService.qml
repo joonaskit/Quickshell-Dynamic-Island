@@ -89,6 +89,7 @@ Singleton {
     // Signals
     signal stateUpdated()
     signal toggleAppLauncherRequested()
+    signal windowSwitcherRequested()
 
     Component.onCompleted: {
         loadPinnedApps();
@@ -292,6 +293,112 @@ Singleton {
         }
     }
 
+    // Launch usage (count + last used) powering the launcher's Recent / Frequent tabs
+    property var usageStats: ({})
+    readonly property string usageFilePath: Quickshell.shellDir + "/launcher_usage.json"
+
+    Process {
+        id: loadUsageProc
+        command: ["python3", "-c", "import sys, os; p=sys.argv[1]; sys.stdout.write(open(p).read() if os.path.exists(p) else '')", root.usageFilePath]
+        running: true
+
+        stdout: StdioCollector {
+            onTextChanged: {
+                let t = text.trim();
+                if (t.length > 0) {
+                    try {
+                        let parsed = JSON.parse(t);
+                        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) root.usageStats = parsed;
+                    } catch(e) {
+                        console.warn("[DockService] Error parsing launcher_usage.json: " + e);
+                    }
+                }
+            }
+        }
+    }
+
+    Process {
+        id: saveUsageProc
+        command: []
+    }
+
+    Timer {
+        id: saveUsageDebounceTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            saveUsageProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.usageFilePath, JSON.stringify(root.usageStats)];
+            saveUsageProc.running = true;
+        }
+    }
+
+    function usageKey(app) {
+        return app ? String(app.desktopFile || app.id || "").replace(/\.desktop$/, "") : "";
+    }
+
+    function recordUse(app) {
+        let key = root.usageKey(app);
+        if (!key) return;
+        let next = Object.assign({}, root.usageStats);
+        let prev = next[key] || { count: 0, last: 0 };
+        next[key] = { count: prev.count + 1, last: Date.now() };
+        root.usageStats = next;
+        saveUsageDebounceTimer.restart();
+    }
+
+    function useCount(app) {
+        let u = root.usageStats[root.usageKey(app)];
+        return u ? u.count : 0;
+    }
+
+    function lastUsed(app) {
+        let u = root.usageStats[root.usageKey(app)];
+        return u ? u.last : 0;
+    }
+
+    // ---- Windows (launcher window switcher) ----
+    function activateWindow(w) {
+        if (!w) return;
+        if (w.isKWin) {
+            WindowService.activateWindow(w.id);
+        } else if (w.raw) {
+            if (w.raw.minimized) w.raw.minimized = false;
+            w.raw.activate();
+        }
+    }
+
+    function closeWindow(w) {
+        if (!w) return;
+        if (w.isKWin) {
+            WindowService.closeWindow(w.id);
+        } else if (w.raw) {
+            try { w.raw.close(); } catch(e) {}
+        }
+    }
+
+    // All open windows shaped like launcher entries
+    function windowItems() {
+        let wins = getMergedWindows();
+        let items = [];
+        for (let i = 0; i < wins.length; i++) {
+            let w = wins[i];
+            if (!w || !w.appId) continue;
+            let entry = findDesktopEntry(w.appId);
+            let appName = entry ? entry.name : w.appId;
+            items.push({
+                id: "win:" + (w.isKWin ? w.id : (w.appId + ":" + i)),
+                name: (w.title && w.title.trim().length > 0) ? w.title : appName,
+                genericName: appName + (w.minimized ? " · minimized" : "") + (w.onCurrent === false ? " · other desktop" : ""),
+                comment: "",
+                icon: entry ? (entry.icon || w.appId) : (w.gameIcon || w.appId),
+                isWindow: true,
+                activated: w.activated,
+                window: w
+            });
+        }
+        return items;
+    }
+
     function loadPinnedApps() {
         if (!loadPinnedProc.running) {
             loadPinnedProc.running = true;
@@ -381,6 +488,7 @@ Singleton {
                     title: w.title,
                     activated: !!w.active,
                     minimized: !!w.minimized,
+                    onCurrent: w.onCurrent !== false,
                     rawAppId: w.rawApp || "",
                     gameName: w.rawApp ? (w.name || "") : "",
                     gameIcon: w.rawApp ? (w.icon || "") : "",
@@ -749,6 +857,7 @@ Singleton {
     // Launch app process
     function launchApp(app) {
         if (!app) return;
+        root.recordUse(app);
 
         // Try DesktopEntry lookup
         let targetId = app.desktopFile || app.id || "";

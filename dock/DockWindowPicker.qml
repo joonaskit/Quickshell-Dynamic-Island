@@ -13,191 +13,237 @@ Item {
     property real dockCapsuleX: 0
     property real dockCapsuleY: 0
     property real dockCapsuleWidth: 0
+    property real dockCapsuleHeight: 0
     property bool isVertical: false
     property string dockPosition: "bottom"
 
     signal closed()
 
-    visible: opacity > 0.001
-    opacity: isOpen ? 1.0 : 0.0
-    scale: isOpen ? 1.0 : 0.92
-    transformOrigin: isVertical ? (dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
+    // True while the pointer is over the list, so the dock keeps it open
+    readonly property bool hovered: pickerHover.hovered
 
-    Behavior on opacity {
-        NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
-    }
-    Behavior on scale {
-        NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
+    HoverHandler {
+        id: pickerHover
     }
 
     readonly property var windowList: (appData && DockService) ? DockService.findToplevels(appData) : []
 
-    width: 240
-    height: cardCol.implicitHeight + 16
-
-    x: {
-        if (isVertical) {
-            return dockPosition === "left" ? (dockCapsuleX + dockCapsuleWidth + 14) : (dockCapsuleX - width - 14);
-        }
-        return Math.max(8, Math.min(parent ? (parent.width - width - 8) : 500, targetX - width / 2));
+    // The list is an extension of the dock: it grows out of the hovered icon
+    // with its base flush on the dock edge (no gap).
+    DockFlyoutGeometry {
+        id: geo
+        open: root.isOpen
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+        dockCapsuleX: root.dockCapsuleX
+        dockCapsuleY: root.dockCapsuleY
+        dockCapsuleWidth: root.dockCapsuleWidth
+        dockCapsuleHeight: root.dockCapsuleHeight
+        targetX: root.targetX
+        targetY: root.targetY
+        finalWidth: 240
+        finalHeight: cardCol.implicitHeight + 16
+        parentWidth: root.parent ? root.parent.width : 500
+        parentHeight: root.parent ? root.parent.height : 500
     }
-    y: {
-        if (isVertical) {
-            return Math.max(8, Math.min(parent ? (parent.height - height - 8) : 500, targetY - height / 2));
-        }
-        return (dockCapsuleY > 0 ? dockCapsuleY : (parent ? parent.height - Theme.dockHeight : targetY)) - height - 12;
+
+    visible: geo.progress > 0.001
+    opacity: Math.min(1.0, geo.progress * 4)
+
+    x: geo.x
+    y: geo.y
+    width: geo.width
+    height: geo.height
+
+    DockFlyoutBackground {
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+        fitsOnDock: geo.fitsOnDock
+        filletSize: geo.filletSize
     }
 
-    // Card background
-    Rectangle {
+    // Content is clipped to the body so it is revealed as the list grows
+    Item {
         anchors.fill: parent
-        radius: 14
-        color: Theme.dockTransparent ? Qt.rgba(0.12, 0.13, 0.16, 0.92) : "#1c1c1e"
-        border.color: Theme.dockBorder
-        border.width: Theme.dockShowBorder ? 1 : 0
-    }
+        clip: true
 
-    Column {
-        id: cardCol
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: 8
-        spacing: 3
+        Column {
+            id: cardCol
+            x: geo.contentX + 8
+            y: geo.contentY + 8
+            // Fixed width so content doesn't reflow while the card is still growing
+            width: geo.finalWidth - 16
+            spacing: 3
+            opacity: geo.contentOpacity
 
-        // Header: App name and window count
-        RowLayout {
-            width: parent.width
-            height: 24
-            spacing: 6
-
-            Text {
-                Layout.fillWidth: true
-                Layout.leftMargin: 6
-                text: root.appData ? root.appData.name : "Windows"
-                font.family: Theme.fontFamily
-                font.pixelSize: 12
-                font.weight: Font.DemiBold
-                color: Theme.textSecondary
-                elide: Text.ElideRight
-            }
-
-            Rectangle {
-                Layout.preferredHeight: 18
-                Layout.preferredWidth: countText.implicitWidth + 10
-                Layout.rightMargin: 4
-                radius: 9
-                color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
+            // Header: App name and window count
+            RowLayout {
+                width: parent.width
+                height: 24
+                spacing: 6
 
                 Text {
-                    id: countText
-                    anchors.centerIn: parent
-                    text: root.windowList.length + " open"
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 6
+                    text: root.appData ? root.appData.name : "Windows"
                     font.family: Theme.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: 12
                     font.weight: Font.DemiBold
-                    color: Theme.accentBlue
+                    color: Theme.textSecondary
+                    elide: Text.ElideRight
+                }
+
+                Rectangle {
+                    Layout.preferredHeight: 18
+                    Layout.preferredWidth: countText.implicitWidth + 10
+                    Layout.rightMargin: 4
+                    radius: 9
+                    color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
+
+                    Text {
+                        id: countText
+                        anchors.centerIn: parent
+                        text: root.windowList.length + " open"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
+                        color: Theme.accentBlue
+                    }
                 }
             }
-        }
 
-        // Hairline separator
-        Rectangle {
-            width: parent.width - 12
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: 1
-            color: Qt.rgba(1, 1, 1, 0.08)
-        }
+            // Hairline separator
+            Rectangle {
+                width: parent.width - 12
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 1
+                color: Qt.rgba(1, 1, 1, 0.08)
+            }
 
-        // List of Windows
-        Repeater {
-            model: root.windowList
+            // List of Windows
+            Repeater {
+                model: root.windowList
 
-            delegate: Rectangle {
-                id: rowItem
-                width: parent.width
-                height: 32
-                radius: 8
-                color: rowMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
+                delegate: Rectangle {
+                    id: rowItem
+                    width: parent.width
+                    height: 32
+                    radius: 8
+                    color: rowMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
 
-                Behavior on color { ColorAnimation { duration: 100 } }
+                    Behavior on color { ColorAnimation { duration: 100 } }
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    spacing: 8
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
 
-                    // Active dot
-                    Rectangle {
-                        Layout.preferredWidth: 6
-                        Layout.preferredHeight: 6
-                        radius: 3
-                        color: modelData.activated ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.35)
-                    }
+                        // App icon with an active indicator dot
+                        Item {
+                            Layout.preferredWidth: 20
+                            Layout.preferredHeight: 20
 
-                    // Window title
-                    Text {
-                        Layout.fillWidth: true
-                        text: (modelData.title && modelData.title.trim().length > 0) ? modelData.title : (root.appData ? (root.appData.name + " (" + (index + 1) + ")") : ("Window " + (index + 1)))
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 12
-                        font.weight: modelData.activated ? Font.DemiBold : Font.Normal
-                        color: modelData.activated ? Theme.accentBlue : Theme.textPrimary
-                        elide: Text.ElideRight
-                    }
+                            Image {
+                                anchors.fill: parent
+                                source: root.appData ? DockService.resolveIcon(root.appData.icon) : ""
+                                sourceSize.width: 40
+                                sourceSize.height: 40
+                                fillMode: Image.PreserveAspectFit
+                                mipmap: true
+                                opacity: modelData.minimized ? 0.45 : 1.0
+                            }
 
-                    // Close Window button
-                    Rectangle {
-                        Layout.preferredWidth: 20
-                        Layout.preferredHeight: 20
-                        radius: 10
-                        color: closeBtnMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : "transparent"
-                        opacity: rowMouse.containsMouse ? 1.0 : 0.0
-
-                        Behavior on opacity { NumberAnimation { duration: 100 } }
-
-                        SvgIcon {
-                            anchors.centerIn: parent
-                            name: "close"
-                            size: 11
-                            color: closeBtnMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                            Rectangle {
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                width: 7
+                                height: 7
+                                radius: 3.5
+                                color: Theme.accentBlue
+                                border.width: 1
+                                border.color: "#1c1c1e"
+                                visible: modelData.activated
+                            }
                         }
 
-                        MouseArea {
-                            id: closeBtnMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                if (modelData.isKWin) {
-                                    WindowService.closeWindow(modelData.id);
-                                } else if (modelData.raw) {
-                                    try { modelData.raw.close(); } catch(e) {}
+                        // Window title
+                        Text {
+                            Layout.fillWidth: true
+                            text: (modelData.title && modelData.title.trim().length > 0) ? modelData.title : (root.appData ? (root.appData.name + " (" + (index + 1) + ")") : ("Window " + (index + 1)))
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            font.weight: modelData.activated ? Font.DemiBold : Font.Normal
+                            color: modelData.activated ? Theme.accentBlue : Theme.textPrimary
+                            elide: Text.ElideRight
+                        }
+
+                        // State badge for windows that are not directly visible
+                        Rectangle {
+                            visible: modelData.minimized || modelData.onCurrent === false
+                            Layout.preferredHeight: 16
+                            Layout.preferredWidth: stateText.implicitWidth + 10
+                            radius: 8
+                            color: Qt.rgba(1, 1, 1, 0.08)
+
+                            Text {
+                                id: stateText
+                                anchors.centerIn: parent
+                                text: modelData.minimized ? "Minimized" : "Other desktop"
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 9
+                                font.weight: Font.Medium
+                                color: Theme.textSecondary
+                            }
+                        }
+
+                        // Close Window button
+                        Rectangle {
+                            Layout.preferredWidth: 20
+                            Layout.preferredHeight: 20
+                            radius: 10
+                            color: closeBtnMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : "transparent"
+                            opacity: rowMouse.containsMouse ? 1.0 : 0.0
+
+                            Behavior on opacity { NumberAnimation { duration: 100 } }
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: "close"
+                                size: 11
+                                color: closeBtnMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                            }
+
+                            MouseArea {
+                                id: closeBtnMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    DockService.closeWindow(modelData);
                                 }
                             }
                         }
                     }
-                }
 
-                MouseArea {
-                    id: rowMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (modelData.isKWin) {
-                            WindowService.activateWindow(modelData.id);
-                        } else if (modelData.raw) {
-                            if (modelData.raw.minimized) modelData.raw.minimized = false;
-                            modelData.raw.activate();
+                    MouseArea {
+                        id: rowMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.MiddleButton) {
+                                DockService.closeWindow(modelData);
+                                return;
+                            }
+                            DockService.activateWindow(modelData);
+                            root.isOpen = false;
+                            root.closed();
                         }
-                        root.isOpen = false;
-                        root.closed();
                     }
                 }
             }
         }
     }
 }
-

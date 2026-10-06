@@ -12,6 +12,9 @@ case "$1" in
     launcher|-l|--launcher)
         quickshell ipc -p "$DIR" call launcher toggle
         ;;
+    windows|-w|--windows)
+        quickshell ipc -p "$DIR" call launcher windows
+        ;;
     toggle|-t|--toggle)
         echo "Toggling Island..."
         quickshell ipc -p "$DIR" call island toggle

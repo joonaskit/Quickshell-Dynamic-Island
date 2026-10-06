@@ -16,6 +16,11 @@ ShellRoot {
         function toggle() {
             DockService.toggleAppLauncherRequested();
         }
+
+        // Open the launcher directly on the open-windows tab
+        function windows() {
+            DockService.windowSwitcherRequested();
+        }
     }
 
     // Global controls for keyboard shortcuts. This lives here, not in IslandWindow,
