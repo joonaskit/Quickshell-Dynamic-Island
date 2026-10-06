@@ -159,1087 +159,779 @@ Item {
             }
 
             // Section 0: Display & Scaling (DPI)
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "DISPLAY & SCALING (DPI)"
+                subtitle: "Interface & Font Sizing"
+                titlePixelSize: Theme.fontPx(10)
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                    spacing: 6
-
-                    Text {
-                        text: "DISPLAY & SCALING (DPI)"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontPx(10)
-                        font.weight: Font.DemiBold
-                        color: Theme.textTertiary
-                    }
-
-                    Text {
-                        text: "• Interface & Font Sizing"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontPx(10)
-                        color: Qt.rgba(1, 1, 1, 0.25)
+                // 1. Interface Scale (DPI)
+                SettingSlider {
+                    title: "Interface Scale (DPI)"
+                    description: "Scale elements, islands, status bar pills, dock, and popup geometry (80% - 125%)"
+                    iconName: "sliders"
+                    iconColor: Theme.accentCyan
+                    value: SettingsService.uiScale
+                    minimumValue: 0.80
+                    maximumValue: 1.25
+                    stepSize: 0.05
+                    presets: [
+                        { label: "80%", value: 0.80 },
+                        { label: "90%", value: 0.90 },
+                        { label: "100% (Default)", value: 1.00 },
+                        { label: "110%", value: 1.10 },
+                        { label: "125%", value: 1.25 }
+                    ]
+                    onValueModified: function(val) {
+                        SettingsService.setSetting("uiScale", val);
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: scalingCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: scalingCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
-
-                        // 1. Interface Scale (DPI)
-                        SettingSlider {
-                            title: "Interface Scale (DPI)"
-                            description: "Scale elements, islands, status bar pills, dock, and popup geometry (80% - 125%)"
-                            iconName: "sliders"
-                            iconColor: Theme.accentCyan
-                            value: SettingsService.uiScale
-                            minimumValue: 0.80
-                            maximumValue: 1.25
-                            stepSize: 0.05
-                            presets: [
-                                { label: "80%", value: 0.80 },
-                                { label: "90%", value: 0.90 },
-                                { label: "100% (Default)", value: 1.00 },
-                                { label: "110%", value: 1.10 },
-                                { label: "125%", value: 1.25 }
-                            ]
-                            onValueModified: function(val) {
-                                SettingsService.setSetting("uiScale", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 2. Text & Font Size Scale
-                        SettingSlider {
-                            title: "Text & Font Size"
-                            description: "Proportionally scale clock digits, labels, titles, and text elements (85% - 125%)"
-                            iconName: "type"
-                            iconColor: Theme.accentYellow
-                            value: SettingsService.fontScale
-                            minimumValue: 0.85
-                            maximumValue: 1.25
-                            stepSize: 0.05
-                            presets: [
-                                { label: "85%", value: 0.85 },
-                                { label: "90%", value: 0.90 },
-                                { label: "100% (Default)", value: 1.00 },
-                                { label: "110%", value: 1.10 },
-                                { label: "125%", value: 1.25 }
-                            ]
-                            onValueModified: function(val) {
-                                SettingsService.setSetting("fontScale", val);
-                            }
-                        }
+                // 2. Text & Font Size Scale
+                SettingSlider {
+                    title: "Text & Font Size"
+                    description: "Proportionally scale clock digits, labels, titles, and text elements (85% - 125%)"
+                    iconName: "type"
+                    iconColor: Theme.accentYellow
+                    value: SettingsService.fontScale
+                    minimumValue: 0.85
+                    maximumValue: 1.25
+                    stepSize: 0.05
+                    presets: [
+                        { label: "85%", value: 0.85 },
+                        { label: "90%", value: 0.90 },
+                        { label: "100% (Default)", value: 1.00 },
+                        { label: "110%", value: 1.10 },
+                        { label: "125%", value: 1.25 }
+                    ]
+                    onValueModified: function(val) {
+                        SettingsService.setSetting("fontScale", val);
                     }
                 }
             }
 
             // Section 1: Window & Workspace Pills (Top Left)
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "WINDOW & WORKSPACE PILLS"
+                subtitle: "Top Left Corner"
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                    spacing: 6
-
-                    Text {
-                        text: "WINDOW & WORKSPACE PILLS"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        font.weight: Font.DemiBold
-                        color: Theme.textTertiary
-                    }
-
-                    Text {
-                        text: "• Top Left Corner"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        color: Qt.rgba(1, 1, 1, 0.25)
+                // 1. Window Controls Main Toggle
+                SettingToggle {
+                    title: "Window Controls Pill"
+                    description: "Display active application name, window title, and window actions menu"
+                    iconName: "window"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.showWindowControls
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showWindowControls", val);
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: windowPillsCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: windowPillsCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 1b. Auto-Hide Window Controls Sub-Toggle
+                SettingToggle {
+                    title: "Auto-Hide Window Controls"
+                    description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
+                    iconName: "chevron-up"
+                    iconColor: Theme.accentBlue
+                    isSubOption: true
+                    enabled: SettingsService.showWindowControls
+                    checked: SettingsService.autoHideWindowControls
+                    onToggled: function(val) {
+                        SettingsService.setSetting("autoHideWindowControls", val);
+                    }
+                }
 
-                        // 1. Window Controls Main Toggle
-                        SettingToggle {
-                            title: "Window Controls Pill"
-                            description: "Display active application name, window title, and window actions menu"
-                            iconName: "window"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.showWindowControls
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showWindowControls", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 2. Virtual Desktops Main Toggle
+                SettingToggle {
+                    title: "Virtual Desktops Pill"
+                    description: "Display workspace switcher dots, desktop numbers, and quick workspace actions"
+                    iconName: "desktop"
+                    iconColor: Theme.accentPurple
+                    checked: SettingsService.showVirtualDesktops
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showVirtualDesktops", val);
+                    }
+                }
 
-                        // 1b. Auto-Hide Window Controls Sub-Toggle
-                        SettingToggle {
-                            title: "Auto-Hide Window Controls"
-                            description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
-                            iconName: "chevron-up"
-                            iconColor: Theme.accentBlue
-                            isSubOption: true
-                            enabled: SettingsService.showWindowControls
-                            checked: SettingsService.autoHideWindowControls
-                            onToggled: function(val) {
-                                SettingsService.setSetting("autoHideWindowControls", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
-
-                        // 2. Virtual Desktops Main Toggle
-                        SettingToggle {
-                            title: "Virtual Desktops Pill"
-                            description: "Display workspace switcher dots, desktop numbers, and quick workspace actions"
-                            iconName: "desktop"
-                            iconColor: Theme.accentPurple
-                            checked: SettingsService.showVirtualDesktops
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showVirtualDesktops", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 2b. Auto-Hide Virtual Desktops Sub-Toggle
-                        SettingToggle {
-                            title: "Auto-Hide Virtual Desktops"
-                            description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
-                            iconName: "chevron-up"
-                            iconColor: Theme.accentPurple
-                            isSubOption: true
-                            enabled: SettingsService.showVirtualDesktops
-                            checked: SettingsService.autoHideVirtualDesktops
-                            onToggled: function(val) {
-                                SettingsService.setSetting("autoHideVirtualDesktops", val);
-                            }
-                        }
+                // 2b. Auto-Hide Virtual Desktops Sub-Toggle
+                SettingToggle {
+                    title: "Auto-Hide Virtual Desktops"
+                    description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
+                    iconName: "chevron-up"
+                    iconColor: Theme.accentPurple
+                    isSubOption: true
+                    enabled: SettingsService.showVirtualDesktops
+                    checked: SettingsService.autoHideVirtualDesktops
+                    onToggled: function(val) {
+                        SettingsService.setSetting("autoHideVirtualDesktops", val);
                     }
                 }
             }
 
             // Section 2: Top Right Status Bar Icons
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "STATUS BAR ICONS"
+                subtitle: "Top Right Cluster"
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                    spacing: 6
-
-                    Text {
-                        text: "STATUS BAR ICONS"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        font.weight: Font.DemiBold
-                        color: Theme.textTertiary
-                    }
-
-                    Text {
-                        text: "• Top Right Cluster"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        color: Qt.rgba(1, 1, 1, 0.25)
+                // 1. Caffeine
+                SettingToggle {
+                    title: "Caffeine"
+                    description: "Keep awake icon to prevent screen sleep and dimming"
+                    iconName: "coffee"
+                    iconColor: Theme.accentOrange
+                    checked: SettingsService.showCaffeineIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showCaffeineIcon", val);
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: statusIconsCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: statusIconsCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 2. Wi-Fi
+                SettingToggle {
+                    title: "Wi-Fi & Network"
+                    description: "Network connectivity status & quick Wi-Fi selection menu"
+                    iconName: "wifi"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.showWifiIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showWifiIcon", val);
+                    }
+                }
 
-                        // 1. Caffeine
-                        SettingToggle {
-                            title: "Caffeine"
-                            description: "Keep awake icon to prevent screen sleep and dimming"
-                            iconName: "coffee"
-                            iconColor: Theme.accentOrange
-                            checked: SettingsService.showCaffeineIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showCaffeineIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 3. Bluetooth
+                SettingToggle {
+                    title: "Bluetooth"
+                    description: "Bluetooth power state and quick paired devices list"
+                    iconName: "bluetooth"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.showBluetoothIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showBluetoothIcon", val);
+                    }
+                }
 
-                        // 2. Wi-Fi
-                        SettingToggle {
-                            title: "Wi-Fi & Network"
-                            description: "Network connectivity status & quick Wi-Fi selection menu"
-                            iconName: "wifi"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.showWifiIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showWifiIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 4. Microphone
+                SettingToggle {
+                    title: "Microphone"
+                    description: "Input mute toggle & microphone volume control"
+                    iconName: "mic"
+                    iconColor: Theme.accentRed
+                    checked: SettingsService.showMicIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showMicIcon", val);
+                    }
+                }
 
-                        // 3. Bluetooth
-                        SettingToggle {
-                            title: "Bluetooth"
-                            description: "Bluetooth power state and quick paired devices list"
-                            iconName: "bluetooth"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.showBluetoothIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showBluetoothIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 5. Clipboard History
+                SettingToggle {
+                    title: "Clipboard History"
+                    description: "Quick clipboard search and copy history manager"
+                    iconName: "clipboard"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.showClipboardIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showClipboardIcon", val);
+                    }
+                }
 
-                        // 4. Microphone
-                        SettingToggle {
-                            title: "Microphone"
-                            description: "Input mute toggle & microphone volume control"
-                            iconName: "mic"
-                            iconColor: Theme.accentRed
-                            checked: SettingsService.showMicIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showMicIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 6. Performance Profiles
+                SettingToggle {
+                    title: "Performance Profiles"
+                    description: "Switch power profile between Power Saver, Balanced, and Performance"
+                    iconName: "gauge"
+                    iconColor: Theme.accentGreen
+                    checked: SettingsService.showProfileIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showProfileIcon", val);
+                    }
+                }
 
-                        // 5. Clipboard History
-                        SettingToggle {
-                            title: "Clipboard History"
-                            description: "Quick clipboard search and copy history manager"
-                            iconName: "clipboard"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.showClipboardIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showClipboardIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 7. Hardware Monitor
+                SettingToggle {
+                    title: "Hardware Monitor"
+                    description: "Live CPU percentage & system resource statistics"
+                    iconName: "cpu"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.showHardwareIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showHardwareIcon", val);
+                    }
+                }
 
-                        // 6. Performance Profiles
-                        SettingToggle {
-                            title: "Performance Profiles"
-                            description: "Switch power profile between Power Saver, Balanced, and Performance"
-                            iconName: "gauge"
-                            iconColor: Theme.accentGreen
-                            checked: SettingsService.showProfileIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showProfileIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
-
-                        // 7. Hardware Monitor
-                        SettingToggle {
-                            title: "Hardware Monitor"
-                            description: "Live CPU percentage & system resource statistics"
-                            iconName: "cpu"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.showHardwareIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showHardwareIcon", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 8. Battery Indicator
-                        SettingToggle {
-                            title: "Battery Indicator"
-                            description: "Display battery percentage widget & power menu"
-                            iconName: "battery"
-                            iconColor: Theme.accentGreen
-                            checked: SettingsService.showBatteryIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showBatteryIcon", val);
-                            }
-                        }
+                // 8. Battery Indicator
+                SettingToggle {
+                    title: "Battery Indicator"
+                    description: "Display battery percentage widget & power menu"
+                    iconName: "battery"
+                    iconColor: Theme.accentGreen
+                    checked: SettingsService.showBatteryIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showBatteryIcon", val);
                     }
                 }
             }
 
             // Section 3: Dynamic Icons & Pinning
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "DYNAMIC ICONS & PINNING"
+                subtitle: "Auto-show or keep pinned"
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                    spacing: 6
-
-                    Text {
-                        text: "DYNAMIC ICONS & PINNING"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        font.weight: Font.DemiBold
-                        color: Theme.textTertiary
-                    }
-
-                    Text {
-                        text: "• Auto-show or keep pinned"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        color: Qt.rgba(1, 1, 1, 0.25)
+                // 1. USB Devices Main Toggle
+                SettingToggle {
+                    title: "USB & External Drives"
+                    description: "Automatically shows when external drives or USB sticks are connected"
+                    iconName: "usb"
+                    iconColor: Theme.accentGreen
+                    checked: SettingsService.showUsbIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showUsbIcon", val);
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: dynamicIconsCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: dynamicIconsCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 1b. Pin USB Toggle
+                SettingToggle {
+                    title: "Always Show USB Icon (Pin)"
+                    description: "Keep USB icon permanently visible even when no drives are plugged in"
+                    iconName: "pin"
+                    iconColor: Theme.accentGreen
+                    isSubOption: true
+                    enabled: SettingsService.showUsbIcon
+                    checked: SettingsService.pinUsbIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("pinUsbIcon", val);
+                    }
+                }
 
-                        // 1. USB Devices Main Toggle
-                        SettingToggle {
-                            title: "USB & External Drives"
-                            description: "Automatically shows when external drives or USB sticks are connected"
-                            iconName: "usb"
-                            iconColor: Theme.accentGreen
-                            checked: SettingsService.showUsbIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showUsbIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 2. Notifications Main Toggle
+                SettingToggle {
+                    title: "Notification Bell"
+                    description: "Automatically shows when unread or active notifications exist"
+                    iconName: "bell"
+                    iconColor: Theme.accentOrange
+                    checked: SettingsService.showNotificationIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showNotificationIcon", val);
+                    }
+                }
 
-                        // 1b. Pin USB Toggle
-                        SettingToggle {
-                            title: "Always Show USB Icon (Pin)"
-                            description: "Keep USB icon permanently visible even when no drives are plugged in"
-                            iconName: "pin"
-                            iconColor: Theme.accentGreen
-                            isSubOption: true
-                            enabled: SettingsService.showUsbIcon
-                            checked: SettingsService.pinUsbIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("pinUsbIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 2b. Pin Notification Toggle
+                SettingToggle {
+                    title: "Always Show Notification Bell (Pin)"
+                    description: "Keep bell permanently visible even when there are no unread notifications"
+                    iconName: "pin"
+                    iconColor: Theme.accentOrange
+                    isSubOption: true
+                    enabled: SettingsService.showNotificationIcon
+                    checked: SettingsService.pinNotificationIcon
+                    onToggled: function(val) {
+                        SettingsService.setSetting("pinNotificationIcon", val);
+                    }
+                }
 
-                        // 2. Notifications Main Toggle
-                        SettingToggle {
-                            title: "Notification Bell"
-                            description: "Automatically shows when unread or active notifications exist"
-                            iconName: "bell"
-                            iconColor: Theme.accentOrange
-                            checked: SettingsService.showNotificationIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showNotificationIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 3. Background Apps Tray Pill Main Toggle
+                SettingToggle {
+                    title: "Background Apps Tray Pill"
+                    description: "Display persistent background application indicators and tray icons capsule"
+                    iconName: "desktop"
+                    iconColor: Theme.accentIndigo
+                    checked: SettingsService.showAppTrayPill
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showAppTrayPill", val);
+                    }
+                }
 
-                        // 2b. Pin Notification Toggle
-                        SettingToggle {
-                            title: "Always Show Notification Bell (Pin)"
-                            description: "Keep bell permanently visible even when there are no unread notifications"
-                            iconName: "pin"
-                            iconColor: Theme.accentOrange
-                            isSubOption: true
-                            enabled: SettingsService.showNotificationIcon
-                            checked: SettingsService.pinNotificationIcon
-                            onToggled: function(val) {
-                                SettingsService.setSetting("pinNotificationIcon", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 3b. Auto-Hide Tray Pill Sub-Toggle
+                SettingToggle {
+                    title: "Auto-Hide Tray Pill"
+                    description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
+                    iconName: "chevron-up"
+                    iconColor: Theme.accentIndigo
+                    isSubOption: true
+                    enabled: SettingsService.showAppTrayPill
+                    checked: SettingsService.autoHideAppTrayPill
+                    onToggled: function(val) {
+                        SettingsService.setSetting("autoHideAppTrayPill", val);
+                    }
+                }
 
-                        // 3. Background Apps Tray Pill Main Toggle
-                        SettingToggle {
-                            title: "Background Apps Tray Pill"
-                            description: "Display persistent background application indicators and tray icons capsule"
-                            iconName: "desktop"
-                            iconColor: Theme.accentIndigo
-                            checked: SettingsService.showAppTrayPill
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showAppTrayPill", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
-
-                        // 3b. Auto-Hide Tray Pill Sub-Toggle
-                        SettingToggle {
-                            title: "Auto-Hide Tray Pill"
-                            description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
-                            iconName: "chevron-up"
-                            iconColor: Theme.accentIndigo
-                            isSubOption: true
-                            enabled: SettingsService.showAppTrayPill
-                            checked: SettingsService.autoHideAppTrayPill
-                            onToggled: function(val) {
-                                SettingsService.setSetting("autoHideAppTrayPill", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 4. Detached Notification Bubble Toggle
-                        SettingToggle {
-                            title: "Detached Notification Bubble"
-                            description: "Secondary floating island circle displaying unread notification alerts"
-                            iconName: "bell"
-                            iconColor: Theme.accentOrange
-                            checked: SettingsService.showDetachedNotifBubble
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showDetachedNotifBubble", val);
-                            }
-                        }
+                // 4. Detached Notification Bubble Toggle
+                SettingToggle {
+                    title: "Detached Notification Bubble"
+                    description: "Secondary floating island circle displaying unread notification alerts"
+                    iconName: "bell"
+                    iconColor: Theme.accentOrange
+                    checked: SettingsService.showDetachedNotifBubble
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showDetachedNotifBubble", val);
                     }
                 }
             }
 
             // Section 4: Clock & Time Settings
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "DATE & CLOCK"
 
-                Text {
-                    text: "DATE & CLOCK"
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 10
-                    font.weight: Font.DemiBold
-                    color: Theme.textTertiary
-                    Layout.leftMargin: 4
+                // 1. 24-Hour Time Format
+                SettingToggle {
+                    title: "24-Hour Time Format"
+                    description: "Display clock in 24-hour mode instead of 12-hour AM/PM"
+                    iconName: "clock"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.use24Hour
+                    onToggled: function(val) {
+                        SettingsService.setSetting("use24Hour", val);
+                    }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: clockCardCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: clockCardCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
-
-                        // 1. 24-Hour Time Format
-                        SettingToggle {
-                            title: "24-Hour Time Format"
-                            description: "Display clock in 24-hour mode instead of 12-hour AM/PM"
-                            iconName: "clock"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.use24Hour
-                            onToggled: function(val) {
-                                SettingsService.setSetting("use24Hour", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 2. Show Seconds
-                        SettingToggle {
-                            title: "Show Seconds in Expanded View"
-                            description: "Display live seconds counter next to the time"
-                            iconName: "clock"
-                            iconColor: Theme.accentPurple
-                            checked: SettingsService.showSeconds
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showSeconds", val);
-                            }
-                        }
+                // 2. Show Seconds
+                SettingToggle {
+                    title: "Show Seconds in Expanded View"
+                    description: "Display live seconds counter next to the time"
+                    iconName: "clock"
+                    iconColor: Theme.accentPurple
+                    checked: SettingsService.showSeconds
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showSeconds", val);
                     }
                 }
             }
 
             // Section 5: Expanded Island Cards Customization
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "EXPANDED ISLAND CARDS"
+                subtitle: "Choose cards shown when expanded"
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                    spacing: 6
-
-                    Text {
-                        text: "EXPANDED ISLAND CARDS"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        font.weight: Font.DemiBold
-                        color: Theme.textTertiary
-                    }
-
-                    Text {
-                        text: "• Choose cards shown when expanded"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        color: Qt.rgba(1, 1, 1, 0.25)
+                // 1. Mini Calendar
+                SettingToggle {
+                    title: "Mini Calendar"
+                    description: "Monthly calendar grid with current date highlight and week numbers"
+                    iconName: "calendar"
+                    iconColor: Theme.accentRed
+                    checked: SettingsService.showExpandedCalendar
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showExpandedCalendar", val);
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: expandedCardsCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: expandedCardsCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 2. Media Player
+                SettingToggle {
+                    title: "Media Player"
+                    description: "Playback controls, album artwork, track title, and interactive seek bar"
+                    iconName: "music"
+                    iconColor: Theme.accentRed
+                    checked: SettingsService.showExpandedMedia
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showExpandedMedia", val);
+                    }
+                }
 
-                        // 1. Mini Calendar
-                        SettingToggle {
-                            title: "Mini Calendar"
-                            description: "Monthly calendar grid with current date highlight and week numbers"
-                            iconName: "calendar"
-                            iconColor: Theme.accentRed
-                            checked: SettingsService.showExpandedCalendar
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showExpandedCalendar", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 3. Audio Output Selector
+                SettingToggle {
+                    title: "Audio Output Selector"
+                    description: "Quickly switch active audio playback device (speakers, headphones, HDMI)"
+                    iconName: "headphones"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.showExpandedAudioSink
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showExpandedAudioSink", val);
+                    }
+                }
 
-                        // 2. Media Player
-                        SettingToggle {
-                            title: "Media Player"
-                            description: "Playback controls, album artwork, track title, and interactive seek bar"
-                            iconName: "music"
-                            iconColor: Theme.accentRed
-                            checked: SettingsService.showExpandedMedia
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showExpandedMedia", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 4. Volume Slider
+                SettingToggle {
+                    title: "Volume Slider"
+                    description: "Interactive slider for master speaker output volume"
+                    iconName: "volume-high"
+                    iconColor: Theme.accentGreen
+                    checked: SettingsService.showExpandedVolume
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showExpandedVolume", val);
+                    }
+                }
 
-                        // 3. Audio Output Selector
-                        SettingToggle {
-                            title: "Audio Output Selector"
-                            description: "Quickly switch active audio playback device (speakers, headphones, HDMI)"
-                            iconName: "headphones"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.showExpandedAudioSink
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showExpandedAudioSink", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
-
-                        // 4. Volume Slider
-                        SettingToggle {
-                            title: "Volume Slider"
-                            description: "Interactive slider for master speaker output volume"
-                            iconName: "volume-high"
-                            iconColor: Theme.accentGreen
-                            checked: SettingsService.showExpandedVolume
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showExpandedVolume", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 5. Brightness Slider
-                        SettingToggle {
-                            title: "Brightness Slider"
-                            description: "Interactive slider for screen backlight brightness"
-                            iconName: "brightness-high"
-                            iconColor: Theme.accentYellow
-                            checked: SettingsService.showExpandedBrightness
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showExpandedBrightness", val);
-                            }
-                        }
+                // 5. Brightness Slider
+                SettingToggle {
+                    title: "Brightness Slider"
+                    description: "Interactive slider for screen backlight brightness"
+                    iconName: "brightness-high"
+                    iconColor: Theme.accentYellow
+                    checked: SettingsService.showExpandedBrightness
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showExpandedBrightness", val);
                     }
                 }
             }
 
             // Section 6: Island Behavior & Timing
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "ISLAND BEHAVIOR & TIMING"
+                subtitle: "Morphing, full-screen & auto-collapse"
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 4
-                    spacing: 6
-
-                    Text {
-                        text: "ISLAND BEHAVIOR & TIMING"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        font.weight: Font.DemiBold
-                        color: Theme.textTertiary
-                    }
-
-                    Text {
-                        text: "• Morphing, full-screen & auto-collapse"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        color: Qt.rgba(1, 1, 1, 0.25)
+                // 1. Show Media When Playing
+                SettingToggle {
+                    title: "Show Media Playing in Compact Pill"
+                    description: "Morphs compact pill into media status when music or audio is playing"
+                    iconName: "music"
+                    iconColor: Theme.accentRed
+                    checked: SettingsService.showMediaWhenPlaying
+                    onToggled: function(val) {
+                        SettingsService.setSetting("showMediaWhenPlaying", val);
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: islandCardCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: islandCardCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 2. Morph to Top Bar When Maximized
+                SettingToggle {
+                    title: "Morph to Top Bar When Windows Maximized"
+                    description: "Liquidly flattens the island into a full-width GNOME-style top bar"
+                    iconName: "window"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.morphToTopBarWhenMaximized
+                    onToggled: function(val) {
+                        SettingsService.setSetting("morphToTopBarWhenMaximized", val);
+                    }
+                }
 
-                        // 1. Show Media When Playing
-                        SettingToggle {
-                            title: "Show Media Playing in Compact Pill"
-                            description: "Morphs compact pill into media status when music or audio is playing"
-                            iconName: "music"
-                            iconColor: Theme.accentRed
-                            checked: SettingsService.showMediaWhenPlaying
-                            onToggled: function(val) {
-                                SettingsService.setSetting("showMediaWhenPlaying", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 2b. Reserve Space When Maximized Sub-Toggle
+                SettingToggle {
+                    title: "Reserve Top Bar Space When Maximized"
+                    description: "Reserves screen space so maximized windows sit underneath the top bar"
+                    iconName: "maximize"
+                    iconColor: Theme.accentCyan
+                    isSubOption: true
+                    enabled: SettingsService.morphToTopBarWhenMaximized
+                    checked: SettingsService.reserveSpaceWhenMaximized
+                    onToggled: function(val) {
+                        SettingsService.setSetting("reserveSpaceWhenMaximized", val);
+                    }
+                }
 
-                        // 2. Morph to Top Bar When Maximized
-                        SettingToggle {
-                            title: "Morph to Top Bar When Windows Maximized"
-                            description: "Liquidly flattens the island into a full-width GNOME-style top bar"
-                            iconName: "window"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.morphToTopBarWhenMaximized
-                            onToggled: function(val) {
-                                SettingsService.setSetting("morphToTopBarWhenMaximized", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 3. Auto-Hide Island on Fullscreen
+                SettingToggle {
+                    title: "Auto-Hide Island on Fullscreen"
+                    description: "Collapses and completely hides the Island when games or fullscreen apps are active"
+                    iconName: "desktop"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.hideOnFullscreen
+                    onToggled: function(val) {
+                        SettingsService.setSetting("hideOnFullscreen", val);
+                    }
+                }
 
-                        // 2b. Reserve Space When Maximized Sub-Toggle
-                        SettingToggle {
-                            title: "Reserve Top Bar Space When Maximized"
-                            description: "Reserves screen space so maximized windows sit underneath the top bar"
-                            iconName: "maximize"
-                            iconColor: Theme.accentCyan
-                            isSubOption: true
-                            enabled: SettingsService.morphToTopBarWhenMaximized
-                            checked: SettingsService.reserveSpaceWhenMaximized
-                            onToggled: function(val) {
-                                SettingsService.setSetting("reserveSpaceWhenMaximized", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
-
-                        // 3. Auto-Hide Island on Fullscreen
-                        SettingToggle {
-                            title: "Auto-Hide Island on Fullscreen"
-                            description: "Collapses and completely hides the Island when games or fullscreen apps are active"
-                            iconName: "desktop"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.hideOnFullscreen
-                            onToggled: function(val) {
-                                SettingsService.setSetting("hideOnFullscreen", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 4. Auto-Collapse Timeout Segmented Picker
-                        SettingSegmented {
-                            title: "Auto-Collapse Inactivity Timeout"
-                            description: "Duration before expanded island automatically collapses when mouse is idle"
-                            iconName: "clock"
-                            iconColor: Theme.accentPurple
-                            currentValue: SettingsService.autoCollapseTimeout
-                            options: [
-                                { "label": "3s", "value": 3000 },
-                                { "label": "6s", "value": 6000 },
-                                { "label": "10s", "value": 10000 },
-                                { "label": "Never", "value": 0 }
-                            ]
-                            onSelected: function(val) {
-                                SettingsService.setSetting("autoCollapseTimeout", val);
-                            }
-                        }
+                // 4. Auto-Collapse Timeout Segmented Picker
+                SettingSegmented {
+                    title: "Auto-Collapse Inactivity Timeout"
+                    description: "Duration before expanded island automatically collapses when mouse is idle"
+                    iconName: "clock"
+                    iconColor: Theme.accentPurple
+                    currentValue: SettingsService.autoCollapseTimeout
+                    options: [
+                        { "label": "3s", "value": 3000 },
+                        { "label": "6s", "value": 6000 },
+                        { "label": "10s", "value": 10000 },
+                        { "label": "Never", "value": 0 }
+                    ]
+                    onSelected: function(val) {
+                        SettingsService.setSetting("autoCollapseTimeout", val);
                     }
                 }
             }
 
             // Section 7: Dock Behavior
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "DOCK"
 
-                Text {
-                    text: "DOCK"
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 10
-                    font.weight: Font.DemiBold
-                    color: Theme.textTertiary
-                    Layout.leftMargin: 4
+                // 1. Dock Screen Edge Position
+                SettingSegmented {
+                    title: "Dock Position"
+                    description: "Screen edge where the dock is pinned (Bottom, Left, or Right)"
+                    iconName: "desktop"
+                    iconColor: Theme.accentBlue
+                    currentValue: SettingsService.dockPosition
+                    options: [
+                        { label: "Bottom", value: "bottom" },
+                        { label: "Left", value: "left" },
+                        { label: "Right", value: "right" }
+                    ]
+                    onSelected: function(val) {
+                        SettingsService.setSetting("dockPosition", val);
+                    }
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
-                    implicitHeight: dockCardCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                    ColumnLayout {
-                        id: dockCardCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 2. Dock Base Icon Size Slider
+                SettingSlider {
+                    title: "Dock Icon Size"
+                    description: "Base icon dimension in the dock capsule (36px – 64px)"
+                    iconName: "sliders"
+                    iconColor: Theme.accentCyan
+                    value: SettingsService.dockIconSize
+                    minimumValue: 36
+                    maximumValue: 64
+                    stepSize: 2
+                    valueDisplay: SettingsService.dockIconSize + "px"
+                    presets: [
+                        { label: "36px", value: 36 },
+                        { label: "44px (Default)", value: 44 },
+                        { label: "52px", value: 52 },
+                        { label: "64px", value: 64 }
+                    ]
+                    onValueModified: function(val) {
+                        SettingsService.setSetting("dockIconSize", Math.round(val));
+                    }
+                }
 
-                        // 1. Dock Screen Edge Position
-                        SettingSegmented {
-                            title: "Dock Position"
-                            description: "Screen edge where the dock is pinned (Bottom, Left, or Right)"
-                            iconName: "desktop"
-                            iconColor: Theme.accentBlue
-                            currentValue: SettingsService.dockPosition
-                            options: [
-                                { label: "Bottom", value: "bottom" },
-                                { label: "Left", value: "left" },
-                                { label: "Right", value: "right" }
-                            ]
-                            onSelected: function(val) {
-                                SettingsService.setSetting("dockPosition", val);
-                            }
-                        }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
+                // 3. Hover Magnification Scale Slider
+                SettingSlider {
+                    title: "Hover Magnification"
+                    description: "Cursor proximity wave zoom effect (1.0x = disabled, up to 1.5x)"
+                    iconName: "search"
+                    iconColor: Theme.accentPurple
+                    value: SettingsService.dockScaleHover
+                    minimumValue: 1.00
+                    maximumValue: 1.50
+                    stepSize: 0.01
+                    valueDisplay: SettingsService.dockScaleHover <= 1.01 ? "Disabled" : (SettingsService.dockScaleHover.toFixed(2) + "x")
+                    presets: [
+                        { label: "Disabled", value: 1.00 },
+                        { label: "1.15x", value: 1.15 },
+                        { label: "1.28x (Default)", value: 1.28 },
+                        { label: "1.40x", value: 1.40 },
+                        { label: "1.50x", value: 1.50 }
+                    ]
+                    onValueModified: function(val) {
+                        SettingsService.setSetting("dockScaleHover", val);
+                    }
+                }
 
-                        // 2. Dock Base Icon Size Slider
-                        SettingSlider {
-                            title: "Dock Icon Size"
-                            description: "Base icon dimension in the dock capsule (36px – 64px)"
-                            iconName: "sliders"
-                            iconColor: Theme.accentCyan
-                            value: SettingsService.dockIconSize
-                            minimumValue: 36
-                            maximumValue: 64
-                            stepSize: 2
-                            valueDisplay: SettingsService.dockIconSize + "px"
-                            presets: [
-                                { label: "36px", value: 36 },
-                                { label: "44px (Default)", value: 44 },
-                                { label: "52px", value: 52 },
-                                { label: "64px", value: 64 }
-                            ]
-                            onValueModified: function(val) {
-                                SettingsService.setSetting("dockIconSize", Math.round(val));
-                            }
-                        }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
+                SettingToggle {
+                    title: "Auto-Hide Dock on Fullscreen"
+                    description: "Automatically hides the dock when games or fullscreen apps are active"
+                    iconName: "desktop"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.dockAutoHideOnFullscreen
+                    onToggled: function(val) {
+                        SettingsService.setSetting("dockAutoHideOnFullscreen", val);
+                    }
+                }
 
-                        // 3. Hover Magnification Scale Slider
-                        SettingSlider {
-                            title: "Hover Magnification"
-                            description: "Cursor proximity wave zoom effect (1.0x = disabled, up to 1.5x)"
-                            iconName: "search"
-                            iconColor: Theme.accentPurple
-                            value: SettingsService.dockScaleHover
-                            minimumValue: 1.00
-                            maximumValue: 1.50
-                            stepSize: 0.01
-                            valueDisplay: SettingsService.dockScaleHover <= 1.01 ? "Disabled" : (SettingsService.dockScaleHover.toFixed(2) + "x")
-                            presets: [
-                                { label: "Disabled", value: 1.00 },
-                                { label: "1.15x", value: 1.15 },
-                                { label: "1.28x (Default)", value: 1.28 },
-                                { label: "1.40x", value: 1.40 },
-                                { label: "1.50x", value: 1.50 }
-                            ]
-                            onValueModified: function(val) {
-                                SettingsService.setSetting("dockScaleHover", val);
-                            }
-                        }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
+                SettingToggle {
+                    title: "Auto-Hide Dock from Windows"
+                    description: "Automatically drops the dock down when a window moves over or overlaps its area"
+                    iconName: "window"
+                    iconColor: Theme.accentBlue
+                    checked: SettingsService.dockAutoHideFromWindows
+                    onToggled: function(val) {
+                        SettingsService.setSetting("dockAutoHideFromWindows", val);
+                    }
+                }
 
-                        SettingToggle {
-                            title: "Auto-Hide Dock on Fullscreen"
-                            description: "Automatically hides the dock when games or fullscreen apps are active"
-                            iconName: "desktop"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.dockAutoHideOnFullscreen
-                            onToggled: function(val) {
-                                SettingsService.setSetting("dockAutoHideOnFullscreen", val);
-                            }
-                        }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
+                SettingToggle {
+                    title: "Always Auto-Hide Dock"
+                    description: "Keeps the dock hidden off-screen until you hover over its screen edge"
+                    iconName: "chevron-down"
+                    iconColor: Theme.accentCyan
+                    checked: SettingsService.dockAutoHideAlways
+                    onToggled: function(val) {
+                        SettingsService.setSetting("dockAutoHideAlways", val);
+                    }
+                }
 
-                        SettingToggle {
-                            title: "Auto-Hide Dock from Windows"
-                            description: "Automatically drops the dock down when a window moves over or overlaps its area"
-                            iconName: "window"
-                            iconColor: Theme.accentBlue
-                            checked: SettingsService.dockAutoHideFromWindows
-                            onToggled: function(val) {
-                                SettingsService.setSetting("dockAutoHideFromWindows", val);
-                            }
-                        }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
+                SettingToggle {
+                    title: "Show Dock Border"
+                    description: "Display a subtle border outline and top highlight on the dock capsule"
+                    iconName: "square"
+                    iconColor: Theme.accentPurple
+                    checked: SettingsService.dockShowBorder
+                    onToggled: function(val) {
+                        SettingsService.setSetting("dockShowBorder", val);
+                    }
+                }
 
-                        SettingToggle {
-                            title: "Always Auto-Hide Dock"
-                            description: "Keeps the dock hidden off-screen until you hover over its screen edge"
-                            iconName: "chevron-down"
-                            iconColor: Theme.accentCyan
-                            checked: SettingsService.dockAutoHideAlways
-                            onToggled: function(val) {
-                                SettingsService.setSetting("dockAutoHideAlways", val);
-                            }
-                        }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Qt.rgba(1, 1, 1, 0.06)
+                }
 
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
-
-                        SettingToggle {
-                            title: "Show Dock Border"
-                            description: "Display a subtle border outline and top highlight on the dock capsule"
-                            iconName: "square"
-                            iconColor: Theme.accentPurple
-                            checked: SettingsService.dockShowBorder
-                            onToggled: function(val) {
-                                SettingsService.setSetting("dockShowBorder", val);
-                            }
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(1, 1, 1, 0.06)
-                        }
-
-                        SettingToggle {
-                            title: "Transparent Glass Dock"
-                            description: "Use a translucent frosted glass effect with specular highlights for the dock capsule"
-                            iconName: "contrast"
-                            iconColor: Theme.accentIndigo
-                            checked: SettingsService.dockTransparent
-                            onToggled: function(val) {
-                                SettingsService.setSetting("dockTransparent", val);
-                            }
-                        }
+                SettingToggle {
+                    title: "Transparent Glass Dock"
+                    description: "Use a translucent frosted glass effect with specular highlights for the dock capsule"
+                    iconName: "contrast"
+                    iconColor: Theme.accentIndigo
+                    checked: SettingsService.dockTransparent
+                    onToggled: function(val) {
+                        SettingsService.setSetting("dockTransparent", val);
                     }
                 }
             }
 
             // Section: App Launcher Customization
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 6
+            SettingsSection {
+                title: "APP LAUNCHER"
 
-                Text {
-                    text: "APP LAUNCHER"
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 10
-                    font.weight: Font.DemiBold
-                    color: Theme.textTertiary
-                    Layout.leftMargin: 4
+                // 1. Default View Layout (Grid vs List)
+                SettingSegmented {
+                    title: "Default View Layout"
+                    description: "Visual layout for the application picker (Grid or List)"
+                    iconName: "apps"
+                    iconColor: Theme.accentBlue
+                    currentValue: SettingsService.launcherDefaultView
+                    options: [
+                        { label: "Grid View", value: "grid" },
+                        { label: "List View", value: "list" }
+                    ]
+                    onSelected: function(val) {
+                        SettingsService.setSetting("launcherDefaultView", val);
+                    }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    implicitHeight: launcherCardCol.implicitHeight
-                    radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                SettingDivider {}
 
-                    ColumnLayout {
-                        id: launcherCardCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        spacing: 0
+                // 2. Display Density (Comfortable vs Compact)
+                SettingSegmented {
+                    title: "Display Density"
+                    description: "Tile size, spacing, and icon dimension density"
+                    iconName: "sliders"
+                    iconColor: Theme.accentCyan
+                    currentValue: SettingsService.launcherDensity
+                    options: [
+                        { label: "Comfortable", value: "comfortable" },
+                        { label: "Compact", value: "compact" }
+                    ]
+                    onSelected: function(val) {
+                        SettingsService.setSetting("launcherDensity", val);
+                    }
+                }
 
-                        // 1. Default View Layout (Grid vs List)
-                        SettingSegmented {
-                            title: "Default View Layout"
-                            description: "Visual layout for the application picker (Grid or List)"
-                            iconName: "apps"
-                            iconColor: Theme.accentBlue
-                            currentValue: SettingsService.launcherDefaultView
-                            options: [
-                                { label: "Grid View", value: "grid" },
-                                { label: "List View", value: "list" }
-                            ]
-                            onSelected: function(val) {
-                                SettingsService.setSetting("launcherDefaultView", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 3. Grid Columns (3, 4, 5)
+                SettingSegmented {
+                    title: "Grid Columns"
+                    description: "Number of columns when Grid View is active"
+                    iconName: "grid"
+                    iconColor: Theme.accentPurple
+                    currentValue: SettingsService.launcherGridColumns
+                    options: [
+                        { label: "3 Cols", value: 3 },
+                        { label: "4 Cols", value: 4 },
+                        { label: "5 Cols", value: 5 }
+                    ]
+                    onSelected: function(val) {
+                        SettingsService.setSetting("launcherGridColumns", parseInt(val));
+                    }
+                }
 
-                        // 2. Display Density (Comfortable vs Compact)
-                        SettingSegmented {
-                            title: "Display Density"
-                            description: "Tile size, spacing, and icon dimension density"
-                            iconName: "sliders"
-                            iconColor: Theme.accentCyan
-                            currentValue: SettingsService.launcherDensity
-                            options: [
-                                { label: "Comfortable", value: "comfortable" },
-                                { label: "Compact", value: "compact" }
-                            ]
-                            onSelected: function(val) {
-                                SettingsService.setSetting("launcherDensity", val);
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
+                // 4. Category Filter Tabs Toggle
+                SettingToggle {
+                    title: "Category Filter Bar"
+                    description: "Display category tabs (Internet, Development, Media, System...) to filter apps"
+                    iconName: "tag"
+                    iconColor: Theme.accentOrange
+                    checked: SettingsService.launcherShowCategories
+                    onToggled: function(val) {
+                        SettingsService.setSetting("launcherShowCategories", val);
+                    }
+                }
 
-                        // 3. Grid Columns (3, 4, 5)
-                        SettingSegmented {
-                            title: "Grid Columns"
-                            description: "Number of columns when Grid View is active"
-                            iconName: "grid"
-                            iconColor: Theme.accentPurple
-                            currentValue: SettingsService.launcherGridColumns
-                            options: [
-                                { label: "3 Cols", value: 3 },
-                                { label: "4 Cols", value: 4 },
-                                { label: "5 Cols", value: 5 }
-                            ]
-                            onSelected: function(val) {
-                                SettingsService.setSetting("launcherGridColumns", parseInt(val));
-                            }
-                        }
+                SettingDivider {}
 
-                        SettingDivider {}
-
-                        // 4. Category Filter Tabs Toggle
-                        SettingToggle {
-                            title: "Category Filter Bar"
-                            description: "Display category tabs (Internet, Development, Media, System...) to filter apps"
-                            iconName: "tag"
-                            iconColor: Theme.accentOrange
-                            checked: SettingsService.launcherShowCategories
-                            onToggled: function(val) {
-                                SettingsService.setSetting("launcherShowCategories", val);
-                            }
-                        }
-
-                        SettingDivider {}
-
-                        // 5. Show App Generic Names / Descriptions Toggle
-                        SettingToggle {
-                            title: "Show App Subtitles"
-                            description: "Display generic descriptions (e.g. 'Web Browser') under app titles"
-                            iconName: "type"
-                            iconColor: Theme.accentGreen
-                            checked: SettingsService.launcherShowGenericNames
-                            onToggled: function(val) {
-                                SettingsService.setSetting("launcherShowGenericNames", val);
-                            }
-                        }
+                // 5. Show App Generic Names / Descriptions Toggle
+                SettingToggle {
+                    title: "Show App Subtitles"
+                    description: "Display generic descriptions (e.g. 'Web Browser') under app titles"
+                    iconName: "type"
+                    iconColor: Theme.accentGreen
+                    checked: SettingsService.launcherShowGenericNames
+                    onToggled: function(val) {
+                        SettingsService.setSetting("launcherShowGenericNames", val);
                     }
                 }
             }
@@ -1383,489 +1075,4 @@ Item {
             onClicked: root.requestClose()
         }
     }
-
-    // Reusable Hairline Divider between settings items
-    component SettingDivider: Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 1
-        Layout.leftMargin: 12
-        Layout.rightMargin: 12
-        color: Qt.rgba(1, 1, 1, 0.06)
-    }
-
-    // Inline Reusable SettingToggle component
-    component SettingToggle: Rectangle {
-        id: toggleRow
-        property string title: ""
-        property string description: ""
-        property string iconName: ""
-        property color iconColor: Theme.accentBlue
-        property color iconBadgeColor: Qt.rgba(iconColor.r, iconColor.g, iconColor.b, 0.18)
-        property bool checked: false
-        property bool isSubOption: false
-        signal toggled(bool val)
-
-        Layout.fillWidth: true
-        implicitHeight: descText.text !== "" ? 52 : 42
-        color: rowMouse.containsMouse && enabled ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
-        radius: 10
-        opacity: enabled ? 1.0 : 0.4
-
-        Behavior on color {
-            ColorAnimation { duration: Theme.animDurationFast }
-        }
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.animDurationPopover }
-        }
-
-        MouseArea {
-            id: rowMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: toggleRow.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: {
-                if (toggleRow.enabled) {
-                    toggleRow.toggled(!toggleRow.checked);
-                }
-            }
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: toggleRow.isSubOption ? 28 : 12
-            anchors.rightMargin: 12
-            spacing: 10
-
-            // Icon Badge
-            Rectangle {
-                visible: toggleRow.iconName !== ""
-                Layout.preferredWidth: 26
-                Layout.preferredHeight: 26
-                radius: 7
-                color: toggleRow.iconBadgeColor
-
-                SvgIcon {
-                    anchors.centerIn: parent
-                    name: toggleRow.iconName
-                    size: 14
-                    color: toggleRow.iconColor
-                }
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 2
-
-                Text {
-                    text: toggleRow.title
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 12
-                    font.weight: Font.DemiBold
-                    color: Theme.textPrimary
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
-
-                Text {
-                    id: descText
-                    text: toggleRow.description
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 10
-                    color: Theme.textSecondary
-                    visible: text !== ""
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
-            }
-
-            // Toggle switch
-            Rectangle {
-                Layout.preferredWidth: 44
-                Layout.preferredHeight: 24
-                radius: 12
-                color: toggleRow.checked ? Theme.accentGreen : "#39393d"
-
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-                Rectangle {
-                    y: 2
-                    x: toggleRow.checked ? 22 : 2
-                    width: 20
-                    height: 20
-                    radius: 10
-                    color: "#ffffff"
-
-                    Behavior on x {
-                        NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
-                    }
-                }
-            }
-        }
-    }
-
-    // Inline Reusable SettingSegmented component (Segmented segmented picker)
-    component SettingSegmented: Rectangle {
-        id: segRow
-        property string title: ""
-        property string description: ""
-        property string iconName: ""
-        property color iconColor: Theme.accentBlue
-        property color iconBadgeColor: Qt.rgba(iconColor.r, iconColor.g, iconColor.b, 0.18)
-        property var options: []
-        property var currentValue: null
-        property bool isSubOption: false
-        signal selected(var val)
-
-        Layout.fillWidth: true
-        implicitHeight: segCol.implicitHeight + 20
-        color: "transparent"
-        opacity: enabled ? 1.0 : 0.4
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.animDurationPopover }
-        }
-
-        ColumnLayout {
-            id: segCol
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: segRow.isSubOption ? 28 : 12
-            anchors.rightMargin: 12
-            anchors.topMargin: 10
-            spacing: 8
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-
-                // Icon Badge
-                Rectangle {
-                    visible: segRow.iconName !== ""
-                    Layout.preferredWidth: 26
-                    Layout.preferredHeight: 26
-                    radius: 7
-                    color: segRow.iconBadgeColor
-
-                    SvgIcon {
-                        anchors.centerIn: parent
-                        name: segRow.iconName
-                        size: 14
-                        color: segRow.iconColor
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 2
-
-                    Text {
-                        text: segRow.title
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 12
-                        font.weight: Font.DemiBold
-                        color: Theme.textPrimary
-                        elide: Text.ElideRight
-                        Layout.fillWidth: true
-                    }
-
-                    Text {
-                        id: segDescText
-                        text: segRow.description
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 10
-                        color: Theme.textSecondary
-                        visible: text !== ""
-                        elide: Text.ElideRight
-                        Layout.fillWidth: true
-                    }
-                }
-            }
-
-            // Segmented Picker Bar
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 32
-                radius: 8
-                color: Qt.rgba(1, 1, 1, 0.08)
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 2
-                    spacing: 2
-
-                    Repeater {
-                        model: segRow.options
-
-                        Rectangle {
-                            id: segOptionBtn
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            radius: 6
-                            readonly property bool isSelected: segRow.currentValue === modelData.value
-                            color: isSelected ? Qt.rgba(1, 1, 1, 0.22) : (segBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
-
-                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData.label
-                                font.family: Theme.fontFamily
-                                font.pixelSize: 11
-                                font.weight: segOptionBtn.isSelected ? Font.Bold : Font.Normal
-                                color: segOptionBtn.isSelected ? Theme.textPrimary : Theme.textSecondary
-                            }
-
-                            MouseArea {
-                                id: segBtnMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    segRow.selected(modelData.value);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Reusable Custom Draggable Slider Row with live percentage badge and quick presets
-    component SettingSlider: Rectangle {
-        id: sliderRow
-        Layout.fillWidth: true
-        implicitHeight: sliderCol.implicitHeight + 20
-        color: "transparent"
-
-        property string title: ""
-        property string description: ""
-        property string iconName: "sliders"
-        property color iconColor: Theme.accentCyan
-        property real value: 1.0
-        property real minimumValue: 0.8
-        property real maximumValue: 1.25
-        property real stepSize: 0.05
-        property var presets: []
-        property string valueDisplay: ""
-
-        signal valueModified(real newValue)
-
-        readonly property real fraction: Math.max(0.0, Math.min(1.0, (value - minimumValue) / (maximumValue - minimumValue)))
-
-        function updateFromPos(mouseX, trackWidth) {
-            if (trackWidth <= 0) return;
-            let ratio = Math.max(0.0, Math.min(1.0, mouseX / trackWidth));
-            let rawVal = minimumValue + ratio * (maximumValue - minimumValue);
-            let stepped = Math.round(rawVal / stepSize) * stepSize;
-            let finalVal = Math.max(minimumValue, Math.min(maximumValue, Math.round(stepped * 100) / 100));
-            sliderRow.valueModified(finalVal);
-        }
-
-        ColumnLayout {
-            id: sliderCol
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: 12
-            spacing: 10
-
-            // Header Row: Icon, Title & Live Value Badge
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-
-                Rectangle {
-                    Layout.preferredWidth: 26
-                    Layout.preferredHeight: 26
-                    radius: 7
-                    color: Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.16)
-
-                    SvgIcon {
-                        anchors.centerIn: parent
-                        name: sliderRow.iconName
-                        size: 14
-                        color: sliderRow.iconColor
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-
-                    Text {
-                        text: sliderRow.title
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 13
-                        font.weight: Font.Medium
-                        color: Theme.textPrimary
-                    }
-
-                    Text {
-                        text: sliderRow.description
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 11
-                        color: Theme.textSecondary
-                        Layout.maximumWidth: 340
-                        wrapMode: Text.WordWrap
-                    }
-                }
-
-                // Live Value Badge
-                Rectangle {
-                    Layout.preferredWidth: Math.max(50, valueBadgeText.implicitWidth + 16)
-                    Layout.preferredHeight: 24
-                    radius: 12
-                    color: Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.18)
-                    border.width: 1
-                    border.color: Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.35)
-
-                    Text {
-                        id: valueBadgeText
-                        anchors.centerIn: parent
-                        text: sliderRow.valueDisplay !== "" ? sliderRow.valueDisplay : (Math.round(sliderRow.value * 100) + "%")
-                        font.family: Theme.fontDisplay
-                        font.pixelSize: 11
-                        font.weight: Font.Bold
-                        color: sliderRow.iconColor
-                    }
-                }
-            }
-
-            // Draggable Slider Track
-            Item {
-                id: trackArea
-                Layout.fillWidth: true
-                Layout.preferredHeight: 22
-
-                // Background Rail
-                Rectangle {
-                    id: railBg
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: 6
-                    radius: 3
-                    color: Qt.rgba(1, 1, 1, 0.12)
-
-                    // Active Fill Track
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        width: Math.max(radius * 2, trackArea.width * sliderRow.fraction)
-                        radius: 3
-                        color: sliderRow.iconColor
-
-                        Behavior on width {
-                            enabled: !trackMouse.pressed
-                            NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic }
-                        }
-                    }
-                }
-
-                // Draggable Knob / Thumb
-                Rectangle {
-                    id: thumb
-                    width: 18
-                    height: 18
-                    radius: 9
-                    color: "#ffffff"
-                    x: Math.max(0, Math.min(trackArea.width - width, (trackArea.width * sliderRow.fraction) - (width / 2)))
-                    anchors.verticalCenter: parent.verticalCenter
-                    scale: trackMouse.pressed ? 1.15 : (trackMouse.containsMouse ? 1.08 : 1.0)
-
-                    border.width: 1
-                    border.color: Qt.rgba(0, 0, 0, 0.25)
-
-                    Behavior on x {
-                        enabled: !trackMouse.pressed
-                        NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic }
-                    }
-                    Behavior on scale {
-                        NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
-                    }
-
-                    // Subtle inner glow / shadow
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 6
-                        height: 6
-                        radius: 3
-                        color: sliderRow.iconColor
-                        opacity: trackMouse.pressed ? 0.9 : 0.4
-
-                        Behavior on opacity {
-                            NumberAnimation { duration: Theme.animDurationFast }
-                        }
-                    }
-                }
-
-                MouseArea {
-                    id: trackMouse
-                    anchors.fill: parent
-                    anchors.margins: -4
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-
-                    onPressed: function(mouse) {
-                        sliderRow.updateFromPos(mouse.x + 4, trackArea.width);
-                    }
-
-                    onPositionChanged: function(mouse) {
-                        if (pressed) {
-                            sliderRow.updateFromPos(mouse.x + 4, trackArea.width);
-                        }
-                    }
-                }
-            }
-
-            // Quick Preset Buttons Row
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 6
-                visible: sliderRow.presets && sliderRow.presets.length > 0
-
-                Repeater {
-                    model: sliderRow.presets
-
-                    Rectangle {
-                        id: presetBtn
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 24
-                        radius: 6
-                        readonly property bool isSelected: Math.abs(sliderRow.value - modelData.value) <= Math.max(0.01, sliderRow.stepSize * 0.51)
-                        color: isSelected ? Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.25) : (presetMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04))
-                        border.width: isSelected ? 1 : 0
-                        border.color: isSelected ? sliderRow.iconColor : "transparent"
-                        scale: presetMouse.pressed ? 0.94 : (presetMouse.containsMouse ? 1.04 : 1.0)
-
-                        Behavior on color { ColorAnimation { duration: Theme.animDurationTooltip } }
-                        Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData.label
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontPx(10)
-                            font.weight: presetBtn.isSelected ? Font.Bold : Font.Normal
-                            color: presetBtn.isSelected ? Theme.textPrimary : Theme.textSecondary
-                        }
-
-                        MouseArea {
-                            id: presetMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                sliderRow.valueModified(modelData.value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
-

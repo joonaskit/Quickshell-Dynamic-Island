@@ -41,6 +41,11 @@ PowerProfileQuickSettings 1.0 quicksettings/PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 quicksettings/HardwareStatsQuickSettings.qml
 DeviceQuickSettings 1.0 quicksettings/DeviceQuickSettings.qml
 SettingsView 1.0 island/SettingsView.qml
+SettingsSection 1.0 island/settings/SettingsSection.qml
+SettingToggle 1.0 island/settings/SettingToggle.qml
+SettingSegmented 1.0 island/settings/SettingSegmented.qml
+SettingSlider 1.0 island/settings/SettingSlider.qml
+SettingDivider 1.0 island/settings/SettingDivider.qml
 singleton DockService 1.0 dock/DockService.qml
 DockWindow 1.0 dock/DockWindow.qml
 DockBar 1.0 dock/DockBar.qml
