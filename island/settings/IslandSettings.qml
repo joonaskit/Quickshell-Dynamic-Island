@@ -141,6 +141,20 @@ SettingsCategory {
 
         SettingDivider {}
 
+        // Volume / brightness OSD
+        SettingToggle {
+            title: "Volume & Brightness OSD"
+            description: "Show a level indicator in the island when changed with the system IPC shortcuts"
+            iconName: "volume-high"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.showOsd
+            onToggled: function(val) {
+                SettingsService.setSetting("showOsd", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 4. Auto-Collapse Timeout Segmented Picker
         SettingSegmented {
             title: "Auto-Collapse Inactivity Timeout"

@@ -34,6 +34,8 @@ Singleton {
 
     // Top Right Status Cluster icon toggles
     property bool showCaffeineIcon: true
+    property bool showDndIcon: true
+    property bool dndEnabled: false
     property bool showWifiIcon: true
     property bool showBluetoothIcon: true
     property bool showMicIcon: true
@@ -56,6 +58,7 @@ Singleton {
     property bool showAppTrayPill: true
     property bool autoHideAppTrayPill: false
     property bool showDetachedNotifBubble: true
+    property bool showOsd: true
 
     // Expanded Island Widget Cards
     property bool showExpandedCalendar: true
@@ -136,6 +139,8 @@ Singleton {
         if (data.autoCollapseTimeout !== undefined && !isNaN(data.autoCollapseTimeout)) root.autoCollapseTimeout = parseInt(data.autoCollapseTimeout);
 
         if (data.showCaffeineIcon !== undefined) root.showCaffeineIcon = !!data.showCaffeineIcon;
+        if (data.showDndIcon !== undefined) root.showDndIcon = !!data.showDndIcon;
+        if (data.dndEnabled !== undefined) root.dndEnabled = !!data.dndEnabled;
         if (data.showWifiIcon !== undefined) root.showWifiIcon = !!data.showWifiIcon;
         if (data.showBluetoothIcon !== undefined) root.showBluetoothIcon = !!data.showBluetoothIcon;
         if (data.showMicIcon !== undefined) root.showMicIcon = !!data.showMicIcon;
@@ -156,6 +161,7 @@ Singleton {
         if (data.showAppTrayPill !== undefined) root.showAppTrayPill = !!data.showAppTrayPill;
         if (data.autoHideAppTrayPill !== undefined) root.autoHideAppTrayPill = !!data.autoHideAppTrayPill;
         if (data.showDetachedNotifBubble !== undefined) root.showDetachedNotifBubble = !!data.showDetachedNotifBubble;
+        if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
 
         if (data.showExpandedCalendar !== undefined) root.showExpandedCalendar = !!data.showExpandedCalendar;
         if (data.showExpandedMedia !== undefined) root.showExpandedMedia = !!data.showExpandedMedia;
@@ -237,6 +243,8 @@ Singleton {
         root.dockScaleHover = 1.28;
 
         root.showCaffeineIcon = true;
+        root.showDndIcon = true;
+        root.dndEnabled = false;
         root.showWifiIcon = true;
         root.showBluetoothIcon = true;
         root.showMicIcon = true;
@@ -257,6 +265,7 @@ Singleton {
         root.showAppTrayPill = true;
         root.autoHideAppTrayPill = false;
         root.showDetachedNotifBubble = true;
+        root.showOsd = true;
 
         root.showExpandedCalendar = true;
         root.showExpandedMedia = true;
@@ -313,6 +322,8 @@ Singleton {
             "dockIconSize": root.dockIconSize,
             "dockScaleHover": root.dockScaleHover,
             "showCaffeineIcon": root.showCaffeineIcon,
+            "showDndIcon": root.showDndIcon,
+            "dndEnabled": root.dndEnabled,
             "showWifiIcon": root.showWifiIcon,
             "showBluetoothIcon": root.showBluetoothIcon,
             "showMicIcon": root.showMicIcon,
@@ -331,6 +342,7 @@ Singleton {
             "showAppTrayPill": root.showAppTrayPill,
             "autoHideAppTrayPill": root.autoHideAppTrayPill,
             "showDetachedNotifBubble": root.showDetachedNotifBubble,
+            "showOsd": root.showOsd,
             "showExpandedCalendar": root.showExpandedCalendar,
             "showExpandedMedia": root.showExpandedMedia,
             "showExpandedNotifications": root.showExpandedNotifications,

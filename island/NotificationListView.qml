@@ -53,6 +53,46 @@ Item {
 
             Item { Layout.fillWidth: true }
 
+            // Do Not Disturb Toggle
+            Rectangle {
+                Layout.preferredHeight: Theme.px(22)
+                Layout.preferredWidth: dndRow.implicitWidth + Theme.px(12)
+                radius: Theme.px(11)
+                color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : (dndMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05))
+                scale: dndMouse.pressed ? 0.92 : 1.0
+
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+                RowLayout {
+                    id: dndRow
+                    anchors.centerIn: parent
+                    spacing: Theme.px(4)
+
+                    SvgIcon {
+                        name: "bell-off"
+                        size: Theme.px(10)
+                        color: SettingsService.dndEnabled ? Theme.accentPurple : Theme.textSecondary
+                    }
+
+                    Text {
+                        text: "DND"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontPx(10)
+                        font.weight: Font.DemiBold
+                        color: SettingsService.dndEnabled ? Theme.accentPurple : Theme.textSecondary
+                    }
+                }
+
+                MouseArea {
+                    id: dndMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: NotificationService.toggleDnd()
+                }
+            }
+
             // Clear All Button
             Rectangle {
                 Layout.preferredHeight: Theme.px(22)

@@ -34,10 +34,12 @@ Item {
     // Hitbox reference for window click-through mask
     property alias hitBox: pillBody
 
+    readonly property bool isShowingOsd: OsdService.isShowing && !root.isExpanded && !root.isSettingsOpen
     readonly property bool isAlertingNotification: NotificationService.isAlerting && NotificationService.latestNotification !== null
 
     // Compact base width (stable across hover and expand)
     readonly property real compactWidth: {
+        if (root.isShowingOsd) return Theme.px(230);
         if (root.isAlertingNotification) return Theme.px(310);
         return (root.hasMediaPlaying && Theme.showMediaWhenPlaying)
             ? Theme.compactWidthMedia
@@ -53,6 +55,9 @@ Item {
         }
         if (root.isExpanded) {
             return Theme.expandedWidth;
+        }
+        if (root.isShowingOsd) {
+            return Theme.px(230);
         }
         if (root.isAlertingNotification) {
             return Theme.px(310) + (root.isHovered ? Theme.px(8) : 0);
@@ -215,7 +220,7 @@ Item {
             currentTime: root.currentDate
             use24Hour: Theme.use24Hour
             isHovered: root.isHovered
-            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isAlertingNotification && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
+            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && !root.isAlertingNotification && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -229,7 +234,7 @@ Item {
             anchors.centerIn: parent
             currentTime: root.currentDate
             player: root.activePlayer
-            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isAlertingNotification && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
+            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && !root.isAlertingNotification && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -241,7 +246,19 @@ Item {
         CompactNotificationAlertView {
             id: compactNotificationView
             anchors.centerIn: parent
-            opacity: (!root.isExpanded && !root.isSettingsOpen && root.isAlertingNotification) ? 1.0 : 0.0
+            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && root.isAlertingNotification) ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.94
+            visible: opacity > 0.01
+
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+        }
+
+        // Compact OSD View (volume / brightness level from IPC shortcuts)
+        CompactOsdView {
+            id: compactOsdView
+            anchors.centerIn: parent
+            opacity: root.isShowingOsd ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
