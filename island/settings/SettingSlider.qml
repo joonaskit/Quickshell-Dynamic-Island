@@ -6,6 +6,7 @@ import QtQuick.Layouts
 Rectangle {
     id: sliderRow
     Layout.fillWidth: true
+    visible: matchesSearch
     implicitHeight: sliderCol.implicitHeight + 20
     color: "transparent"
 
@@ -21,6 +22,8 @@ Rectangle {
     property string valueDisplay: ""
 
     signal valueModified(real newValue)
+
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
 
     readonly property real fraction: Math.max(0.0, Math.min(1.0, (value - minimumValue) / (maximumValue - minimumValue)))
 

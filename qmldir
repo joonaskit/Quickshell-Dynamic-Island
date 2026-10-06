@@ -52,6 +52,8 @@ IslandSettings 1.0 island/settings/IslandSettings.qml
 DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
+SettingsCategory 1.0 island/settings/SettingsCategory.qml
+singleton SettingsSearch 1.0 island/settings/SettingsSearch.qml
 singleton DockService 1.0 dock/DockService.qml
 DockWindow 1.0 dock/DockWindow.qml
 DockBar 1.0 dock/DockBar.qml

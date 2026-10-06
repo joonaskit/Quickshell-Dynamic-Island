@@ -31,6 +31,8 @@ PanelWindow {
     // Top layer sits above regular/maximized windows but below fullscreen windows
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell-island"
+    // Lets the settings search box take typing once it is clicked
+    WlrLayershell.keyboardFocus: islandPill.isSettingsOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     // Check if the active window is on this screen (or screen is unspecified)
     readonly property bool isThisScreenActive: {

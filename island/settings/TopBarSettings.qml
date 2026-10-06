@@ -2,9 +2,7 @@ import "../.."
 import QtQuick
 import QtQuick.Layouts
 
-ColumnLayout {
-    Layout.fillWidth: true
-    spacing: 14
+SettingsCategory {
 
     // Window & Workspace Pills (Top Left)
     SettingsSection {
