@@ -46,6 +46,12 @@ SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingSegmented 1.0 island/settings/SettingSegmented.qml
 SettingSlider 1.0 island/settings/SettingSlider.qml
 SettingDivider 1.0 island/settings/SettingDivider.qml
+DisplaySettings 1.0 island/settings/DisplaySettings.qml
+TopBarSettings 1.0 island/settings/TopBarSettings.qml
+IslandSettings 1.0 island/settings/IslandSettings.qml
+DockSettings 1.0 island/settings/DockSettings.qml
+LauncherSettings 1.0 island/settings/LauncherSettings.qml
+AboutSettings 1.0 island/settings/AboutSettings.qml
 singleton DockService 1.0 dock/DockService.qml
 DockWindow 1.0 dock/DockWindow.qml
 DockBar 1.0 dock/DockBar.qml
