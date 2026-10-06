@@ -53,6 +53,26 @@ ShellRoot {
             OsdService.show("brightness");
         }
 
+        function startTimer(minutes: int) {
+            TimerService.startTimer(minutes * 60000);
+        }
+
+        function toggleTimer() {
+            TimerService.toggleTimer();
+        }
+
+        function cancelTimer() {
+            TimerService.resetTimer();
+        }
+
+        function toggleStopwatch() {
+            TimerService.toggleStopwatch();
+        }
+
+        function resetStopwatch() {
+            TimerService.resetStopwatch();
+        }
+
         function mediaPlayPause() {
             let p = root.mediaPlayer();
             if (p) p.togglePlaying();

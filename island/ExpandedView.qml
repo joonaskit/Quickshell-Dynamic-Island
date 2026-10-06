@@ -15,11 +15,13 @@ Item {
 
     // Card visibility bindings directly referenced from services to avoid layout cycle / forward reference errors
     readonly property bool showCalendar: SettingsService.showExpandedCalendar
+    readonly property bool showTimer: SettingsService.showExpandedTimer
     readonly property bool showMedia: SettingsService.showExpandedMedia && (root.player !== null)
     readonly property bool showAudioSink: SettingsService.showExpandedAudioSink
+    readonly property bool showAppMixer: SettingsService.showExpandedAppMixer
     readonly property bool showVolume: SettingsService.showExpandedVolume
     readonly property bool showBrightness: SettingsService.showExpandedBrightness && BrightnessService.isAvailable
-    readonly property bool showControls: showAudioSink || showVolume || showBrightness
+    readonly property bool showControls: showAudioSink || showAppMixer || showVolume || showBrightness
 
     // Screen-aware maximum height to prevent overflowing the monitor or window
     readonly property real maxAllowedHeight: {
@@ -189,7 +191,22 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showCalendar && (root.showMedia || root.showControls)
+                visible: root.showCalendar && (root.showTimer || root.showMedia || root.showControls)
+            }
+
+            // Timer & Stopwatch Section
+            TimerWidget {
+                id: timerWidget
+                Layout.fillWidth: true
+                visible: root.showTimer
+            }
+
+            // Divider after timer
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: Qt.rgba(1, 1, 1, 0.08)
+                visible: root.showTimer && (root.showMedia || root.showControls)
             }
 
             // Media Player Section
@@ -219,6 +236,12 @@ Item {
                     id: audioOutputSelector
                     Layout.fillWidth: true
                     visible: root.showAudioSink
+                }
+
+                AppVolumeMixer {
+                    id: appVolumeMixer
+                    Layout.fillWidth: true
+                    visible: root.showAppMixer && streams.length > 0
                 }
 
                 VolumeSlider {

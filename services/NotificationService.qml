@@ -13,6 +13,23 @@ Singleton {
     property bool isAlerting: false
     readonly property int maxHistory: 30
 
+    // Notifications grouped by app, ordered by each group's newest notification
+    readonly property var groups: {
+        let order = [];
+        let map = {};
+        let list = root.notifications || [];
+        for (let i = 0; i < list.length; i++) {
+            let n = list[i];
+            let key = n.appName || "System";
+            if (!map[key]) {
+                map[key] = { "appName": key, "appIcon": n.appIcon || "", "items": [] };
+                order.push(key);
+            }
+            map[key].items.push(n);
+        }
+        return order.map(k => map[k]);
+    }
+
     signal notificationReceived(var notification)
 
     // Timer to automatically finish the island alert expansion
@@ -115,6 +132,14 @@ Singleton {
             if (root.latestNotification && root.latestNotification.id === id) {
                 root.latestNotification = list.length > 0 ? list[0] : null;
             }
+        }
+    }
+
+    function dismissGroup(appName) {
+        let key = appName || "System";
+        let ids = (root.notifications || []).filter(n => (n.appName || "System") === key).map(n => n.id);
+        for (let i = 0; i < ids.length; i++) {
+            root.dismissNotification(ids[i]);
         }
     }
 

@@ -5,6 +5,23 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    property bool confirmingClear: false
+    // appName -> true for groups the user expanded
+    property var expandedGroups: ({})
+
+    function toggleGroup(appName) {
+        let next = Object.assign({}, root.expandedGroups);
+        next[appName] = !next[appName];
+        root.expandedGroups = next;
+    }
+
+    // Reset the confirm prompt if the user doesn't follow up
+    Timer {
+        id: confirmTimer
+        interval: 3000
+        onTriggered: root.confirmingClear = false
+    }
+
     implicitWidth: parent ? parent.width : Theme.px(370)
     implicitHeight: contentColumn.implicitHeight
 
@@ -93,12 +110,13 @@ Item {
                 }
             }
 
-            // Clear All Button
+            // Clear All Button (asks to confirm with a second click)
             Rectangle {
                 Layout.preferredHeight: Theme.px(22)
                 Layout.preferredWidth: clearRow.implicitWidth + Theme.px(12)
                 radius: Theme.px(11)
-                color: clearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : Qt.rgba(1, 1, 1, 0.05)
+                color: root.confirmingClear ? Qt.rgba(255/255, 69/255, 58/255, 0.32)
+                     : (clearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : Qt.rgba(1, 1, 1, 0.05))
                 scale: clearMouse.pressed ? 0.92 : (clearMouse.containsMouse ? 1.08 : 1.0)
 
                 Behavior on color {
@@ -117,15 +135,15 @@ Item {
                     SvgIcon {
                         name: "trash"
                         size: Theme.px(10)
-                        color: clearMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                        color: (root.confirmingClear || clearMouse.containsMouse) ? Theme.accentRed : Theme.textSecondary
                     }
 
                     Text {
-                        text: "Clear"
+                        text: root.confirmingClear ? "Clear all?" : "Clear"
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontPx(10)
                         font.weight: Font.DemiBold
-                        color: clearMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                        color: (root.confirmingClear || clearMouse.containsMouse) ? Theme.accentRed : Theme.textSecondary
                     }
                 }
 
@@ -135,154 +153,136 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        NotificationService.clearAll();
+                        if (root.confirmingClear) {
+                            root.confirmingClear = false;
+                            confirmTimer.stop();
+                            NotificationService.clearAll();
+                        } else {
+                            root.confirmingClear = true;
+                            confirmTimer.restart();
+                        }
                     }
                 }
             }
         }
 
-        // List of Notifications (up to 4 most recent)
+        // Notifications grouped by app (newest group first)
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Theme.px(6)
+            spacing: Theme.px(8)
 
             Repeater {
-                model: {
-                    let list = NotificationService.notifications || [];
-                    return list.slice(0, 4);
-                }
+                // Show at most the 4 most recently active apps
+                model: (NotificationService.groups || []).slice(0, 4)
 
-                Rectangle {
-                    id: notifCard
+                delegate: ColumnLayout {
+                    id: groupBlock
+                    required property var modelData
+
+                    readonly property bool multi: modelData.items.length > 1
+                    readonly property bool groupExpanded: !!root.expandedGroups[modelData.appName]
+
                     Layout.fillWidth: true
-                    Layout.preferredHeight: cardLayout.implicitHeight + Theme.px(14)
-                    radius: Theme.px(10)
-                    color: cardMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.04)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.06)
+                    spacing: Theme.px(4)
 
-                    // Spring-in on creation
-                    scale: 1.0
-                    opacity: 1.0
-                    Component.onCompleted: {
-                        scale = 0.92;
-                        opacity = 0.0;
-                        scaleAnim.start();
-                        opacityAnim.start();
-                    }
-                    NumberAnimation { id: scaleAnim; target: notifCard; property: "scale"; to: 1.0; duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
-                    NumberAnimation { id: opacityAnim; target: notifCard; property: "opacity"; to: 1.0; duration: Theme.animDurationFast }
+                    // Group header for apps with several notifications
+                    RowLayout {
+                        visible: groupBlock.multi
+                        Layout.fillWidth: true
+                        spacing: Theme.px(6)
 
-                    Behavior on color {
-                        ColorAnimation { duration: 120 }
-                    }
+                        Rectangle {
+                            Layout.preferredHeight: Theme.px(16)
+                            Layout.preferredWidth: groupAppText.implicitWidth + Theme.px(8)
+                            radius: Theme.px(4)
+                            color: Qt.rgba(10/255, 132/255, 255/255, 0.15)
 
-                    ColumnLayout {
-                        id: cardLayout
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.margins: Theme.px(7)
-                        spacing: Theme.px(2)
+                            Text {
+                                id: groupAppText
+                                anchors.centerIn: parent
+                                text: groupBlock.modelData.appName
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontPx(9)
+                                font.weight: Font.DemiBold
+                                color: Theme.accentBlue
+                            }
+                        }
 
-                        // Top line: App Name Badge, Time & Dismiss '✕' button
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: Theme.px(6)
+                        // Expand / collapse chip
+                        Rectangle {
+                            Layout.preferredHeight: Theme.px(16)
+                            Layout.preferredWidth: chipRow.implicitWidth + Theme.px(10)
+                            radius: Theme.px(8)
+                            color: chipMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
 
-                            // App Name
-                            Rectangle {
-                                Layout.preferredHeight: Theme.px(16)
-                                Layout.preferredWidth: appText.implicitWidth + Theme.px(8)
-                                radius: Theme.px(4)
-                                color: Qt.rgba(10/255, 132/255, 255/255, 0.15)
+                            Behavior on color { ColorAnimation { duration: 120 } }
+
+                            RowLayout {
+                                id: chipRow
+                                anchors.centerIn: parent
+                                spacing: Theme.px(3)
 
                                 Text {
-                                    id: appText
-                                    anchors.centerIn: parent
-                                    text: modelData.appName || "System"
+                                    text: groupBlock.groupExpanded ? "Show less" : ("+" + (groupBlock.modelData.items.length - 1) + " more")
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontPx(9)
                                     font.weight: Font.DemiBold
-                                    color: Theme.accentBlue
-                                }
-                            }
-
-                            Text {
-                                text: modelData.time || ""
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontPx(10)
-                                color: Theme.textTertiary
-                            }
-
-                            Item { Layout.fillWidth: true }
-
-                            // Dismiss button
-                            Rectangle {
-                                Layout.preferredWidth: Theme.px(18)
-                                Layout.preferredHeight: Theme.px(18)
-                                radius: Theme.px(9)
-                                color: dismissMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : "transparent"
-                                scale: dismissMouse.pressed ? 0.88 : (dismissMouse.containsMouse ? 1.22 : 1.0)
-
-                                Behavior on color {
-                                    ColorAnimation { duration: 120 }
-                                }
-
-                                Behavior on scale {
-                                    NumberAnimation { duration: 150; easing.type: Easing.OutBack; easing.overshoot: 1.4 }
+                                    color: Theme.textSecondary
                                 }
 
                                 SvgIcon {
-                                    anchors.centerIn: parent
-                                    name: "close"
+                                    name: groupBlock.groupExpanded ? "chevron-up" : "chevron-down"
                                     size: Theme.px(9)
-                                    color: dismissMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.25)
+                                    color: Theme.textSecondary
                                 }
+                            }
 
-                                MouseArea {
-                                    id: dismissMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        NotificationService.dismissNotification(modelData.id);
-                                    }
-                                }
+                            MouseArea {
+                                id: chipMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.toggleGroup(groupBlock.modelData.appName)
                             }
                         }
 
-                        // Summary
-                        Text {
-                            visible: modelData.summary && modelData.summary.length > 0
-                            Layout.fillWidth: true
-                            text: modelData.summary || ""
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontPx(11)
-                            font.weight: Font.DemiBold
-                            color: Theme.textPrimary
-                            elide: Text.ElideRight
-                        }
+                        Item { Layout.fillWidth: true }
 
-                        // Body
-                        Text {
-                            visible: modelData.body && modelData.body.length > 0
-                            Layout.fillWidth: true
-                            text: modelData.body || ""
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontPx(10)
-                            color: Theme.textSecondary
-                            wrapMode: Text.WrapAnywhere
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
+                        // Clear this app's notifications
+                        Rectangle {
+                            Layout.preferredWidth: Theme.px(18)
+                            Layout.preferredHeight: Theme.px(18)
+                            radius: Theme.px(9)
+                            color: groupClearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : "transparent"
+
+                            Behavior on color { ColorAnimation { duration: 120 } }
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: "trash"
+                                size: Theme.px(10)
+                                color: groupClearMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.3)
+                            }
+
+                            MouseArea {
+                                id: groupClearMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: NotificationService.dismissGroup(groupBlock.modelData.appName)
+                            }
                         }
                     }
 
-                    MouseArea {
-                        id: cardMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.ArrowCursor
+                    // Cards: newest only when collapsed, all (up to 6) when expanded
+                    Repeater {
+                        model: groupBlock.groupExpanded ? groupBlock.modelData.items.slice(0, 6) : groupBlock.modelData.items.slice(0, 1)
+
+                        delegate: NotificationCard {
+                            required property var modelData
+                            notif: modelData
+                            showApp: !groupBlock.multi
+                        }
                     }
                 }
             }
