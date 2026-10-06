@@ -26,6 +26,25 @@ SettingsCategory {
 
         SettingDivider {}
 
+        // Start tab
+        SettingSegmented {
+            title: "Open On"
+            description: "Tab shown when the launcher opens (Recent and Frequent fall back to All until you have launched something)"
+            iconName: "clock"
+            iconColor: Theme.accentOrange
+            currentValue: SettingsService.launcherStartTab
+            options: [
+                { label: "All", value: "All" },
+                { label: "Recent", value: "Recent" },
+                { label: "Frequent", value: "Frequent" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("launcherStartTab", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 2. Display Density (Comfortable vs Compact)
         SettingSegmented {
             title: "Display Density"

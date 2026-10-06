@@ -50,6 +50,7 @@
   "showExpandedBrightness": true,
   "launcherDefaultView": "grid",
   "launcherDensity": "comfortable",
+  "launcherStartTab": "All",
   "launcherShowCategories": true,
   "launcherGridColumns": 4,
   "launcherShowGenericNames": true

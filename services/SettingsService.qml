@@ -74,6 +74,7 @@ Singleton {
     // App Launcher Customization
     property string launcherDefaultView: "grid"
     property string launcherDensity: "comfortable"
+    property string launcherStartTab: "All"
     property bool launcherShowCategories: true
     property int launcherGridColumns: 4
     property bool launcherShowGenericNames: true
@@ -178,6 +179,9 @@ Singleton {
 
         if (data.launcherDefaultView !== undefined && (data.launcherDefaultView === "grid" || data.launcherDefaultView === "list")) {
             root.launcherDefaultView = data.launcherDefaultView;
+        }
+        if (data.launcherStartTab !== undefined && (data.launcherStartTab === "All" || data.launcherStartTab === "Recent" || data.launcherStartTab === "Frequent")) {
+            root.launcherStartTab = data.launcherStartTab;
         }
         if (data.launcherDensity !== undefined && (data.launcherDensity === "comfortable" || data.launcherDensity === "compact")) {
             root.launcherDensity = data.launcherDensity;
@@ -285,6 +289,7 @@ Singleton {
 
         root.launcherDefaultView = "grid";
         root.launcherDensity = "comfortable";
+        root.launcherStartTab = "All";
         root.launcherShowCategories = true;
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
@@ -363,6 +368,7 @@ Singleton {
             "showExpandedBrightness": root.showExpandedBrightness,
             "launcherDefaultView": root.launcherDefaultView,
             "launcherDensity": root.launcherDensity,
+            "launcherStartTab": root.launcherStartTab,
             "launcherShowCategories": root.launcherShowCategories,
             "launcherGridColumns": root.launcherGridColumns,
             "launcherShowGenericNames": root.launcherShowGenericNames

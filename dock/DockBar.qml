@@ -56,8 +56,8 @@ Item {
         }
     }
 
-    implicitWidth: isVertical ? (hasOpenPopups ? 660 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.width + 40) : 0)
-    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.height + 40) : 0) : (hasOpenPopups ? 660 : (dockCapsule.height + Theme.dockBottomMargin))
+    implicitWidth: isVertical ? (hasOpenPopups ? 660 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.finalWidth + 64) : 0)
+    implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.finalHeight + 64) : 0) : (hasOpenPopups ? 660 : (dockCapsule.height + Theme.dockBottomMargin))
 
     // Mouse tracking for fluid magnification wave
     property real currentMouseX: -9999
@@ -88,10 +88,45 @@ Item {
         windowPicker.isOpen = false;
     }
 
+    // The launcher grows out of its dock button
+    function updateAppPickerOrigin() {
+        let mapped = launchpadItem.mapToItem(root, launchpadItem.width / 2, launchpadItem.height / 2);
+        appPicker.targetX = mapped.x;
+        appPicker.targetY = mapped.y;
+    }
+
     function toggleAppPicker() {
         let wasOpen = appPicker.isOpen;
         closeAllPopups();
+        if (!wasOpen) updateAppPickerOrigin();
         appPicker.isOpen = !wasOpen;
+    }
+
+    function isContextMenuOpenFor(app) {
+        return contextMenu.isOpen && !!app && !!contextMenu.appData && contextMenu.appData.id === app.id;
+    }
+
+    // Open the context menu for an icon, or close it if it is already open for that icon
+    function toggleContextMenu(app, item) {
+        if (root.isContextMenuOpenFor(app)) {
+            contextMenu.isOpen = false;
+            contextMenu.closed();
+            return;
+        }
+        closeAllPopups();
+        contextClearTimer.stop();
+        contextMenu.appData = app;
+        let mapped = item.mapToItem(root, item.width / 2, item.height / 2);
+        contextMenu.targetX = mapped.x;
+        contextMenu.targetY = mapped.y;
+        contextMenu.isOpen = true;
+    }
+
+    function openAppPicker(category) {
+        closeAllPopups();
+        updateAppPickerOrigin();
+        appPicker.pendingCategory = category || "";
+        appPicker.isOpen = true;
     }
 
     function toggleDownloadsStack() {
@@ -460,17 +495,15 @@ Item {
                         }
                     }
 
+                    contextMenuOpen: root.isContextMenuOpenFor(appData)
                     onRequestContextMenu: function(app, x, y) {
-                        contextMenu.appData = app;
-                        let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, pinnedItem.height / 2);
-                        contextMenu.targetX = mapped.x;
-                        contextMenu.targetY = mapped.y;
-                        closeAllPopups();
-                        contextMenu.isOpen = true;
+                        root.toggleContextMenu(app, pinnedItem);
                     }
 
                     onRequestWindowPicker: function(app, x, y) {
                         if (!contextMenu.isOpen && !appPicker.isOpen && !downloadsStack.isOpen) {
+                            windowPickerCloseTimer.stop();
+                            windowClearTimer.stop();
                             windowPicker.appData = app;
                             let mapped = pinnedItem.mapToItem(root, pinnedItem.width / 2, pinnedItem.height / 2);
                             windowPicker.targetX = mapped.x;
@@ -480,7 +513,7 @@ Item {
                     }
 
                     onRequestCloseWindowPicker: function() {
-                        windowPicker.isOpen = false;
+                        windowPickerCloseTimer.restart();
                     }
                 }
             }
@@ -525,17 +558,15 @@ Item {
                         }
                     }
 
+                    contextMenuOpen: root.isContextMenuOpenFor(appData)
                     onRequestContextMenu: function(app, x, y) {
-                        contextMenu.appData = app;
-                        let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, unpinnedItem.height / 2);
-                        contextMenu.targetX = mapped.x;
-                        contextMenu.targetY = mapped.y;
-                        closeAllPopups();
-                        contextMenu.isOpen = true;
+                        root.toggleContextMenu(app, unpinnedItem);
                     }
 
                     onRequestWindowPicker: function(app, x, y) {
                         if (!contextMenu.isOpen && !appPicker.isOpen && !downloadsStack.isOpen) {
+                            windowPickerCloseTimer.stop();
+                            windowClearTimer.stop();
                             windowPicker.appData = app;
                             let mapped = unpinnedItem.mapToItem(root, unpinnedItem.width / 2, unpinnedItem.height / 2);
                             windowPicker.targetX = mapped.x;
@@ -545,7 +576,7 @@ Item {
                     }
 
                     onRequestCloseWindowPicker: function() {
-                        windowPicker.isOpen = false;
+                        windowPickerCloseTimer.restart();
                     }
                 }
             }
@@ -843,8 +874,16 @@ Item {
         dockCapsuleX: dockCapsule.x
         dockCapsuleY: dockCapsule.y
         dockCapsuleWidth: dockCapsule.width
-        onClosed: {
-            appData = null;
+        dockCapsuleHeight: dockCapsule.height
+        // Clear after the close animation so the menu doesn't empty while shrinking
+        onClosed: contextClearTimer.restart()
+    }
+
+    Timer {
+        id: contextClearTimer
+        interval: Theme.animDurationFast + 60
+        onTriggered: {
+            if (!contextMenu.isOpen) contextMenu.appData = null;
         }
     }
 
@@ -856,8 +895,34 @@ Item {
         dockCapsuleX: dockCapsule.x
         dockCapsuleY: dockCapsule.y
         dockCapsuleWidth: dockCapsule.width
-        onClosed: {
-            windowPicker.appData = null;
+        dockCapsuleHeight: dockCapsule.height
+        // Clear after the close animation so the list doesn't empty while shrinking
+        onClosed: windowClearTimer.restart()
+    }
+
+    // Leaving the icon doesn't close the list straight away, so the pointer can
+    // travel onto it; it stays open while hovered.
+    Timer {
+        id: windowPickerCloseTimer
+        interval: 260
+        onTriggered: {
+            if (!windowPicker.hovered) windowPicker.isOpen = false;
+        }
+    }
+
+    Connections {
+        target: windowPicker
+        function onHoveredChanged() {
+            if (windowPicker.hovered) windowPickerCloseTimer.stop();
+            else if (windowPicker.isOpen) windowPickerCloseTimer.restart();
+        }
+    }
+
+    Timer {
+        id: windowClearTimer
+        interval: Theme.animDurationFast + 60
+        onTriggered: {
+            if (!windowPicker.isOpen) windowPicker.appData = null;
         }
     }
 
@@ -869,6 +934,7 @@ Item {
         dockCapsuleX: dockCapsule.x
         dockCapsuleY: dockCapsule.y
         dockCapsuleWidth: dockCapsule.width
+        dockCapsuleHeight: dockCapsule.height
     }
 
     // Trash Context Menu
@@ -878,100 +944,106 @@ Item {
         property real targetX: 0
         property real targetY: 0
 
-        visible: opacity > 0.001
-        opacity: isOpen ? 1.0 : 0.0
-        scale: isOpen ? 1.0 : 0.92
-        transformOrigin: root.isVertical ? (root.dockPosition === "left" ? Item.Left : Item.Right) : Item.Bottom
-
-        Behavior on opacity {
-            NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
-        }
-        Behavior on scale {
-            NumberAnimation { duration: Theme.animDuration; easing.type: Theme.animEasing; easing.overshoot: Theme.animEntranceOvershoot }
-        }
-
-        width: 150
-        height: trashCol.implicitHeight + 16
-
-        x: {
-            if (root.isVertical) {
-                return root.dockPosition === "left" ? (dockCapsule.x + dockCapsule.width + 14) : (dockCapsule.x - width - 14);
-            }
-            return Math.max(8, Math.min(root.width - width - 8, targetX - width / 2));
-        }
-        y: {
-            if (root.isVertical) {
-                return Math.max(8, Math.min(root.height - height - 8, targetY - height / 2));
-            }
-            return (dockCapsule.y > 0 ? dockCapsule.y : (root.height - Theme.dockHeight)) - height - 10;
+        // Grows out of the trash icon with its base flush on the dock edge
+        DockFlyoutGeometry {
+            id: trashGeo
+            open: trashMenu.isOpen
+            isVertical: root.isVertical
+            dockPosition: root.dockPosition
+            dockCapsuleX: dockCapsule.x
+            dockCapsuleY: dockCapsule.y
+            dockCapsuleWidth: dockCapsule.width
+            dockCapsuleHeight: dockCapsule.height
+            targetX: trashMenu.targetX
+            targetY: trashMenu.targetY
+            finalWidth: 150
+            finalHeight: trashCol.implicitHeight + 16
+            parentWidth: root.width
+            parentHeight: root.height
         }
 
-        Rectangle {
+        visible: trashGeo.progress > 0.001
+        opacity: Math.min(1.0, trashGeo.progress * 4)
+
+        x: trashGeo.x
+        y: trashGeo.y
+        width: trashGeo.width
+        height: trashGeo.height
+
+        DockFlyoutBackground {
+            isVertical: root.isVertical
+            dockPosition: root.dockPosition
+            fitsOnDock: trashGeo.fitsOnDock
+            filletSize: trashGeo.filletSize
+            cornerRadius: 12
+        }
+
+        // Content is clipped to the body so it is revealed as the menu grows
+        Item {
             anchors.fill: parent
-            radius: 12
-            color: "#1c1c1e"
-            border.color: Qt.rgba(1, 1, 1, 0.14)
-            border.width: 1
-        }
+            clip: true
 
-        Column {
-            id: trashCol
-            anchors.fill: parent
-            anchors.margins: 8
-            spacing: 4
+            Column {
+                id: trashCol
+                x: trashGeo.contentX + 8
+                y: trashGeo.contentY + 8
+                width: trashGeo.finalWidth - 16
+                spacing: 4
+                opacity: trashGeo.contentOpacity
 
-            Rectangle {
-                width: parent.width
-                height: 28
-                radius: 6
-                color: openTrashMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                Rectangle {
+                    width: parent.width
+                    height: 28
+                    radius: 6
+                    color: openTrashMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
 
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Open Trash"
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 13
-                    color: Theme.textPrimary
-                }
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Open Trash"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 13
+                        color: Theme.textPrimary
+                    }
 
-                MouseArea {
-                    id: openTrashMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        DockService.openTrash();
-                        trashMenu.isOpen = false;
+                    MouseArea {
+                        id: openTrashMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            DockService.openTrash();
+                            trashMenu.isOpen = false;
+                        }
                     }
                 }
-            }
 
-            Rectangle {
-                width: parent.width
-                height: 28
-                radius: 6
-                color: emptyTrashMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.25) : "transparent"
+                Rectangle {
+                    width: parent.width
+                    height: 28
+                    radius: 6
+                    color: emptyTrashMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.25) : "transparent"
 
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 8
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Empty Trash"
-                    font.family: Theme.fontFamily
-                    font.pixelSize: 13
-                    color: emptyTrashMouse.containsMouse ? Theme.accentRed : Theme.textPrimary
-                }
+                    Text {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Empty Trash"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 13
+                        color: emptyTrashMouse.containsMouse ? Theme.accentRed : Theme.textPrimary
+                    }
 
-                MouseArea {
-                    id: emptyTrashMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        DockService.emptyTrash();
-                        trashMenu.isOpen = false;
+                    MouseArea {
+                        id: emptyTrashMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            DockService.emptyTrash();
+                            trashMenu.isOpen = false;
+                        }
                     }
                 }
             }

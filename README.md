@@ -12,7 +12,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
 - **Settings UI:** toggle every icon and widget, UI and font scale, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher.
 
 ## Requirements
 
@@ -36,6 +36,7 @@ cd ~/.config/quickshell/island
 | `./run.sh -d` | Start in the background |
 | `./run.sh -k` | Stop |
 | `./run.sh -l` | Toggle the app launcher |
+| `./run.sh -w` | Open the launcher on the open-windows tab (window switcher) |
 | `./run.sh -t` | Toggle expanded view |
 | `./run.sh -e` / `-c` | Expand / collapse |
 | `./run.sh -i <target> <function>` | Call any IPC function, for example `-i system volumeUp` |
