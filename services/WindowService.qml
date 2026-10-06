@@ -118,28 +118,66 @@ Singleton {
         Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.quitApplication", String(idOrApp)]);
     }
 
+    // systemd scope name for an app, per the desktop environment cgroup convention
+    function appScopeName(appId) {
+        let id = String(appId || "").replace(/\.desktop$/, "") || "app";
+        let escaped = id.replace(/[^A-Za-z0-9_.:]/g, function(c) {
+            return "\\x" + c.charCodeAt(0).toString(16).padStart(2, "0");
+        });
+        return "app-" + escaped + "-" + Math.random().toString(16).slice(2, 10) + ".scope";
+    }
+
+    // Launch a command in its own systemd scope so it is not accounted to the shell's cgroup
+    function launchCommand(command, appId, workingDirectory) {
+        if (!command || command.length === 0) return;
+        let script = "unit=\"$1\"; dir=\"$2\"; shift 2; " +
+                     "[ -n \"$dir\" ] && cd \"$dir\" 2>/dev/null; " +
+                     "if command -v systemd-run >/dev/null 2>&1; then " +
+                     "exec systemd-run --user --scope --quiet --collect --slice=app.slice --unit=\"$unit\" -- \"$@\"; " +
+                     "else exec \"$@\"; fi";
+        let argv = ["sh", "-c", script, "sh", appScopeName(appId), workingDirectory || ""];
+        for (let i = 0; i < command.length; i++) argv.push(String(command[i]));
+        Quickshell.execDetached(argv);
+    }
+
+    // Launch a DesktopEntry or one of its DesktopActions (appId names the owning entry)
+    function launchEntry(entry, appId) {
+        if (!entry) return;
+        let command = entry.command;
+        if (command && command.length > 0) {
+            launchCommand(command, appId || entry.id, entry.workingDirectory);
+        } else {
+            entry.execute();
+        }
+    }
+
     function launchNewWindow(appId) {
         if (!appId) return;
         let cleanId = appId.replace(/\.desktop$/, "");
         let entry = DesktopEntries.byId(cleanId);
         if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
         if (entry) {
-            entry.execute();
+            launchEntry(entry);
             return;
         }
-        Quickshell.execDetached(["gtk-launch", appId.endsWith(".desktop") ? appId : (appId + ".desktop")]);
+        launchCommand(["gtk-launch", appId.endsWith(".desktop") ? appId : (appId + ".desktop")], cleanId);
     }
 
     function openTerminal() {
-        Quickshell.execDetached(["sh", "-c", "konsole || x-terminal-emulator || alacritty || kitty || gnome-terminal"]);
+        let entry = DesktopEntries.byId("org.kde.konsole");
+        if (entry) {
+            launchEntry(entry);
+            return;
+        }
+        launchCommand(["sh", "-c", "konsole || x-terminal-emulator || alacritty || kitty || gnome-terminal"], "terminal");
     }
 
     function openFileManager() {
-        Quickshell.execDetached(["dolphin"]);
+        launchCommand(["dolphin"], "org.kde.dolphin");
     }
 
     function openSettings() {
-        Quickshell.execDetached(["systemsettings"]);
+        launchCommand(["systemsettings"], "systemsettings");
     }
 
     function lockScreen() {
