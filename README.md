@@ -59,3 +59,7 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 ## Configuration
 
 Use the in-app settings view, or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
+
+## License
+
+Licensed under the [GNU General Public License v3.0 or later](LICENSE) (GPL-3.0-or-later).
