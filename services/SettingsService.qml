@@ -3,6 +3,7 @@ import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "settingsMigration.js" as SettingsMigration
 
 Singleton {
     id: root
@@ -64,17 +65,6 @@ Singleton {
     // Expanded island widgets: id -> enabled. Ids missing here use the
     // registry default (see WidgetRegistry).
     property var widgets: ({})
-
-    // Per-widget keys used before the widgets map, migrated on load
-    readonly property var legacyWidgetKeys: ({
-        "calendar": "showExpandedCalendar",
-        "timer": "showExpandedTimer",
-        "media": "showExpandedMedia",
-        "audioOutput": "showExpandedAudioSink",
-        "appMixer": "showExpandedAppMixer",
-        "volume": "showExpandedVolume",
-        "brightness": "showExpandedBrightness"
-    })
 
     // App Launcher Customization
     property string launcherDefaultView: "grid"
@@ -173,15 +163,8 @@ Singleton {
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
 
-        let savedWidgets = (data.widgets && typeof data.widgets === "object") ? data.widgets : {};
-        let widgetStates = {};
-        for (let i = 0; i < WidgetRegistry.widgets.length; i++) {
-            let id = WidgetRegistry.widgets[i].id;
-            let legacyKey = root.legacyWidgetKeys[id];
-            if (savedWidgets[id] !== undefined) widgetStates[id] = !!savedWidgets[id];
-            else if (legacyKey && data[legacyKey] !== undefined) widgetStates[id] = !!data[legacyKey];
-        }
-        root.widgets = widgetStates;
+        // Also reads the per-widget keys used by older configs
+        root.widgets = SettingsMigration.widgetStates(data, WidgetRegistry.widgets.map(w => w.id));
 
         if (data.launcherDefaultView !== undefined && (data.launcherDefaultView === "grid" || data.launcherDefaultView === "list")) {
             root.launcherDefaultView = data.launcherDefaultView;
