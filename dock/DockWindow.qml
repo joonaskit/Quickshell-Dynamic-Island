@@ -43,7 +43,7 @@ PanelWindow {
     readonly property bool hasFullscreenApp: Theme.dockAutoHideOnFullscreen && WindowService.hasFullscreenApp && isThisScreenActive
 
     // Popups currently open
-    readonly property bool hasOpenPopups: dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen || dockBar.downloadsStackOpen || dockBar.windowPickerOpen
+    readonly property bool hasOpenPopups: dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen || dockBar.launcherMenuOpen || dockBar.downloadsStackOpen || dockBar.windowPickerOpen
 
     // Detect if any normal window overlaps or touches the dock area on this screen
     readonly property bool windowOverlapsDock: {
@@ -245,6 +245,9 @@ PanelWindow {
         }
         Region {
             item: (!window.hasFullscreenApp && dockBar.trashMenuOpen) ? dockBar.trashMenuHitBox : null
+        }
+        Region {
+            item: (!window.hasFullscreenApp && dockBar.launcherMenuOpen) ? dockBar.launcherMenuHitBox : null
         }
         Region {
             item: (!window.hasFullscreenApp && dockBar.downloadsStackOpen) ? dockBar.downloadsStackHitBox : null

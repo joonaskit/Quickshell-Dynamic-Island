@@ -12,7 +12,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
 - **Settings UI:** toggle every icon and widget, UI and font scale, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings.
 
 ## Requirements
 
