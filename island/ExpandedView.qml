@@ -201,7 +201,7 @@ Item {
 
                     Loader {
                         Layout.fillWidth: true
-                        sourceComponent: modelData.component
+                        source: modelData.source
                         onLoaded: if ("host" in item) item.host = root
                     }
                 }
@@ -229,7 +229,7 @@ Item {
                         required property var modelData
                         Layout.fillWidth: true
                         visible: root.isShown(modelData)
-                        sourceComponent: modelData.component
+                        source: modelData.source
                         onLoaded: if ("host" in item) item.host = root
                     }
                 }

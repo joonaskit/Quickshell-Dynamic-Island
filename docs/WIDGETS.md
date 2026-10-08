@@ -5,7 +5,7 @@ The widgets in the expanded island (calendar, timer, media, audio and display co
 ## Adding a widget
 
 1. Create `widgets/MyWidget.qml` and register it in `qmldir`.
-2. Add a `Component { id: myComponent; MyWidget {} }` and an entry to `widgets` in `WidgetRegistry.qml`.
+2. Add an entry to `widgets` in `WidgetRegistry.qml`, with `"source": Qt.resolvedUrl("MyWidget.qml")`.
 
 The settings toggle, the saved on/off state and the layout follow from the entry.
 
@@ -20,8 +20,10 @@ The settings toggle, the saved on/off state and the layout follow from the entry
 | `iconColor` | yes | Settings toggle icon color, usually a `Theme.accent*` color |
 | `group` | yes | `"cards"` or `"controls"`, see Layout |
 | `defaultEnabled` | yes | Whether the widget is shown when the user has no saved setting for it |
-| `component` | yes | The `Component` that creates the widget |
+| `source` | yes | URL of the widget's QML file, as `Qt.resolvedUrl("MyWidget.qml")` |
 | `available` | no | `function(host)` returning whether the widget has anything to show, for example whether a media player is active. Without it the widget is always available |
+
+The registry holds file URLs rather than `Component`s on purpose. The expanded view loads each file itself, so a widget's context belongs to the view. A `Component` declared in the registry would tie the widget to the singleton's context, which is torn down before the view on hot reload and leaves the widget's bindings evaluating to `undefined` (#33).
 
 A widget is shown when the user has it enabled and `available(host)` returns true. `available` is called inside a binding, so any properties it reads (`host.player`, service properties) re-evaluate it when they change.
 
