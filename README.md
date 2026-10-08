@@ -66,6 +66,8 @@ Use the in-app settings view, or edit `settings.json` directly. Changes are pick
 
 Run `./lint.sh` before committing. It runs `qmllint` on the QML files (settings in `.qmllint.ini`) and `ruff` on `scripts/` (settings in `ruff.toml`). It needs the Qt 6 declarative tools for `qmllint`, and either `ruff` or `uv` for the Python check.
 
+`./test.sh` runs the unit tests in `tests/` headless with `qmltestrunner`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js`. The UI is checked by hand in the running shell.
+
 ## License
 
 Licensed under the [GNU General Public License v3.0 or later](LICENSE) (GPL-3.0-or-later).

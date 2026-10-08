@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Mpris
+import "windowMatching.js" as WindowMatching
 
 Singleton {
     id: root
@@ -520,51 +521,12 @@ Singleton {
         return list;
     }
 
-    // Match windows to an app definition
+    // Match windows to an app definition (logic in windowMatching.js)
     function findToplevels(app) {
         let wins = getMergedWindows();
         if (wins.length === 0) return [];
-        let list = [];
-        let idLower = (app.id || "").toLowerCase().replace(/\.desktop$/, "");
-        let deskLower = (app.desktopFile || "").toLowerCase().replace(/\.desktop$/, "");
-        let rawLower = (app.rawAppId || "").toLowerCase().replace(/\.desktop$/, "");
-        let cmdLower = (app.command || "").toLowerCase();
-        let nameLower = (app.name || "").toLowerCase();
-
-        // Entries declaring StartupWMClass are matched exactly, so that e.g. a
-        // Vivaldi PWA window is not mistaken for the Vivaldi browser itself.
         let entry = findDesktopEntry(app.desktopFile || app.id || "");
-        let wmClass = ((entry && entry.startupClass) || "").toLowerCase();
-        let strict = wmClass.length > 0;
-
-        for (let i = 0; i < wins.length; i++) {
-            let w = wins[i];
-            if (!w || !w.appId) continue;
-            let wApp = w.appId.toLowerCase().replace(/\.desktop$/, "");
-
-            let match = (wApp === idLower || wApp === deskLower || (rawLower.length > 0 && wApp === rawLower) || (strict && wApp === wmClass));
-            if (strict) {
-                if (match) list.push(w);
-                continue;
-            }
-            if (!match && idLower.length > 2 && (wApp.endsWith("." + idLower) || deskLower.endsWith("." + wApp) || idLower.indexOf(wApp) >= 0 || wApp.indexOf(idLower) >= 0)) {
-                match = true;
-            }
-            if (!match && rawLower.length > 2 && (wApp.endsWith("." + rawLower) || rawLower.indexOf(wApp) >= 0 || wApp.indexOf(rawLower) >= 0)) {
-                match = true;
-            }
-            if (!match && cmdLower.length > 2 && (wApp === cmdLower || wApp.indexOf(cmdLower) >= 0 || cmdLower.indexOf(wApp) >= 0)) {
-                match = true;
-            }
-            if (!match && nameLower.length > 3 && wApp.indexOf(nameLower) >= 0) {
-                match = true;
-            }
-
-            if (match) {
-                list.push(w);
-            }
-        }
-        return list;
+        return WindowMatching.matchWindows(app, wins, (entry && entry.startupClass) || "");
     }
 
     // Check if an app is running
