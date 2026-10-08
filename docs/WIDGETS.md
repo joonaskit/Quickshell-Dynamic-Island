@@ -52,4 +52,4 @@ Enabled state is stored as one map in `settings.json`:
 }
 ```
 
-Ids missing from the map use `defaultEnabled`. Older configs used one key per widget (`showExpandedCalendar` and so on). `SettingsService` reads those when a widget has no entry in the map, and the next save writes the map instead.
+Ids missing from the map use `defaultEnabled`. Older configs used one key per widget (`showExpandedCalendar` and so on). `SettingsService` reads those when a widget has no entry in the map, and the next save writes the map instead. The key mapping is in `services/settingsMigration.js`, tested in `tests/tst_settingsMigration.qml`.
