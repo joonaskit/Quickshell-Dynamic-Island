@@ -686,11 +686,35 @@ Item {
                                 height: parent.height - 6
                                 radius: 10
 
-                                color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.24) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
-                                border.color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.6) : (gridMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                                color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.24) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
+                                border.color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.6) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
                                 border.width: 1
 
                                 Behavior on color { ColorAnimation { duration: 100 } }
+
+                                // Passive, so hovering the pin badge still counts as hovering the tile
+                                HoverHandler {
+                                    id: gridHover
+                                }
+
+                                // Declared before the tile content so the pin badge sits above it
+                                MouseArea {
+                                    id: gridMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    cursorShape: Qt.PointingHandCursor
+                                    onEntered: {
+                                        appGridView.currentIndex = index;
+                                    }
+                                    onClicked: function(mouse) {
+                                        if (mouse.button === Qt.RightButton) {
+                                            root.openItemSecondary(modelData);
+                                        } else {
+                                            root.openAndClose(modelData);
+                                        }
+                                    }
+                                }
 
                                 Column {
                                     anchors.centerIn: parent
@@ -713,7 +737,7 @@ Item {
                                             fillMode: Image.PreserveAspectFit
                                             mipmap: true
                                             smooth: true
-                                            scale: gridMouse.containsMouse ? 1.08 : 1.0
+                                            scale: gridHover.hovered ? 1.08 : 1.0
                                             Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
                                         }
                                     }
@@ -754,7 +778,7 @@ Item {
                                     height: 18
                                     radius: 9
                                     color: gridPinMouse.containsMouse ? Qt.rgba(0.04, 0.52, 1, 0.4) : Qt.rgba(0, 0, 0, 0.6)
-                                    visible: gridMouse.containsMouse && !root.isCompact && !modelData.isWindow
+                                    visible: gridHover.hovered && !root.isCompact && !modelData.isWindow
 
                                     SvgIcon {
                                         anchors.centerIn: parent
@@ -774,24 +798,6 @@ Item {
                                             } else {
                                                 DockService.pinApp(modelData);
                                             }
-                                        }
-                                    }
-                                }
-
-                                MouseArea {
-                                    id: gridMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    cursorShape: Qt.PointingHandCursor
-                                    onEntered: {
-                                        appGridView.currentIndex = index;
-                                    }
-                                    onClicked: function(mouse) {
-                                        if (mouse.button === Qt.RightButton) {
-                                            root.openItemSecondary(modelData);
-                                        } else {
-                                            root.openAndClose(modelData);
                                         }
                                     }
                                 }

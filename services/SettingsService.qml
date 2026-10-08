@@ -80,6 +80,15 @@ Singleton {
     // Signal emitted when any setting changes
     signal settingsChanged()
 
+    // Asks the island to open the settings view on a tab (a name from
+    // SettingsView.tabs, e.g. "Launcher"). Lets other windows, such as the dock,
+    // link to a settings page.
+    signal openSettingsRequested(string tab)
+
+    function requestOpenSettings(tab) {
+        root.openSettingsRequested(tab || "");
+    }
+
     // Process to read settings.json on startup
     Process {
         id: loadProc

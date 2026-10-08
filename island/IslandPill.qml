@@ -119,7 +119,9 @@ Item {
         root.isSettingsOpen = false;
     }
 
-    function openSettings() {
+    // Opens the settings view, on the named tab if one is given
+    function openSettings(tab) {
+        if (tab) settingsView.showTab(tab);
         root.isSettingsOpen = true;
     }
 

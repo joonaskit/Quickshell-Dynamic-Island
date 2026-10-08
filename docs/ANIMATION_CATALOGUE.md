@@ -430,7 +430,7 @@ Behavior on awayLength  { enabled: geo.shown; NumberAnimation { duration: Theme.
 | `align` | Position | Grows from | Used by |
 |---|---|---|---|
 | `"center"` (default) | Centred on the origin point, kept on the dock's straight edge. Centred on the dock if the dock is too short to carry it | The origin point (the clicked icon) | Context menu, window list, downloads |
-| `"start"` | One side in line with the start end of the dock (left, or top for a vertical dock) | That corner of the dock | Launcher |
+| `"start"` | One side in line with the start end of the dock (left, or top for a vertical dock) | That corner of the dock | Launcher, launcher button menu |
 | `"end"` | One side in line with the end of the dock (right, or bottom) | That corner of the dock | Trash menu |
 
 With `"start"` and `"end"` the popup stays attached to that end of the dock and follows it, with the dock's own width animation, when icons are added or removed.
@@ -457,6 +457,7 @@ The background absorbs hover over the whole popup. The dock's magnification trac
 | `DockWindowPicker.qml` | Hover window list | `"center"` |
 | `DockDownloadsStack.qml` | Downloads stack | `"center"` |
 | `DockAppPicker.qml` | Launcher | `"start"` |
+| `DockLauncherMenu.qml` | Launcher button's right-click menu | `"start"` |
 | `DockBar.qml` (`trashMenu`) | Trash menu | `"end"` |
 
 ---

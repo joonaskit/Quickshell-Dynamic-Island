@@ -10,6 +10,14 @@ Item {
 
     readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "About"]
     property int currentTab: 0
+
+    // Switches to a tab by its name in `tabs`; unknown names are ignored
+    function showTab(name) {
+        let idx = tabs.indexOf(name);
+        if (idx < 0) return;
+        searchInput.text = "";
+        currentTab = idx;
+    }
     readonly property bool hasSearchResults: displaySettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
                                              || dockSettings.hasMatches || launcherSettings.hasMatches
 

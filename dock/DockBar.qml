@@ -8,12 +8,14 @@ Item {
     property alias contextMenuHitBox: contextMenu
     property alias appPickerHitBox: appPicker
     property alias trashMenuHitBox: trashMenu
+    property alias launcherMenuHitBox: launcherMenu
     property alias downloadsStackHitBox: downloadsStack
     property alias windowPickerHitBox: windowPicker
 
     property alias contextMenuOpen: contextMenu.isOpen
     property alias appPickerOpen: appPicker.isOpen
     property alias trashMenuOpen: trashMenu.isOpen
+    property alias launcherMenuOpen: launcherMenu.isOpen
     property alias downloadsStackOpen: downloadsStack.isOpen
     property alias windowPickerOpen: windowPicker.isOpen
 
@@ -25,7 +27,7 @@ Item {
     readonly property real capsuleX: dockCapsule.x
     readonly property real capsuleY: dockCapsule.y
 
-    readonly property bool hasOpenPopups: appPickerOpen || contextMenuOpen || trashMenuOpen || downloadsStackOpen || windowPickerOpen
+    readonly property bool hasOpenPopups: appPickerOpen || contextMenuOpen || trashMenuOpen || launcherMenuOpen || downloadsStackOpen || windowPickerOpen
 
     property bool shouldDropDock: false
 
@@ -82,6 +84,7 @@ Item {
         if (except !== contextMenu) contextMenu.isOpen = false;
         appPicker.isOpen = false;
         trashMenu.isOpen = false;
+        launcherMenu.isOpen = false;
         downloadsStack.isOpen = false;
         windowPicker.isOpen = false;
     }
@@ -90,6 +93,12 @@ Item {
         let wasOpen = appPicker.isOpen;
         closeAllPopups();
         appPicker.isOpen = !wasOpen;
+    }
+
+    function toggleLauncherMenu() {
+        let wasOpen = launcherMenu.isOpen;
+        closeAllPopups();
+        launcherMenu.isOpen = !wasOpen;
     }
 
     function toggleTrashMenu() {
@@ -198,7 +207,7 @@ Item {
     // The launcher and the trash menu continue an end of the dock in a straight
     // line, so the dock straightens its corner under them as they open. Start is
     // the launcher's end (left, or top for a vertical dock).
-    readonly property real startCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, appPicker.openProgress * 3)))
+    readonly property real startCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
     readonly property real endCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, trashGeo.progress * 3)))
 
     // Dock capsule background
@@ -419,7 +428,8 @@ Item {
                     onClicked: function(mouse) {
                         launchpadItem.pressScale = 1.0;
                         launchpadBounceAnim.restart();
-                        root.toggleAppPicker();
+                        if (mouse.button === Qt.RightButton) root.toggleLauncherMenu();
+                        else root.toggleAppPicker();
                     }
                 }
             }
@@ -1074,6 +1084,18 @@ Item {
                 }
             }
         }
+    }
+
+    // Launcher button's right-click menu
+    DockLauncherMenu {
+        id: launcherMenu
+        isVertical: root.isVertical
+        dockPosition: root.dockPosition
+        dockCapsuleX: dockCapsule.x
+        dockCapsuleY: dockCapsule.y
+        dockCapsuleWidth: dockCapsule.width
+        dockCapsuleHeight: dockCapsule.height
+        dockCornerRadius: root.startCornerRadius
     }
 
     // App Picker Popup

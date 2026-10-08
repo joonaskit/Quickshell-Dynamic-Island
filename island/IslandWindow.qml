@@ -114,16 +114,23 @@ PanelWindow {
         }
     }
 
-    // Dismiss overlay to close Quick Settings popovers or context menus when clicking anywhere outside
+    // The expanded island closes on an outside click, like the menus. The settings
+    // view does not: it is common to click elsewhere while adjusting settings
+    // (e.g. to try the dock), and it has its own close and back buttons.
+    readonly property bool expandedDismissable: islandPill.isExpanded && !islandPill.isSettingsOpen
+    readonly property bool hasDismissablePopup: statusCluster.anyMenuOpen || appIndicatorPill.contextMenuOpen || appCluster.menuOpen || virtualDesktopsPill.menuOpen || expandedDismissable
+
+    // Dismiss overlay to close the expanded island, Quick Settings popovers or context menus when clicking anywhere outside
     MouseArea {
         id: dismissOverlay
         anchors.fill: parent
-        enabled: statusCluster.anyMenuOpen || appIndicatorPill.contextMenuOpen || appCluster.menuOpen || virtualDesktopsPill.menuOpen
+        enabled: window.hasDismissablePopup
         onClicked: {
             statusCluster.closeAllMenus();
             appIndicatorPill.closeContextMenu();
             appCluster.closeMenu();
             virtualDesktopsPill.closeMenu();
+            if (window.expandedDismissable) islandPill.collapse();
         }
     }
 
@@ -156,7 +163,7 @@ PanelWindow {
             item: (!window.hasFullscreenApp && virtualDesktopsPill.menuOpen) ? virtualDesktopsPill.menuHitBox : null
         }
         Region {
-            item: (!window.hasFullscreenApp && (statusCluster.anyMenuOpen || appIndicatorPill.contextMenuOpen || appCluster.menuOpen || virtualDesktopsPill.menuOpen)) ? dismissOverlay : null
+            item: (!window.hasFullscreenApp && window.hasDismissablePopup) ? dismissOverlay : null
         }
         Region {
             item: (!window.hasFullscreenApp && SettingsService.showDetachedNotifBubble && notifBubble.visible) ? notifBubble : null
@@ -479,6 +486,18 @@ PanelWindow {
                 duration: Theme.animDuration
                 easing.type: Easing.OutCubic
             }
+        }
+    }
+
+    // Another window (e.g. the dock) asked for a settings page
+    Connections {
+        target: SettingsService
+        function onOpenSettingsRequested(tab) {
+            if (!window.isThisScreenActive || window.hasFullscreenApp) return;
+            statusCluster.closeAllMenus();
+            appCluster.closeMenu();
+            virtualDesktopsPill.closeMenu();
+            islandPill.openSettings(tab);
         }
     }
 
