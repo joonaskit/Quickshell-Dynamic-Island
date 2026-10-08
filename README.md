@@ -49,12 +49,14 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 | --- | --- |
 | `shell.qml` | Entry point, one `IslandWindow` per screen |
 | `island/` | Island window, pill, expanded view, top bar clusters, views and settings UI |
+| `widgets/` | Widgets in the expanded view and their registry, see `docs/WIDGETS.md` |
 | `components/` | Shared pieces such as `SvgIcon` |
 | `quicksettings/` | Popups for each status icon |
 | `services/` | Backends (audio, network, Bluetooth, brightness, notifications, windows, ...) |
 | `scripts/` | Helper scripts, including the KWin window tracker |
 | `dock/` | Dock and app launcher |
 | `docs/ANIMATION_CATALOGUE.md` | Reference for all animations |
+| `docs/WIDGETS.md` | How to add a widget to the expanded view |
 
 ## Configuration
 

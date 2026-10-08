@@ -24,16 +24,16 @@ CompactMediaView 1.0 island/CompactMediaView.qml
 CompactNotificationAlertView 1.0 island/CompactNotificationAlertView.qml
 CompactOsdView 1.0 island/CompactOsdView.qml
 CompactTimerView 1.0 island/CompactTimerView.qml
-TimerWidget 1.0 island/TimerWidget.qml
+TimerWidget 1.0 widgets/TimerWidget.qml
 ExpandedView 1.0 island/ExpandedView.qml
 NotificationCard 1.0 island/NotificationCard.qml
 NotificationListView 1.0 island/NotificationListView.qml
-MiniCalendarWidget 1.0 island/MiniCalendarWidget.qml
-MediaWidget 1.0 island/MediaWidget.qml
-VolumeSlider 1.0 quicksettings/VolumeSlider.qml
-AudioOutputSelector 1.0 quicksettings/AudioOutputSelector.qml
-AppVolumeMixer 1.0 quicksettings/AppVolumeMixer.qml
-BrightnessSlider 1.0 quicksettings/BrightnessSlider.qml
+MiniCalendarWidget 1.0 widgets/MiniCalendarWidget.qml
+MediaWidget 1.0 widgets/MediaWidget.qml
+VolumeSlider 1.0 widgets/VolumeSlider.qml
+AudioOutputSelector 1.0 widgets/AudioOutputSelector.qml
+AppVolumeMixer 1.0 widgets/AppVolumeMixer.qml
+BrightnessSlider 1.0 widgets/BrightnessSlider.qml
 AudioVisualizer 1.0 components/AudioVisualizer.qml
 SvgIcon 1.0 components/SvgIcon.qml
 TopBarWings 1.0 island/TopBarWings.qml
@@ -77,3 +77,4 @@ DockWindowPicker 1.0 dock/DockWindowPicker.qml
 DockDownloadsStack 1.0 dock/DockDownloadsStack.qml
 singleton DownloadsService 1.0 services/DownloadsService.qml
 
+singleton WidgetRegistry 1.0 widgets/WidgetRegistry.qml

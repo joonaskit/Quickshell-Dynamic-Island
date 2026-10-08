@@ -5,7 +5,9 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    property var player: null
+    // Set by the expanded view; provides player
+    property var host: null
+    property var player: host ? host.player : null
     property bool isPlaying: player ? player.isPlaying : false
     property string trackTitle: player && player.trackTitle ? player.trackTitle : "Not Playing"
     property string trackArtist: player && player.trackArtist ? player.trackArtist : "No Media"
