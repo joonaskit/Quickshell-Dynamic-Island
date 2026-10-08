@@ -13,15 +13,21 @@ Item {
     signal requestCollapse()
     signal requestOpenSettings()
 
-    // Card visibility bindings directly referenced from services to avoid layout cycle / forward reference errors
-    readonly property bool showCalendar: SettingsService.showExpandedCalendar
-    readonly property bool showTimer: SettingsService.showExpandedTimer
-    readonly property bool showMedia: SettingsService.showExpandedMedia && (root.player !== null)
-    readonly property bool showAudioSink: SettingsService.showExpandedAudioSink
-    readonly property bool showAppMixer: SettingsService.showExpandedAppMixer
-    readonly property bool showVolume: SettingsService.showExpandedVolume
-    readonly property bool showBrightness: SettingsService.showExpandedBrightness && BrightnessService.isAvailable
-    readonly property bool showControls: showAudioSink || showAppMixer || showVolume || showBrightness
+    // Widgets come from WidgetRegistry: "cards" are separated by dividers,
+    // "controls" are stacked tightly in one section after them
+    readonly property var cardWidgets: WidgetRegistry.widgets.filter(w => w.group === "cards")
+    readonly property var controlWidgets: WidgetRegistry.widgets.filter(w => w.group === "controls")
+
+    function isShown(widget) {
+        return SettingsService.isWidgetEnabled(widget.id) && (!widget.available || widget.available(root));
+    }
+
+    // Ids of the visible sections in order; each section after the first gets a divider above it
+    readonly property var visibleSections: {
+        let sections = cardWidgets.filter(w => isShown(w)).map(w => w.id);
+        if (controlWidgets.some(w => isShown(w))) sections.push("controls");
+        return sections;
+    }
 
     // Screen-aware maximum height to prevent overflowing the monitor or window
     readonly property real maxAllowedHeight: {
@@ -178,51 +184,36 @@ Item {
                 color: Qt.rgba(1, 1, 1, 0.08)
             }
 
-            // Mini Calendar Widget with week numbers
-            MiniCalendarWidget {
-                id: calendarWidget
-                Layout.fillWidth: true
-                currentDate: root.currentTime
-                visible: root.showCalendar
+            Repeater {
+                model: root.cardWidgets
+
+                delegate: ColumnLayout {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    spacing: contentColumn.spacing
+                    visible: root.isShown(modelData)
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 1
+                        color: Qt.rgba(1, 1, 1, 0.08)
+                        visible: root.visibleSections.indexOf(modelData.id) > 0
+                    }
+
+                    Loader {
+                        Layout.fillWidth: true
+                        sourceComponent: modelData.component
+                        onLoaded: if ("host" in item) item.host = root
+                    }
+                }
             }
 
-            // Hairline Divider after calendar
+            // Divider before the controls section
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showCalendar && (root.showTimer || root.showMedia || root.showControls)
-            }
-
-            // Timer & Stopwatch Section
-            TimerWidget {
-                id: timerWidget
-                Layout.fillWidth: true
-                visible: root.showTimer
-            }
-
-            // Divider after timer
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showTimer && (root.showMedia || root.showControls)
-            }
-
-            // Media Player Section
-            MediaWidget {
-                id: mediaWidget
-                Layout.fillWidth: true
-                player: root.player
-                visible: root.showMedia
-            }
-
-            // Divider between Media and following content
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
-                visible: root.showMedia && root.showControls
+                visible: root.visibleSections.indexOf("controls") > 0
             }
 
             // System Controls Section (Audio Output, Volume & Brightness)
@@ -230,30 +221,18 @@ Item {
                 id: controlsCol
                 Layout.fillWidth: true
                 spacing: Theme.px(6)
-                visible: root.showControls
+                visible: root.visibleSections.indexOf("controls") >= 0
 
-                AudioOutputSelector {
-                    id: audioOutputSelector
-                    Layout.fillWidth: true
-                    visible: root.showAudioSink
-                }
+                Repeater {
+                    model: root.controlWidgets
 
-                AppVolumeMixer {
-                    id: appVolumeMixer
-                    Layout.fillWidth: true
-                    visible: root.showAppMixer && streams.length > 0
-                }
-
-                VolumeSlider {
-                    id: volumeSlider
-                    Layout.fillWidth: true
-                    visible: root.showVolume
-                }
-
-                BrightnessSlider {
-                    id: brightnessSlider
-                    Layout.fillWidth: true
-                    visible: root.showBrightness
+                    delegate: Loader {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        visible: root.isShown(modelData)
+                        sourceComponent: modelData.component
+                        onLoaded: if ("host" in item) item.host = root
+                    }
                 }
             }
         }

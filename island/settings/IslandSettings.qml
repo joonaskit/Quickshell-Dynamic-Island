@@ -9,111 +9,34 @@ SettingsCategory {
         title: "EXPANDED ISLAND CARDS"
         subtitle: "Choose cards shown when expanded"
 
-        // Timer & Stopwatch
-        SettingToggle {
-            title: "Timer & Stopwatch"
-            description: "Countdown timer and stopwatch card"
-            iconName: "clock"
-            iconColor: Theme.accentOrange
-            checked: SettingsService.showExpandedTimer
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedTimer", val);
-            }
-        }
+        // One toggle per registered widget
+        Repeater {
+            model: WidgetRegistry.widgets
 
-        SettingDivider {}
+            delegate: ColumnLayout {
+                required property var modelData
+                required property int index
+                readonly property bool matchesSearch: widgetToggle.matchesSearch
 
-        SettingToggle {
-            title: "Timer in Island"
-            description: "Show a running timer or stopwatch in the compact island"
-            iconName: "clock"
-            iconColor: Theme.accentOrange
-            checked: SettingsService.showTimerInPill
-            onToggled: function(val) {
-                SettingsService.setSetting("showTimerInPill", val);
-            }
-        }
+                Layout.fillWidth: true
+                visible: matchesSearch
+                spacing: 0
 
-        SettingDivider {}
+                SettingDivider {
+                    visible: index > 0 && !SettingsSearch.active
+                }
 
-        // 1. Mini Calendar
-        SettingToggle {
-            title: "Mini Calendar"
-            description: "Monthly calendar grid with current date highlight and week numbers"
-            iconName: "calendar"
-            iconColor: Theme.accentRed
-            checked: SettingsService.showExpandedCalendar
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedCalendar", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2. Media Player
-        SettingToggle {
-            title: "Media Player"
-            description: "Playback controls, album artwork, track title, and interactive seek bar"
-            iconName: "music"
-            iconColor: Theme.accentRed
-            checked: SettingsService.showExpandedMedia
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedMedia", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 3. Audio Output Selector
-        SettingToggle {
-            title: "Audio Output Selector"
-            description: "Quickly switch active audio playback device (speakers, headphones, HDMI)"
-            iconName: "headphones"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showExpandedAudioSink
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedAudioSink", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 4. Volume Slider
-        SettingToggle {
-            title: "App Volume Mixer"
-            description: "Per-app volume sliders for apps that are playing audio"
-            iconName: "music"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showExpandedAppMixer
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedAppMixer", val);
-            }
-        }
-
-        SettingDivider {}
-
-        SettingToggle {
-            title: "Volume Slider"
-            description: "Interactive slider for master speaker output volume"
-            iconName: "volume-high"
-            iconColor: Theme.accentGreen
-            checked: SettingsService.showExpandedVolume
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedVolume", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 5. Brightness Slider
-        SettingToggle {
-            title: "Brightness Slider"
-            description: "Interactive slider for screen backlight brightness"
-            iconName: "brightness-high"
-            iconColor: Theme.accentYellow
-            checked: SettingsService.showExpandedBrightness
-            onToggled: function(val) {
-                SettingsService.setSetting("showExpandedBrightness", val);
+                SettingToggle {
+                    id: widgetToggle
+                    title: modelData.title
+                    description: modelData.description
+                    iconName: modelData.icon
+                    iconColor: modelData.iconColor
+                    checked: SettingsService.isWidgetEnabled(modelData.id)
+                    onToggled: function(val) {
+                        SettingsService.setWidgetEnabled(modelData.id, val);
+                    }
+                }
             }
         }
     }
@@ -132,6 +55,19 @@ SettingsCategory {
             checked: SettingsService.showMediaWhenPlaying
             onToggled: function(val) {
                 SettingsService.setSetting("showMediaWhenPlaying", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Timer in Island"
+            description: "Show a running timer or stopwatch in the compact island"
+            iconName: "clock"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.showTimerInPill
+            onToggled: function(val) {
+                SettingsService.setSetting("showTimerInPill", val);
             }
         }
 

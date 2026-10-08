@@ -60,16 +60,21 @@ Singleton {
     property bool showDetachedNotifBubble: true
     property bool showOsd: true
     property bool showTimerInPill: true
-    property bool showExpandedTimer: true
 
-    // Expanded Island Widget Cards
-    property bool showExpandedCalendar: true
-    property bool showExpandedMedia: true
-    property bool showExpandedNotifications: true
-    property bool showExpandedAudioSink: true
-    property bool showExpandedAppMixer: true
-    property bool showExpandedVolume: true
-    property bool showExpandedBrightness: true
+    // Expanded island widgets: id -> enabled. Ids missing here use the
+    // registry default (see WidgetRegistry).
+    property var widgets: ({})
+
+    // Per-widget keys used before the widgets map, migrated on load
+    readonly property var legacyWidgetKeys: ({
+        "calendar": "showExpandedCalendar",
+        "timer": "showExpandedTimer",
+        "media": "showExpandedMedia",
+        "audioOutput": "showExpandedAudioSink",
+        "appMixer": "showExpandedAppMixer",
+        "volume": "showExpandedVolume",
+        "brightness": "showExpandedBrightness"
+    })
 
     // App Launcher Customization
     property string launcherDefaultView: "grid"
@@ -167,15 +172,16 @@ Singleton {
         if (data.showDetachedNotifBubble !== undefined) root.showDetachedNotifBubble = !!data.showDetachedNotifBubble;
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
-        if (data.showExpandedTimer !== undefined) root.showExpandedTimer = !!data.showExpandedTimer;
 
-        if (data.showExpandedCalendar !== undefined) root.showExpandedCalendar = !!data.showExpandedCalendar;
-        if (data.showExpandedMedia !== undefined) root.showExpandedMedia = !!data.showExpandedMedia;
-        if (data.showExpandedNotifications !== undefined) root.showExpandedNotifications = !!data.showExpandedNotifications;
-        if (data.showExpandedAudioSink !== undefined) root.showExpandedAudioSink = !!data.showExpandedAudioSink;
-        if (data.showExpandedAppMixer !== undefined) root.showExpandedAppMixer = !!data.showExpandedAppMixer;
-        if (data.showExpandedVolume !== undefined) root.showExpandedVolume = !!data.showExpandedVolume;
-        if (data.showExpandedBrightness !== undefined) root.showExpandedBrightness = !!data.showExpandedBrightness;
+        let savedWidgets = (data.widgets && typeof data.widgets === "object") ? data.widgets : {};
+        let widgetStates = {};
+        for (let i = 0; i < WidgetRegistry.widgets.length; i++) {
+            let id = WidgetRegistry.widgets[i].id;
+            let legacyKey = root.legacyWidgetKeys[id];
+            if (savedWidgets[id] !== undefined) widgetStates[id] = !!savedWidgets[id];
+            else if (legacyKey && data[legacyKey] !== undefined) widgetStates[id] = !!data[legacyKey];
+        }
+        root.widgets = widgetStates;
 
         if (data.launcherDefaultView !== undefined && (data.launcherDefaultView === "grid" || data.launcherDefaultView === "list")) {
             root.launcherDefaultView = data.launcherDefaultView;
@@ -232,6 +238,31 @@ Singleton {
         root.setSetting(key, !root[key]);
     }
 
+    function isWidgetEnabled(id) {
+        if (root.widgets[id] !== undefined) return root.widgets[id];
+        let widget = WidgetRegistry.byId(id);
+        return widget ? widget.defaultEnabled : false;
+    }
+
+    function setWidgetEnabled(id, val) {
+        if (root.isWidgetEnabled(id) === val) return;
+        let states = Object.assign({}, root.widgets);
+        states[id] = val;
+        root.widgets = states;
+        root.settingsChanged();
+        saveTimer.restart();
+    }
+
+    // Enabled state of every registered widget, defaults filled in
+    function widgetStates() {
+        let states = {};
+        for (let i = 0; i < WidgetRegistry.widgets.length; i++) {
+            let id = WidgetRegistry.widgets[i].id;
+            states[id] = root.isWidgetEnabled(id);
+        }
+        return states;
+    }
+
     function resetDefaults() {
         root.uiScale = 1.0;
         root.fontScale = 1.0;
@@ -277,15 +308,8 @@ Singleton {
         root.showDetachedNotifBubble = true;
         root.showOsd = true;
         root.showTimerInPill = true;
-        root.showExpandedTimer = true;
 
-        root.showExpandedCalendar = true;
-        root.showExpandedMedia = true;
-        root.showExpandedNotifications = true;
-        root.showExpandedAudioSink = true;
-        root.showExpandedAppMixer = true;
-        root.showExpandedVolume = true;
-        root.showExpandedBrightness = true;
+        root.widgets = {};
 
         root.launcherDefaultView = "grid";
         root.launcherDensity = "comfortable";
@@ -358,14 +382,7 @@ Singleton {
             "showDetachedNotifBubble": root.showDetachedNotifBubble,
             "showOsd": root.showOsd,
             "showTimerInPill": root.showTimerInPill,
-            "showExpandedTimer": root.showExpandedTimer,
-            "showExpandedCalendar": root.showExpandedCalendar,
-            "showExpandedMedia": root.showExpandedMedia,
-            "showExpandedNotifications": root.showExpandedNotifications,
-            "showExpandedAudioSink": root.showExpandedAudioSink,
-            "showExpandedAppMixer": root.showExpandedAppMixer,
-            "showExpandedVolume": root.showExpandedVolume,
-            "showExpandedBrightness": root.showExpandedBrightness,
+            "widgets": root.widgetStates(),
             "launcherDefaultView": root.launcherDefaultView,
             "launcherDensity": root.launcherDensity,
             "launcherStartTab": root.launcherStartTab,

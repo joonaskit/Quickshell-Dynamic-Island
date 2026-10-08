@@ -5,7 +5,9 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    property date currentDate: new Date()
+    // Set by the expanded view; provides currentTime
+    property var host: null
+    property date currentDate: host ? host.currentTime : new Date()
     property int displayYear: currentDate.getFullYear()
     property int displayMonth: currentDate.getMonth() // 0-indexed
 
