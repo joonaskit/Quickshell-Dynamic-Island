@@ -95,7 +95,7 @@ Rectangle {
             Layout.preferredWidth: 44
             Layout.preferredHeight: 24
             radius: 12
-            color: toggleRow.checked ? Theme.accentGreen : "#39393d"
+            color: toggleRow.checked ? Theme.accentGreen : Theme.switchTrackOff
 
             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
@@ -105,7 +105,7 @@ Rectangle {
                 width: 20
                 height: 20
                 radius: 10
-                color: "#ffffff"
+                color: Theme.sliderHandle
 
                 Behavior on x {
                     NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }

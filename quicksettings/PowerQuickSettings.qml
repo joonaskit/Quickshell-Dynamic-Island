@@ -45,7 +45,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
         radius: root.embedded ? 0 : 18
-        color: root.embedded ? "transparent" : "#1c1c1e"
+        color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Qt.rgba(1, 1, 1, 0.12)
         clip: true
@@ -217,7 +217,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "moon"
                                 size: 14
-                                color: "#5e5ce6"
+                                color: Theme.accentIndigo
                             }
                         }
 

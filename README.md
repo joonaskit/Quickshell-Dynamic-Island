@@ -57,16 +57,21 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 | `dock/` | Dock and app launcher |
 | `docs/ANIMATION_CATALOGUE.md` | Reference for all animations |
 | `docs/WIDGETS.md` | How to add a widget to the expanded view |
+| `docs/THEME.md` | Theme file exported for companion apps |
+| `examples/` | Reference code for companion apps, such as a theme reader |
+| `tests/` | Unit tests, run with `./test.sh` |
 
 ## Configuration
 
 Use the in-app settings view, or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
 
+The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
+
 ## Development
 
-Run `./lint.sh` before committing. It runs `qmllint` on the QML files (settings in `.qmllint.ini`) and `ruff` on `scripts/` (settings in `ruff.toml`). It needs the Qt 6 declarative tools for `qmllint`, and either `ruff` or `uv` for the Python check.
+Run `./lint.sh` before committing. It runs `qmllint` on the QML files (settings in `.qmllint.ini`) and `ruff` on the Python files (settings in `ruff.toml`). It needs the Qt 6 declarative tools for `qmllint`, and either `ruff` or `uv` for the Python check.
 
-`./test.sh` runs the unit tests in `tests/` headless with `qmltestrunner`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js` and the reading of older `settings.json` formats in `services/settingsMigration.js`. The UI is checked by hand in the running shell.
+`./test.sh` runs the unit tests in `tests/`: the QML ones headless with `qmltestrunner`, and the Python ones with `unittest`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js` and the reading of older `settings.json` formats in `services/settingsMigration.js`. The UI is checked by hand in the running shell.
 
 ## License
 

@@ -197,7 +197,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: root.isTopBarMode ? 11 : 12
                                 font.weight: desktopItem.isCurrent ? Font.Bold : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Font.DemiBold : Font.Normal)
-                                color: desktopItem.isCurrent ? "#ffffff" : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
+                                color: desktopItem.isCurrent ? Theme.onAccent : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
 
                                 Behavior on color { ColorAnimation { duration: 110 } }
                             }
@@ -337,7 +337,7 @@ Item {
             width: Math.min(240, tooltipText.implicitWidth + 18)
             height: 24
             radius: 7
-            color: "#1c1c1e"
+            color: Theme.cardBackground
             border.width: 1
             border.color: Qt.rgba(1, 1, 1, 0.14)
 

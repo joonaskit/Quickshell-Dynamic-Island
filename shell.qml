@@ -9,6 +9,9 @@ ShellRoot {
     readonly property real volumeStep: 0.05
     readonly property real brightnessStep: 0.05
 
+    // Singletons are created on first use; nothing else references this one
+    readonly property var themeExport: ThemeExportService
+
     // IPC handler for external scripts / shortcuts
     IpcHandler {
         target: "launcher"

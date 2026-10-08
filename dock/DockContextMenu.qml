@@ -187,7 +187,7 @@ Item {
                                     anchors.centerIn: parent
                                     name: (root.mprisPlayer && root.mprisPlayer.isPlaying) ? "pause" : "play"
                                     size: 11
-                                    color: "#000000"
+                                    color: Theme.onLight
                                 }
 
                                 MouseArea {

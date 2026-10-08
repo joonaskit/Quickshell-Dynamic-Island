@@ -183,7 +183,7 @@ Item {
                                 radius: 3.5
                                 color: Theme.accentBlue
                                 border.width: 1
-                                border.color: "#1c1c1e"
+                                border.color: Theme.cardBackground
                                 visible: modelData.activated
                             }
                         }

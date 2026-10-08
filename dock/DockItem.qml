@@ -172,7 +172,7 @@ Item {
                 font.family: Theme.fontDisplay
                 font.pixelSize: 18
                 font.weight: Font.Bold
-                color: "#ffffff"
+                color: Theme.onAccent
             }
         }
 
@@ -188,7 +188,7 @@ Item {
             width: Math.max(18, badgeText.implicitWidth + 8)
             radius: 9
             color: Theme.accentRed
-            border.color: "#1c1c1e"
+            border.color: Theme.cardBackground
             border.width: 1.5
             visible: opacity > 0.01
             opacity: root.unreadNotifCount > 0 ? 1.0 : 0.0
@@ -204,7 +204,7 @@ Item {
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
                 font.weight: Font.Bold
-                color: "#ffffff"
+                color: Theme.onAccent
             }
         }
     }
@@ -278,7 +278,7 @@ Item {
             width: tooltipText.implicitWidth + 16
             height: 24
             radius: 6
-            color: "#1c1c1e"
+            color: Theme.cardBackground
             border.color: Qt.rgba(1, 1, 1, 0.18)
             border.width: 1
 

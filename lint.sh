@@ -24,7 +24,7 @@ elif command -v uvx >/dev/null 2>&1; then
 fi
 if [ -n "${RUFF[*]}" ]; then
     echo "== ruff"
-    "${RUFF[@]}" check scripts/ || status=1
+    "${RUFF[@]}" check scripts/ tests/ examples/ || status=1
 else
     echo "ruff not found (install ruff or uv)" >&2
     status=1

@@ -1,10 +1,11 @@
+import ".."
 import QtQuick
 
 Item {
     id: root
 
     property bool playing: false
-    property color barColor: "#30d158"
+    property color barColor: Theme.accentGreen
     property real maxHeight: 15
     property real minHeight: 3
     property real barWidth: 3

@@ -629,7 +629,7 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 11
                                     font.weight: catPill.isSelected ? Font.DemiBold : Font.Medium
-                                    color: catPill.isSelected ? "#ffffff" : (catMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
+                                    color: catPill.isSelected ? Theme.onAccent : (catMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                                 }
 
                                 MouseArea {
