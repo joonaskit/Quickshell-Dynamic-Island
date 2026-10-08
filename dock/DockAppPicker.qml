@@ -29,6 +29,11 @@ Item {
 
     signal closed()
 
+    // How far open the launcher is (0 to 1), and the current radius of the dock
+    // corner it sits on; the dock straightens that corner as the launcher opens
+    readonly property real openProgress: geo.progress
+    property real dockCornerRadius: Theme.dockRadius
+
     // Full size of the launcher; animates when the layout settings change
     property real finalWidth: gridCols >= 5 ? 540 : 460
     property real finalHeight: isCompact ? 440 : 480
@@ -219,6 +224,7 @@ Item {
         dockPosition: root.dockPosition
         filletSize: geo.filletSize
         startFlush: geo.startFlush
+        dockCornerRadius: root.dockCornerRadius
         farFillet: geo.farFillet
         farOverhang: geo.farOverhang
         cornerRadius: 18

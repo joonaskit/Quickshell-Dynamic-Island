@@ -438,10 +438,12 @@ With `"start"` and `"end"` the popup stays attached to that end of the dock and 
 ### Shape of the join
 
 - **Centred popups** flare onto the dock with a concave fillet on each side (`filletSize`, 12 px). The fillets are dropped when the popup overhangs the dock's straight edge.
-- **End-aligned popups** continue the end of the dock in one straight line. The outline runs down past the popup's base and follows the dock's rounded corner, filling the wedge between the two.
+- **End-aligned popups** continue the end of the dock in one straight line. The dock straightens its corner under that side as the popup opens (`startCornerRadius` / `endCornerRadius` in `DockBar.qml`, reaching zero in the first third of the animation), so the two meet along a straight edge. While the corner still has some radius, the popup's outline runs down past its base and follows the corner, filling the wedge between the two.
 - **The far side** of an end-aligned popup has a fillet while it rests on the dock's straight edge. The fillet shrinks to nothing as that side nears the dock's other rounded corner (`farFillet`), and if the side reaches past the dock, its base corner is rounded off instead (`farOverhang`).
 - The body is slightly more opaque than the dock and fades to the exact dock colour at the base, so the join has no visible seam.
-- The outline is one SVG path, drawn for a bottom dock with the flush side on the left. It is rotated for left and right docks, and mirrored for a right dock and for `"end"`.
+- The outline is one SVG path, drawn for a bottom dock with the flush side on the left, and rotated for left and right docks. Rotation puts that side at the top for a left dock and at the bottom for a right dock, so the path is mirrored whenever that is not the side that should be flush. The mirroring is done on the path's coordinates, not with a `Scale` transform, which would be applied after the rotation and flip the shape across the dock.
+- **Pixel snapping.** The dock edge that popups attach to is snapped to the physical pixel grid (`snapToPixel`, `dockThickness` and `dockEdgeMargin` in `DockBar.qml`). With fractional display scaling a whole-number position usually falls between two physical pixels; the dock and the popup share that edge, and two half-covered translucent edges let the wallpaper through as a thin line. A curved join can never be snapped, which is why the dock's corner is straightened rather than only filled in.
+- The background is centred in the popup with `anchors.alignWhenCentered: false`. With the default pixel snapping it can sit half a pixel off, which shows as a gap against a left or right dock.
 
 ### Hover
 

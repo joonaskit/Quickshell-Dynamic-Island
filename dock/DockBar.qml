@@ -178,6 +178,29 @@ Item {
         }
     }
 
+    // With fractional display scaling, a whole-number position usually falls
+    // between two physical pixels. The dock edge that popups attach to is snapped
+    // to the pixel grid: the dock and a popup share that edge, and if both draw
+    // it half-covered the wallpaper shows through as a thin line.
+    readonly property real pixelRatio: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1
+    function snapToPixel(v) {
+        return Math.round(v * pixelRatio) / pixelRatio;
+    }
+    readonly property real dockThickness: snapToPixel(Theme.dockHeight)
+    // Gap between the dock and its screen edge, adjusted so that the opposite
+    // (popup-facing) edge of the dock lands on a physical pixel
+    readonly property real dockEdgeMargin: {
+        if (root.dockPosition === "left") return snapToPixel(Theme.dockBottomMargin);
+        let extent = root.isVertical ? root.width : root.height;
+        return extent - dockThickness - snapToPixel(extent - Theme.dockBottomMargin - dockThickness);
+    }
+
+    // The launcher and the trash menu continue an end of the dock in a straight
+    // line, so the dock straightens its corner under them as they open. Start is
+    // the launcher's end (left, or top for a vertical dock).
+    readonly property real startCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, appPicker.openProgress * 3)))
+    readonly property real endCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, trashGeo.progress * 3)))
+
     // Dock capsule background
     Rectangle {
         id: dockCapsule
@@ -186,17 +209,23 @@ Item {
         anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
 
         anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-        anchors.bottomMargin: (!root.isVertical) ? Theme.dockBottomMargin : 0
+        anchors.bottomMargin: (!root.isVertical) ? root.dockEdgeMargin : 0
 
         anchors.left: (root.dockPosition === "left") ? parent.left : undefined // qmllint disable Quick.anchor-combinations
-        anchors.leftMargin: (root.dockPosition === "left") ? Theme.dockBottomMargin : 0
+        anchors.leftMargin: (root.dockPosition === "left") ? root.dockEdgeMargin : 0
 
         anchors.right: (root.dockPosition === "right") ? parent.right : undefined
-        anchors.rightMargin: (root.dockPosition === "right") ? Theme.dockBottomMargin : 0
+        anchors.rightMargin: (root.dockPosition === "right") ? root.dockEdgeMargin : 0
 
-        width: root.isVertical ? Theme.dockHeight : (root.dockContentLength + 32)
-        height: root.isVertical ? (root.dockContentLength + 32) : Theme.dockHeight
+        width: root.isVertical ? root.dockThickness : (root.dockContentLength + 32)
+        height: root.isVertical ? (root.dockContentLength + 32) : root.dockThickness
         radius: Theme.dockRadius
+        // The two corners on the popup-facing edge: bottom dock top-left / top-right,
+        // left dock top-right / bottom-right, right dock top-left / bottom-left
+        topLeftRadius: root.dockPosition === "left" ? radius : root.startCornerRadius
+        topRightRadius: root.dockPosition === "bottom" ? root.endCornerRadius : (root.dockPosition === "left" ? root.startCornerRadius : radius)
+        bottomRightRadius: root.dockPosition === "left" ? root.endCornerRadius : radius
+        bottomLeftRadius: root.dockPosition === "right" ? root.endCornerRadius : radius
         color: Theme.dockBackground
         border.color: Theme.dockBorder
         border.width: Theme.dockShowBorder ? 1 : 0
@@ -234,6 +263,10 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
+            topLeftRadius: parent.topLeftRadius
+            topRightRadius: parent.topRightRadius
+            bottomRightRadius: parent.bottomRightRadius
+            bottomLeftRadius: parent.bottomLeftRadius
             visible: Theme.dockTransparent
             gradient: Gradient {
                 GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.12) }
@@ -965,6 +998,7 @@ Item {
             dockPosition: root.dockPosition
             filletSize: trashGeo.filletSize
             cornerRadius: 12
+            dockCornerRadius: root.endCornerRadius
             endFlush: trashGeo.endFlush
             farFillet: trashGeo.farFillet
             farOverhang: trashGeo.farOverhang
@@ -1051,6 +1085,7 @@ Item {
         dockCapsuleY: dockCapsule.y
         dockCapsuleWidth: dockCapsule.width
         dockCapsuleHeight: dockCapsule.height
+        dockCornerRadius: root.startCornerRadius
     }
 
     // Dismiss overlay to close popups on outside click
