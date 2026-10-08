@@ -12,6 +12,7 @@ TestCase {
         "textPrimary": "#ffffff",
         "textSecondary": "#98989d",
         "textTertiary": "#636366",
+        "accent": "#bf5af2",
         "onAccent": "#ffffff",
         "accentGreen": "#30d158",
         "accentBlue": "#0a84ff",
@@ -56,7 +57,9 @@ TestCase {
 
     function test_semanticColorsMapToAccents() {
         let colors = ThemeExport.build(input).colors;
-        compare(colors.accent, input.accentBlue);
+        // The accent is the user's choice, independent of the palette's blue
+        compare(colors.accent, "#bf5af2");
+        compare(colors.palette.blue, input.accentBlue);
         compare(colors.success, input.accentGreen);
         compare(colors.warning, input.accentOrange);
         compare(colors.danger, input.accentRed);

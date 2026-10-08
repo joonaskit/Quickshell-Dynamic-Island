@@ -195,7 +195,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         name: MicrophoneService.isMuted ? "mic-off" : "mic"
                         size: 14
-                        color: Theme.onAccent
+                        color: Theme.dangerForeground
                     }
 
                     MouseArea {

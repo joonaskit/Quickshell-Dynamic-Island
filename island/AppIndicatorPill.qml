@@ -721,7 +721,7 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 11
                                     font.weight: Font.Bold
-                                    color: Theme.accentBlue
+                                    color: Theme.accent
                                     visible: modelData.checkState !== Qt.Unchecked
                                     Layout.preferredWidth: visible ? 12 : 0
                                 }
@@ -788,7 +788,7 @@ Item {
                             SvgIcon {
                                 name: "window"
                                 size: 12
-                                color: Theme.accentBlue
+                                color: Theme.accent
                             }
 
                             Text {

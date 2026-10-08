@@ -8,7 +8,7 @@ Item {
     property real targetX: 0
     property real targetWidth: 100
     property bool active: false
-    property color accentColor: Theme.accentBlue
+    property color accentColor: Theme.accent
     property bool atBottom: false
 
     // Purely visual overlay - do not intercept clicks.

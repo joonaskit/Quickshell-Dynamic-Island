@@ -23,7 +23,7 @@ Item {
             radius: Theme.px(8)
             color: selectorMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04)
             border.width: 1
-            border.color: root.expanded ? Qt.rgba(10/255, 132/255, 255/255, 0.35) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: root.expanded ? Theme.accentTint(0.35) : Qt.rgba(1, 1, 1, 0.08)
 
             Behavior on color {
                 ColorAnimation { duration: 150 }
@@ -42,7 +42,7 @@ Item {
                 SvgIcon {
                     name: AudioService.currentSinkIcon || "volume-high"
                     size: Theme.px(13)
-                    color: Theme.accentBlue
+                    color: Theme.accent
                 }
 
                 // Active Device Name
@@ -61,7 +61,7 @@ Item {
                     visible: (AudioService.sinks || []).length > 1
                     name: root.expanded ? "chevron-up" : "chevron-down"
                     size: Theme.px(12)
-                    color: root.expanded ? Theme.accentBlue : Theme.textSecondary
+                    color: root.expanded ? Theme.accent : Theme.textSecondary
                 }
             }
 
@@ -97,9 +97,9 @@ Item {
                     radius: Theme.px(7)
                     color: itemMouse.containsMouse
                         ? Qt.rgba(1, 1, 1, 0.1)
-                        : (modelData.isDefault ? Qt.rgba(10/255, 132/255, 255/255, 0.16) : Qt.rgba(1, 1, 1, 0.03))
+                        : (modelData.isDefault ? Theme.accentTint(0.16) : Qt.rgba(1, 1, 1, 0.03))
                     border.width: modelData.isDefault ? 1 : 0
-                    border.color: modelData.isDefault ? Qt.rgba(10/255, 132/255, 255/255, 0.35) : "transparent"
+                    border.color: modelData.isDefault ? Theme.accentTint(0.35) : "transparent"
 
                     Behavior on color {
                         ColorAnimation { duration: 120 }
@@ -114,7 +114,7 @@ Item {
                         SvgIcon {
                             name: modelData.icon || "volume-high"
                             size: Theme.px(13)
-                            color: modelData.isDefault ? Theme.accentBlue : Theme.textSecondary
+                            color: modelData.isDefault ? Theme.accent : Theme.textSecondary
                         }
 
                         Text {
@@ -130,7 +130,7 @@ Item {
                         SvgIcon {
                             name: "check"
                             size: Theme.px(12)
-                            color: Theme.accentBlue
+                            color: Theme.accent
                             visible: modelData.isDefault
                         }
                     }

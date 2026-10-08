@@ -91,7 +91,7 @@ Item {
                 SvgIcon {
                     name: "calendar"
                     size: Theme.px(13)
-                    color: Theme.accentBlue
+                    color: Theme.accent
                 }
 
                 Text {
@@ -110,7 +110,7 @@ Item {
                 Layout.preferredHeight: Theme.px(20)
                 Layout.preferredWidth: todayText.implicitWidth + Theme.px(12)
                 radius: Theme.px(10)
-                color: todayMouse.containsMouse ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : Qt.rgba(1, 1, 1, 0.06)
+                color: todayMouse.containsMouse ? Theme.accentTint(0.25) : Qt.rgba(1, 1, 1, 0.06)
                 visible: (root.displayYear !== root.currentDate.getFullYear() || root.displayMonth !== root.currentDate.getMonth())
 
                 Text {
@@ -120,7 +120,7 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontPx(10)
                     font.weight: Font.DemiBold
-                    color: Theme.accentBlue
+                    color: Theme.accent
                 }
 
                 MouseArea {
@@ -294,7 +294,7 @@ Item {
                                     height: Theme.px(22)
                                     radius: Theme.px(11)
                                     color: {
-                                        if (modelData.isToday) return Theme.accentBlue;
+                                        if (modelData.isToday) return Theme.accent;
                                         if (cellMouse.containsMouse) return Qt.rgba(1, 1, 1, 0.1);
                                         return "transparent";
                                     }
@@ -307,7 +307,7 @@ Item {
                                         font.weight: modelData.isToday ? Font.Bold : Font.Normal
                                         font.features: { "tnum": 1 }
                                         color: {
-                                            if (modelData.isToday) return Theme.onAccent;
+                                            if (modelData.isToday) return Theme.accentForeground;
                                             if (!modelData.isCurrentMonth) return Qt.rgba(1, 1, 1, 0.18);
                                             return Theme.textPrimary;
                                         }

@@ -97,7 +97,7 @@ Item {
                     Layout.preferredWidth: countText.implicitWidth + 10
                     Layout.rightMargin: 4
                     radius: 9
-                    color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
+                    color: Theme.accentTint(0.2)
 
                     Text {
                         id: countText
@@ -106,7 +106,7 @@ Item {
                         font.family: Theme.fontFamily
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
                 }
             }
@@ -128,7 +128,7 @@ Item {
                     width: parent.width
                     height: 32
                     radius: 8
-                    color: rowHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
+                    color: rowHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Theme.accentTint(0.12) : "transparent")
 
                     Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -181,7 +181,7 @@ Item {
                                 width: 7
                                 height: 7
                                 radius: 3.5
-                                color: Theme.accentBlue
+                                color: Theme.accent
                                 border.width: 1
                                 border.color: Theme.cardBackground
                                 visible: modelData.activated
@@ -195,7 +195,7 @@ Item {
                             font.family: Theme.fontFamily
                             font.pixelSize: 12
                             font.weight: modelData.activated ? Font.DemiBold : Font.Normal
-                            color: modelData.activated ? Theme.accentBlue : Theme.textPrimary
+                            color: modelData.activated ? Theme.accent : Theme.textPrimary
                             elide: Text.ElideRight
                         }
 

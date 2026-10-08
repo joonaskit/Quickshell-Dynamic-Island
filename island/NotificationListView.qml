@@ -195,7 +195,7 @@ Item {
                             Layout.preferredHeight: Theme.px(16)
                             Layout.preferredWidth: groupAppText.implicitWidth + Theme.px(8)
                             radius: Theme.px(4)
-                            color: Qt.rgba(10/255, 132/255, 255/255, 0.15)
+                            color: Theme.accentTint(0.15)
 
                             Text {
                                 id: groupAppText
@@ -204,7 +204,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(9)
                                 font.weight: Font.DemiBold
-                                color: Theme.accentBlue
+                                color: Theme.accent
                             }
                         }
 

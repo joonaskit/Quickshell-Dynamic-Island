@@ -27,8 +27,10 @@ Item {
     // join, so its base corner is rounded.
     property real farFillet: fitsOnDock ? filletSize : 0
     property real farOverhang: 0
-    // Opacity of the body; it fades to the exact dock colour at the base
-    property real tintAlpha: Theme.dockTransparent ? 0.9 : 0.97
+    // Opacity of the body; it fades to the exact dock colour at the base. Kept
+    // well above a see-through dock so the content stays readable, and follows
+    // the dock when the dock is more opaque than that.
+    property real tintAlpha: Math.max(Theme.dockAlpha, Theme.dockTransparent ? 0.9 : 0.97)
     readonly property color tintColor: Qt.rgba(Theme.dockBackground.r, Theme.dockBackground.g, Theme.dockBackground.b, tintAlpha)
 
     anchors.centerIn: parent

@@ -201,7 +201,7 @@ Item {
                         anchors.centerIn: parent
                         name: root.isDesktop ? "desktop" : "window"
                         size: 14
-                        color: Theme.accentBlue
+                        color: Theme.accent
                         visible: !appIconImg.visible
                     }
                 }
@@ -419,7 +419,7 @@ Item {
                     MenuItem {
                         required property var modelData
                         iconName: "window"
-                        iconColor: (modelData.id === root.activeWindowId || modelData.active) ? Theme.accentBlue : Theme.textTertiary
+                        iconColor: (modelData.id === root.activeWindowId || modelData.active) ? Theme.accent : Theme.textTertiary
                         label: modelData.title && modelData.title.length > 0 ? modelData.title : (root.activeAppTitle + " Window")
                         badgeText: (modelData.id === root.activeWindowId || modelData.active) ? "Active" : ""
                         isActive: (modelData.id === root.activeWindowId || modelData.active)
@@ -627,7 +627,7 @@ Item {
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
                 font.weight: Font.DemiBold
-                color: Theme.accentBlue
+                color: Theme.accent
                 visible: itemRoot.badgeText !== ""
             }
         }

@@ -88,7 +88,7 @@ Item {
                     anchors.centerIn: parent
                     name: "bolt"
                     size: Theme.px(9)
-                    color: root.percentage > 0.55 ? Theme.onLight : Theme.accentGreen
+                    color: root.percentage > 0.55 ? Theme.lightForeground : Theme.accentGreen
                     visible: root.isCharging
                 }
             }

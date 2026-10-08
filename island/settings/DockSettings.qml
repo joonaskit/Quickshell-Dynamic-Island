@@ -166,5 +166,73 @@ SettingsCategory {
                 SettingsService.setSetting("dockTransparent", val);
             }
         }
+
+        SettingDivider {}
+
+        SettingSwatches {
+            title: "Dock & Launcher Tint"
+            description: "Hue of the dock, the launcher and the dock's menus"
+            iconName: "contrast"
+            iconColor: Theme.accentPurple
+            options: Theme.dockTintChoices
+            currentValue: SettingsService.dockTint
+            onSelected: function(val) {
+                SettingsService.setSetting("dockTint", val);
+            }
+        }
+
+        SettingDivider {}
+
+        // Only the hue options are mixed in; Cool and Neutral are fixed colors
+        SettingSlider {
+            title: "Tint Intensity"
+            description: Theme.dockTintHasHue ? "How strongly the chosen hue colors the dock and launcher" : "Pick a hue above to adjust its intensity"
+            iconName: "sliders"
+            iconColor: Theme.accentPurple
+            enabled: Theme.dockTintHasHue
+            opacity: enabled ? 1.0 : 0.4
+            value: SettingsService.dockTintStrength
+            minimumValue: 0.02
+            maximumValue: 0.20
+            stepSize: 0.01
+            presets: [
+                { label: "Subtle", value: 0.04 },
+                { label: "8% (Default)", value: 0.08 },
+                { label: "Strong", value: 0.14 },
+                { label: "Vivid", value: 0.20 }
+            ]
+            onValueModified: function(val) {
+                SettingsService.setSetting("dockTintStrength", val);
+            }
+        }
+
+        SettingDivider {}
+
+        // One slider, two remembered values: the solid dock and the glass dock
+        // each keep their own opacity
+        SettingSlider {
+            title: "Dock Opacity"
+            description: SettingsService.dockTransparent ? "Opacity of the transparent glass dock" : "Opacity of the dock (the launcher and menus stay readable)"
+            iconName: "contrast"
+            iconColor: Theme.accentIndigo
+            value: SettingsService.dockTransparent ? SettingsService.dockGlassOpacity : SettingsService.dockOpacity
+            minimumValue: 0.20
+            maximumValue: 1.00
+            stepSize: 0.05
+            presets: SettingsService.dockTransparent ? [
+                { label: "20%", value: 0.20 },
+                { label: "35% (Default)", value: 0.35 },
+                { label: "50%", value: 0.50 },
+                { label: "70%", value: 0.70 }
+            ] : [
+                { label: "60%", value: 0.60 },
+                { label: "85% (Default)", value: 0.85 },
+                { label: "95%", value: 0.95 },
+                { label: "Solid", value: 1.00 }
+            ]
+            onValueModified: function(val) {
+                SettingsService.setSetting(SettingsService.dockTransparent ? "dockGlassOpacity" : "dockOpacity", val);
+            }
+        }
     }
 }

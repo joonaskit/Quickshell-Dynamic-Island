@@ -55,7 +55,7 @@ Item {
                     radius: 19
                     color: {
                         if (DeviceService.hasMountedDevices) return Qt.rgba(48/255, 209/255, 88/255, 0.22);
-                        if (DeviceService.hasDevices) return Qt.rgba(10/255, 132/255, 255/255, 0.22);
+                        if (DeviceService.hasDevices) return Theme.accentTint(0.22);
                         return Theme.cardBackgroundHover;
                     }
 
@@ -67,7 +67,7 @@ Item {
                         size: 20
                         color: {
                             if (DeviceService.hasMountedDevices) return Theme.accentGreen;
-                            if (DeviceService.hasDevices) return Theme.accentBlue;
+                            if (DeviceService.hasDevices) return Theme.accent;
                             return Theme.textTertiary;
                         }
                         Behavior on color { ColorAnimation { duration: 180 } }
@@ -432,7 +432,7 @@ Item {
                                                 Layout.preferredHeight: 24
                                                 Layout.preferredWidth: browseRow.implicitWidth + 14
                                                 radius: 12
-                                                color: browseMouse.containsMouse ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : Qt.rgba(1, 1, 1, 0.08)
+                                                color: browseMouse.containsMouse ? Theme.accentTint(0.25) : Qt.rgba(1, 1, 1, 0.08)
 
                                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
@@ -444,7 +444,7 @@ Item {
                                                     SvgIcon {
                                                         name: "folder"
                                                         size: 11
-                                                        color: browseMouse.containsMouse ? Theme.accentBlue : Theme.textSecondary
+                                                        color: browseMouse.containsMouse ? Theme.accent : Theme.textSecondary
                                                     }
 
                                                     Text {
@@ -452,7 +452,7 @@ Item {
                                                         font.family: Theme.fontFamily
                                                         font.pixelSize: 10
                                                         font.weight: Font.Medium
-                                                        color: browseMouse.containsMouse ? Theme.accentBlue : Theme.textSecondary
+                                                        color: browseMouse.containsMouse ? Theme.accent : Theme.textSecondary
                                                     }
                                                 }
 
@@ -481,7 +481,7 @@ Item {
                                                     if (modelData.isMounted) {
                                                         return mountToggleMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : Qt.rgba(255/255, 69/255, 58/255, 0.12);
                                                     } else {
-                                                        return mountToggleMouse.containsMouse ? Qt.rgba(10/255, 132/255, 255/255, 0.35) : Qt.rgba(10/255, 132/255, 255/255, 0.2);
+                                                        return mountToggleMouse.containsMouse ? Theme.accentTint(0.35) : Theme.accentTint(0.2);
                                                     }
                                                 }
 
@@ -495,7 +495,7 @@ Item {
                                                     SvgIcon {
                                                         name: modelData.isMounted ? "eject" : "check"
                                                         size: 11
-                                                        color: modelData.isMounted ? Theme.accentRed : Theme.accentBlue
+                                                        color: modelData.isMounted ? Theme.accentRed : Theme.accent
                                                     }
 
                                                     Text {
@@ -508,7 +508,7 @@ Item {
                                                         font.family: Theme.fontFamily
                                                         font.pixelSize: 10
                                                         font.weight: Font.DemiBold
-                                                        color: modelData.isMounted ? Theme.accentRed : Theme.accentBlue
+                                                        color: modelData.isMounted ? Theme.accentRed : Theme.accent
                                                     }
                                                 }
 

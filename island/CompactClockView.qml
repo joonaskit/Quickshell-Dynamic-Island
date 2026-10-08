@@ -29,7 +29,7 @@ Item {
                 width: Theme.px(14)
                 height: Theme.px(14)
                 radius: Theme.px(7)
-                color: Theme.accentBlue
+                color: Theme.accent
                 opacity: root.isHovered ? 0.35 : 0.15
 
                 Behavior on opacity {
@@ -41,7 +41,7 @@ Item {
                 anchors.centerIn: parent
                 name: "clock"
                 size: Theme.px(14)
-                color: root.isHovered ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.75)
+                color: root.isHovered ? Theme.accent : Qt.rgba(1, 1, 1, 0.75)
 
                 Behavior on color {
                     ColorAnimation { duration: 180 }

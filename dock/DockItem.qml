@@ -172,7 +172,7 @@ Item {
                 font.family: Theme.fontDisplay
                 font.pixelSize: 18
                 font.weight: Font.Bold
-                color: Theme.onAccent
+                color: Theme.textPrimary
             }
         }
 
@@ -204,7 +204,7 @@ Item {
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
                 font.weight: Font.Bold
-                color: Theme.onAccent
+                color: Theme.dangerForeground
             }
         }
     }
@@ -217,7 +217,7 @@ Item {
         width: root.isVertical ? 8 : (root.isFocused ? 22 : 0)
         height: root.isVertical ? (root.isFocused ? 22 : 0) : 8
         radius: 4
-        color: Qt.rgba(10/255, 132/255, 255/255, 0.45)
+        color: Theme.accentTint(0.45)
         opacity: (root.isRunning && root.isFocused) ? 1.0 : 0.0
 
         x: root.isVertical ? (root.dockPosition === "left" ? Math.round(4 + (4 - width) / 2) : Math.round(parent.width - 4 - 4 + (4 - width) / 2)) : Math.round((parent.width - width) / 2)
@@ -236,7 +236,7 @@ Item {
         width: root.isVertical ? 4 : (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4))
         height: root.isVertical ? (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4)) : 4
         radius: 2
-        color: root.isFocused ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.75)
+        color: root.isFocused ? Theme.accent : Qt.rgba(1, 1, 1, 0.75)
         opacity: root.isRunning ? 1.0 : 0.0
 
         x: root.isVertical ? (root.dockPosition === "left" ? 4 : (parent.width - width - 4)) : Math.round((parent.width - width) / 2)

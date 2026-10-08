@@ -3,6 +3,24 @@ import QtQuick
 
 SettingsCategory {
 
+    // Colors
+    SettingsSection {
+        title: "COLORS"
+        titlePixelSize: Theme.fontPx(10)
+
+        SettingSwatches {
+            title: "Accent Color"
+            description: "Used for selection, focus and active states"
+            iconName: "sliders"
+            iconColor: Theme.accent
+            options: Theme.accentChoices
+            currentValue: SettingsService.accentColor
+            onSelected: function(val) {
+                SettingsService.setSetting("accentColor", val);
+            }
+        }
+    }
+
     // Display & Scaling (DPI)
     SettingsSection {
         title: "DISPLAY & SCALING (DPI)"

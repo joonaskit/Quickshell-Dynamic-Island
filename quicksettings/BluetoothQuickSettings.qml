@@ -53,7 +53,7 @@ Item {
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
                     radius: 19
-                    color: BluetoothService.isEnabled ? Theme.accentBlue : Theme.cardBackgroundHover
+                    color: BluetoothService.isEnabled ? Theme.accent : Theme.cardBackgroundHover
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -63,7 +63,7 @@ Item {
                         anchors.centerIn: parent
                         name: "bluetooth"
                         size: 19
-                        color: Theme.onAccent
+                        color: BluetoothService.isEnabled ? Theme.accentForeground : Theme.textPrimary
                     }
 
                     MouseArea {
@@ -99,7 +99,7 @@ Item {
                         }
                         font.family: Theme.fontFamily
                         font.pixelSize: 11
-                        color: (BluetoothService.isEnabled && BluetoothService.isConnected) ? Theme.accentBlue : Theme.textSecondary
+                        color: (BluetoothService.isEnabled && BluetoothService.isConnected) ? Theme.accent : Theme.textSecondary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -179,7 +179,7 @@ Item {
                             width: parent.width
                             height: 34
                             radius: 8
-                            color: deviceMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.isConnected ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
+                            color: deviceMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.isConnected ? Theme.accentTint(0.12) : "transparent")
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                             RowLayout {
@@ -198,7 +198,7 @@ Item {
                                         return "bluetooth";
                                     }
                                     size: 13
-                                    color: modelData.isConnected ? Theme.accentBlue : Theme.textSecondary
+                                    color: modelData.isConnected ? Theme.accent : Theme.textSecondary
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
 
@@ -208,7 +208,7 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 12
                                     font.weight: modelData.isConnected ? Font.Bold : Font.Normal
-                                    color: modelData.isConnected ? Theme.accentBlue : Theme.textPrimary
+                                    color: modelData.isConnected ? Theme.accent : Theme.textPrimary
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -222,14 +222,14 @@ Item {
                                     }
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 10
-                                    color: modelData.isConnected ? Theme.accentBlue : Theme.textTertiary
+                                    color: modelData.isConnected ? Theme.accent : Theme.textTertiary
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
 
                                 SvgIcon {
                                     name: "check"
                                     size: 12
-                                    color: Theme.accentBlue
+                                    color: Theme.accent
                                     opacity: modelData.isConnected ? 1.0 : 0.0
                                     scale: modelData.isConnected ? 1.0 : 0.5
                                     Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }

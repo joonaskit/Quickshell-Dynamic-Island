@@ -14,6 +14,8 @@ Singleton {
     // User settings properties (with default values matching Theme.qml)
     property real uiScale: 1.0
     property real fontScale: 1.0
+    // Name of an entry in Theme.accentChoices
+    property string accentColor: "blue"
     property bool use24Hour: true
     property bool showSeconds: false
     property bool showBattery: true
@@ -29,6 +31,12 @@ Singleton {
     property bool dockAutoHideAlways: false
     property bool dockShowBorder: false
     property bool dockTransparent: false
+    // Name of an entry in Theme.dockTintChoices
+    property string dockTint: "cool"
+    property real dockTintStrength: 0.08
+    // Dock opacity, kept separately for the solid look and the transparent glass look
+    property real dockOpacity: 0.85
+    property real dockGlassOpacity: 0.35
     property string dockPosition: "bottom"
     property int dockIconSize: 44
     property real dockScaleHover: 1.28
@@ -123,6 +131,8 @@ Singleton {
         if (data.uiScale !== undefined && !isNaN(data.uiScale)) root.uiScale = Math.max(0.80, Math.min(1.25, parseFloat(data.uiScale)));
         if (data.fontScale !== undefined && !isNaN(data.fontScale)) root.fontScale = Math.max(0.85, Math.min(1.25, parseFloat(data.fontScale)));
 
+        if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
+
         if (data.use24Hour !== undefined) root.use24Hour = !!data.use24Hour;
         if (data.showSeconds !== undefined) root.showSeconds = !!data.showSeconds;
         if (data.showBattery !== undefined) root.showBattery = !!data.showBattery;
@@ -135,6 +145,10 @@ Singleton {
         if (data.dockAutoHideAlways !== undefined) root.dockAutoHideAlways = !!data.dockAutoHideAlways;
         if (data.dockShowBorder !== undefined) root.dockShowBorder = !!data.dockShowBorder;
         if (data.dockTransparent !== undefined) root.dockTransparent = !!data.dockTransparent;
+        if (data.dockTint !== undefined && Theme.dockTintChoices.some(c => c.name === data.dockTint)) root.dockTint = data.dockTint;
+        if (data.dockTintStrength !== undefined && !isNaN(data.dockTintStrength)) root.dockTintStrength = Math.max(0.02, Math.min(0.20, parseFloat(data.dockTintStrength)));
+        if (data.dockOpacity !== undefined && !isNaN(data.dockOpacity)) root.dockOpacity = Math.max(0.20, Math.min(1.0, parseFloat(data.dockOpacity)));
+        if (data.dockGlassOpacity !== undefined && !isNaN(data.dockGlassOpacity)) root.dockGlassOpacity = Math.max(0.20, Math.min(1.0, parseFloat(data.dockGlassOpacity)));
         if (data.dockPosition !== undefined && (data.dockPosition === "bottom" || data.dockPosition === "left" || data.dockPosition === "right")) {
             root.dockPosition = data.dockPosition;
         }
@@ -199,6 +213,7 @@ Singleton {
     function syncToTheme() {
         Theme.uiScale = root.uiScale;
         Theme.fontScale = root.fontScale;
+        Theme.accentName = root.accentColor;
         Theme.use24Hour = root.use24Hour;
         Theme.showSeconds = root.showSeconds;
         Theme.showBattery = root.showBattery && root.showBatteryIcon;
@@ -211,6 +226,10 @@ Singleton {
         Theme.dockAutoHideAlways = root.dockAutoHideAlways;
         Theme.dockShowBorder = root.dockShowBorder;
         Theme.dockTransparent = root.dockTransparent;
+        Theme.dockTintName = root.dockTint;
+        Theme.dockTintStrength = root.dockTintStrength;
+        Theme.dockOpacity = root.dockOpacity;
+        Theme.dockGlassOpacity = root.dockGlassOpacity;
         Theme.dockPosition = root.dockPosition;
         Theme.baseDockIconSize = root.dockIconSize;
         Theme.dockScaleHover = root.dockScaleHover;
@@ -258,6 +277,7 @@ Singleton {
     function resetDefaults() {
         root.uiScale = 1.0;
         root.fontScale = 1.0;
+        root.accentColor = "blue";
         root.use24Hour = true;
         root.showSeconds = false;
         root.showBattery = true;
@@ -271,6 +291,10 @@ Singleton {
         root.dockAutoHideAlways = false;
         root.dockShowBorder = false;
         root.dockTransparent = false;
+        root.dockTint = "cool";
+        root.dockTintStrength = 0.08;
+        root.dockOpacity = 0.85;
+        root.dockGlassOpacity = 0.35;
         root.dockPosition = "bottom";
         root.dockIconSize = 44;
         root.dockScaleHover = 1.28;
@@ -335,6 +359,7 @@ Singleton {
         let data = {
             "uiScale": root.uiScale,
             "fontScale": root.fontScale,
+            "accentColor": root.accentColor,
             "use24Hour": root.use24Hour,
             "showSeconds": root.showSeconds,
             "showBattery": root.showBattery,
@@ -348,6 +373,10 @@ Singleton {
             "dockAutoHideAlways": root.dockAutoHideAlways,
             "dockShowBorder": root.dockShowBorder,
             "dockTransparent": root.dockTransparent,
+            "dockTint": root.dockTint,
+            "dockTintStrength": root.dockTintStrength,
+            "dockOpacity": root.dockOpacity,
+            "dockGlassOpacity": root.dockGlassOpacity,
             "dockPosition": root.dockPosition,
             "dockIconSize": root.dockIconSize,
             "dockScaleHover": root.dockScaleHover,

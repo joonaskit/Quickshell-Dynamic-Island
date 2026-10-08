@@ -22,9 +22,9 @@ Singleton {
     readonly property color textPrimary: "#ffffff"
     readonly property color textSecondary: "#98989d"
     readonly property color textTertiary: "#636366"
-    // Foreground on accent-colored fills (badges, selected pills) and on light fills
-    readonly property color onAccent: "#ffffff"
-    readonly property color onLight: "#000000"
+    // Foreground on light fills, and on red fills such as unread badges
+    readonly property color lightForeground: "#000000"
+    readonly property color dangerForeground: "#ffffff"
 
     // Accent colors
     readonly property color accentGreen: "#30d158"
@@ -35,6 +35,37 @@ Singleton {
     readonly property color accentPurple: "#bf5af2"
     readonly property color accentCyan: "#64d2ff"
     readonly property color accentIndigo: "#5e5ce6"
+
+    // The user's accent: selection, focus and active states. Chosen by name from
+    // accentChoices (SettingsService.accentColor). The accent* colors above keep
+    // their own meaning as category and status colors and do not follow it.
+    property string accentName: "blue"
+    readonly property var accentChoices: [
+        { "name": "blue", "label": "Blue", "color": accentBlue },
+        { "name": "indigo", "label": "Indigo", "color": accentIndigo },
+        { "name": "purple", "label": "Purple", "color": accentPurple },
+        { "name": "red", "label": "Red", "color": accentRed },
+        { "name": "orange", "label": "Orange", "color": accentOrange },
+        { "name": "yellow", "label": "Yellow", "color": accentYellow },
+        { "name": "green", "label": "Green", "color": accentGreen },
+        { "name": "cyan", "label": "Cyan", "color": accentCyan }
+    ]
+    readonly property color accent: {
+        for (let i = 0; i < accentChoices.length; i++) {
+            if (accentChoices[i].name === accentName) return accentChoices[i].color;
+        }
+        return accentBlue;
+    }
+    // Text and icons on top of an accent fill: black on the light accents
+    // (orange, yellow, green, cyan), white on the others.
+    // These roles are not named "onAccent" etc. on purpose: QML reads a binding
+    // to a name of the form on<Capital> as a signal handler and silently drops it.
+    readonly property color accentForeground: (0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b) > 0.6 ? "#000000" : "#ffffff"
+
+    // The accent at a given opacity, for selection fills and focus borders
+    function accentTint(alpha) {
+        return Qt.rgba(accent.r, accent.g, accent.b, alpha);
+    }
 
     // Slider styling
     readonly property color sliderTrack: "#3a3a3c"
@@ -131,7 +162,51 @@ Singleton {
     property bool dockAutoHideAlways: false
     property bool dockShowBorder: false
     property bool dockTransparent: false
+    // Hue of the dock, the launcher and the dock's popups, chosen by name from
+    // dockTintChoices (SettingsService.dockTint). "cool" is the original slightly
+    // blue tone, "neutral" a plain grey, "accent" follows the accent color, and
+    // the rest are fixed hues. `color` is only what the settings swatch shows.
+    property string dockTintName: "cool"
+    // How much of a chosen hue is mixed into the dark base (0.02 to 0.20). Does not
+    // apply to "cool" and "neutral", which have fixed colors.
+    property real dockTintStrength: 0.08
+    // Opacity of the dock, remembered separately for the solid and the glass look
+    property real dockOpacity: 0.85
+    property real dockGlassOpacity: 0.35
+    readonly property real dockAlpha: dockTransparent ? dockGlassOpacity : dockOpacity
+    readonly property bool dockTintHasHue: dockTintName !== "cool" && dockTintName !== "neutral"
+    readonly property var dockTintChoices: [
+        { "name": "cool", "label": "Cool (default)", "color": "#5b6078" },
+        { "name": "neutral", "label": "Neutral", "color": "#6e6e73" },
+        { "name": "accent", "label": "Match accent", "color": accent, "hollow": true },
+        { "name": "blue", "label": "Blue", "color": accentBlue },
+        { "name": "indigo", "label": "Indigo", "color": accentIndigo },
+        { "name": "purple", "label": "Purple", "color": accentPurple },
+        { "name": "red", "label": "Red", "color": accentRed },
+        { "name": "orange", "label": "Orange", "color": accentOrange },
+        { "name": "yellow", "label": "Yellow", "color": accentYellow },
+        { "name": "green", "label": "Green", "color": accentGreen },
+        { "name": "cyan", "label": "Cyan", "color": accentCyan }
+    ]
     // Frosted glass translucent tint when transparent mode is enabled, or deep OLED dark when solid
-    readonly property color dockBackground: dockTransparent ? Qt.rgba(0.12, 0.13, 0.16, 0.35) : Qt.rgba(0.08, 0.08, 0.10, 0.85)
+    readonly property color dockBackground: {
+        let alpha = dockAlpha;
+        if (dockTintName === "neutral") {
+            let grey = dockTransparent ? 0.135 : 0.085;
+            return Qt.rgba(grey, grey, grey, alpha);
+        }
+        let hue = null;
+        for (let i = 0; i < dockTintChoices.length; i++) {
+            if (dockTintChoices[i].name === dockTintName && dockTintHasHue) hue = dockTintChoices[i].color;
+        }
+        if (hue === null) {
+            return dockTransparent ? Qt.rgba(0.12, 0.13, 0.16, alpha) : Qt.rgba(0.08, 0.08, 0.10, alpha);
+        }
+        // A dark base with a little of the hue mixed in: clearly tinted, still dark
+        // enough for white text
+        let base = dockTransparent ? 0.10 : 0.05;
+        let mix = dockTintStrength;
+        return Qt.rgba(base + hue.r * mix, base + hue.g * mix, base + hue.b * mix, alpha);
+    }
     readonly property color dockBorder: Qt.rgba(1, 1, 1, 0.18)
 }

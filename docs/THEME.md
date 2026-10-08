@@ -68,8 +68,8 @@ The shell owns this file and overwrites it. It is not a place for user edits: ch
 | `colors.surface` | Cards and panels on top of the background |
 | `colors.surfaceRaised` | Hovered cards, and controls on top of a surface |
 | `colors.textPrimary`, `textSecondary`, `textTertiary` | Text, from most to least prominent |
-| `colors.onAccent` | Text and icons on top of `accent`, `success`, `warning` or `danger` fills |
-| `colors.accent` | Selection, focus and primary actions |
+| `colors.onAccent` | Text and icons on top of an `accent` fill. White or black, whichever reads better on the current accent, so do not assume white |
+| `colors.accent` | Selection, focus and primary actions. The user picks it in the shell's settings, so it can be any of the `palette` colors |
 | `colors.success`, `warning`, `danger` | Status colors. Use these rather than picking from `palette` |
 | `colors.palette` | The full set of accent colors, for categories and decoration |
 | `fonts.families` | Font families for text, in order of preference |
