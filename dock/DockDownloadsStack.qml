@@ -98,7 +98,7 @@ Item {
                     Layout.preferredWidth: 20
                     Layout.preferredHeight: 20
                     radius: 10
-                    color: refreshMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: refreshMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -122,7 +122,7 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Empty state
@@ -149,7 +149,7 @@ Item {
                     width: parent.width
                     height: 34
                     radius: 8
-                    color: fileMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: fileMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -164,7 +164,7 @@ Item {
                             Layout.preferredWidth: 22
                             Layout.preferredHeight: 22
                             radius: 5
-                            color: Qt.rgba(1, 1, 1, 0.06)
+                            color: Theme.overlay(0.06)
 
                             SvgIcon {
                                 anchors.centerIn: parent
@@ -218,7 +218,7 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Open in File Manager button
@@ -226,7 +226,7 @@ Item {
                 width: parent.width
                 height: 28
                 radius: 7
-                color: openFolderMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: openFolderMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
                     anchors.fill: parent

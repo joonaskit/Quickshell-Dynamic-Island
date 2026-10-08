@@ -150,7 +150,7 @@ Item {
                     width: Theme.px(30)
                     height: Theme.px(30)
                     radius: Theme.px(15)
-                    color: settingsMouse.pressed ? Qt.rgba(1, 1, 1, 0.16) : (settingsMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05))
+                    color: settingsMouse.pressed ? Theme.overlay(0.16) : (settingsMouse.containsMouse ? Theme.overlay(0.1) : Theme.overlay(0.05))
                     scale: settingsMouse.pressed ? 0.92 : (settingsMouse.containsMouse ? 1.05 : 1.0)
 
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -180,7 +180,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             Repeater {
@@ -195,7 +195,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Qt.rgba(1, 1, 1, 0.08)
+                        color: Theme.overlay(0.08)
                         visible: root.visibleSections.indexOf(modelData.id) > 0
                     }
 
@@ -211,7 +211,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
                 visible: root.visibleSections.indexOf("controls") > 0
             }
 
@@ -250,7 +250,7 @@ Item {
             width: Theme.px(38)
             height: Theme.px(4)
             radius: Theme.px(2)
-            color: grabberMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(1, 1, 1, 0.25)
+            color: grabberMouse.containsMouse ? Theme.overlay(0.45) : Theme.overlay(0.25)
 
             Behavior on color {
                 ColorAnimation { duration: 150 }

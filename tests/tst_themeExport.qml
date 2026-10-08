@@ -38,6 +38,13 @@ TestCase {
         compare(theme.scheme, "dark");
     }
 
+    function test_scheme() {
+        compare(ThemeExport.build(Object.assign({}, input, { "scheme": "light" })).scheme, "light");
+        compare(ThemeExport.build(Object.assign({}, input, { "scheme": "dark" })).scheme, "dark");
+        // Anything else, including a missing value, is exported as dark
+        compare(ThemeExport.build(Object.assign({}, input, { "scheme": "sepia" })).scheme, "dark");
+    }
+
     // The documented top-level layout; removing or renaming one of these
     // breaks readers and needs a version bump
     function test_topLevelKeys() {

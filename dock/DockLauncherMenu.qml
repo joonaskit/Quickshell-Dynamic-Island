@@ -84,7 +84,7 @@ Item {
             width: 176
             height: 24
             radius: 7
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
 
             Row {
                 anchors.fill: parent
@@ -102,7 +102,7 @@ Item {
                         width: parent.width / segRow.options.length
                         height: parent.height
                         radius: 5
-                        color: isSelected ? Theme.accent : (segMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+                        color: isSelected ? Theme.accent : (segMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
 
                         Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -138,7 +138,7 @@ Item {
 
         height: 30
         radius: 6
-        color: toggleMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+        color: toggleMouse.containsMouse ? Theme.overlay(0.08) : "transparent"
 
         Text {
             anchors.left: parent.left
@@ -289,14 +289,14 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             Rectangle {
                 width: parent.width
                 height: 30
                 radius: 6
-                color: settingsLinkMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: settingsLinkMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 SvgIcon {
                     id: settingsLinkIcon

@@ -89,7 +89,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
             radius: 8
-            color: Qt.rgba(1, 1, 1, 0.08)
+            color: Theme.overlay(0.08)
 
             RowLayout {
                 anchors.fill: parent
@@ -105,7 +105,7 @@ Rectangle {
                         Layout.fillHeight: true
                         radius: 6
                         readonly property bool isSelected: segRow.currentValue === modelData.value
-                        color: isSelected ? Qt.rgba(1, 1, 1, 0.22) : (segBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
+                        color: isSelected ? Theme.overlay(0.22) : (segBtnMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
 
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 

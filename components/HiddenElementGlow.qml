@@ -87,7 +87,7 @@ Item {
 
         glowRadius: Theme.px(16)
         spread: 0.15
-        color: Qt.rgba(1.0, 1.0, 1.0, 0.55)
+        color: Theme.overlay(0.55)
         cornerRadius: height / 2 + glowRadius
 
         opacity: 0.55 + 0.35 * root.pulseFactor

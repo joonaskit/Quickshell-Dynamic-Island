@@ -281,7 +281,7 @@ Item {
                             Layout.preferredHeight: 18
                             Layout.preferredWidth: appCountText.implicitWidth + 12
                             radius: 9
-                            color: Qt.rgba(1, 1, 1, 0.08)
+                            color: Theme.overlay(0.08)
 
                             Text {
                                 id: appCountText
@@ -303,8 +303,8 @@ Item {
                         Layout.preferredHeight: 26
                         Layout.preferredWidth: viewToggleRow.implicitWidth + 14
                         radius: 13
-                        color: viewToggleMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
-                        border.color: Qt.rgba(1, 1, 1, 0.1)
+                        color: viewToggleMouse.containsMouse ? Theme.overlay(0.16) : Theme.overlay(0.08)
+                        border.color: Theme.overlay(0.1)
                         border.width: 1
 
                         Row {
@@ -346,7 +346,7 @@ Item {
                         Layout.preferredHeight: 26
                         Layout.preferredWidth: editMenuRow.implicitWidth + 14
                         radius: 13
-                        color: editMenuMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+                        color: editMenuMouse.containsMouse ? Theme.overlay(0.16) : Theme.overlay(0.08)
 
                         Row {
                             id: editMenuRow
@@ -386,7 +386,7 @@ Item {
                         Layout.preferredHeight: 26
                         Layout.preferredWidth: krunnerRow.implicitWidth + 14
                         radius: 13
-                        color: krunnerMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+                        color: krunnerMouse.containsMouse ? Theme.overlay(0.16) : Theme.overlay(0.08)
 
                         Row {
                             id: krunnerRow
@@ -426,7 +426,7 @@ Item {
                         Layout.preferredWidth: 26
                         Layout.preferredHeight: 26
                         radius: 13
-                        color: closeHover.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.08)
+                        color: closeHover.containsMouse ? Theme.overlay(0.18) : Theme.overlay(0.08)
 
                         SvgIcon {
                             anchors.centerIn: parent
@@ -452,8 +452,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
                     radius: 9
-                    color: Qt.rgba(1, 1, 1, 0.08)
-                    border.color: searchInput.activeFocus ? Theme.accent : Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
+                    border.color: searchInput.activeFocus ? Theme.accent : Theme.overlay(0.08)
                     border.width: 1
 
                     RowLayout {
@@ -561,7 +561,7 @@ Item {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 9
-                                color: clearMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.12)
+                                color: clearMouse.containsMouse ? Theme.overlay(0.22) : Theme.overlay(0.12)
 
                                 SvgIcon {
                                     anchors.centerIn: parent
@@ -619,8 +619,8 @@ Item {
                                 height: 24
                                 width: catText.implicitWidth + 16
                                 radius: 12
-                                color: isSelected ? Theme.accent : (catMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06))
-                                border.color: isSelected ? Theme.accent : Qt.rgba(1, 1, 1, 0.08)
+                                color: isSelected ? Theme.accent : (catMouse.containsMouse ? Theme.overlay(0.12) : Theme.overlay(0.06))
+                                border.color: isSelected ? Theme.accent : Theme.overlay(0.08)
                                 border.width: 1
 
                                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -686,8 +686,8 @@ Item {
                                 height: parent.height - 6
                                 radius: 10
 
-                                color: gridCell.isSelected ? Theme.accentTint(0.24) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
-                                border.color: gridCell.isSelected ? Theme.accentTint(0.6) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                                color: gridCell.isSelected ? Theme.accentTint(0.24) : (gridHover.hovered ? Theme.overlay(0.10) : Theme.overlay(0.02))
+                                border.color: gridCell.isSelected ? Theme.accentTint(0.6) : (gridHover.hovered ? Theme.overlay(0.12) : "transparent")
                                 border.width: 1
 
                                 Behavior on color { ColorAnimation { duration: 100 } }
@@ -777,7 +777,7 @@ Item {
                                     width: 18
                                     height: 18
                                     radius: 9
-                                    color: gridPinMouse.containsMouse ? Theme.accentTint(0.4) : Qt.rgba(0, 0, 0, 0.6)
+                                    color: gridPinMouse.containsMouse ? Theme.accentTint(0.4) : (Theme.isLight ? Qt.rgba(1, 1, 1, 0.8) : Qt.rgba(0, 0, 0, 0.6))
                                     visible: gridHover.hovered && !root.isCompact && !modelData.isWindow
 
                                     SvgIcon {
@@ -826,7 +826,7 @@ Item {
                             readonly property bool isSelected: index === appListView.currentIndex
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
-                            color: isSelected ? Theme.accentTint(0.22) : (itemMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+                            color: isSelected ? Theme.accentTint(0.22) : (itemMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
                             border.color: isSelected ? Theme.accentTint(0.5) : "transparent"
                             border.width: isSelected ? 1 : 0
 
@@ -867,7 +867,7 @@ Item {
                                         text: modelData.genericName || modelData.comment || ""
                                         font.family: Theme.fontFamily
                                         font.pixelSize: 10
-                                        color: isSelected ? Qt.rgba(1, 1, 1, 0.8) : Theme.textSecondary
+                                        color: isSelected ? Theme.overlay(0.8) : Theme.textSecondary
                                         elide: Text.ElideRight
                                         width: parent.width
                                         visible: SettingsService.launcherShowGenericNames && !root.isCompact && text.length > 0
@@ -880,8 +880,8 @@ Item {
                                     Layout.preferredWidth: root.isCompact ? 22 : 24
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
                                     radius: 6
-                                    color: closeWinMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : Qt.rgba(1, 1, 1, 0.06)
-                                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                                    color: closeWinMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : Theme.overlay(0.06)
+                                    border.color: Theme.overlay(0.1)
                                     border.width: 1
 
                                     SvgIcon {
@@ -906,8 +906,8 @@ Item {
                                     Layout.preferredWidth: root.isCompact ? 22 : 24
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
                                     radius: 6
-                                    color: editBtnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.06)
-                                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                                    color: editBtnMouse.containsMouse ? Theme.overlay(0.18) : Theme.overlay(0.06)
+                                    border.color: Theme.overlay(0.1)
                                     border.width: 1
 
                                     SvgIcon {
@@ -935,8 +935,8 @@ Item {
                                     Layout.preferredWidth: root.isCompact ? 54 : 64
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
                                     radius: 6
-                                    color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Theme.accentTint(0.25)) : (pinned ? Qt.rgba(1, 1, 1, 0.08) : Theme.accentTint(0.15))
-                                    border.color: pinned ? Qt.rgba(1, 1, 1, 0.12) : Theme.accentTint(0.4)
+                                    color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Theme.accentTint(0.25)) : (pinned ? Theme.overlay(0.08) : Theme.accentTint(0.15))
+                                    border.color: pinned ? Theme.overlay(0.12) : Theme.accentTint(0.4)
                                     border.width: 1
 
                                     Text {
@@ -1002,7 +1002,7 @@ Item {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 name: "search"
                                 size: 32
-                                color: Qt.rgba(1, 1, 1, 0.2)
+                                color: Theme.overlay(0.2)
                             }
 
                             Text {

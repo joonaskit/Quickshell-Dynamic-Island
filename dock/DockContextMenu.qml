@@ -101,7 +101,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: 8
-                    color: Qt.rgba(1, 1, 1, 0.06)
+                    color: Theme.overlay(0.06)
 
                     RowLayout {
                         anchors.fill: parent
@@ -113,7 +113,7 @@ Item {
                             Layout.preferredWidth: 26
                             Layout.preferredHeight: 26
                             radius: 6
-                            color: Qt.rgba(1, 1, 1, 0.08)
+                            color: Theme.overlay(0.08)
 
                             SvgIcon {
                                 anchors.centerIn: parent
@@ -156,7 +156,7 @@ Item {
                                 Layout.preferredWidth: 22
                                 Layout.preferredHeight: 22
                                 radius: 11
-                                color: prevMprisMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
+                                color: prevMprisMouse.containsMouse ? Theme.overlay(0.15) : "transparent"
 
                                 SvgIcon {
                                     anchors.centerIn: parent
@@ -181,7 +181,7 @@ Item {
                                 Layout.preferredWidth: 24
                                 Layout.preferredHeight: 24
                                 radius: 12
-                                color: playMprisMouse.containsMouse ? Qt.rgba(1, 1, 1, 1.0) : Qt.rgba(1, 1, 1, 0.85)
+                                color: playMprisMouse.containsMouse ? Theme.overlay(1.0) : Theme.overlay(0.85)
 
                                 SvgIcon {
                                     anchors.centerIn: parent
@@ -206,7 +206,7 @@ Item {
                                 Layout.preferredWidth: 22
                                 Layout.preferredHeight: 22
                                 radius: 11
-                                color: nextMprisMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
+                                color: nextMprisMouse.containsMouse ? Theme.overlay(0.15) : "transparent"
 
                                 SvgIcon {
                                     anchors.centerIn: parent
@@ -236,7 +236,7 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Open Windows Section (if running and has open windows)
@@ -248,7 +248,7 @@ Item {
                     width: parent.width
                     height: 28
                     radius: 7
-                    color: winMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: winMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     RowLayout {
                         anchors.fill: parent
@@ -260,7 +260,7 @@ Item {
                             Layout.preferredWidth: 6
                             Layout.preferredHeight: 6
                             radius: 3
-                            color: modelData.activated ? Theme.accent : Qt.rgba(1, 1, 1, 0.45)
+                            color: modelData.activated ? Theme.accent : Theme.overlay(0.45)
                         }
 
                         Text {
@@ -331,7 +331,7 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Desktop Actions / Jumplists (e.g. New Private Window, New Tab, etc.)
@@ -343,7 +343,7 @@ Item {
                     width: parent.width
                     height: 28
                     radius: 7
-                    color: actionMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: actionMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     RowLayout {
                         anchors.fill: parent
@@ -393,7 +393,7 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // New Window button
@@ -406,7 +406,7 @@ Item {
                 width: parent.width
                 height: 28
                 radius: 7
-                color: newWinMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: newWinMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
                     anchors.fill: parent
@@ -447,7 +447,7 @@ Item {
                 width: parent.width
                 height: 28
                 radius: 7
-                color: pinMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: pinMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
                     anchors.fill: parent
@@ -495,7 +495,7 @@ Item {
                 width: parent.width
                 height: 28
                 radius: 7
-                color: editAppMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: editAppMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
                     anchors.fill: parent

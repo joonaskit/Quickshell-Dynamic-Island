@@ -25,7 +25,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(5)
             radius: height / 2
-            color: Qt.rgba(1, 1, 1, 0.14)
+            color: Theme.overlay(0.14)
 
             Rectangle {
                 width: parent.width * Math.max(0, Math.min(1, OsdService.value))

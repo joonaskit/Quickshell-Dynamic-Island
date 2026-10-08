@@ -21,9 +21,9 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(28)
             radius: Theme.px(8)
-            color: selectorMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04)
+            color: selectorMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.04)
             border.width: 1
-            border.color: root.expanded ? Theme.accentTint(0.35) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: root.expanded ? Theme.accentTint(0.35) : Theme.overlay(0.08)
 
             Behavior on color {
                 ColorAnimation { duration: 150 }
@@ -96,8 +96,8 @@ Item {
                     Layout.preferredHeight: Theme.px(30)
                     radius: Theme.px(7)
                     color: itemMouse.containsMouse
-                        ? Qt.rgba(1, 1, 1, 0.1)
-                        : (modelData.isDefault ? Theme.accentTint(0.16) : Qt.rgba(1, 1, 1, 0.03))
+                        ? Theme.overlay(0.1)
+                        : (modelData.isDefault ? Theme.accentTint(0.16) : Theme.overlay(0.03))
                     border.width: modelData.isDefault ? 1 : 0
                     border.color: modelData.isDefault ? Theme.accentTint(0.35) : "transparent"
 

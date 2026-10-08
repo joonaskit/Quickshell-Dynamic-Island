@@ -61,7 +61,7 @@ Item {
             Layout.preferredHeight: Theme.px(48)
             radius: Theme.px(10)
             color: Theme.cardBackground
-            border.color: Qt.rgba(1, 1, 1, 0.1)
+            border.color: Theme.overlay(0.1)
             border.width: 1
             clip: true
 
@@ -144,7 +144,7 @@ Item {
                 width: Theme.px(32)
                 height: Theme.px(32)
                 radius: Theme.px(16)
-                color: playArea.containsMouse ? Qt.rgba(1, 1, 1, 0.95) : Qt.rgba(1, 1, 1, 0.85)
+                color: playArea.containsMouse ? Theme.overlay(0.95) : Theme.overlay(0.85)
 
                 SvgIcon {
                     anchors.centerIn: parent

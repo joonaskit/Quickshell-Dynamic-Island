@@ -63,7 +63,7 @@ The shell owns this file and overwrites it. It is not a place for user edits: ch
 | Field | Meaning |
 | --- | --- |
 | `version` | Format version, an integer. See Versioning |
-| `scheme` | `"dark"` or `"light"`. Only `"dark"` is written today |
+| `scheme` | `"dark"` or `"light"`, following the shell's Appearance setting. The colors below change with it |
 | `colors.background` | Window background, the darkest layer |
 | `colors.surface` | Cards and panels on top of the background |
 | `colors.surfaceRaised` | Hovered cards, and controls on top of a surface |

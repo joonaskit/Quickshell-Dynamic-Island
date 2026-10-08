@@ -56,7 +56,7 @@ Item {
                 Layout.preferredWidth: 32
                 Layout.preferredHeight: 32
                 radius: 16
-                color: backMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.08)
+                color: backMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.08)
                 scale: backMouse.pressed ? 0.90 : (backMouse.containsMouse ? 1.05 : 1.0)
 
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -151,9 +151,9 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
             radius: 10
-            color: Qt.rgba(1, 1, 1, searchInput.activeFocus ? 0.10 : 0.06)
+            color: Theme.overlay(searchInput.activeFocus ? 0.10 : 0.06)
             border.width: 1
-            border.color: searchInput.activeFocus ? Theme.accentTint(0.5) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: searchInput.activeFocus ? Theme.accentTint(0.5) : Theme.overlay(0.08)
 
             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
             Behavior on border.color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -216,7 +216,7 @@ Item {
                     Layout.preferredHeight: 20
                     radius: 10
                     visible: searchInput.text !== ""
-                    color: clearMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
+                    color: clearMouse.containsMouse ? Theme.overlay(0.14) : "transparent"
 
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
@@ -246,7 +246,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
             radius: 8
-            color: Qt.rgba(1, 1, 1, 0.08)
+            color: Theme.overlay(0.08)
 
             RowLayout {
                 anchors.fill: parent
@@ -262,7 +262,7 @@ Item {
                         Layout.fillHeight: true
                         radius: 6
                         readonly property bool isSelected: !SettingsSearch.active && root.currentTab === index
-                        color: isSelected ? Qt.rgba(1, 1, 1, 0.22) : (tabMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
+                        color: isSelected ? Theme.overlay(0.22) : (tabMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
 
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
@@ -295,7 +295,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.08)
+            color: Theme.overlay(0.08)
         }
     }
 
@@ -393,7 +393,7 @@ Item {
             id: scrollThumb
             width: 3
             radius: 1.5
-            color: Qt.rgba(1, 1, 1, 0.35)
+            color: Theme.overlay(0.35)
             y: Math.max(0, Math.min(scrollTrack.height - height, scrollContainer.visibleArea.yPosition * scrollTrack.height))
             height: Math.max(28, scrollContainer.visibleArea.heightRatio * scrollTrack.height)
         }
@@ -418,7 +418,7 @@ Item {
             width: 38
             height: 4
             radius: 2
-            color: grabberMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(1, 1, 1, 0.25)
+            color: grabberMouse.containsMouse ? Theme.overlay(0.45) : Theme.overlay(0.25)
 
             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
         }

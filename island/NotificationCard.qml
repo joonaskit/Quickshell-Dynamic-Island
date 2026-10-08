@@ -22,9 +22,9 @@ Rectangle {
     Layout.fillWidth: true
     Layout.preferredHeight: cardLayout.implicitHeight + Theme.px(14)
     radius: Theme.px(10)
-    color: cardMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.04)
+    color: cardMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.04)
     border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.06)
+    border.color: Theme.overlay(0.06)
 
     // Spring-in on creation
     scale: 1.0
@@ -110,7 +110,7 @@ Rectangle {
                     anchors.centerIn: parent
                     name: "close"
                     size: Theme.px(9)
-                    color: dismissMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.25)
+                    color: dismissMouse.containsMouse ? Theme.accentRed : Theme.overlay(0.25)
                 }
 
                 MouseArea {
@@ -204,9 +204,9 @@ Rectangle {
             Layout.topMargin: Theme.px(4)
             Layout.preferredHeight: Theme.px(26)
             radius: Theme.px(8)
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
             border.width: 1
-            border.color: replyInput.activeFocus ? Theme.accentTint(0.5) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: replyInput.activeFocus ? Theme.accentTint(0.5) : Theme.overlay(0.08)
 
             TextInput {
                 id: replyInput

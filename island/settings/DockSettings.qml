@@ -28,7 +28,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         // 2. Dock Base Icon Size Slider
@@ -56,7 +56,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         // 3. Hover Magnification Scale Slider
@@ -85,7 +85,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         SettingToggle {
@@ -102,7 +102,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         SettingToggle {
@@ -119,7 +119,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         SettingToggle {
@@ -136,7 +136,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         SettingToggle {
@@ -153,7 +153,7 @@ SettingsCategory {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Theme.overlay(0.06)
         }
 
         SettingToggle {

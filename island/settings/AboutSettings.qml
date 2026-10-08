@@ -11,7 +11,7 @@ SettingsCategory {
         radius: 14
         color: Qt.rgba(0, 0, 0, 0.3)
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        border.color: Theme.overlay(0.06)
 
         ColumnLayout {
             id: persistCol
@@ -46,7 +46,7 @@ SettingsCategory {
                     Layout.preferredHeight: 24
                     Layout.preferredWidth: resetRow.implicitWidth + 14
                     radius: 12
-                    color: resetMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Qt.rgba(1, 1, 1, 0.08)
+                    color: resetMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.overlay(0.08)
 
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 

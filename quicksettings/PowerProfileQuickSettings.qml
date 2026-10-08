@@ -32,7 +32,7 @@ Item {
         radius: root.embedded ? 0 : 18
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -101,7 +101,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Profile Selection Options
@@ -116,7 +116,7 @@ Item {
                     radius: 10
                     color: PowerProfileService.activeProfile === "power-saver"
                         ? Qt.rgba(48/255, 209/255, 88/255, 0.16)
-                        : (saveMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
+                        : (saveMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
                     scale: saveMouse.pressed ? 0.96 : (saveMouse.containsMouse ? 1.02 : 1.0)
 
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -181,7 +181,7 @@ Item {
                     radius: 10
                     color: PowerProfileService.activeProfile === "balanced"
                         ? Qt.rgba(10/255, 132/255, 255/255, 0.16)
-                        : (balMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
+                        : (balMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
                     scale: balMouse.pressed ? 0.96 : (balMouse.containsMouse ? 1.02 : 1.0)
 
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -246,7 +246,7 @@ Item {
                     radius: 10
                     color: PowerProfileService.activeProfile === "performance"
                         ? Qt.rgba(255/255, 69/255, 58/255, 0.16)
-                        : (perfMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
+                        : (perfMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
                     scale: perfMouse.pressed ? 0.96 : (perfMouse.containsMouse ? 1.02 : 1.0)
 
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }

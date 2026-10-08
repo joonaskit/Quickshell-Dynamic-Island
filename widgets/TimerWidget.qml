@@ -26,7 +26,7 @@ Item {
         Layout.preferredWidth: btnRow.implicitWidth + Theme.px(22)
         radius: height / 2
         color: filled ? Qt.rgba(accent.r, accent.g, accent.b, btnMouse.containsMouse ? 0.34 : 0.24)
-                      : (btnMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06))
+                      : (btnMouse.containsMouse ? Theme.overlay(0.12) : Theme.overlay(0.06))
         scale: btnMouse.pressed ? 0.94 : 1.0
 
         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }

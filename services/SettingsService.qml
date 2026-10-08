@@ -14,6 +14,8 @@ Singleton {
     // User settings properties (with default values matching Theme.qml)
     property real uiScale: 1.0
     property real fontScale: 1.0
+    // "dark" or "light"
+    property string colorScheme: "dark"
     // Name of an entry in Theme.accentChoices
     property string accentColor: "blue"
     property bool use24Hour: true
@@ -131,6 +133,7 @@ Singleton {
         if (data.uiScale !== undefined && !isNaN(data.uiScale)) root.uiScale = Math.max(0.80, Math.min(1.25, parseFloat(data.uiScale)));
         if (data.fontScale !== undefined && !isNaN(data.fontScale)) root.fontScale = Math.max(0.85, Math.min(1.25, parseFloat(data.fontScale)));
 
+        if (data.colorScheme === "dark" || data.colorScheme === "light") root.colorScheme = data.colorScheme;
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
 
         if (data.use24Hour !== undefined) root.use24Hour = !!data.use24Hour;
@@ -213,6 +216,7 @@ Singleton {
     function syncToTheme() {
         Theme.uiScale = root.uiScale;
         Theme.fontScale = root.fontScale;
+        Theme.scheme = root.colorScheme;
         Theme.accentName = root.accentColor;
         Theme.use24Hour = root.use24Hour;
         Theme.showSeconds = root.showSeconds;
@@ -277,6 +281,7 @@ Singleton {
     function resetDefaults() {
         root.uiScale = 1.0;
         root.fontScale = 1.0;
+        root.colorScheme = "dark";
         root.accentColor = "blue";
         root.use24Hour = true;
         root.showSeconds = false;
@@ -359,6 +364,7 @@ Singleton {
         let data = {
             "uiScale": root.uiScale,
             "fontScale": root.fontScale,
+            "colorScheme": root.colorScheme,
             "accentColor": root.accentColor,
             "use24Hour": root.use24Hour,
             "showSeconds": root.showSeconds,

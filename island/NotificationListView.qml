@@ -75,7 +75,7 @@ Item {
                 Layout.preferredHeight: Theme.px(22)
                 Layout.preferredWidth: dndRow.implicitWidth + Theme.px(12)
                 radius: Theme.px(11)
-                color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : (dndMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(1, 1, 1, 0.05))
+                color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : (dndMouse.containsMouse ? Theme.overlay(0.1) : Theme.overlay(0.05))
                 scale: dndMouse.pressed ? 0.92 : 1.0
 
                 Behavior on color { ColorAnimation { duration: 150 } }
@@ -116,7 +116,7 @@ Item {
                 Layout.preferredWidth: clearRow.implicitWidth + Theme.px(12)
                 radius: Theme.px(11)
                 color: root.confirmingClear ? Qt.rgba(255/255, 69/255, 58/255, 0.32)
-                     : (clearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : Qt.rgba(1, 1, 1, 0.05))
+                     : (clearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.2) : Theme.overlay(0.05))
                 scale: clearMouse.pressed ? 0.92 : (clearMouse.containsMouse ? 1.08 : 1.0)
 
                 Behavior on color {
@@ -213,7 +213,7 @@ Item {
                             Layout.preferredHeight: Theme.px(16)
                             Layout.preferredWidth: chipRow.implicitWidth + Theme.px(10)
                             radius: Theme.px(8)
-                            color: chipMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06)
+                            color: chipMouse.containsMouse ? Theme.overlay(0.12) : Theme.overlay(0.06)
 
                             Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -261,7 +261,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "trash"
                                 size: Theme.px(10)
-                                color: groupClearMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.3)
+                                color: groupClearMouse.containsMouse ? Theme.accentRed : Theme.overlay(0.3)
                             }
 
                             MouseArea {
@@ -293,7 +293,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(58)
             radius: Theme.px(10)
-            color: Qt.rgba(1, 1, 1, 0.03)
+            color: Theme.overlay(0.03)
             opacity: NotificationService.notifications.length === 0 ? 1.0 : 0.0
             visible: opacity > 0.01
             Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
@@ -305,7 +305,7 @@ Item {
                 SvgIcon {
                     name: "bell"
                     size: Theme.px(14)
-                    color: Qt.rgba(1, 1, 1, 0.25)
+                    color: Theme.overlay(0.25)
                 }
 
                 Text {

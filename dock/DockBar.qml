@@ -343,7 +343,7 @@ Item {
                         GradientStop { position: 0.0; color: Theme.cardBackgroundHover }
                         GradientStop { position: 1.0; color: Theme.cardBackground }
                     }
-                    border.color: Qt.rgba(1, 1, 1, 0.16)
+                    border.color: Theme.overlay(0.16)
                     border.width: 1
 
                     // 9-dot Launchpad icon grid
@@ -384,7 +384,7 @@ Item {
                         height: 24
                         radius: 6
                         color: Theme.cardBackground
-                        border.color: Qt.rgba(1, 1, 1, 0.18)
+                        border.color: Theme.overlay(0.18)
                         border.width: 1
 
                         Text {
@@ -443,7 +443,7 @@ Item {
                     anchors.centerIn: parent
                     width: root.isVertical ? 28 : 1
                     height: root.isVertical ? 1 : 28
-                    color: Qt.rgba(1, 1, 1, 0.15)
+                    color: Theme.overlay(0.15)
                 }
             }
 
@@ -568,7 +568,7 @@ Item {
                     anchors.centerIn: parent
                     width: root.isVertical ? 28 : 1
                     height: root.isVertical ? 1 : 28
-                    color: Qt.rgba(1, 1, 1, 0.15)
+                    color: Theme.overlay(0.15)
                 }
             }
 
@@ -629,7 +629,7 @@ Item {
                     anchors.centerIn: parent
                     width: root.isVertical ? 28 : 1
                     height: root.isVertical ? 1 : 28
-                    color: Qt.rgba(1, 1, 1, 0.15)
+                    color: Theme.overlay(0.15)
                 }
             }
 
@@ -678,7 +678,7 @@ Item {
                         GradientStop { position: 0.0; color: Theme.cardBackgroundHover }
                         GradientStop { position: 1.0; color: Theme.cardBackground }
                     }
-                    border.color: Qt.rgba(1, 1, 1, 0.16)
+                    border.color: Theme.overlay(0.16)
                     border.width: 1
 
                     // Downloads Folder Stack Icon
@@ -709,7 +709,7 @@ Item {
                         height: 24
                         radius: 6
                         color: Theme.cardBackground
-                        border.color: Qt.rgba(1, 1, 1, 0.18)
+                        border.color: Theme.overlay(0.18)
                         border.width: 1
 
                         Text {
@@ -813,7 +813,7 @@ Item {
                             anchors.fill: parent
                             radius: 11
                             color: Theme.cardBackgroundHover
-                            border.color: Qt.rgba(1, 1, 1, 0.15)
+                            border.color: Theme.overlay(0.15)
                             border.width: 1
                             visible: parent.status !== Image.Ready
 
@@ -846,7 +846,7 @@ Item {
                         height: 24
                         radius: 6
                         color: Theme.cardBackground
-                        border.color: Qt.rgba(1, 1, 1, 0.18)
+                        border.color: Theme.overlay(0.18)
                         border.width: 1
 
                         Text {
@@ -1031,7 +1031,7 @@ Item {
                     width: parent.width
                     height: 28
                     radius: 6
-                    color: openTrashMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: openTrashMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     Text {
                         anchors.left: parent.left

@@ -96,9 +96,9 @@ Item {
         }
 
         // Frosted glass appearance
-        color: root.isTopBarMode ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0.12, 0.12, 0.14, 0.65)
+        color: root.isTopBarMode ? Theme.overlay(0.08) : (Theme.isLight ? Qt.rgba(0.97, 0.95, 0.92, 0.8) : Qt.rgba(0.12, 0.12, 0.14, 0.65))
         border.width: 1
-        border.color: root.isTopBarMode ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.09)
+        border.color: root.isTopBarMode ? Theme.overlay(0.06) : Theme.overlay(0.09)
 
         Behavior on width {
             NumberAnimation {
@@ -168,13 +168,13 @@ Item {
 
                         color: {
                             if (desktopItem.isCurrent) {
-                                return root.isTopBarMode ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.24);
+                                return root.isTopBarMode ? Theme.overlay(0.22) : Theme.overlay(0.24);
                             }
                             return "transparent";
                         }
 
                         border.width: desktopItem.isCurrent ? 1 : 0
-                        border.color: desktopItem.isCurrent ? Qt.rgba(1, 1, 1, 0.20) : "transparent"
+                        border.color: desktopItem.isCurrent ? Theme.overlay(0.20) : "transparent"
 
                         scale: itemMouse.pressed ? 0.90 : 1.0
 
@@ -208,7 +208,7 @@ Item {
                                 width: 3
                                 height: 3
                                 radius: 1.5
-                                color: desktopItem.isCurrent ? Qt.rgba(1, 1, 1, 0.85) : Qt.rgba(1, 1, 1, 0.45)
+                                color: desktopItem.isCurrent ? Theme.overlay(0.85) : Theme.overlay(0.45)
                                 visible: desktopItem.winCount > 0
                             }
                         }
@@ -339,7 +339,7 @@ Item {
             radius: 7
             color: Theme.cardBackground
             border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.14)
+            border.color: Theme.overlay(0.14)
 
             Rectangle {
                 anchors.centerIn: parent
@@ -444,7 +444,7 @@ Item {
                             easing.overshoot: Theme.animOvershoot
                         }
                     }
-                    color: switchMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: switchMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                     Behavior on color {
                         ColorAnimation { duration: 100 }
                     }
@@ -498,7 +498,7 @@ Item {
                             easing.overshoot: Theme.animOvershoot
                         }
                     }
-                    color: addMenuMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                    color: addMenuMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                     Behavior on color {
                         ColorAnimation { duration: 100 }
                     }

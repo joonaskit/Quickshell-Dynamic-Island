@@ -463,7 +463,7 @@ Item {
                             enabled: !root.isTopBarMode && !root.hasFullscreenApp
                         }
 
-                        color: isSelectedForMenu ? Qt.rgba(1, 1, 1, 0.22) : (mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.20) : (itemHoverHandler.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent"))
+                        color: isSelectedForMenu ? Theme.overlay(0.22) : (mouseArea.pressed ? Theme.overlay(0.20) : (itemHoverHandler.hovered ? Theme.overlay(0.12) : "transparent"))
 
                         scale: mouseArea.pressed ? 0.90 : 1.0
 
@@ -623,7 +623,7 @@ Item {
                         Layout.preferredWidth: 20
                         Layout.preferredHeight: 20
                         radius: 10
-                        color: closeHover.containsMouse ? Qt.rgba(1, 1, 1, 0.18) : Qt.rgba(1, 1, 1, 0.08)
+                        color: closeHover.containsMouse ? Theme.overlay(0.18) : Theme.overlay(0.08)
 
                         Text {
                             anchors.centerIn: parent
@@ -654,7 +654,7 @@ Item {
                 anchors.leftMargin: 8
                 anchors.rightMargin: 8
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.12)
+                color: Theme.overlay(0.12)
             }
 
             // Options List Column
@@ -682,7 +682,7 @@ Item {
                             anchors.centerIn: parent
                             width: parent.width - 8
                             height: 1
-                            color: Qt.rgba(1, 1, 1, 0.10)
+                            color: Theme.overlay(0.10)
                             visible: modelData.isSeparator
                         }
 
@@ -700,9 +700,9 @@ Item {
 
                             color: {
                                 if (!modelData.enabled) return "transparent";
-                                if (itemMouse.pressed) return Qt.rgba(1, 1, 1, 0.22);
+                                if (itemMouse.pressed) return Theme.overlay(0.22);
                                 if (itemMouse.containsMouse) {
-                                    return isExitItem ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Qt.rgba(1, 1, 1, 0.12);
+                                    return isExitItem ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.overlay(0.12);
                                 }
                                 return "transparent";
                             }
@@ -734,7 +734,7 @@ Item {
                                     font.pixelSize: 12
                                     font.weight: itemMouse.containsMouse ? Font.Medium : Font.Normal
                                     color: {
-                                        if (!modelData.enabled) return Qt.rgba(1, 1, 1, 0.35);
+                                        if (!modelData.enabled) return Theme.overlay(0.35);
                                         if (itemMouse.containsMouse && actionButton.isExitItem) return Theme.accentRed;
                                         return Theme.textPrimary;
                                     }
@@ -745,7 +745,7 @@ Item {
                                 SvgIcon {
                                     name: "power"
                                     size: 11
-                                    color: itemMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.40)
+                                    color: itemMouse.containsMouse ? Theme.accentRed : Theme.overlay(0.40)
                                     visible: actionButton.isExitItem
                                 }
                             }
@@ -777,7 +777,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: 6
-                        color: fallbackFocusMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                        color: fallbackFocusMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                         RowLayout {
                             anchors.fill: parent
@@ -834,7 +834,7 @@ Item {
                             SvgIcon {
                                 name: "power"
                                 size: 12
-                                color: fallbackQuitMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.40)
+                                color: fallbackQuitMouse.containsMouse ? Theme.accentRed : Theme.overlay(0.40)
                             }
 
                             Text {

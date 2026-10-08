@@ -1,6 +1,7 @@
 {
   "uiScale": 1.0,
   "fontScale": 1.0,
+  "colorScheme": "dark",
   "accentColor": "blue",
   "use24Hour": true,
   "showSeconds": false,

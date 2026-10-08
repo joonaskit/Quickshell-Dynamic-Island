@@ -249,7 +249,7 @@ Item {
             anchors.leftMargin: 10
             anchors.rightMargin: 10
             height: 1
-            color: Qt.rgba(1, 1, 1, 0.08)
+            color: Theme.overlay(0.08)
             opacity: root.menuOpen ? 1.0 : 0.0
             visible: opacity > 0.01
 
@@ -393,7 +393,7 @@ Item {
                     width: parent.width - 12
                     anchors.horizontalCenter: parent.horizontalCenter
                     height: 1
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
                 }
 
                 Item {
@@ -436,7 +436,7 @@ Item {
                     width: parent.width - 12
                     anchors.horizontalCenter: parent.horizontalCenter
                     height: 1
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
                 }
 
                 Item {
@@ -552,7 +552,7 @@ Item {
             width: 36
             height: 4
             radius: 2
-            color: Qt.rgba(1, 1, 1, 0.2)
+            color: Theme.overlay(0.2)
             opacity: root.menuOpen ? 1.0 : 0.0
             visible: opacity > 0.01
 
@@ -588,8 +588,8 @@ Item {
             }
         }
         color: mouse.containsMouse
-            ? (isDestructive ? Qt.rgba(1, 0.27, 0.23, 0.20) : Qt.rgba(1, 1, 1, 0.12))
-            : (isActive ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
+            ? (isDestructive ? Qt.rgba(1, 0.27, 0.23, 0.20) : Theme.overlay(0.12))
+            : (isActive ? Theme.overlay(0.08) : "transparent")
 
         Behavior on color {
             ColorAnimation { duration: 100 }

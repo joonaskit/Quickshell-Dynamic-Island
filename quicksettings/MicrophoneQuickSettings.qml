@@ -32,7 +32,7 @@ Item {
         radius: root.embedded ? 0 : 18
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -107,7 +107,7 @@ Item {
                     Layout.preferredWidth: 64
                     Layout.preferredHeight: 28
                     radius: 14
-                    color: MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : Qt.rgba(1, 1, 1, 0.1)
+                    color: MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : Theme.overlay(0.1)
                     scale: toggleMouse.pressed ? 0.92 : (toggleMouse.containsMouse ? 1.05 : 1.0)
 
                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -138,7 +138,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Input Volume Slider
@@ -174,7 +174,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 28
                     radius: 14
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
 
                     // Fill bar
                     Rectangle {
@@ -183,7 +183,7 @@ Item {
                         anchors.bottom: parent.bottom
                         width: Math.max(sliderTrack.height, sliderTrack.width * MicrophoneService.volume)
                         radius: 14
-                        color: MicrophoneService.isMuted ? Qt.rgba(1, 1, 1, 0.2) : Theme.accentRed
+                        color: MicrophoneService.isMuted ? Theme.overlay(0.2) : Theme.accentRed
 
                         Behavior on color { ColorAnimation { duration: 150 } }
                     }
@@ -242,7 +242,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 28
                         radius: 8
-                        color: modelData.isDefault ? Qt.rgba(255/255, 69/255, 58/255, 0.18) : (sourceMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : "transparent")
+                        color: modelData.isDefault ? Qt.rgba(255/255, 69/255, 58/255, 0.18) : (sourceMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                         RowLayout {

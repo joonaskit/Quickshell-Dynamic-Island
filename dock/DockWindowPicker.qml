@@ -116,7 +116,7 @@ Item {
                 width: parent.width - 12
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // List of Windows
@@ -128,7 +128,7 @@ Item {
                     width: parent.width
                     height: 32
                     radius: 8
-                    color: rowHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Theme.accentTint(0.12) : "transparent")
+                    color: rowHover.hovered ? Theme.overlay(0.12) : (modelData.activated ? Theme.accentTint(0.12) : "transparent")
 
                     Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -205,7 +205,7 @@ Item {
                             Layout.preferredHeight: 16
                             Layout.preferredWidth: stateText.implicitWidth + 10
                             radius: 8
-                            color: Qt.rgba(1, 1, 1, 0.08)
+                            color: Theme.overlay(0.08)
 
                             Text {
                                 id: stateText

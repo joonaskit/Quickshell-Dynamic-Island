@@ -41,7 +41,7 @@ ColumnLayout {
             text: "• " + section.subtitle
             font.family: Theme.fontFamily
             font.pixelSize: section.titlePixelSize
-            color: Qt.rgba(1, 1, 1, 0.25)
+            color: Theme.overlay(0.25)
         }
     }
 
@@ -49,9 +49,9 @@ ColumnLayout {
         Layout.fillWidth: true
         implicitHeight: rowsCol.implicitHeight
         radius: 14
-        color: Qt.rgba(1, 1, 1, 0.04)
+        color: Theme.overlay(0.04)
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        border.color: Theme.overlay(0.08)
 
         ColumnLayout {
             id: rowsCol

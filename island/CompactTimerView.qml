@@ -37,7 +37,7 @@ Item {
                     let r = c - 2;
                     ctx.lineWidth = 2.5;
                     ctx.lineCap = "round";
-                    ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.16);
+                    ctx.strokeStyle = Theme.overlay(0.16);
                     ctx.beginPath();
                     ctx.arc(c, c, r, 0, Math.PI * 2);
                     ctx.stroke();

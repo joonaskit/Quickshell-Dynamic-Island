@@ -160,10 +160,10 @@ Item {
             radius: 11
             visible: appIcon.status !== Image.Ready
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#3a3a3c" }
-                GradientStop { position: 1.0; color: "#242426" }
+                GradientStop { position: 0.0; color: Theme.tileGradientTop }
+                GradientStop { position: 1.0; color: Theme.tileGradientBottom }
             }
-            border.color: Qt.rgba(1, 1, 1, 0.15)
+            border.color: Theme.overlay(0.15)
             border.width: 1
 
             Text {
@@ -236,7 +236,7 @@ Item {
         width: root.isVertical ? 4 : (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4))
         height: root.isVertical ? (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4)) : 4
         radius: 2
-        color: root.isFocused ? Theme.accent : Qt.rgba(1, 1, 1, 0.75)
+        color: root.isFocused ? Theme.accent : Theme.overlay(0.75)
         opacity: root.isRunning ? 1.0 : 0.0
 
         x: root.isVertical ? (root.dockPosition === "left" ? 4 : (parent.width - width - 4)) : Math.round((parent.width - width) / 2)
@@ -279,7 +279,7 @@ Item {
             height: 24
             radius: 6
             color: Theme.cardBackground
-            border.color: Qt.rgba(1, 1, 1, 0.18)
+            border.color: Theme.overlay(0.18)
             border.width: 1
 
             Text {

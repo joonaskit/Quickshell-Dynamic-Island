@@ -11,6 +11,7 @@ Singleton {
     id: root
 
     readonly property string themeJson: JSON.stringify(ThemeExport.build({
+        "scheme": Theme.scheme,
         "background": String(Theme.islandBackground),
         "surface": String(Theme.cardBackground),
         "surfaceRaised": String(Theme.cardBackgroundHover),
