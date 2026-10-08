@@ -150,7 +150,7 @@ Item {
                     anchors.centerIn: parent
                     name: root.isPlaying ? "pause" : "play"
                     size: Theme.px(14)
-                    color: Theme.onLight
+                    color: Theme.lightForeground
                 }
 
                 MouseArea {

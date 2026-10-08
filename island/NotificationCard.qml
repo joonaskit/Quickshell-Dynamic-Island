@@ -68,7 +68,7 @@ Rectangle {
                 Layout.preferredHeight: Theme.px(16)
                 Layout.preferredWidth: appText.implicitWidth + Theme.px(8)
                 radius: Theme.px(4)
-                color: Qt.rgba(10/255, 132/255, 255/255, 0.15)
+                color: Theme.accentTint(0.15)
 
                 Text {
                     id: appText
@@ -77,7 +77,7 @@ Rectangle {
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontPx(9)
                     font.weight: Font.DemiBold
-                    color: Theme.accentBlue
+                    color: Theme.accent
                 }
             }
 
@@ -166,7 +166,7 @@ Rectangle {
                     width: actionLabel.implicitWidth + Theme.px(18)
                     height: Theme.px(22)
                     radius: height / 2
-                    color: actionMouse.containsMouse ? Qt.rgba(10/255, 132/255, 255/255, 0.32) : Qt.rgba(10/255, 132/255, 255/255, 0.18)
+                    color: actionMouse.containsMouse ? Theme.accentTint(0.32) : Theme.accentTint(0.18)
                     scale: actionMouse.pressed ? 0.94 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 120 } }
@@ -179,7 +179,7 @@ Rectangle {
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontPx(10)
                         font.weight: Font.DemiBold
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
 
                     MouseArea {
@@ -206,7 +206,7 @@ Rectangle {
             radius: Theme.px(8)
             color: Qt.rgba(1, 1, 1, 0.06)
             border.width: 1
-            border.color: replyInput.activeFocus ? Qt.rgba(10/255, 132/255, 255/255, 0.5) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: replyInput.activeFocus ? Theme.accentTint(0.5) : Qt.rgba(1, 1, 1, 0.08)
 
             TextInput {
                 id: replyInput
@@ -218,7 +218,7 @@ Rectangle {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontPx(11)
                 color: Theme.textPrimary
-                selectionColor: Theme.accentBlue
+                selectionColor: Theme.accent
 
                 onAccepted: notifCard.sendReply()
 
@@ -241,13 +241,13 @@ Rectangle {
                 width: Theme.px(22)
                 height: Theme.px(20)
                 radius: Theme.px(7)
-                color: replyInput.text.length > 0 ? Qt.rgba(10/255, 132/255, 255/255, sendMouse.containsMouse ? 0.4 : 0.28) : "transparent"
+                color: replyInput.text.length > 0 ? Theme.accentTint(sendMouse.containsMouse ? 0.4 : 0.28) : "transparent"
 
                 SvgIcon {
                     anchors.centerIn: parent
                     name: "chevron-right"
                     size: Theme.px(12)
-                    color: replyInput.text.length > 0 ? Theme.accentBlue : Theme.textTertiary
+                    color: replyInput.text.length > 0 ? Theme.accent : Theme.textTertiary
                 }
 
                 MouseArea {

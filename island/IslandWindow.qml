@@ -319,7 +319,7 @@ PanelWindow {
         targetX: appCluster.x
         targetWidth: appCluster.width
         active: window.appClusterShouldHide && SettingsService.showWindowControls && !window.hasFullscreenApp && edgeHoverHandler.hovered
-        accentColor: Theme.accentBlue
+        accentColor: Theme.accent
     }
 
     HiddenElementGlow {
@@ -337,7 +337,7 @@ PanelWindow {
         targetX: appIndicatorPill.x
         targetWidth: appIndicatorPill.width
         active: window.appIndicatorShouldHide && SettingsService.showAppTrayPill && (appIndicatorPill.appCount > 0) && !window.hasFullscreenApp && appIndicatorEdgeHoverHandler.hovered
-        accentColor: Theme.accentBlue
+        accentColor: Theme.accent
     }
 
 

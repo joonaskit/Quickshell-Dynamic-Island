@@ -403,7 +403,7 @@ Item {
                     Layout.preferredWidth: visible ? root.buttonSize : 0
                     Layout.preferredHeight: root.buttonSize
                     radius: root.buttonSize / 2
-                    color: root.wifiMenuOpen ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : "transparent"
+                    color: root.wifiMenuOpen ? Theme.accentTint(0.25) : "transparent"
                     scale: wifiMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
@@ -414,7 +414,7 @@ Item {
                         name: (NetworkService.isConnected && NetworkService.isWifi) ? "wifi" : "wifi-off"
                         size: root.iconSize
                         color: {
-                            if (root.wifiMenuOpen) return Theme.accentBlue;
+                            if (root.wifiMenuOpen) return Theme.accent;
                             if (NetworkService.isConnected && NetworkService.isWifi) return Theme.textPrimary;
                             return wifiMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
@@ -437,7 +437,7 @@ Item {
                     Layout.preferredWidth: visible ? root.buttonSize : 0
                     Layout.preferredHeight: root.buttonSize
                     radius: root.buttonSize / 2
-                    color: root.bluetoothMenuOpen ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : "transparent"
+                    color: root.bluetoothMenuOpen ? Theme.accentTint(0.25) : "transparent"
                     scale: btMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
@@ -448,8 +448,8 @@ Item {
                         name: "bluetooth"
                         size: root.iconSize
                         color: {
-                            if (root.bluetoothMenuOpen) return Theme.accentBlue;
-                            if (BluetoothService.isConnected) return Theme.accentBlue;
+                            if (root.bluetoothMenuOpen) return Theme.accent;
+                            if (BluetoothService.isConnected) return Theme.accent;
                             if (BluetoothService.isEnabled) return Theme.textPrimary;
                             return btMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
@@ -516,7 +516,7 @@ Item {
                     Layout.preferredWidth: visible ? root.buttonSize : 0
                     Layout.preferredHeight: root.buttonSize
                     radius: root.buttonSize / 2
-                    color: root.clipboardMenuOpen ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : "transparent"
+                    color: root.clipboardMenuOpen ? Theme.accentTint(0.25) : "transparent"
                     scale: clipboardMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
@@ -527,7 +527,7 @@ Item {
                         name: "clipboard"
                         size: root.iconSize
                         color: {
-                            if (root.clipboardMenuOpen) return Theme.accentBlue;
+                            if (root.clipboardMenuOpen) return Theme.accent;
                             if (ClipboardService.currentText !== "") return Theme.textPrimary;
                             return clipboardMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
                         }
@@ -589,7 +589,7 @@ Item {
                     Layout.preferredWidth: visible ? root.buttonSize : 0
                     Layout.preferredHeight: root.buttonSize
                     radius: root.buttonSize / 2
-                    color: root.hardwareMenuOpen ? Qt.rgba(10/255, 132/255, 255/255, 0.25) : "transparent"
+                    color: root.hardwareMenuOpen ? Theme.accentTint(0.25) : "transparent"
                     scale: hardwareMouse.pressed ? 0.90 : 1.0
 
                     Behavior on color { ColorAnimation { duration: 180 } }
@@ -600,7 +600,7 @@ Item {
                         name: "cpu"
                         size: root.iconSize
                         color: {
-                            if (root.hardwareMenuOpen) return Theme.accentBlue;
+                            if (root.hardwareMenuOpen) return Theme.accent;
                             if (HardwareStatsService.cpuPercent > 50) return Theme.accentOrange;
                             return hardwareMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.45);
                         }
@@ -624,9 +624,9 @@ Item {
                     Layout.preferredHeight: root.buttonSize
                     radius: root.buttonSize / 2
                     color: {
-                        if (root.devicesMenuOpen) return Qt.rgba(10/255, 132/255, 255/255, 0.25);
+                        if (root.devicesMenuOpen) return Theme.accentTint(0.25);
                         if (DeviceService.hasMountedDevices) return Qt.rgba(48/255, 209/255, 88/255, 0.2);
-                        if (DeviceService.hasDevices) return Qt.rgba(10/255, 132/255, 255/255, 0.15);
+                        if (DeviceService.hasDevices) return Theme.accentTint(0.15);
                         return "transparent";
                     }
                     scale: devicesMouse.pressed ? 0.90 : 1.0
@@ -639,9 +639,9 @@ Item {
                         name: "usb"
                         size: root.iconSize
                         color: {
-                            if (root.devicesMenuOpen) return Theme.accentBlue;
+                            if (root.devicesMenuOpen) return Theme.accent;
                             if (DeviceService.hasMountedDevices) return Theme.accentGreen;
-                            if (DeviceService.hasDevices) return Theme.accentBlue;
+                            if (DeviceService.hasDevices) return Theme.accent;
                             return devicesMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -656,7 +656,7 @@ Item {
                         width: Theme.px(6)
                         height: Theme.px(6)
                         radius: Theme.px(3)
-                        color: DeviceService.hasMountedDevices ? Theme.accentGreen : Theme.accentBlue
+                        color: DeviceService.hasMountedDevices ? Theme.accentGreen : Theme.accent
                         visible: DeviceService.hasDevices
                     }
 

@@ -187,7 +187,7 @@ Item {
                                     anchors.centerIn: parent
                                     name: (root.mprisPlayer && root.mprisPlayer.isPlaying) ? "pause" : "play"
                                     size: 11
-                                    color: Theme.onLight
+                                    color: Theme.lightForeground
                                 }
 
                                 MouseArea {
@@ -260,7 +260,7 @@ Item {
                             Layout.preferredWidth: 6
                             Layout.preferredHeight: 6
                             radius: 3
-                            color: modelData.activated ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.45)
+                            color: modelData.activated ? Theme.accent : Qt.rgba(1, 1, 1, 0.45)
                         }
 
                         Text {
@@ -269,7 +269,7 @@ Item {
                             font.family: Theme.fontFamily
                             font.pixelSize: 12
                             font.weight: modelData.activated ? Font.DemiBold : Font.Normal
-                            color: modelData.activated ? Theme.accentBlue : Theme.textPrimary
+                            color: modelData.activated ? Theme.accent : Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
@@ -458,7 +458,7 @@ Item {
                     SvgIcon {
                         name: "check"
                         size: 14
-                        color: root.isPinned ? Theme.accentBlue : Theme.textSecondary
+                        color: root.isPinned ? Theme.accent : Theme.textSecondary
                     }
 
                     Text {

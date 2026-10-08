@@ -1,6 +1,7 @@
 {
   "uiScale": 1.0,
   "fontScale": 1.0,
+  "accentColor": "blue",
   "use24Hour": true,
   "showSeconds": false,
   "showBattery": true,
@@ -14,6 +15,10 @@
   "dockAutoHideAlways": false,
   "dockShowBorder": false,
   "dockTransparent": false,
+  "dockTint": "cool",
+  "dockTintStrength": 0.08,
+  "dockOpacity": 0.85,
+  "dockGlassOpacity": 0.35,
   "dockPosition": "bottom",
   "dockIconSize": 44,
   "dockScaleHover": 1.28,

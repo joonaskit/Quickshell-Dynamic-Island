@@ -26,7 +26,7 @@ Item {
             radius: Theme.px(8)
             color: headerMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04)
             border.width: 1
-            border.color: root.expanded ? Qt.rgba(10/255, 132/255, 255/255, 0.35) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: root.expanded ? Theme.accentTint(0.35) : Qt.rgba(1, 1, 1, 0.08)
 
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -40,7 +40,7 @@ Item {
                 SvgIcon {
                     name: "music"
                     size: Theme.px(12)
-                    color: Theme.accentBlue
+                    color: Theme.accent
                 }
 
                 Text {
@@ -63,7 +63,7 @@ Item {
                 SvgIcon {
                     name: root.expanded ? "chevron-up" : "chevron-down"
                     size: Theme.px(12)
-                    color: root.expanded ? Theme.accentBlue : Theme.textSecondary
+                    color: root.expanded ? Theme.accent : Theme.textSecondary
                 }
             }
 
@@ -168,7 +168,7 @@ Item {
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
                                     radius: height / 2
-                                    color: row.muted ? Theme.textTertiary : (drag.containsMouse || drag.pressed ? Theme.accentBlue : Theme.sliderFill)
+                                    color: row.muted ? Theme.textTertiary : (drag.containsMouse || drag.pressed ? Theme.accent : Theme.sliderFill)
                                     width: Math.max(0, Math.min(track.width, (row.muted ? 0 : row.vol) * track.width))
                                     Behavior on color { ColorAnimation { duration: 150 } }
                                 }

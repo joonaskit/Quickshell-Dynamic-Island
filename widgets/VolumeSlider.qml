@@ -67,7 +67,7 @@ Item {
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     radius: Theme.px(9)
-                    color: root.isMuted ? Theme.textTertiary : (dragArea.containsMouse || dragArea.pressed ? Theme.accentBlue : Theme.sliderFill)
+                    color: root.isMuted ? Theme.textTertiary : (dragArea.containsMouse || dragArea.pressed ? Theme.accent : Theme.sliderFill)
                     width: Math.max(0, Math.min(sliderTrack.width, (root.isMuted ? 0 : root.volume) * sliderTrack.width))
 
                     Behavior on color {

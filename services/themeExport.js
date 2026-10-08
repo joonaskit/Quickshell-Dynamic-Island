@@ -27,7 +27,7 @@ function build(t) {
             "textSecondary": t.textSecondary,
             "textTertiary": t.textTertiary,
             "onAccent": t.onAccent,
-            "accent": t.accentBlue,
+            "accent": t.accent,
             "success": t.accentGreen,
             "warning": t.accentOrange,
             "danger": t.accentRed,

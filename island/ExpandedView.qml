@@ -160,7 +160,7 @@ Item {
                         anchors.centerIn: parent
                         name: "settings"
                         size: Theme.px(15)
-                        color: settingsMouse.containsMouse ? Theme.accentBlue : Theme.textSecondary
+                        color: settingsMouse.containsMouse ? Theme.accent : Theme.textSecondary
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 

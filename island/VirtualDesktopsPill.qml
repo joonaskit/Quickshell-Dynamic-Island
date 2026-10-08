@@ -197,7 +197,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: root.isTopBarMode ? 11 : 12
                                 font.weight: desktopItem.isCurrent ? Font.Bold : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Font.DemiBold : Font.Normal)
-                                color: desktopItem.isCurrent ? Theme.onAccent : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
+                                color: desktopItem.isCurrent ? Theme.textPrimary : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
 
                                 Behavior on color { ColorAnimation { duration: 110 } }
                             }
@@ -458,7 +458,7 @@ Item {
                         SvgIcon {
                             name: "desktop"
                             size: 13
-                            color: Theme.accentBlue
+                            color: Theme.accent
                         }
 
                         Text {

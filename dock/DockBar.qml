@@ -686,7 +686,7 @@ Item {
                         anchors.centerIn: parent
                         name: "folder"
                         size: 22
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
                 }
 

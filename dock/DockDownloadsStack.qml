@@ -75,13 +75,13 @@ Item {
                     Layout.preferredWidth: 22
                     Layout.preferredHeight: 22
                     radius: 6
-                    color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
+                    color: Theme.accentTint(0.2)
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "folder"
                         size: 13
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
                 }
 
@@ -170,7 +170,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: modelData.isDir ? "folder" : "file"
                                 size: 13
-                                color: modelData.isDir ? Theme.accentBlue : Theme.textSecondary
+                                color: modelData.isDir ? Theme.accent : Theme.textSecondary
                             }
                         }
 
@@ -237,7 +237,7 @@ Item {
                     SvgIcon {
                         name: "folder"
                         size: 13
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
 
                     Text {

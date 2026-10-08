@@ -397,7 +397,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 name: "bolt"
                                 size: 11
-                                color: Theme.accentBlue
+                                color: Theme.accent
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -405,7 +405,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 11
                                 font.weight: Font.Medium
-                                color: Theme.accentBlue
+                                color: Theme.accent
                             }
                         }
 
@@ -453,7 +453,7 @@ Item {
                     Layout.preferredHeight: 34
                     radius: 9
                     color: Qt.rgba(1, 1, 1, 0.08)
-                    border.color: searchInput.activeFocus ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.08)
+                    border.color: searchInput.activeFocus ? Theme.accent : Qt.rgba(1, 1, 1, 0.08)
                     border.width: 1
 
                     RowLayout {
@@ -465,7 +465,7 @@ Item {
                         SvgIcon {
                             name: "search"
                             size: 14
-                            color: searchInput.activeFocus ? Theme.accentBlue : Theme.textSecondary
+                            color: searchInput.activeFocus ? Theme.accent : Theme.textSecondary
                         }
 
                         TextInput {
@@ -476,7 +476,7 @@ Item {
                             font.family: Theme.fontFamily
                             font.pixelSize: 13
                             color: Theme.textPrimary
-                            selectionColor: Qt.rgba(0.04, 0.52, 1, 0.4)
+                            selectionColor: Theme.accentTint(0.4)
                             selectedTextColor: Theme.textPrimary
                             clip: true
                             selectByMouse: true
@@ -619,8 +619,8 @@ Item {
                                 height: 24
                                 width: catText.implicitWidth + 16
                                 radius: 12
-                                color: isSelected ? Theme.accentBlue : (catMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06))
-                                border.color: isSelected ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.08)
+                                color: isSelected ? Theme.accent : (catMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(1, 1, 1, 0.06))
+                                border.color: isSelected ? Theme.accent : Qt.rgba(1, 1, 1, 0.08)
                                 border.width: 1
 
                                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -632,7 +632,7 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 11
                                     font.weight: catPill.isSelected ? Font.DemiBold : Font.Medium
-                                    color: catPill.isSelected ? Theme.onAccent : (catMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
+                                    color: catPill.isSelected ? Theme.accentForeground : (catMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                                 }
 
                                 MouseArea {
@@ -686,8 +686,8 @@ Item {
                                 height: parent.height - 6
                                 radius: 10
 
-                                color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.24) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
-                                border.color: gridCell.isSelected ? Qt.rgba(0.04, 0.52, 1, 0.6) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                                color: gridCell.isSelected ? Theme.accentTint(0.24) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(1, 1, 1, 0.02))
+                                border.color: gridCell.isSelected ? Theme.accentTint(0.6) : (gridHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
                                 border.width: 1
 
                                 Behavior on color { ColorAnimation { duration: 100 } }
@@ -765,7 +765,7 @@ Item {
                                     width: 6
                                     height: 6
                                     radius: 3
-                                    color: Theme.accentBlue
+                                    color: Theme.accent
                                     visible: gridCell.pinned
                                 }
 
@@ -777,14 +777,14 @@ Item {
                                     width: 18
                                     height: 18
                                     radius: 9
-                                    color: gridPinMouse.containsMouse ? Qt.rgba(0.04, 0.52, 1, 0.4) : Qt.rgba(0, 0, 0, 0.6)
+                                    color: gridPinMouse.containsMouse ? Theme.accentTint(0.4) : Qt.rgba(0, 0, 0, 0.6)
                                     visible: gridHover.hovered && !root.isCompact && !modelData.isWindow
 
                                     SvgIcon {
                                         anchors.centerIn: parent
                                         name: "pin"
                                         size: 9
-                                        color: gridCell.pinned ? Theme.accentBlue : Theme.textSecondary
+                                        color: gridCell.pinned ? Theme.accent : Theme.textSecondary
                                     }
 
                                     MouseArea {
@@ -826,8 +826,8 @@ Item {
                             readonly property bool isSelected: index === appListView.currentIndex
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
-                            color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.22) : (itemMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
-                            border.color: isSelected ? Qt.rgba(0.04, 0.52, 1, 0.5) : "transparent"
+                            color: isSelected ? Theme.accentTint(0.22) : (itemMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+                            border.color: isSelected ? Theme.accentTint(0.5) : "transparent"
                             border.width: isSelected ? 1 : 0
 
                             RowLayout {
@@ -935,8 +935,8 @@ Item {
                                     Layout.preferredWidth: root.isCompact ? 54 : 64
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
                                     radius: 6
-                                    color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Qt.rgba(0.04, 0.52, 1, 0.25)) : (pinned ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0.04, 0.52, 1, 0.15))
-                                    border.color: pinned ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0.04, 0.52, 1, 0.4)
+                                    color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Theme.accentTint(0.25)) : (pinned ? Qt.rgba(1, 1, 1, 0.08) : Theme.accentTint(0.15))
+                                    border.color: pinned ? Qt.rgba(1, 1, 1, 0.12) : Theme.accentTint(0.4)
                                     border.width: 1
 
                                     Text {
@@ -945,7 +945,7 @@ Item {
                                         font.family: Theme.fontFamily
                                         font.pixelSize: root.isCompact ? 10 : 11
                                         font.weight: Font.Medium
-                                        color: pinned ? Theme.textSecondary : Theme.accentBlue
+                                        color: pinned ? Theme.textSecondary : Theme.accent
                                     }
 
                                     MouseArea {

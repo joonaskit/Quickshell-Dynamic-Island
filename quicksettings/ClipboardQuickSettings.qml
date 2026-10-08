@@ -53,13 +53,13 @@ Item {
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
                     radius: 19
-                    color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
+                    color: Theme.accentTint(0.2)
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "clipboard"
                         size: 20
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
                 }
 
@@ -293,7 +293,7 @@ Item {
                             SvgIcon {
                                 name: "copy"
                                 size: 12
-                                color: histMouse.containsMouse ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.3)
+                                color: histMouse.containsMouse ? Theme.accent : Qt.rgba(1, 1, 1, 0.3)
                             }
 
                             Text {

@@ -87,13 +87,13 @@ Item {
                     Layout.preferredWidth: 34
                     Layout.preferredHeight: 34
                     radius: 17
-                    color: Qt.rgba(10/255, 132/255, 255/255, 0.22)
+                    color: Theme.accentTint(0.22)
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "settings"
                         size: 18
-                        color: Theme.accentBlue
+                        color: Theme.accent
                     }
                 }
 
@@ -153,7 +153,7 @@ Item {
             radius: 10
             color: Qt.rgba(1, 1, 1, searchInput.activeFocus ? 0.10 : 0.06)
             border.width: 1
-            border.color: searchInput.activeFocus ? Qt.rgba(10/255, 132/255, 255/255, 0.5) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: searchInput.activeFocus ? Theme.accentTint(0.5) : Qt.rgba(1, 1, 1, 0.08)
 
             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
             Behavior on border.color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -173,7 +173,7 @@ Item {
                 SvgIcon {
                     name: "search"
                     size: 14
-                    color: searchInput.activeFocus ? Theme.accentBlue : Theme.textSecondary
+                    color: searchInput.activeFocus ? Theme.accent : Theme.textSecondary
                 }
 
                 TextInput {
@@ -183,7 +183,7 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: 12
                     color: Theme.textPrimary
-                    selectionColor: Qt.rgba(0.04, 0.52, 1, 0.4)
+                    selectionColor: Theme.accentTint(0.4)
                     selectedTextColor: Theme.textPrimary
                     clip: true
                     selectByMouse: true

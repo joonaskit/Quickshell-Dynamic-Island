@@ -102,7 +102,7 @@ Item {
                         width: parent.width / segRow.options.length
                         height: parent.height
                         radius: 5
-                        color: isSelected ? Theme.accentBlue : (segMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+                        color: isSelected ? Theme.accent : (segMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
 
                         Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -112,7 +112,7 @@ Item {
                             font.family: Theme.fontFamily
                             font.pixelSize: 11
                             font.weight: segOption.isSelected ? Font.DemiBold : Font.Normal
-                            color: segOption.isSelected ? Theme.onAccent : Theme.textSecondary
+                            color: segOption.isSelected ? Theme.accentForeground : Theme.textSecondary
                         }
 
                         MouseArea {

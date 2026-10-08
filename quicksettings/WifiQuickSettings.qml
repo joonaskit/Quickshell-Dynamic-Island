@@ -53,7 +53,7 @@ Item {
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
                     radius: 19
-                    color: NetworkService.isWifiEnabled ? Theme.accentBlue : Theme.cardBackgroundHover
+                    color: NetworkService.isWifiEnabled ? Theme.accent : Theme.cardBackgroundHover
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -63,7 +63,7 @@ Item {
                         anchors.centerIn: parent
                         name: "wifi"
                         size: 19
-                        color: Theme.onAccent
+                        color: NetworkService.isWifiEnabled ? Theme.accentForeground : Theme.textPrimary
                     }
 
                     MouseArea {
@@ -97,7 +97,7 @@ Item {
                         }
                         font.family: Theme.fontFamily
                         font.pixelSize: 11
-                        color: (NetworkService.isWifiEnabled && NetworkService.isConnected) ? Theme.accentBlue : Theme.textSecondary
+                        color: (NetworkService.isWifiEnabled && NetworkService.isConnected) ? Theme.accent : Theme.textSecondary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -204,7 +204,7 @@ Item {
                             width: parent.width
                             height: 32
                             radius: 8
-                            color: itemMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.inUse ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
+                            color: itemMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.inUse ? Theme.accentTint(0.12) : "transparent")
 
                             RowLayout {
                                 anchors.fill: parent
@@ -216,7 +216,7 @@ Item {
                                 SvgIcon {
                                     name: "check"
                                     size: 12
-                                    color: Theme.accentBlue
+                                    color: Theme.accent
                                     opacity: modelData.inUse ? 1.0 : 0.0
                                     scale: modelData.inUse ? 1.0 : 0.5
                                     Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
@@ -229,7 +229,7 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 12
                                     font.weight: modelData.inUse ? Font.Bold : Font.Normal
-                                    color: modelData.inUse ? Theme.accentBlue : Theme.textPrimary
+                                    color: modelData.inUse ? Theme.accent : Theme.textPrimary
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
@@ -246,7 +246,7 @@ Item {
                                 SvgIcon {
                                     name: "wifi"
                                     size: 12
-                                    color: modelData.inUse ? Theme.accentBlue : Theme.textSecondary
+                                    color: modelData.inUse ? Theme.accent : Theme.textSecondary
                                 }
                             }
 
