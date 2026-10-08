@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import sys
-import time
 import glob
 import json
 import signal
+import sys
+import time
+
 
 def handle_sigterm(signum, frame):
     sys.exit(0)

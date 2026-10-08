@@ -688,6 +688,7 @@ Item {
 
                         // Interactive Action Button
                         Rectangle {
+                            id: actionButton
                             anchors.fill: parent
                             radius: 6
                             visible: !modelData.isSeparator
@@ -734,7 +735,7 @@ Item {
                                     font.weight: itemMouse.containsMouse ? Font.Medium : Font.Normal
                                     color: {
                                         if (!modelData.enabled) return Qt.rgba(1, 1, 1, 0.35);
-                                        if (itemMouse.containsMouse && parent.parent.isExitItem) return Theme.accentRed;
+                                        if (itemMouse.containsMouse && actionButton.isExitItem) return Theme.accentRed;
                                         return Theme.textPrimary;
                                     }
                                     elide: Text.ElideRight
@@ -745,7 +746,7 @@ Item {
                                     name: "power"
                                     size: 11
                                     color: itemMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.40)
-                                    visible: parent.parent.isExitItem
+                                    visible: actionButton.isExitItem
                                 }
                             }
 

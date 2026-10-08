@@ -1,0 +1,8 @@
+# Lint settings for scripts/, used by lint.sh
+target-version = "py311"
+
+[lint]
+# pyflakes, pycodestyle, bugbear, import sorting
+select = ["F", "E", "W", "B", "I"]
+# Long lines are fine; the helpers build long command strings
+ignore = ["E501"]

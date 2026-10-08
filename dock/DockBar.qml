@@ -1,7 +1,5 @@
 import ".."
 import QtQuick
-import QtQuick.Layouts
-import Quickshell
 
 Item {
     id: root
@@ -150,7 +148,7 @@ Item {
         anchors.verticalCenter: root.isVertical ? parent.verticalCenter : undefined
 
         anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
-        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined // qmllint disable Quick.anchor-combinations
         anchors.right: (root.dockPosition === "right") ? parent.right : undefined
 
         width: root.isVertical ? (dockCapsule.width + Theme.dockBottomMargin + 16) : (dockCapsule.width + 16)
@@ -192,7 +190,7 @@ Item {
         anchors.bottom: (!root.isVertical) ? parent.bottom : undefined
         anchors.bottomMargin: (!root.isVertical) ? Theme.dockBottomMargin : 0
 
-        anchors.left: (root.dockPosition === "left") ? parent.left : undefined
+        anchors.left: (root.dockPosition === "left") ? parent.left : undefined // qmllint disable Quick.anchor-combinations
         anchors.leftMargin: (root.dockPosition === "left") ? Theme.dockBottomMargin : 0
 
         anchors.right: (root.dockPosition === "right") ? parent.right : undefined

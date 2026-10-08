@@ -171,8 +171,8 @@ Item {
 
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        width: 44
-                        height: 44
+                        Layout.preferredWidth: 44
+                        Layout.preferredHeight: 44
                         radius: 22
                         color: Qt.rgba(1, 1, 1, 0.05)
 
@@ -344,8 +344,8 @@ Item {
                                             spacing: 6
 
                                             Rectangle {
-                                                width: 6
-                                                height: 6
+                                                Layout.preferredWidth: 6
+                                                Layout.preferredHeight: 6
                                                 radius: 3
                                                 color: modelData.isMounted ? Theme.accentGreen : Theme.textTertiary
                                             }

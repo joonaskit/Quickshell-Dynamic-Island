@@ -1,5 +1,4 @@
 pragma Singleton
-import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
