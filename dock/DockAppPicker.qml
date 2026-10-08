@@ -1,8 +1,6 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
-import Quickshell
 
 Item {
     id: root
@@ -444,7 +442,6 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
-                    height: Layout.preferredHeight
                     radius: 9
                     color: Qt.rgba(1, 1, 1, 0.08)
                     border.color: searchInput.activeFocus ? Theme.accentBlue : Qt.rgba(1, 1, 1, 0.08)
@@ -586,7 +583,6 @@ Item {
                     id: categoryFlickable
                     Layout.fillWidth: true
                     Layout.preferredHeight: SettingsService.launcherShowCategories ? 26 : 0
-                    height: Layout.preferredHeight
                     visible: SettingsService.launcherShowCategories
                     contentWidth: categoryRow.implicitWidth
                     contentHeight: height

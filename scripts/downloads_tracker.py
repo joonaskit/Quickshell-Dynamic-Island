@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import os
-import sys
-import subprocess
 import json
+import os
+import subprocess
+import sys
+
 
 def get_downloads_dir():
     # 1. Try xdg-user-dir

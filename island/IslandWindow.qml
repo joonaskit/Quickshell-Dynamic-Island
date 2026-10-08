@@ -4,7 +4,6 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Services.UPower
-import Quickshell.Services.SystemTray
 
 PanelWindow {
     id: window

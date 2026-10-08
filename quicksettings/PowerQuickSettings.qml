@@ -160,8 +160,8 @@ Item {
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            width: 28
-                            height: 28
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 28
                             radius: 14
                             color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
 
@@ -208,8 +208,8 @@ Item {
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            width: 28
-                            height: 28
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 28
                             radius: 14
                             color: Qt.rgba(94/255, 92/255, 230/255, 0.2)
 
@@ -256,8 +256,8 @@ Item {
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            width: 28
-                            height: 28
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 28
                             radius: 14
                             color: Qt.rgba(255/255, 159/255, 10/255, 0.2)
 
@@ -304,8 +304,8 @@ Item {
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            width: 28
-                            height: 28
+                            Layout.preferredWidth: 28
+                            Layout.preferredHeight: 28
                             radius: 14
                             color: Qt.rgba(255/255, 69/255, 58/255, 0.2)
 

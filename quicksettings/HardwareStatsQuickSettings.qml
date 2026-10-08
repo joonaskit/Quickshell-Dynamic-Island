@@ -196,8 +196,8 @@ Item {
                     spacing: 8
 
                     Rectangle {
-                        width: 8
-                        height: 8
+                        Layout.preferredWidth: 8
+                        Layout.preferredHeight: 8
                         radius: 4
                         color: HardwareStatsService.cpuTemp > 75 ? Theme.accentRed : (HardwareStatsService.cpuTemp > 60 ? Theme.accentOrange : Theme.accentGreen)
                     }

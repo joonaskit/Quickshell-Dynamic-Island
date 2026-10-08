@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import sys
-import os
 import json
+import os
 import subprocess
+import sys
+
 
 def list_sources():
     try:
@@ -23,7 +24,6 @@ def list_sources():
             desc = s.get("description", name)
             props = s.get("properties", {})
             nick = props.get("node.nick", "")
-            active_port = s.get("active_port", "")
 
             # Generate friendly display name
             display_name = desc

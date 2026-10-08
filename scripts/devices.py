@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-import sys
-import os
-import time
 import json
 import signal
 import subprocess
-import threading
+import sys
+import time
+
 
 def handle_sigterm(signum, frame):
     sys.exit(0)

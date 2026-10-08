@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-import sys
-import os
-import time
-import signal
 import atexit
-import dbus
-import dbus.service
-import dbus.mainloop.glib
 import json
+import os
+import signal
+import sys
+import time
+
+import dbus
+import dbus.mainloop.glib
+import dbus.service
 from gi.repository import GLib
 
 BUS_NAME = "org.quickshell.IslandBridge"
@@ -611,7 +612,8 @@ def main():
         sys.exit(1)
 
     try:
-        bus_name = dbus.service.BusName(BUS_NAME, bus)
+        # Keep a reference: the name is released when BusName is garbage collected
+        bus_name = dbus.service.BusName(BUS_NAME, bus)  # noqa: F841
     except Exception as e:
         sys.stderr.write(f"Bus name note: {e}\n")
 
@@ -619,12 +621,12 @@ def main():
     bridge.emit_state()
 
     script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kwin_script.js")
-    
+
     kwin_script_id = None
     try:
         kwin_obj = bus.get_object("org.kde.KWin", "/Scripting")
         kwin_iface = dbus.Interface(kwin_obj, "org.kde.kwin.Scripting")
-        
+
         try:
             kwin_iface.unloadScript(SCRIPT_NAME)
         except Exception:
@@ -632,7 +634,7 @@ def main():
 
         # Specify signature="ss" because loadScript is overloaded in KWin DBus API
         kwin_script_id = kwin_iface.loadScript(script_path, SCRIPT_NAME, signature="ss")
-        
+
         script_obj = bus.get_object("org.kde.KWin", f"/Scripting/Script{kwin_script_id}")
         script_iface = dbus.Interface(script_obj, "org.kde.kwin.Script")
         script_iface.run()

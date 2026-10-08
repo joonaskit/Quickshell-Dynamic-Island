@@ -1,4 +1,3 @@
-import ".."
 import QtQuick
 
 Item {
