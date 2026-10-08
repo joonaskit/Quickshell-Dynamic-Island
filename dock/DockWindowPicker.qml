@@ -129,9 +129,31 @@ Item {
                     width: parent.width
                     height: 32
                     radius: 8
-                    color: rowMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
+                    color: rowHover.hovered ? Qt.rgba(1, 1, 1, 0.12) : (modelData.activated ? Qt.rgba(10/255, 132/255, 255/255, 0.12) : "transparent")
 
                     Behavior on color { ColorAnimation { duration: 100 } }
+
+                    // Passive, so hovering the close button still counts as hovering the row
+                    HoverHandler {
+                        id: rowHover
+                    }
+
+                    // Declared before the row content so the close button sits above it
+                    MouseArea {
+                        id: rowMouse
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.MiddleButton) {
+                                DockService.closeWindow(modelData);
+                                return;
+                            }
+                            DockService.activateWindow(modelData);
+                            root.isOpen = false;
+                            root.closed();
+                        }
+                    }
 
                     RowLayout {
                         anchors.fill: parent
@@ -203,7 +225,7 @@ Item {
                             Layout.preferredHeight: 20
                             radius: 10
                             color: closeBtnMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : "transparent"
-                            opacity: rowMouse.containsMouse ? 1.0 : 0.0
+                            opacity: rowHover.hovered ? 1.0 : 0.0
 
                             Behavior on opacity { NumberAnimation { duration: 100 } }
 
@@ -226,22 +248,6 @@ Item {
                         }
                     }
 
-                    MouseArea {
-                        id: rowMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: function(mouse) {
-                            if (mouse.button === Qt.MiddleButton) {
-                                DockService.closeWindow(modelData);
-                                return;
-                            }
-                            DockService.activateWindow(modelData);
-                            root.isOpen = false;
-                            root.closed();
-                        }
-                    }
                 }
             }
         }
