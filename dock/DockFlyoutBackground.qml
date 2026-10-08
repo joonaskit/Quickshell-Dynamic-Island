@@ -14,6 +14,16 @@ Item {
     property bool fitsOnDock: true
     property real filletSize: 12
     property real cornerRadius: 14
+    // One side continues an end of the dock in a straight line, filling in the
+    // dock's rounded corner below it. Start is left, or top for a vertical dock.
+    property bool startFlush: false
+    property bool endFlush: false
+    readonly property bool flush: startFlush || endFlush
+    // Fillet on the far side (the one away from that end), and how far that side
+    // reaches past the other end of the dock. Past the end it has nothing to
+    // join, so its base corner is rounded.
+    property real farFillet: fitsOnDock ? filletSize : 0
+    property real farOverhang: 0
     // Opacity of the body; it fades to the exact dock colour at the base
     property real tintAlpha: Theme.dockTransparent ? 0.9 : 0.97
     readonly property color tintColor: Qt.rgba(Theme.dockBackground.r, Theme.dockBackground.g, Theme.dockBackground.b, tintAlpha)
@@ -22,12 +32,62 @@ Item {
     width: isVertical ? parent.height : parent.width
     height: isVertical ? parent.width : parent.height
     rotation: !isVertical ? 0 : (dockPosition === "left" ? 90 : -90)
+    // The outline is drawn with the flush side on its left. It is mirrored for a
+    // right dock, where rotation alone puts the start (top) side on the right,
+    // and when the flush side is the end.
+    transform: Scale {
+        origin.x: bgHolder.width / 2
+        xScale: ((bgHolder.dockPosition === "right") !== bgHolder.endFlush) ? -1 : 1
+    }
 
     readonly property real w: width
     readonly property real h: height
     // Shrink the curves while the body is still too small to hold them
     readonly property real r: Math.max(0, Math.min(cornerRadius, h / 2, w / 2))
-    readonly property real f: fitsOnDock ? Math.max(0, Math.min(filletSize, h - r)) : 0
+    readonly property real nearF: flush ? 0 : Math.max(0, Math.min(fitsOnDock ? filletSize : 0, h - r))
+    readonly property real farF: Math.max(0, Math.min(farFillet, h - r))
+    readonly property real farR: Math.max(0, Math.min(farOverhang, r))
+    readonly property real dockR: flush ? Theme.dockRadius : 0
+
+    // Outline, clockwise from the near (left) side's base. Arcs: "A rx ry 0 0 sweep x y",
+    // sweep 1 = clockwise (convex corners), 0 = counterclockwise (concave joins).
+    readonly property string outline: {
+        let n = v => v.toFixed(2);
+        let arc = (radius, sweep, x, y) => radius > 0.01 ? ` A ${n(radius)} ${n(radius)} 0 0 ${sweep} ${n(x)} ${n(y)}` : ` L ${n(x)} ${n(y)}`;
+        let p;
+        if (flush) {
+            // Straight down past the base, to where the dock's corner meets its side
+            p = `M 0 ${n(h + dockR)}`;
+        } else {
+            p = `M ${n(-nearF)} ${n(h)}` + arc(nearF, 0, 0, h - nearF);
+        }
+        // Near side, top corners
+        p += ` L 0 ${n(r)}` + arc(r, 1, r, 0);
+        p += ` L ${n(w - r)} 0` + arc(r, 1, w, r);
+        // Far side: rounded off when it overhangs the dock, else a fillet onto it
+        if (farR > 0.01) {
+            p += ` L ${n(w)} ${n(h - farR)}` + arc(farR, 1, w - farR, h);
+        } else {
+            p += ` L ${n(w)} ${n(h - farF)}` + arc(farF, 0, w + farF, h);
+        }
+        // Base, lying on the dock edge
+        if (flush) {
+            // Follow the dock's rounded corner back down to the start point
+            p += ` L ${n(dockR)} ${n(h)}` + arc(dockR, 0, 0, h + dockR);
+        } else {
+            p += ` L ${n(-nearF)} ${n(h)}`;
+        }
+        return p + " Z";
+    }
+
+    // Absorbs hover over the whole popup. The dock's magnification tracker reaches
+    // a little above the dock, under the popup's base; without this, hover falls
+    // through the gaps between the popup's own items and the dock icons twitch.
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+    }
 
     Shape {
         anchors.fill: parent
@@ -46,35 +106,9 @@ Item {
             strokeColor: Theme.dockShowBorder ? Theme.dockBorder : "transparent"
             strokeWidth: 1
 
-            // Left fillet, flaring out onto the dock
-            startX: -bgHolder.f
-            startY: bgHolder.h
-            PathArc {
-                x: 0; y: bgHolder.h - bgHolder.f
-                radiusX: bgHolder.f; radiusY: bgHolder.f
-                direction: PathArc.Counterclockwise
-            }
-            // Left side and top-left corner
-            PathLine { x: 0; y: bgHolder.r }
-            PathArc {
-                x: bgHolder.r; y: 0
-                radiusX: bgHolder.r; radiusY: bgHolder.r
-            }
-            // Top edge and top-right corner
-            PathLine { x: bgHolder.w - bgHolder.r; y: 0 }
-            PathArc {
-                x: bgHolder.w; y: bgHolder.r
-                radiusX: bgHolder.r; radiusY: bgHolder.r
-            }
-            // Right side and right fillet
-            PathLine { x: bgHolder.w; y: bgHolder.h - bgHolder.f }
-            PathArc {
-                x: bgHolder.w + bgHolder.f; y: bgHolder.h
-                radiusX: bgHolder.f; radiusY: bgHolder.f
-                direction: PathArc.Counterclockwise
-            }
-            // Base, lying on the dock edge
-            PathLine { x: -bgHolder.f; y: bgHolder.h }
+            startX: 0
+            startY: 0
+            PathSvg { path: bgHolder.outline }
         }
     }
 }

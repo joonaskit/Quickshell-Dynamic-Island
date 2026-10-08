@@ -29,10 +29,6 @@ Item {
 
     signal closed()
 
-    // Point on the dock the launcher grows from (the launcher button)
-    property real targetX: dockCapsuleX + dockCapsuleWidth / 2
-    property real targetY: dockCapsuleY + dockCapsuleHeight / 2
-
     // Full size of the launcher; animates when the layout settings change
     property real finalWidth: gridCols >= 5 ? 540 : 460
     property real finalHeight: isCompact ? 440 : 480
@@ -44,8 +40,8 @@ Item {
         NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
     }
 
-    // The launcher is an extension of the dock: it grows out of the launcher
-    // button with its base flush on the dock edge (no gap).
+    // The launcher is an extension of the dock: it grows out of the corner by the
+    // launcher button, with its side continuing the end of the dock in one line.
     DockFlyoutGeometry {
         id: geo
         open: root.isOpen
@@ -55,8 +51,7 @@ Item {
         dockCapsuleY: root.dockCapsuleY
         dockCapsuleWidth: root.dockCapsuleWidth
         dockCapsuleHeight: root.dockCapsuleHeight
-        targetX: root.targetX
-        targetY: root.targetY
+        align: "start"
         finalWidth: root.finalWidth
         finalHeight: root.finalHeight
         parentWidth: root.parent ? root.parent.width : 1000
@@ -222,8 +217,10 @@ Item {
     DockFlyoutBackground {
         isVertical: root.isVertical
         dockPosition: root.dockPosition
-        fitsOnDock: geo.fitsOnDock
         filletSize: geo.filletSize
+        startFlush: geo.startFlush
+        farFillet: geo.farFillet
+        farOverhang: geo.farOverhang
         cornerRadius: 18
         tintAlpha: Theme.dockTransparent ? 0.94 : 0.97
     }

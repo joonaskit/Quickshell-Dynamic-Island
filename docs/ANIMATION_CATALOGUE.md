@@ -27,7 +27,7 @@ All durations and easings are defined in `Theme.qml` and referenced throughout:
 
 ## Pattern Overview
 
-Five distinct patterns are used across the codebase:
+Six distinct patterns are used across the codebase:
 
 | # | Pattern | Used for |
 |---|---|---|
@@ -36,6 +36,7 @@ Five distinct patterns are used across the codebase:
 | **C** | Y-translate slide off-screen | Auto-hide / fullscreen hide |
 | **D** | Scale spring entrance | New floating elements appearing |
 | **E** | Opacity-only fade | Simple menus and tooltips |
+| **F** | Dock flyout (grow from the dock, morph between targets) | All popups attached to the dock |
 
 ---
 
@@ -174,9 +175,8 @@ Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 | `TopRightStatusCluster.qml` L720–725 | Divider between status icons and menu content | `root.anyMenuOpen` |
 | `TopLeftAppCluster.qml` L248–270 | `divider`, `menuContainer` | `root.menuOpen` |
 | `AppIndicatorPill.qml` L435–589 | `compactContainer` (icon row), `morphedMenuArea` (context menu content) | `root.contextMenuOpen` |
-| `DockContextMenu.qml` L16–20 | Entire context menu | `isOpen` |
-| `DockAppPicker.qml` L15–19 | Entire app picker | `isOpen` |
-| `DockBar.qml` L443–447 | Trash context menu | `isOpen` |
+
+The dock's popups (context menu, launcher, window list, downloads, trash) are not listed here: they use Pattern F.
 
 #### Tooltip variants (120 ms, no easing)
 
@@ -383,6 +383,82 @@ File: `CompactNotificationAlertView.qml` L81–85.
 
 ---
 
+## Pattern F — Dock Flyout
+
+Every popup attached to the dock is an extension of the dock itself: its base lies on the dock's edge with no gap, and it grows out of the dock instead of fading in above it. The geometry lives in `dock/DockFlyoutGeometry.qml` and the body is drawn by `dock/DockFlyoutBackground.qml`. A popup binds its `x` / `y` / `width` / `height` to the geometry's outputs and puts the background behind its content.
+
+### Open and close
+
+One `progress` value (0 = closed, 1 = open) drives the whole shape:
+
+```qml
+property real progress: open ? 1.0 : 0.0
+Behavior on progress {
+    NumberAnimation {
+        duration: geo.open ? Theme.animDuration : Theme.animDurationFast   // 360 ms in, 180 ms out
+        easing.type: geo.open ? Theme.animEasing : Easing.OutCubic         // OutBack in, OutCubic out
+        easing.overshoot: Theme.animOvershoot
+    }
+}
+```
+
+- **Along the dock** the body spreads from an icon-sized stub (`originSize`) to its final length.
+- **Away from the dock** it grows from zero to its final depth.
+- **The popup's opacity** reaches 1 in the first quarter of the animation (`progress * 4`).
+- **Content** is laid out at its final size from the start and clipped by the body, so it is revealed rather than reflowed. It fades in over the last 60 % of the animation (`contentOpacity`).
+
+### Retargeting an open popup
+
+While a popup is on screen (`shown`, `progress > 0.001`), a change of origin or final size is animated instead of applied at once. This is what lets one context menu move from icon to icon, and one window list follow the pointer along the dock.
+
+```qml
+Behavior on origin      { enabled: geo.shown; NumberAnimation { duration: Theme.animDurationTopBar; easing.type: Easing.OutCubic } }
+Behavior on alongLength { enabled: geo.shown; NumberAnimation { duration: Theme.animDurationTopBar; easing.type: Easing.OutCubic } }
+Behavior on awayLength  { enabled: geo.shown; NumberAnimation { duration: Theme.animDurationTopBar; easing.type: Easing.OutCubic } }
+```
+
+- **Slide and resize:** 260 ms `OutCubic`, no overshoot, so the body does not expose clipped content at the end of the move.
+- **Content swap:** when the origin changes, the content is hidden at once, held for 70 ms, then faded back in over 200 ms (`swapFade`). The old content is never seen reflowing inside the moving body.
+- **Closed popups jump.** The behaviors are disabled until the popup is shown, so opening always starts from the clicked icon, not from wherever the popup was last.
+- The caller must keep the popup open while it retargets. `DockBar.toggleContextMenu` passes the menu to `closeAllPopups(except)` for this.
+- A size change with the same origin (a window opening while the menu is up, the downloads list refreshing) is eased the same way, without the content fade.
+
+### Alignment
+
+`align` chooses where the popup sits along the dock:
+
+| `align` | Position | Grows from | Used by |
+|---|---|---|---|
+| `"center"` (default) | Centred on the origin point, kept on the dock's straight edge. Centred on the dock if the dock is too short to carry it | The origin point (the clicked icon) | Context menu, window list, downloads |
+| `"start"` | One side in line with the start end of the dock (left, or top for a vertical dock) | That corner of the dock | Launcher |
+| `"end"` | One side in line with the end of the dock (right, or bottom) | That corner of the dock | Trash menu |
+
+With `"start"` and `"end"` the popup stays attached to that end of the dock and follows it, with the dock's own width animation, when icons are added or removed.
+
+### Shape of the join
+
+- **Centred popups** flare onto the dock with a concave fillet on each side (`filletSize`, 12 px). The fillets are dropped when the popup overhangs the dock's straight edge.
+- **End-aligned popups** continue the end of the dock in one straight line. The outline runs down past the popup's base and follows the dock's rounded corner, filling the wedge between the two.
+- **The far side** of an end-aligned popup has a fillet while it rests on the dock's straight edge. The fillet shrinks to nothing as that side nears the dock's other rounded corner (`farFillet`), and if the side reaches past the dock, its base corner is rounded off instead (`farOverhang`).
+- The body is slightly more opaque than the dock and fades to the exact dock colour at the base, so the join has no visible seam.
+- The outline is one SVG path, drawn for a bottom dock with the flush side on the left. It is rotated for left and right docks, and mirrored for a right dock and for `"end"`.
+
+### Hover
+
+The background absorbs hover over the whole popup. The dock's magnification tracker reaches 16 px above the dock, under a popup's base; without this, hover falls through the gaps between a popup's own items and the dock icons twitch.
+
+### Instances
+
+| File | Popup | `align` |
+|---|---|---|
+| `DockContextMenu.qml` | App context menu | `"center"` |
+| `DockWindowPicker.qml` | Hover window list | `"center"` |
+| `DockDownloadsStack.qml` | Downloads stack | `"center"` |
+| `DockAppPicker.qml` | Launcher | `"start"` |
+| `DockBar.qml` (`trashMenu`) | Trash menu | `"end"` |
+
+---
+
 ## Inconsistencies — Resolution Log
 
 ### ✅ Resolved
@@ -413,6 +489,8 @@ File: `CompactNotificationAlertView.qml` L81–85.
 | 22 | `SettingsView.qml` header Back/Close buttons & grabber | No press scale feedback | Added `scale` + `Behavior on scale` (`Theme.animDurationTooltip`), standardized colors |
 | 23 | `SettingsView.qml` slider track, knob & presets | Instant snap on preset select / external update | Added `Behavior on x` & `Behavior on width` (`Theme.animDurationPopover`, enabled when not dragging), knob scale on hover/drag, glow opacity fade, preset button scale |
 | 24 | `ClipboardQuickSettings.qml` Empty button, history list & delete buttons | Abrupt visibility toggles, no button scale | Added `scale` + `Behavior on scale` to empty/delete buttons, `opacity` fade on recent copies section |
+
+Row 1 has since been superseded: the dock's context menu, launcher and trash menu no longer use a scale spring. They grow out of the dock as described under Pattern F.
 
 ### ⚠️ Intentionally Kept As-Is
 

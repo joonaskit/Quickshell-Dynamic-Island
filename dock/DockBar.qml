@@ -78,26 +78,24 @@ Item {
         return 1.0;
     }
 
-    function closeAllPopups() {
-        contextMenu.isOpen = false;
+    function closeAllPopups(except) {
+        if (except !== contextMenu) contextMenu.isOpen = false;
         appPicker.isOpen = false;
         trashMenu.isOpen = false;
         downloadsStack.isOpen = false;
         windowPicker.isOpen = false;
     }
 
-    // The launcher grows out of its dock button
-    function updateAppPickerOrigin() {
-        let mapped = launchpadItem.mapToItem(root, launchpadItem.width / 2, launchpadItem.height / 2);
-        appPicker.targetX = mapped.x;
-        appPicker.targetY = mapped.y;
-    }
-
     function toggleAppPicker() {
         let wasOpen = appPicker.isOpen;
         closeAllPopups();
-        if (!wasOpen) updateAppPickerOrigin();
         appPicker.isOpen = !wasOpen;
+    }
+
+    function toggleTrashMenu() {
+        let wasOpen = trashMenu.isOpen;
+        closeAllPopups();
+        trashMenu.isOpen = !wasOpen;
     }
 
     function isContextMenuOpenFor(app) {
@@ -111,7 +109,8 @@ Item {
             contextMenu.closed();
             return;
         }
-        closeAllPopups();
+        // An open menu stays open and morphs to the new icon
+        closeAllPopups(contextMenu);
         contextClearTimer.stop();
         contextMenu.appData = app;
         let mapped = item.mapToItem(root, item.width / 2, item.height / 2);
@@ -122,7 +121,6 @@ Item {
 
     function openAppPicker(category) {
         closeAllPopups();
-        updateAppPickerOrigin();
         appPicker.pendingCategory = category || "";
         appPicker.isOpen = true;
     }
@@ -850,11 +848,7 @@ Item {
                         trashItem.pressScale = 1.0;
                         trashBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) {
-                            let mapped = trashItem.mapToItem(root, trashItem.width / 2, trashItem.height / 2);
-                            trashMenu.targetX = mapped.x;
-                            trashMenu.targetY = mapped.y;
-                            closeAllPopups();
-                            trashMenu.isOpen = true;
+                            root.toggleTrashMenu();
                         } else {
                             DockService.openTrash();
                         }
@@ -939,10 +933,9 @@ Item {
     Item {
         id: trashMenu
         property bool isOpen: false
-        property real targetX: 0
-        property real targetY: 0
 
-        // Grows out of the trash icon with its base flush on the dock edge
+        // Mirrors the launcher: grows out of the corner by the trash icon, with its
+        // side continuing the end of the dock in one line
         DockFlyoutGeometry {
             id: trashGeo
             open: trashMenu.isOpen
@@ -952,8 +945,7 @@ Item {
             dockCapsuleY: dockCapsule.y
             dockCapsuleWidth: dockCapsule.width
             dockCapsuleHeight: dockCapsule.height
-            targetX: trashMenu.targetX
-            targetY: trashMenu.targetY
+            align: "end"
             finalWidth: 150
             finalHeight: trashCol.implicitHeight + 16
             parentWidth: root.width
@@ -971,9 +963,11 @@ Item {
         DockFlyoutBackground {
             isVertical: root.isVertical
             dockPosition: root.dockPosition
-            fitsOnDock: trashGeo.fitsOnDock
             filletSize: trashGeo.filletSize
             cornerRadius: 12
+            endFlush: trashGeo.endFlush
+            farFillet: trashGeo.farFillet
+            farOverhang: trashGeo.farOverhang
         }
 
         // Content is clipped to the body so it is revealed as the menu grows

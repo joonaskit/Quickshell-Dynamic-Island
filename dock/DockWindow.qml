@@ -149,6 +149,10 @@ PanelWindow {
             window.dockRevealed = false;
             dockDwellTimer.stop();
             dockUnhoverTimer.stop();
+        } else if (isDockHovered) {
+            // Auto-hide applies again (e.g. a popup just closed) while the pointer
+            // is still on the dock: keep it up until the pointer leaves
+            window.dockRevealed = true;
         }
     }
 
