@@ -148,6 +148,18 @@ Item {
         }
     }
 
+    function close() {
+        root.isOpen = false;
+        root.closed();
+    }
+
+    // Delegates call this as one step: opening or closing can reset the model
+    // and destroy the delegate, after which it can no longer reach root
+    function openAndClose(item) {
+        root.openItem(item);
+        root.close();
+    }
+
     // Secondary action: close a window, or open an app's properties
     function openItemSecondary(item) {
         if (!item) return;
@@ -156,8 +168,7 @@ Item {
             Qt.callLater(root.refreshWindows);
         } else {
             DockService.openAppProperties(item.desktopFile || item.id);
-            root.isOpen = false;
-            root.closed();
+            root.close();
         }
     }
 
@@ -203,9 +214,7 @@ Item {
             if (idx < 0 || idx >= list.length) idx = 0;
             let targetApp = list[idx];
             if (targetApp) {
-                root.openItem(targetApp);
-                root.isOpen = false;
-                root.closed();
+                root.openAndClose(targetApp);
             }
         }
     }
@@ -364,8 +373,7 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 DockService.openMenuEditor();
-                                root.isOpen = false;
-                                root.closed();
+                                root.close();
                             }
                         }
                     }
@@ -405,8 +413,7 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 DockService.openLaunchpad();
-                                root.isOpen = false;
-                                root.closed();
+                                root.close();
                             }
                         }
                     }
@@ -431,8 +438,7 @@ Item {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                root.isOpen = false;
-                                root.closed();
+                                root.close();
                             }
                         }
                     }
@@ -483,8 +489,7 @@ Item {
                             }
 
                             Keys.onEscapePressed: function(event) {
-                                root.isOpen = false;
-                                root.closed();
+                                root.close();
                                 event.accepted = true;
                             }
 
@@ -783,9 +788,7 @@ Item {
                                         if (mouse.button === Qt.RightButton) {
                                             root.openItemSecondary(modelData);
                                         } else {
-                                            root.openItem(modelData);
-                                            root.isOpen = false;
-                                            root.closed();
+                                            root.openAndClose(modelData);
                                         }
                                     }
                                 }
@@ -912,8 +915,7 @@ Item {
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
                                             DockService.openAppProperties(modelData.desktopFile || modelData.id);
-                                            root.isOpen = false;
-                                            root.closed();
+                                            root.close();
                                         }
                                     }
                                 }
@@ -971,9 +973,7 @@ Item {
                                     if (mouse.button === Qt.RightButton) {
                                         root.openItemSecondary(modelData);
                                     } else {
-                                        root.openItem(modelData);
-                                        root.isOpen = false;
-                                        root.closed();
+                                        root.openAndClose(modelData);
                                     }
                                 }
                             }
