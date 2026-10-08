@@ -300,8 +300,8 @@ Item {
                     scale: launchpadItem.dockScale * launchpadItem.pressScale
 
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: "#2c2c2e" }
-                        GradientStop { position: 1.0; color: "#1c1c1e" }
+                        GradientStop { position: 0.0; color: Theme.cardBackgroundHover }
+                        GradientStop { position: 1.0; color: Theme.cardBackground }
                     }
                     border.color: Qt.rgba(1, 1, 1, 0.16)
                     border.width: 1
@@ -319,7 +319,7 @@ Item {
                                 width: 5
                                 height: 5
                                 radius: 2.5
-                                color: "#ffffff"
+                                color: Theme.textPrimary
                             }
                         }
                     }
@@ -343,7 +343,7 @@ Item {
                         width: launchpadTipText.implicitWidth + 16
                         height: 24
                         radius: 6
-                        color: "#1c1c1e"
+                        color: Theme.cardBackground
                         border.color: Qt.rgba(1, 1, 1, 0.18)
                         border.width: 1
 
@@ -634,8 +634,8 @@ Item {
                     scale: downloadsItem.dockScale * downloadsItem.pressScale
 
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: "#2c2c2e" }
-                        GradientStop { position: 1.0; color: "#1c1c1e" }
+                        GradientStop { position: 0.0; color: Theme.cardBackgroundHover }
+                        GradientStop { position: 1.0; color: Theme.cardBackground }
                     }
                     border.color: Qt.rgba(1, 1, 1, 0.16)
                     border.width: 1
@@ -667,7 +667,7 @@ Item {
                         width: downloadsTipText.implicitWidth + 16
                         height: 24
                         radius: 6
-                        color: "#1c1c1e"
+                        color: Theme.cardBackground
                         border.color: Qt.rgba(1, 1, 1, 0.18)
                         border.width: 1
 
@@ -771,7 +771,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             radius: 11
-                            color: "#2c2c2e"
+                            color: Theme.cardBackgroundHover
                             border.color: Qt.rgba(1, 1, 1, 0.15)
                             border.width: 1
                             visible: parent.status !== Image.Ready
@@ -804,7 +804,7 @@ Item {
                         width: trashTipText.implicitWidth + 16
                         height: 24
                         radius: 6
-                        color: "#1c1c1e"
+                        color: Theme.cardBackground
                         border.color: Qt.rgba(1, 1, 1, 0.18)
                         border.width: 1
 

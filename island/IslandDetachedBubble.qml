@@ -98,7 +98,7 @@ Item {
                 font.family: Theme.fontDisplay
                 font.pixelSize: Theme.fontPx(8)
                 font.weight: Font.Bold
-                color: "#ffffff"
+                color: Theme.onAccent
             }
         }
 

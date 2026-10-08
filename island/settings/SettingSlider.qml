@@ -144,7 +144,7 @@ Rectangle {
                 width: 18
                 height: 18
                 radius: 9
-                color: "#ffffff"
+                color: Theme.sliderHandle
                 x: Math.max(0, Math.min(trackArea.width - width, (trackArea.width * sliderRow.fraction) - (width / 2)))
                 anchors.verticalCenter: parent.verticalCenter
                 scale: trackMouse.pressed ? 1.15 : (trackMouse.containsMouse ? 1.08 : 1.0)

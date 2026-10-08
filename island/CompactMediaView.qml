@@ -25,7 +25,7 @@ Item {
             Layout.preferredHeight: Theme.px(22)
             Layout.alignment: Qt.AlignVCenter
             radius: Theme.px(5)
-            color: "#1c1c1e"
+            color: Theme.cardBackground
             clip: true
 
             Image {

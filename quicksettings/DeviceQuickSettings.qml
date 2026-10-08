@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? 14 : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : "#1c1c1e"
+        color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Qt.rgba(1, 1, 1, 0.12)
         clip: true
@@ -56,7 +56,7 @@ Item {
                     color: {
                         if (DeviceService.hasMountedDevices) return Qt.rgba(48/255, 209/255, 88/255, 0.22);
                         if (DeviceService.hasDevices) return Qt.rgba(10/255, 132/255, 255/255, 0.22);
-                        return "#2c2c2e";
+                        return Theme.cardBackgroundHover;
                     }
 
                     Behavior on color { ColorAnimation { duration: 180 } }

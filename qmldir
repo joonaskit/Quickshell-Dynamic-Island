@@ -78,3 +78,4 @@ DockDownloadsStack 1.0 dock/DockDownloadsStack.qml
 singleton DownloadsService 1.0 services/DownloadsService.qml
 
 singleton WidgetRegistry 1.0 widgets/WidgetRegistry.qml
+singleton ThemeExportService 1.0 services/ThemeExportService.qml

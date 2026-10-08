@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
         radius: root.embedded ? 0 : 18
-        color: root.embedded ? "transparent" : "#1c1c1e"
+        color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Qt.rgba(1, 1, 1, 0.12)
         clip: true
@@ -53,7 +53,7 @@ Item {
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
                     radius: 19
-                    color: !MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : "#2c2c2e"
+                    color: !MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.cardBackgroundHover
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -195,7 +195,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         name: MicrophoneService.isMuted ? "mic-off" : "mic"
                         size: 14
-                        color: "#ffffff"
+                        color: Theme.onAccent
                     }
 
                     MouseArea {

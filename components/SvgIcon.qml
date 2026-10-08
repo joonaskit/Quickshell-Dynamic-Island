@@ -1,3 +1,4 @@
+import ".."
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Layouts
@@ -7,7 +8,7 @@ Item {
 
     property string name: ""
     property real size: 20
-    property color color: "#ffffff"
+    property color color: Theme.textPrimary
 
     implicitWidth: size
     implicitHeight: size

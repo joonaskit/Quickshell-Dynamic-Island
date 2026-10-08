@@ -22,6 +22,9 @@ Singleton {
     readonly property color textPrimary: "#ffffff"
     readonly property color textSecondary: "#98989d"
     readonly property color textTertiary: "#636366"
+    // Foreground on accent-colored fills (badges, selected pills) and on light fills
+    readonly property color onAccent: "#ffffff"
+    readonly property color onLight: "#000000"
 
     // Accent colors
     readonly property color accentGreen: "#30d158"
@@ -37,10 +40,16 @@ Singleton {
     readonly property color sliderTrack: "#3a3a3c"
     readonly property color sliderFill: "#ffffff"
     readonly property color sliderHandle: "#ffffff"
+    readonly property color switchTrackOff: "#39393d"
 
     // Fonts
     readonly property string fontFamily: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
     readonly property string fontDisplay: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
+
+    // Corner radius scale (unscaled), exported to companion apps
+    readonly property int radiusSmall: 6
+    readonly property int radiusMedium: 10
+    readonly property int radiusLarge: 14
 
     // UI Scaling & DPI (limits: 0.80 to 1.25)
     property real uiScale: 1.0

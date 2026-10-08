@@ -307,7 +307,7 @@ Item {
                                         font.weight: modelData.isToday ? Font.Bold : Font.Normal
                                         font.features: { "tnum": 1 }
                                         color: {
-                                            if (modelData.isToday) return "#ffffff";
+                                            if (modelData.isToday) return Theme.onAccent;
                                             if (!modelData.isCurrentMonth) return Qt.rgba(1, 1, 1, 0.18);
                                             return Theme.textPrimary;
                                         }

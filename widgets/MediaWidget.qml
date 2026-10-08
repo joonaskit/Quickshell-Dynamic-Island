@@ -60,7 +60,7 @@ Item {
             Layout.preferredWidth: Theme.px(48)
             Layout.preferredHeight: Theme.px(48)
             radius: Theme.px(10)
-            color: "#1c1c1e"
+            color: Theme.cardBackground
             border.color: Qt.rgba(1, 1, 1, 0.1)
             border.width: 1
             clip: true
@@ -150,7 +150,7 @@ Item {
                     anchors.centerIn: parent
                     name: root.isPlaying ? "pause" : "play"
                     size: Theme.px(14)
-                    color: "#000000"
+                    color: Theme.onLight
                 }
 
                 MouseArea {

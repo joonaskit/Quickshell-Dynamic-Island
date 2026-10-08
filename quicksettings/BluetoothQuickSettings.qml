@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
         radius: root.embedded ? 0 : 18
-        color: root.embedded ? "transparent" : "#1c1c1e"
+        color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Qt.rgba(1, 1, 1, 0.12)
         clip: true
@@ -53,7 +53,7 @@ Item {
                     Layout.preferredWidth: 38
                     Layout.preferredHeight: 38
                     radius: 19
-                    color: BluetoothService.isEnabled ? Theme.accentBlue : "#2c2c2e"
+                    color: BluetoothService.isEnabled ? Theme.accentBlue : Theme.cardBackgroundHover
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -63,7 +63,7 @@ Item {
                         anchors.centerIn: parent
                         name: "bluetooth"
                         size: 19
-                        color: "#ffffff"
+                        color: Theme.onAccent
                     }
 
                     MouseArea {
@@ -110,7 +110,7 @@ Item {
                     Layout.preferredWidth: 46
                     Layout.preferredHeight: 26
                     radius: 13
-                    color: BluetoothService.isEnabled ? Theme.accentGreen : "#39393d"
+                    color: BluetoothService.isEnabled ? Theme.accentGreen : Theme.switchTrackOff
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -124,7 +124,7 @@ Item {
                         width: 22
                         height: 22
                         radius: 11
-                        color: "#ffffff"
+                        color: Theme.sliderHandle
 
                         Behavior on x {
                             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
