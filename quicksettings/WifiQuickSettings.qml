@@ -32,7 +32,7 @@ Item {
         radius: root.embedded ? 0 : 18
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -143,7 +143,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Available Networks Section
@@ -304,7 +304,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Footer Link: Wi-Fi Settings...

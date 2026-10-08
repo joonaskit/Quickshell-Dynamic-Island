@@ -90,7 +90,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
-            color: Qt.rgba(1, 1, 1, 0.12)
+            color: Theme.overlay(0.12)
             opacity: (root.isMaximized && barBackground.width > root.width * 0.85) ? 1.0 : 0.0
             visible: opacity > 0.01
 

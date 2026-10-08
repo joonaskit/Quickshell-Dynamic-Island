@@ -331,7 +331,7 @@ Item {
                 Rectangle {
                     Layout.preferredWidth: visible ? 1 : 0
                     Layout.preferredHeight: Theme.px(14)
-                    color: Qt.rgba(1, 1, 1, 0.15)
+                    color: Theme.overlay(0.15)
                     visible: root.isTopBarMode && (root.visibleIconCount > 0)
                     Layout.rightMargin: Theme.px(4)
                 }
@@ -353,7 +353,7 @@ Item {
                         anchors.centerIn: parent
                         name: "coffee"
                         size: root.iconSize
-                        color: CaffeineService.isActive ? Theme.accentOrange : (coffeeMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38))
+                        color: CaffeineService.isActive ? Theme.accentOrange : (coffeeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38))
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
@@ -383,7 +383,7 @@ Item {
                         anchors.centerIn: parent
                         name: "bell-off"
                         size: root.iconSize
-                        color: SettingsService.dndEnabled ? Theme.accentPurple : (dndMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38))
+                        color: SettingsService.dndEnabled ? Theme.accentPurple : (dndMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38))
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
 
@@ -416,7 +416,7 @@ Item {
                         color: {
                             if (root.wifiMenuOpen) return Theme.accent;
                             if (NetworkService.isConnected && NetworkService.isWifi) return Theme.textPrimary;
-                            return wifiMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
+                            return wifiMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -451,7 +451,7 @@ Item {
                             if (root.bluetoothMenuOpen) return Theme.accent;
                             if (BluetoothService.isConnected) return Theme.accent;
                             if (BluetoothService.isEnabled) return Theme.textPrimary;
-                            return btMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
+                            return btMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -488,7 +488,7 @@ Item {
                         size: root.iconSize
                         color: {
                             if (root.micMenuOpen || !MicrophoneService.isMuted) return Theme.accentRed;
-                            return micMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
+                            return micMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -529,7 +529,7 @@ Item {
                         color: {
                             if (root.clipboardMenuOpen) return Theme.accent;
                             if (ClipboardService.currentText !== "") return Theme.textPrimary;
-                            return clipboardMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.35);
+                            return clipboardMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -568,7 +568,7 @@ Item {
                             if (root.profileMenuOpen) return Theme.accentGreen;
                             if (PowerProfileService.activeProfile === "performance") return Theme.accentRed;
                             if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreen;
-                            return profileMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.45);
+                            return profileMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.45);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -602,7 +602,7 @@ Item {
                         color: {
                             if (root.hardwareMenuOpen) return Theme.accent;
                             if (HardwareStatsService.cpuPercent > 50) return Theme.accentOrange;
-                            return hardwareMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.45);
+                            return hardwareMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.45);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -642,7 +642,7 @@ Item {
                             if (root.devicesMenuOpen) return Theme.accent;
                             if (DeviceService.hasMountedDevices) return Theme.accentGreen;
                             if (DeviceService.hasDevices) return Theme.accent;
-                            return devicesMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38);
+                            return devicesMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -689,7 +689,7 @@ Item {
                         color: {
                             if (root.notificationMenuOpen) return Theme.accentOrange;
                             if (NotificationService.unreadCount > 0) return Theme.accentOrange;
-                            return notifMouse.containsMouse ? Theme.textPrimary : Qt.rgba(1, 1, 1, 0.38);
+                            return notifMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                     }
@@ -757,7 +757,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             height: 1
-            color: Qt.rgba(1, 1, 1, 0.08)
+            color: Theme.overlay(0.08)
             opacity: root.anyMenuOpen ? 1.0 : 0.0
             visible: opacity > 0.01
 
@@ -920,7 +920,7 @@ Item {
                 width: 36
                 height: 4
                 radius: 2
-                color: Qt.rgba(1, 1, 1, 0.25)
+                color: Theme.overlay(0.25)
             }
 
             MouseArea {

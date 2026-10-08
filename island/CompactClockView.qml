@@ -41,7 +41,7 @@ Item {
                 anchors.centerIn: parent
                 name: "clock"
                 size: Theme.px(14)
-                color: root.isHovered ? Theme.accent : Qt.rgba(1, 1, 1, 0.75)
+                color: root.isHovered ? Theme.accent : Theme.overlay(0.75)
 
                 Behavior on color {
                     ColorAnimation { duration: 180 }

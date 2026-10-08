@@ -5,25 +5,46 @@ import Quickshell
 Singleton {
     id: theme
 
+    // Color scheme: "dark" or "light" (SettingsService.colorScheme). Every role
+    // below has a value for each, and overlay() flips with it.
+    property string scheme: "dark"
+    readonly property bool isLight: scheme === "light"
+
+    // A translucent layer for hovers, dividers, borders and dimmed text: white on
+    // the dark scheme, black on the light one. Use this instead of a literal
+    // Qt.rgba(1, 1, 1, alpha), which only works on a dark background.
+    function overlay(alpha) {
+        // A warm near-black on light, to sit with the warm paper tones below
+        return isLight ? Qt.rgba(0.14, 0.11, 0.07, alpha) : Qt.rgba(1, 1, 1, alpha);
+    }
+
     // OLED true black and sleek translucent border
-    readonly property color islandBackground: "#000000"
+    readonly property color islandBackground: isLight ? "#faf6ef" : "#000000"
     readonly property color islandBorder: Qt.rgba(1, 1, 1, 0)
     readonly property color islandBorderHover: Qt.rgba(1, 1, 1, 0)
     readonly property color islandShadow: Qt.rgba(0, 0, 0, 0)
 
     // Inner card backgrounds & subtle highlights
-    readonly property color cardBackground: "#1c1c1e"
-    readonly property color cardBackgroundHover: "#2c2c2e"
+    readonly property color cardBackground: isLight ? "#f1ebe1" : "#1c1c1e"
+    readonly property color cardBackgroundHover: isLight ? "#e7dfd2" : "#2c2c2e"
+    // Gradient of the dock's fallback letter tile
+    readonly property color tileGradientTop: isLight ? "#e7dfd2" : "#3a3a3c"
+    readonly property color tileGradientBottom: isLight ? "#d9d0c2" : "#242426"
     readonly property color controlBackground: Qt.rgba(1, 1, 1, 0)
     readonly property color controlBackgroundHover: Qt.rgba(1, 1, 1, 0)
     readonly property color controlBackgroundActive: Qt.rgba(1, 1, 1, 0)
 
     // Text colors (standard label hierarchy)
-    readonly property color textPrimary: "#ffffff"
-    readonly property color textSecondary: "#98989d"
-    readonly property color textTertiary: "#636366"
-    // Foreground on light fills, and on red fills such as unread badges
-    readonly property color lightForeground: "#000000"
+    // On light, secondary and tertiary are darker than a mirror of the dark values
+    // would give: tertiary carries real text (descriptions), and light grey on a
+    // light background is much harder to read than dark grey on black
+    readonly property color textPrimary: isLight ? "#221f1a" : "#ffffff"
+    readonly property color textSecondary: isLight ? "#575147" : "#98989d"
+    readonly property color textTertiary: isLight ? "#787166" : "#636366"
+    // Foreground on a strong overlay() fill, such as the play button: the fill is
+    // near-white on the dark scheme and near-black on the light one
+    readonly property color lightForeground: isLight ? "#ffffff" : "#000000"
+    // Foreground on red fills such as unread badges
     readonly property color dangerForeground: "#ffffff"
 
     // Accent colors
@@ -68,10 +89,10 @@ Singleton {
     }
 
     // Slider styling
-    readonly property color sliderTrack: "#3a3a3c"
-    readonly property color sliderFill: "#ffffff"
+    readonly property color sliderTrack: isLight ? "#d9d0c2" : "#3a3a3c"
+    readonly property color sliderFill: isLight ? "#221f1a" : "#ffffff"
     readonly property color sliderHandle: "#ffffff"
-    readonly property color switchTrackOff: "#39393d"
+    readonly property color switchTrackOff: isLight ? "#d3c9b9" : "#39393d"
 
     // Fonts
     readonly property string fontFamily: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
@@ -163,8 +184,8 @@ Singleton {
     property bool dockShowBorder: false
     property bool dockTransparent: false
     // Hue of the dock, the launcher and the dock's popups, chosen by name from
-    // dockTintChoices (SettingsService.dockTint). "cool" is the original slightly
-    // blue tone, "neutral" a plain grey, "accent" follows the accent color, and
+    // dockTintChoices (SettingsService.dockTint). "cool" is the scheme's default
+    // tone (slightly blue on dark, warm paper on light), "neutral" a plain grey, "accent" follows the accent color, and
     // the rest are fixed hues. `color` is only what the settings swatch shows.
     property string dockTintName: "cool"
     // How much of a chosen hue is mixed into the dark base (0.02 to 0.20). Does not
@@ -176,7 +197,7 @@ Singleton {
     readonly property real dockAlpha: dockTransparent ? dockGlassOpacity : dockOpacity
     readonly property bool dockTintHasHue: dockTintName !== "cool" && dockTintName !== "neutral"
     readonly property var dockTintChoices: [
-        { "name": "cool", "label": "Cool (default)", "color": "#5b6078" },
+        { "name": "cool", "label": "Default", "color": isLight ? "#cfc6b6" : "#5b6078" },
         { "name": "neutral", "label": "Neutral", "color": "#6e6e73" },
         { "name": "accent", "label": "Match accent", "color": accent, "hollow": true },
         { "name": "blue", "label": "Blue", "color": accentBlue },
@@ -191,6 +212,18 @@ Singleton {
     // Frosted glass translucent tint when transparent mode is enabled, or deep OLED dark when solid
     readonly property color dockBackground: {
         let alpha = dockAlpha;
+        if (isLight) {
+            // The same choices on a near-white base, with the hue taken out of
+            // white instead of added to black
+            if (dockTintName === "neutral") return Qt.rgba(0.95, 0.95, 0.95, alpha);
+            let lightHue = null;
+            for (let j = 0; j < dockTintChoices.length; j++) {
+                if (dockTintChoices[j].name === dockTintName && dockTintHasHue) lightHue = dockTintChoices[j].color;
+            }
+            if (lightHue === null) return Qt.rgba(0.965, 0.945, 0.915, alpha);
+            let lightMix = dockTintStrength * 1.5;
+            return Qt.rgba(0.97 - (1 - lightHue.r) * lightMix, 0.97 - (1 - lightHue.g) * lightMix, 0.97 - (1 - lightHue.b) * lightMix, alpha);
+        }
         if (dockTintName === "neutral") {
             let grey = dockTransparent ? 0.135 : 0.085;
             return Qt.rgba(grey, grey, grey, alpha);
@@ -208,5 +241,5 @@ Singleton {
         let mix = dockTintStrength;
         return Qt.rgba(base + hue.r * mix, base + hue.g * mix, base + hue.b * mix, alpha);
     }
-    readonly property color dockBorder: Qt.rgba(1, 1, 1, 0.18)
+    readonly property color dockBorder: overlay(0.18)
 }

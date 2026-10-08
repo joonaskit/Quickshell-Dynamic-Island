@@ -32,7 +32,7 @@ Item {
         radius: root.embedded ? 0 : Theme.px(18)
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -156,7 +156,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Empty State
@@ -174,7 +174,7 @@ Item {
                         Layout.preferredWidth: 44
                         Layout.preferredHeight: 44
                         radius: 22
-                        color: Qt.rgba(1, 1, 1, 0.05)
+                        color: Theme.overlay(0.05)
 
                         SvgIcon {
                             anchors.centerIn: parent
@@ -217,9 +217,9 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: devCardCol.implicitHeight + 16
                         radius: 14
-                        color: Qt.rgba(1, 1, 1, 0.04)
+                        color: Theme.overlay(0.04)
                         border.width: 1
-                        border.color: Qt.rgba(1, 1, 1, 0.08)
+                        border.color: Theme.overlay(0.08)
 
                         ColumnLayout {
                             id: devCardCol
@@ -238,7 +238,7 @@ Item {
                                     Layout.preferredWidth: 28
                                     Layout.preferredHeight: 28
                                     radius: 14
-                                    color: modelData.isMounted ? Qt.rgba(48/255, 209/255, 88/255, 0.18) : Qt.rgba(1, 1, 1, 0.08)
+                                    color: modelData.isMounted ? Qt.rgba(48/255, 209/255, 88/255, 0.18) : Theme.overlay(0.08)
 
                                     SvgIcon {
                                         anchors.centerIn: parent
@@ -281,7 +281,7 @@ Item {
                                     property bool isBusy: DeviceService.operatingDevice === modelData.path
                                     enabled: !isBusy
                                     opacity: isBusy ? 0.5 : 1.0
-                                    color: ejectMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Qt.rgba(1, 1, 1, 0.08)
+                                    color: ejectMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.overlay(0.08)
 
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
@@ -328,7 +328,7 @@ Item {
                                     radius: 10
                                     color: Qt.rgba(0, 0, 0, 0.25)
                                     border.width: 1
-                                    border.color: Qt.rgba(1, 1, 1, 0.04)
+                                    border.color: Theme.overlay(0.04)
 
                                     ColumnLayout {
                                         id: partCol
@@ -383,7 +383,7 @@ Item {
                                                 Layout.fillWidth: true
                                                 Layout.preferredHeight: 4
                                                 radius: 2
-                                                color: Qt.rgba(1, 1, 1, 0.12)
+                                                color: Theme.overlay(0.12)
                                                 clip: true
 
                                                 Rectangle {
@@ -432,7 +432,7 @@ Item {
                                                 Layout.preferredHeight: 24
                                                 Layout.preferredWidth: browseRow.implicitWidth + 14
                                                 radius: 12
-                                                color: browseMouse.containsMouse ? Theme.accentTint(0.25) : Qt.rgba(1, 1, 1, 0.08)
+                                                color: browseMouse.containsMouse ? Theme.accentTint(0.25) : Theme.overlay(0.08)
 
                                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 

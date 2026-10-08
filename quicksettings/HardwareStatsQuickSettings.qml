@@ -32,7 +32,7 @@ Item {
         radius: root.embedded ? 0 : 18
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -87,7 +87,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // 1. CPU Usage Meter
@@ -121,7 +121,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 8
                     radius: 4
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
 
                     Rectangle {
                         anchors.left: parent.left
@@ -167,7 +167,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 8
                     radius: 4
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
 
                     Rectangle {
                         anchors.left: parent.left
@@ -187,7 +187,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 38
                 radius: 8
-                color: Qt.rgba(1, 1, 1, 0.04)
+                color: Theme.overlay(0.04)
 
                 RowLayout {
                     anchors.fill: parent

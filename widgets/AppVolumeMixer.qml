@@ -24,9 +24,9 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(26)
             radius: Theme.px(8)
-            color: headerMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04)
+            color: headerMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.04)
             border.width: 1
-            border.color: root.expanded ? Theme.accentTint(0.35) : Qt.rgba(1, 1, 1, 0.08)
+            border.color: root.expanded ? Theme.accentTint(0.35) : Theme.overlay(0.08)
 
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }

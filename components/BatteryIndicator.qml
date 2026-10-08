@@ -56,7 +56,7 @@ Item {
                 radius: Theme.px(3.5)
                 color: "transparent"
                 border.width: 1.2
-                border.color: Qt.rgba(1, 1, 1, 0.55)
+                border.color: Theme.overlay(0.55)
 
                 // Battery Fill level
                 Rectangle {
@@ -99,7 +99,7 @@ Item {
                 height: Theme.px(4.5)
                 radius: 0.8
                 anchors.verticalCenter: capsule.verticalCenter
-                color: Qt.rgba(1, 1, 1, 0.55)
+                color: Theme.overlay(0.55)
             }
         }
     }

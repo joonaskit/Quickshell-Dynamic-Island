@@ -47,7 +47,7 @@ Item {
         radius: root.embedded ? 0 : 18
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -70,7 +70,7 @@ Item {
                     radius: 19
                     color: !root.isPresent
                         ? Qt.rgba(255/255, 214/255, 10/255, 0.2)
-                        : (root.isCharging ? Qt.rgba(48/255, 209/255, 88/255, 0.2) : Qt.rgba(1, 1, 1, 0.08))
+                        : (root.isCharging ? Qt.rgba(48/255, 209/255, 88/255, 0.2) : Theme.overlay(0.08))
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -130,7 +130,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // System Power Actions Title
@@ -152,7 +152,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
                     radius: 12
-                    color: lockMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.05)
+                    color: lockMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -200,7 +200,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
                     radius: 12
-                    color: sleepMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.05)
+                    color: sleepMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -248,7 +248,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
                     radius: 12
-                    color: restartMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.05)
+                    color: restartMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -296,7 +296,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
                     radius: 12
-                    color: shutdownMouse.containsMouse ? Theme.cardBackgroundHover : Qt.rgba(1, 1, 1, 0.05)
+                    color: shutdownMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -344,7 +344,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Footer Link: Energy & Power Settings...

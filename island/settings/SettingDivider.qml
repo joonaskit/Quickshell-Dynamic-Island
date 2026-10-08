@@ -9,5 +9,5 @@ Rectangle {
     Layout.preferredHeight: 1
     Layout.leftMargin: 12
     Layout.rightMargin: 12
-    color: Qt.rgba(1, 1, 1, 0.06)
+    color: Theme.overlay(0.06)
 }

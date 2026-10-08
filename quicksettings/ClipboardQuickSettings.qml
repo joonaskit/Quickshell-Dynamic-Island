@@ -32,7 +32,7 @@ Item {
         radius: root.embedded ? 0 : 18
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.overlay(0.12)
         clip: true
 
         ColumnLayout {
@@ -149,7 +149,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: Qt.rgba(1, 1, 1, 0.08)
+                color: Theme.overlay(0.08)
             }
 
             // Section 1: Active Clipboard Preview
@@ -184,9 +184,9 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: activeCardContent.implicitHeight + 16
                     radius: 12
-                    color: Qt.rgba(1, 1, 1, 0.05)
+                    color: Theme.overlay(0.05)
                     border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                    border.color: Theme.overlay(0.08)
 
                     ColumnLayout {
                         id: activeCardContent
@@ -228,7 +228,7 @@ Item {
                             SvgIcon {
                                 name: "clipboard"
                                 size: 14
-                                color: Qt.rgba(1, 1, 1, 0.25)
+                                color: Theme.overlay(0.25)
                             }
 
                             Text {
@@ -254,7 +254,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Theme.overlay(0.08)
                     Layout.bottomMargin: 2
                 }
 
@@ -278,7 +278,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 32
                         radius: 8
-                        color: histMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.03)
+                        color: histMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.03)
 
                         Behavior on color {
                             ColorAnimation { duration: Theme.animDurationTooltip }
@@ -293,7 +293,7 @@ Item {
                             SvgIcon {
                                 name: "copy"
                                 size: 12
-                                color: histMouse.containsMouse ? Theme.accent : Qt.rgba(1, 1, 1, 0.3)
+                                color: histMouse.containsMouse ? Theme.accent : Theme.overlay(0.3)
                             }
 
                             Text {
@@ -325,7 +325,7 @@ Item {
                                     anchors.centerIn: parent
                                     name: "close"
                                     size: 10
-                                    color: delMouse.containsMouse ? Theme.accentRed : Qt.rgba(1, 1, 1, 0.25)
+                                    color: delMouse.containsMouse ? Theme.accentRed : Theme.overlay(0.25)
                                 }
 
                                 MouseArea {

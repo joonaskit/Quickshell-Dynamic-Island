@@ -18,7 +18,7 @@ function fontFamilies(fontFamily) {
 function build(t) {
     return {
         "version": formatVersion,
-        "scheme": "dark",
+        "scheme": t.scheme === "light" ? "light" : "dark",
         "colors": {
             "background": t.background,
             "surface": t.surface,

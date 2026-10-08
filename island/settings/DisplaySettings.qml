@@ -8,6 +8,23 @@ SettingsCategory {
         title: "COLORS"
         titlePixelSize: Theme.fontPx(10)
 
+        SettingSegmented {
+            title: "Appearance"
+            description: "Light is experimental"
+            iconName: "contrast"
+            iconColor: Theme.accentIndigo
+            currentValue: SettingsService.colorScheme
+            options: [
+                { label: "Dark", value: "dark" },
+                { label: "Light", value: "light" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("colorScheme", val);
+            }
+        }
+
+        SettingDivider {}
+
         SettingSwatches {
             title: "Accent Color"
             description: "Used for selection, focus and active states"

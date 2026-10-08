@@ -110,7 +110,7 @@ Item {
                 Layout.preferredHeight: Theme.px(20)
                 Layout.preferredWidth: todayText.implicitWidth + Theme.px(12)
                 radius: Theme.px(10)
-                color: todayMouse.containsMouse ? Theme.accentTint(0.25) : Qt.rgba(1, 1, 1, 0.06)
+                color: todayMouse.containsMouse ? Theme.accentTint(0.25) : Theme.overlay(0.06)
                 visible: (root.displayYear !== root.currentDate.getFullYear() || root.displayMonth !== root.currentDate.getMonth())
 
                 Text {
@@ -140,7 +140,7 @@ Item {
                 Layout.preferredWidth: Theme.px(22)
                 Layout.preferredHeight: Theme.px(22)
                 radius: Theme.px(11)
-                color: prevMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: prevMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                 scale: prevMouse.pressed ? 0.90 : 1.0
 
                 SvgIcon {
@@ -171,7 +171,7 @@ Item {
                 Layout.preferredWidth: Theme.px(22)
                 Layout.preferredHeight: Theme.px(22)
                 radius: Theme.px(11)
-                color: nextMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent"
+                color: nextMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                 scale: nextMouse.pressed ? 0.90 : 1.0
 
                 SvgIcon {
@@ -203,9 +203,9 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: gridColumn.implicitHeight + Theme.px(12)
             radius: Theme.px(12)
-            color: Qt.rgba(1, 1, 1, 0.03)
+            color: Theme.overlay(0.03)
             border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.06)
+            border.color: Theme.overlay(0.06)
 
             ColumnLayout {
                 id: gridColumn
@@ -243,7 +243,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: Qt.rgba(1, 1, 1, 0.06)
+                    color: Theme.overlay(0.06)
                 }
 
                 // Weeks and Days Grid
@@ -274,7 +274,7 @@ Item {
                                     font.pixelSize: Theme.fontPx(9)
                                     font.weight: modelData.isCurrentWeek ? Font.Bold : Font.Normal
                                     font.features: { "tnum": 1 }
-                                    color: modelData.isCurrentWeek ? Theme.accentOrange : Qt.rgba(1, 1, 1, 0.3)
+                                    color: modelData.isCurrentWeek ? Theme.accentOrange : Theme.overlay(0.3)
                                 }
                             }
                         }
@@ -295,7 +295,7 @@ Item {
                                     radius: Theme.px(11)
                                     color: {
                                         if (modelData.isToday) return Theme.accent;
-                                        if (cellMouse.containsMouse) return Qt.rgba(1, 1, 1, 0.1);
+                                        if (cellMouse.containsMouse) return Theme.overlay(0.1);
                                         return "transparent";
                                     }
 
@@ -308,7 +308,7 @@ Item {
                                         font.features: { "tnum": 1 }
                                         color: {
                                             if (modelData.isToday) return Theme.accentForeground;
-                                            if (!modelData.isCurrentMonth) return Qt.rgba(1, 1, 1, 0.18);
+                                            if (!modelData.isCurrentMonth) return Theme.overlay(0.18);
                                             return Theme.textPrimary;
                                         }
                                     }
