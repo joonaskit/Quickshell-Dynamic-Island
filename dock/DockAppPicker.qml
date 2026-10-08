@@ -29,9 +29,10 @@ Item {
 
     signal closed()
 
-    // Point on the dock the launcher grows from (the launcher button)
-    property real targetX: dockCapsuleX + dockCapsuleWidth / 2
-    property real targetY: dockCapsuleY + dockCapsuleHeight / 2
+    // How far open the launcher is (0 to 1), and the current radius of the dock
+    // corner it sits on; the dock straightens that corner as the launcher opens
+    readonly property real openProgress: geo.progress
+    property real dockCornerRadius: Theme.dockRadius
 
     // Full size of the launcher; animates when the layout settings change
     property real finalWidth: gridCols >= 5 ? 540 : 460
@@ -44,8 +45,8 @@ Item {
         NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
     }
 
-    // The launcher is an extension of the dock: it grows out of the launcher
-    // button with its base flush on the dock edge (no gap).
+    // The launcher is an extension of the dock: it grows out of the corner by the
+    // launcher button, with its side continuing the end of the dock in one line.
     DockFlyoutGeometry {
         id: geo
         open: root.isOpen
@@ -55,8 +56,7 @@ Item {
         dockCapsuleY: root.dockCapsuleY
         dockCapsuleWidth: root.dockCapsuleWidth
         dockCapsuleHeight: root.dockCapsuleHeight
-        targetX: root.targetX
-        targetY: root.targetY
+        align: "start"
         finalWidth: root.finalWidth
         finalHeight: root.finalHeight
         parentWidth: root.parent ? root.parent.width : 1000
@@ -222,8 +222,11 @@ Item {
     DockFlyoutBackground {
         isVertical: root.isVertical
         dockPosition: root.dockPosition
-        fitsOnDock: geo.fitsOnDock
         filletSize: geo.filletSize
+        startFlush: geo.startFlush
+        dockCornerRadius: root.dockCornerRadius
+        farFillet: geo.farFillet
+        farOverhang: geo.farOverhang
         cornerRadius: 18
         tintAlpha: Theme.dockTransparent ? 0.94 : 0.97
     }
