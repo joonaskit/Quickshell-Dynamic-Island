@@ -18,7 +18,7 @@ Singleton {
             "iconColor": Theme.accentRed,
             "group": "cards",
             "defaultEnabled": true,
-            "component": calendarComponent
+            "source": Qt.resolvedUrl("MiniCalendarWidget.qml")
         },
         {
             "id": "timer",
@@ -28,7 +28,7 @@ Singleton {
             "iconColor": Theme.accentOrange,
             "group": "cards",
             "defaultEnabled": true,
-            "component": timerComponent
+            "source": Qt.resolvedUrl("TimerWidget.qml")
         },
         {
             "id": "media",
@@ -38,7 +38,7 @@ Singleton {
             "iconColor": Theme.accentRed,
             "group": "cards",
             "defaultEnabled": true,
-            "component": mediaComponent,
+            "source": Qt.resolvedUrl("MediaWidget.qml"),
             "available": function(host) { return host.player !== null; }
         },
         {
@@ -49,7 +49,7 @@ Singleton {
             "iconColor": Theme.accentBlue,
             "group": "controls",
             "defaultEnabled": true,
-            "component": audioOutputComponent
+            "source": Qt.resolvedUrl("AudioOutputSelector.qml")
         },
         {
             "id": "appMixer",
@@ -59,7 +59,7 @@ Singleton {
             "iconColor": Theme.accentBlue,
             "group": "controls",
             "defaultEnabled": true,
-            "component": appMixerComponent,
+            "source": Qt.resolvedUrl("AppVolumeMixer.qml"),
             "available": function(host) { return AppMixerService.streams.length > 0; }
         },
         {
@@ -70,7 +70,7 @@ Singleton {
             "iconColor": Theme.accentGreen,
             "group": "controls",
             "defaultEnabled": true,
-            "component": volumeComponent
+            "source": Qt.resolvedUrl("VolumeSlider.qml")
         },
         {
             "id": "brightness",
@@ -80,7 +80,7 @@ Singleton {
             "iconColor": Theme.accentYellow,
             "group": "controls",
             "defaultEnabled": true,
-            "component": brightnessComponent,
+            "source": Qt.resolvedUrl("BrightnessSlider.qml"),
             "available": function(host) { return BrightnessService.isAvailable; }
         }
     ]
@@ -91,12 +91,4 @@ Singleton {
         }
         return null;
     }
-
-    Component { id: calendarComponent; MiniCalendarWidget {} }
-    Component { id: timerComponent; TimerWidget {} }
-    Component { id: mediaComponent; MediaWidget {} }
-    Component { id: audioOutputComponent; AudioOutputSelector {} }
-    Component { id: appMixerComponent; AppVolumeMixer {} }
-    Component { id: volumeComponent; VolumeSlider {} }
-    Component { id: brightnessComponent; BrightnessSlider {} }
 }
