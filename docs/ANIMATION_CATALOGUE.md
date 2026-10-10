@@ -170,7 +170,7 @@ Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
 | File | Element | Trigger |
 |---|---|---|
-| `IslandPill.qml` L221–302 | `compactClockView`, `compactMediaView`, `compactNotificationView`, `expandedView`, `settingsView` | `isExpanded` / `isSettingsOpen` / media state |
+| `IslandPill.qml` L221–302 | `compactClockView`, `compactMediaView`, `compactNotificationView`, `expandedView`, `notificationView`, `settingsView` | `isExpanded` / `isNotificationOpen` / `isSettingsOpen` / media state |
 | `TopRightStatusCluster.qml` L736–863 | `menuContainer` + 9 individual sub-menus (WiFi, BT, Power, Clipboard, Notifications, Mic, Profile, Hardware, Devices) | `root.anyMenuOpen` + per-menu booleans |
 | `TopRightStatusCluster.qml` L720–725 | Divider between status icons and menu content | `root.anyMenuOpen` |
 | `TopLeftAppCluster.qml` L248–270 | `divider`, `menuContainer` | `root.menuOpen` |

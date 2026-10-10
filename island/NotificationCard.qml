@@ -7,6 +7,8 @@ Rectangle {
 
     property var notif: null
     property bool showApp: true
+    property int bodyMaxLines: 2
+    readonly property bool replyActive: replyInput.activeFocus
 
     // Native notification object (stays valid while tracked)
     readonly property var raw: notif ? notif._raw : null
@@ -146,7 +148,7 @@ Rectangle {
             font.pixelSize: Theme.fontPx(10)
             color: Theme.textSecondary
             wrapMode: Text.WrapAnywhere
-            maximumLineCount: 2
+            maximumLineCount: notifCard.bodyMaxLines
             elide: Text.ElideRight
         }
 

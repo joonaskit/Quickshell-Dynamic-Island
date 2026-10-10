@@ -30,8 +30,8 @@ PanelWindow {
     // Top layer sits above regular/maximized windows but below fullscreen windows
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell-island"
-    // Lets the settings search box take typing once it is clicked
-    WlrLayershell.keyboardFocus: (islandPill.isSettingsOpen || statusCluster.notificationMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    // Lets the settings search box and notification replies take typing once clicked
+    WlrLayershell.keyboardFocus: (islandPill.isSettingsOpen || islandPill.isNotificationOpen || statusCluster.notificationMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     // Check if the active window is on this screen (or screen is unspecified)
     readonly property bool isThisScreenActive: {
@@ -87,7 +87,7 @@ PanelWindow {
 
     onHasFullscreenAppChanged: {
         if (hasFullscreenApp) {
-            if (islandPill.isExpanded) islandPill.collapse();
+            if (islandPill.isOpen) islandPill.collapse();
             statusCluster.closeAllMenus();
             appIndicatorPill.closeContextMenu();
             appCluster.closeMenu();
@@ -106,18 +106,18 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
-            enabled: islandPill.isExpanded || islandPill.isSettingsOpen || appCluster.menuOpen
+            enabled: islandPill.isOpen || appCluster.menuOpen
             onClicked: {
-                if (islandPill.isExpanded || islandPill.isSettingsOpen) islandPill.collapse();
+                if (islandPill.isOpen) islandPill.collapse();
                 if (appCluster.menuOpen) appCluster.closeMenu();
             }
         }
     }
 
-    // The expanded island closes on an outside click, like the menus. The settings
-    // view does not: it is common to click elsewhere while adjusting settings
-    // (e.g. to try the dock), and it has its own close and back buttons.
-    readonly property bool expandedDismissable: islandPill.isExpanded && !islandPill.isSettingsOpen
+    // The expanded island and an opened notification close on an outside click, like
+    // the menus. The settings view does not: it is common to click elsewhere while
+    // adjusting settings (e.g. to try the dock), and it has its own close and back buttons.
+    readonly property bool expandedDismissable: (islandPill.isExpanded || islandPill.isNotificationOpen) && !islandPill.isSettingsOpen
     readonly property bool hasDismissablePopup: statusCluster.anyMenuOpen || appIndicatorPill.contextMenuOpen || appCluster.menuOpen || virtualDesktopsPill.menuOpen || expandedDismissable
 
     // Dismiss overlay to close the expanded island, Quick Settings popovers or context menus when clicking anywhere outside
@@ -419,7 +419,7 @@ PanelWindow {
     // Island container positioned at top center
     IslandPill {
         id: islandPill
-        z: (islandPill.isExpanded || islandPill.isSettingsOpen) ? 300 : 20
+        z: (islandPill.isOpen) ? 300 : 20
         anchors.horizontalCenter: parent.horizontalCenter
         y: window.isMaximized ? 0 : Theme.topMargin
         isTopBarMode: window.isMaximized
@@ -427,6 +427,11 @@ PanelWindow {
 
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
         visible: opacity > 0.01
+
+        onRequestShowAllNotifications: {
+            islandPill.collapse();
+            statusCluster.openNotificationMenu();
+        }
 
         Behavior on y {
             NumberAnimation {
@@ -446,11 +451,11 @@ PanelWindow {
         // Tracks the pill body's actual animated right edge (same frame, same curve)
         x: islandPill.x + islandPill.hitBox.x + islandPill.hitBox.width + 8
         anchors.verticalCenter: islandPill.verticalCenter
-        isExpanded: islandPill.isExpanded || islandPill.isSettingsOpen
+        isExpanded: islandPill.isOpen
         isTopBarMode: window.isMaximized
 
         onClicked: {
-            if (islandPill.isExpanded || islandPill.isSettingsOpen) {
+            if (islandPill.isOpen) {
                 islandPill.collapse();
             }
             statusCluster.openNotificationMenu();
@@ -465,7 +470,7 @@ PanelWindow {
         y: window.appIndicatorTargetY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
-        isIslandExpanded: islandPill.isExpanded || islandPill.isSettingsOpen
+        isIslandExpanded: islandPill.isOpen
 
         onCollapseIslandRequested: {
             islandPill.collapse();
@@ -519,7 +524,7 @@ PanelWindow {
                 statusCluster.closeAllMenus();
                 appIndicatorPill.closeContextMenu();
                 virtualDesktopsPill.closeMenu();
-                if (islandPill.isExpanded) islandPill.collapse();
+                if (islandPill.isOpen) islandPill.collapse();
             }
         }
     }
@@ -541,7 +546,7 @@ PanelWindow {
                 statusCluster.closeAllMenus();
                 appIndicatorPill.closeContextMenu();
                 appCluster.closeMenu();
-                if (islandPill.isExpanded || islandPill.isSettingsOpen) islandPill.collapse();
+                if (islandPill.isOpen) islandPill.collapse();
             }
         }
     }
@@ -572,7 +577,7 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
-            enabled: islandPill.isExpanded || islandPill.isSettingsOpen
+            enabled: islandPill.isOpen
             onClicked: {
                 islandPill.collapse();
             }
