@@ -26,6 +26,7 @@ CompactOsdView 1.0 island/CompactOsdView.qml
 CompactTimerView 1.0 island/CompactTimerView.qml
 TimerWidget 1.0 widgets/TimerWidget.qml
 ExpandedView 1.0 island/ExpandedView.qml
+ExpandedNotificationView 1.0 island/ExpandedNotificationView.qml
 NotificationCard 1.0 island/NotificationCard.qml
 NotificationListView 1.0 island/NotificationListView.qml
 MiniCalendarWidget 1.0 widgets/MiniCalendarWidget.qml
