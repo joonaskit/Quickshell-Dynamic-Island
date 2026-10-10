@@ -52,6 +52,8 @@ Singleton {
     readonly property color accentBlue: "#0a84ff"
     readonly property color accentOrange: "#ff9f0a"
     readonly property color accentYellow: "#ffd60a"
+    // Yellow for icons and text on the panel background: the plain yellow washes out on light
+    readonly property color accentYellowStrong: isLight ? "#b38600" : accentYellow
     readonly property color accentRed: "#ff453a"
     readonly property color accentPurple: "#bf5af2"
     readonly property color accentCyan: "#64d2ff"

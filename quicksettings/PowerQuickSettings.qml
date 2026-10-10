@@ -76,7 +76,7 @@ Item {
                         anchors.centerIn: parent
                         name: !root.isPresent ? "nuclear" : (root.isCharging ? "bolt" : "battery")
                         size: 20
-                        color: !root.isPresent ? Theme.accentYellow : (root.isCharging ? Theme.accentGreen : Theme.textPrimary)
+                        color: !root.isPresent ? Theme.accentYellowStrong : (root.isCharging ? Theme.accentGreen : Theme.textPrimary)
                     }
                 }
 
