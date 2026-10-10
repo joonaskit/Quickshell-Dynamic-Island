@@ -1,6 +1,7 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
+import "../services/clipboardHistory.js" as History
 
 Item {
     id: root
@@ -416,7 +417,7 @@ Item {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: modelData.sensitive ? "Hidden: looks like a credential" : modelData.text.replace(/[\r\n\t]+/g, " ").trim()
+                                text: modelData.sensitive ? "Hidden: looks like a credential" : History.label(modelData, 200)
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(11)
                                 font.italic: modelData.sensitive

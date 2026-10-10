@@ -10,7 +10,7 @@ QML desktop shell for KDE Plasma (Wayland), built with Quickshell: a morphing to
 - `services/Theme.qml` holds colors, sizes and scale. Use it instead of hardcoding values.
 - `scripts/` holds the Python helpers (`kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*.py`, `downloads_tracker.py`, `clipboard_tracker.py`) that feed data to the services. `scripts/kwin_script.js` runs inside KWin, loaded by the tracker from its own directory.
 - `dock/` holds the dock (`Dock*.qml`, including `DockService`).
-- `clipboard/` holds the clipboard history window. `ClipboardService` fills it from `scripts/clipboard_tracker.py`, and the history logic is in `services/clipboardHistory.js`. History stays in memory only, so never write it to disk.
+- `clipboard/` holds the clipboard history window. `ClipboardService` fills it from `scripts/clipboard_tracker.py`, and the history logic is in `services/clipboardHistory.js`. History stays in memory only, so never write it to disk. The one exception is copied images: the tracker saves them under `$XDG_RUNTIME_DIR` (tmpfs), deletes them when entries go, and wipes the folder when it starts and stops.
 - `quicksettings/` holds the quick-settings popups, selectors and sliders.
 - `services/` holds the `*Service.qml` singletons and `Theme.qml`.
 - `island/` holds the island window, pills, clusters, views and settings UI.

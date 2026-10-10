@@ -87,4 +87,83 @@ TestCase {
         compare(History.formatAge(0, 120000), "2 min ago");
         compare(History.formatAge(0, 7200000), "2 h ago");
     }
+
+    function img(hash, extra) {
+        return Object.assign({ "type": "image", "mime": "image/png", "path": "/run/x/" + hash + ".png", "hash": hash, "size": 100, "time": 1000 }, extra || {});
+    }
+
+    function files(list) {
+        return { "type": "files", "files": list, "time": 1000 };
+    }
+
+    function test_imageRepeatMovesToFront() {
+        let h = History.addCopy([], img("h1"), src, 1);
+        h = History.addCopy(h, rec("t"), src, 2);
+        h = History.addCopy(h, img("h1", { "time": 5000 }), src, 3);
+        compare(h.length, 2);
+        compare(h[0].type, "image");
+        compare(h[0].count, 2);
+        compare(h[0].id, 1);
+        compare(h[0].kind, "image");
+        compare(h[0].sensitive, false);
+    }
+
+    function test_differentImagesAreSeparate() {
+        let h = History.addCopy([], img("h1"), src, 1);
+        h = History.addCopy(h, img("h2"), src, 2);
+        compare(h.length, 2);
+    }
+
+    function test_filesRepeatAndFolder() {
+        let h = History.addCopy([], files(["/home/u/docs/a.txt", "/home/u/docs/b.txt"]), src, 1);
+        compare(h[0].dir, "/home/u/docs");
+        h = History.addCopy(h, files(["/home/u/docs/a.txt", "/home/u/docs/b.txt"]), src, 2);
+        compare(h.length, 1);
+        compare(h[0].count, 2);
+        h = History.addCopy(h, files(["/home/u/docs/a.txt"]), src, 3);
+        compare(h.length, 2);
+    }
+
+    function test_commonDir() {
+        compare(History.commonDir(["/a/b/c.txt"]), "/a/b");
+        compare(History.commonDir(["/a/b/c.txt", "/a/d/e.txt"]), "/a");
+        compare(History.commonDir(["/a/b.txt", "/c/d.txt"]), "/");
+        compare(History.commonDir(["/a.txt"]), "/");
+    }
+
+    function test_textAndImageDoNotCollide() {
+        let h = History.addCopy([], rec("abc"), src, 1);
+        h = History.addCopy(h, img("abc"), src, 2);
+        compare(h.length, 2);
+    }
+
+    function test_viewFiltersImagesAndFiles() {
+        let h = History.addCopy([], rec("alpha"), src, 1);
+        h = History.addCopy(h, img("h1"), src, 2);
+        h = History.addCopy(h, files(["/home/u/report.pdf"]), src, 3);
+        compare(History.view(h, "", "image").map(e => e.id), [2]);
+        compare(History.view(h, "", "files").map(e => e.id), [3]);
+        compare(History.view(h, "", "text").map(e => e.id), [1]);
+        compare(History.view(h, "report", "all").map(e => e.id), [3]);
+        compare(History.view(h, "", "all").length, 3);
+    }
+
+    function test_labelsAndThumbs() {
+        let h = History.addCopy([], img("h1"), src, 1);
+        h = History.addCopy(h, files(["/x/a.txt", "/x/pic.PNG", "/x/c.txt"]), src, 2);
+        h = History.addCopy(h, files(["/x/a.txt"]), src, 3);
+        compare(History.label(h[2], 20), "Image");
+        compare(History.label(h[1], 20), "a.txt and 2 more");
+        compare(History.label(h[0], 20), "a.txt");
+        compare(History.thumbPath(h[2]), "/run/x/h1.png");
+        compare(History.thumbPath(h[1]), "/x/pic.PNG");
+        compare(History.thumbPath(h[0]), "");
+    }
+
+    function test_displayDirAndFileUrl() {
+        compare(History.displayDir("/home/u/docs", "/home/u"), "~/docs");
+        compare(History.displayDir("/home/u", "/home/u"), "~");
+        compare(History.displayDir("/home/user2/x", "/home/u"), "/home/user2/x");
+        compare(History.fileUrl("/a b/c#d.png"), "file:///a%20b/c%23d.png");
+    }
 }

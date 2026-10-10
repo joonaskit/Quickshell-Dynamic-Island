@@ -118,7 +118,6 @@ Item {
         root.powerMenuOpen = next;
     }
 
-    onClipboardMenuOpenChanged: ClipboardService.previewActive = clipboardMenuOpen
 
     function toggleClipboardMenu() {
         let next = !root.clipboardMenuOpen;

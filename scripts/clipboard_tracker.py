@@ -5,14 +5,21 @@ Runs `wl-paste --watch` and prints one JSON line per clipboard change:
 
   {"type": "text", "text": ..., "kind": "text"|"url", "sensitive": bool,
    "size": bytes, "chars": n, "lines": n, "time": ms}
-  {"type": "files", "files": [paths]}
-  {"type": "image" | "other", "mime": "image/png"}
+  {"type": "files", "files": [paths], "time": ms}
+  {"type": "image", "mime": "image/png", "path": file, "hash": sha1, "size": bytes, "time": ms}
+  {"type": "other", "mime": "application/x-foo"}
   {"type": "secret"}   copy marked by a password manager; its content is never read
   {"type": "empty"}    nothing on the clipboard
+
+Copied images are saved under $XDG_RUNTIME_DIR (a RAM-backed tmpfs) so the history can
+show and re-copy them. The folder is emptied when the tracker starts and stops.
 """
+import hashlib
 import json
 import math
+import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -21,6 +28,10 @@ from urllib.parse import unquote
 
 # Copies above this many characters are not recorded
 MAX_CHARS = 200_000
+# Images above this many bytes are not recorded
+MAX_IMAGE_BYTES = 25 * 1024 * 1024
+IMAGE_DIR = os.path.join(os.environ.get("XDG_RUNTIME_DIR") or "/tmp", "quickshell-clipboard-images")
+IMAGE_EXTENSIONS = {"image/jpeg": "jpg", "image/svg+xml": "svg", "image/x-icon": "ico"}
 
 PASSWORD_HINT_TYPE = "x-kde-passwordManagerHint"
 TEXT_TYPES = ("text/plain", "UTF8_STRING", "STRING", "TEXT")
@@ -97,6 +108,36 @@ def parse_uri_list(raw):
     return files
 
 
+def pick_image_type(types):
+    """The image format to read: PNG when offered, else the first image type."""
+    images = [t for t in types if t.startswith("image/")]
+    if "image/png" in images:
+        return "image/png"
+    return images[0] if images else None
+
+
+def build_image_record(data, mime, now_ms=None, directory=None):
+    """Saves image bytes and returns their record, or None when empty or too large."""
+    if not data or len(data) > MAX_IMAGE_BYTES:
+        return None
+    digest = hashlib.sha1(data).hexdigest()
+    ext = IMAGE_EXTENSIONS.get(mime) or re.sub(r"[^a-z0-9]", "", mime.split("/", 1)[1].lower()) or "img"
+    directory = directory or IMAGE_DIR
+    os.makedirs(directory, mode=0o700, exist_ok=True)
+    path = os.path.join(directory, f"{digest}.{ext}")
+    if not os.path.exists(path):
+        with open(path, "wb") as f:
+            f.write(data)
+    return {
+        "type": "image",
+        "mime": mime,
+        "path": path,
+        "hash": digest,
+        "size": len(data),
+        "time": int(time.time() * 1000) if now_ms is None else now_ms,
+    }
+
+
 def wl_paste(*args):
     """Runs wl-paste and returns its stdout bytes, or None when it fails."""
     try:
@@ -118,7 +159,7 @@ def snapshot():
         raw = wl_paste("--type", "text/uri-list")
         files = parse_uri_list(raw.decode("utf-8", "replace")) if raw else []
         if files:
-            return {"type": "files", "files": files}
+            return {"type": "files", "files": files, "time": int(time.time() * 1000)}
     if any(t in TEXT_TYPES or t.startswith("text/plain") for t in types):
         raw = wl_paste("-n", "--type", "text/plain")
         if raw is None:
@@ -129,8 +170,12 @@ def snapshot():
             return {"type": "other", "mime": types[0]}
         record = build_text_record(text)
         return record if record else {"type": "empty"}
-    mime = types[0]
-    return {"type": "image" if mime.startswith("image/") else "other", "mime": mime}
+    image_type = pick_image_type(types)
+    if image_type:
+        data = wl_paste("--type", image_type)
+        record = build_image_record(data, image_type) if data else None
+        return record if record else {"type": "empty"}
+    return {"type": "other", "mime": types[0]}
 
 
 def emit(record):
@@ -140,10 +185,12 @@ def emit(record):
 
 def main():
     # `wl-paste --watch echo` prints one empty line per clipboard change
+    shutil.rmtree(IMAGE_DIR, ignore_errors=True)
     child = subprocess.Popen(["wl-paste", "--watch", "echo"], stdout=subprocess.PIPE, text=True)
 
     def stop(*_):
         child.terminate()
+        shutil.rmtree(IMAGE_DIR, ignore_errors=True)
         sys.exit(0)
 
     signal.signal(signal.SIGTERM, stop)
@@ -158,6 +205,7 @@ def main():
         pass
     finally:
         child.terminate()
+        shutil.rmtree(IMAGE_DIR, ignore_errors=True)
 
 
 if __name__ == "__main__":
