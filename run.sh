@@ -3,11 +3,18 @@
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Quickshell does not stop the Python helpers it started; stale ones (e.g. a second
+# kwin_window_tracker) keep the new shell from getting window state
+stop_helpers() {
+    pkill -f "$DIR/scripts/.*\.py" 2>/dev/null || true
+}
+
 case "$1" in
     kill|-k|--kill)
         echo "Stopping Quickshell Island..."
         quickshell kill -p "$DIR" 2>/dev/null || pkill -f "quickshell.*$DIR"
         quickshell kill -p "$DIR" 2>/dev/null || killall -q quickshell 2>/dev/null || true
+        stop_helpers
         ;;
     launcher|-l|--launcher)
         quickshell ipc -p "$DIR" call launcher toggle
@@ -32,11 +39,13 @@ case "$1" in
     daemon|-d|--daemon)
         echo "Starting Quickshell Island in background..."
         quickshell kill -p "$DIR" 2>/dev/null || true
+        stop_helpers
         quickshell -p "$DIR" --daemonize
         ;;
     *)
         echo "Starting Quickshell Island..."
         quickshell kill -p "$DIR" 2>/dev/null || true
+        stop_helpers
         exec quickshell -p "$DIR"
         ;;
 esac
