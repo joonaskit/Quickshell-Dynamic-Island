@@ -71,6 +71,7 @@ Singleton {
     property bool showDetachedNotifBubble: true
     property bool showOsd: true
     property bool showTimerInPill: true
+    property bool showActivitiesInPill: true
 
     // Expanded island widgets: id -> enabled. Ids missing here use the
     // registry default (see WidgetRegistry).
@@ -188,6 +189,7 @@ Singleton {
         if (data.showDetachedNotifBubble !== undefined) root.showDetachedNotifBubble = !!data.showDetachedNotifBubble;
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
+        if (data.showActivitiesInPill !== undefined) root.showActivitiesInPill = !!data.showActivitiesInPill;
 
         // Also reads the per-widget keys used by older configs
         root.widgets = SettingsMigration.widgetStates(data, WidgetRegistry.widgets.map(w => w.id));
@@ -329,6 +331,7 @@ Singleton {
         root.showDetachedNotifBubble = true;
         root.showOsd = true;
         root.showTimerInPill = true;
+        root.showActivitiesInPill = true;
 
         root.widgets = {};
 
@@ -409,6 +412,7 @@ Singleton {
             "showDetachedNotifBubble": root.showDetachedNotifBubble,
             "showOsd": root.showOsd,
             "showTimerInPill": root.showTimerInPill,
+            "showActivitiesInPill": root.showActivitiesInPill,
             "widgets": root.widgetStates(),
             "launcherDefaultView": root.launcherDefaultView,
             "launcherDensity": root.launcherDensity,

@@ -11,6 +11,17 @@ Singleton {
 
     readonly property var widgets: [
         {
+            "id": "activities",
+            "title": "App Activities",
+            "description": "Progress and status from other apps, such as file copies, with their actions",
+            "icon": "download",
+            "iconColor": Theme.accentGreen,
+            "group": "cards",
+            "defaultEnabled": true,
+            "source": Qt.resolvedUrl("ActivitiesWidget.qml"),
+            "available": function(host) { return ActivityService.count > 0; }
+        },
+        {
             "id": "calendar",
             "title": "Mini Calendar",
             "description": "Monthly calendar grid with current date highlight and week numbers",

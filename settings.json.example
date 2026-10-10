@@ -46,6 +46,7 @@
   "showDetachedNotifBubble": true,
   "showOsd": true,
   "showTimerInPill": true,
+  "showActivitiesInPill": true,
   "widgets": {
     "calendar": true,
     "timer": true,
