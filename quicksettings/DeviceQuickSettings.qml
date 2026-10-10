@@ -16,9 +16,9 @@ Item {
     Rectangle {
         id: cardShadow
         anchors.centerIn: mainCard
-        width: mainCard.width + 16
-        height: mainCard.height + 12
-        radius: mainCard.radius + 4
+        width: mainCard.width + Theme.px(16)
+        height: mainCard.height + Theme.px(12)
+        radius: mainCard.radius + Theme.px(4)
         color: Theme.islandShadow
         opacity: 0.7
         visible: !root.embedded
@@ -28,7 +28,7 @@ Item {
     Rectangle {
         id: mainCard
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
-        height: contentColumn.implicitHeight + (root.embedded ? 14 : Theme.px(28))
+        height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
@@ -40,19 +40,19 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: root.embedded ? 10 : 14
-            spacing: 12
+            anchors.margins: root.embedded ? Theme.px(10) : Theme.px(14)
+            spacing: Theme.px(12)
 
             // Top Header: USB Badge, Title, Status & Refresh Button
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: Theme.px(10)
 
                 // Circular Device Badge
                 Rectangle {
-                    Layout.preferredWidth: 38
-                    Layout.preferredHeight: 38
-                    radius: 19
+                    Layout.preferredWidth: Theme.px(38)
+                    Layout.preferredHeight: Theme.px(38)
+                    radius: Theme.px(19)
                     color: {
                         if (DeviceService.hasMountedDevices) return Qt.rgba(48/255, 209/255, 88/255, 0.22);
                         if (DeviceService.hasDevices) return Theme.accentTint(0.22);
@@ -64,7 +64,7 @@ Item {
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "usb"
-                        size: 20
+                        size: Theme.px(20)
                         color: {
                             if (DeviceService.hasMountedDevices) return Theme.accentGreen;
                             if (DeviceService.hasDevices) return Theme.accent;
@@ -85,12 +85,12 @@ Item {
                 // Title & Subtitle Readout
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: Theme.px(2)
 
                     Text {
                         text: "Detachable Devices"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 14
+                        font.pixelSize: Theme.fontPx(14)
                         font.weight: Font.Bold
                         color: Theme.textPrimary
                     }
@@ -112,7 +112,7 @@ Item {
                             return "No detachable drives detected";
                         }
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         color: {
                             if (DeviceService.operatingDevice !== "") return Theme.accentOrange;
                             if (DeviceService.hasMountedDevices) return Theme.accentGreen;
@@ -126,9 +126,9 @@ Item {
 
                 // Refresh / Rescan Button
                 Rectangle {
-                    Layout.preferredWidth: 28
-                    Layout.preferredHeight: 28
-                    radius: 14
+                    Layout.preferredWidth: Theme.px(28)
+                    Layout.preferredHeight: Theme.px(28)
+                    radius: Theme.px(14)
                     color: refreshMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -136,7 +136,7 @@ Item {
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "refresh"
-                        size: 13
+                        size: Theme.px(13)
                         color: refreshMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
                     }
 
@@ -162,24 +162,24 @@ Item {
             // Empty State
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 110
+                Layout.preferredHeight: Theme.px(110)
                 visible: !DeviceService.hasDevices
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 8
+                    spacing: Theme.px(8)
 
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: 44
-                        Layout.preferredHeight: 44
-                        radius: 22
+                        Layout.preferredWidth: Theme.px(44)
+                        Layout.preferredHeight: Theme.px(44)
+                        radius: Theme.px(22)
                         color: Theme.overlay(0.05)
 
                         SvgIcon {
                             anchors.centerIn: parent
                             name: "usb"
-                            size: 22
+                            size: Theme.px(22)
                             color: Theme.textTertiary
                         }
                     }
@@ -188,7 +188,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: "No Detachable Drives"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontPx(12)
                         font.weight: Font.DemiBold
                         color: Theme.textSecondary
                     }
@@ -197,7 +197,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: "Connect a USB drive or external disk"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.fontPx(10)
                         color: Theme.textTertiary
                     }
                 }
@@ -206,7 +206,7 @@ Item {
             // Devices List
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 10
+                spacing: Theme.px(10)
                 visible: DeviceService.hasDevices
 
                 Repeater {
@@ -215,7 +215,7 @@ Item {
                     delegate: Rectangle {
                         id: deviceCard
                         Layout.fillWidth: true
-                        implicitHeight: devCardCol.implicitHeight + 16
+                        implicitHeight: devCardCol.implicitHeight + Theme.px(16)
                         radius: Theme.corner(14)
                         color: Theme.overlay(0.04)
                         border.width: 1
@@ -226,24 +226,24 @@ Item {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
-                            anchors.margins: 10
-                            spacing: 8
+                            anchors.margins: Theme.px(10)
+                            spacing: Theme.px(8)
 
                             // Device Card Header: Icon, Name, Size & Safe Eject
                             RowLayout {
                                 Layout.fillWidth: true
-                                spacing: 8
+                                spacing: Theme.px(8)
 
                                 Rectangle {
-                                    Layout.preferredWidth: 28
-                                    Layout.preferredHeight: 28
-                                    radius: 14
+                                    Layout.preferredWidth: Theme.px(28)
+                                    Layout.preferredHeight: Theme.px(28)
+                                    radius: Theme.px(14)
                                     color: modelData.isMounted ? Qt.rgba(48/255, 209/255, 88/255, 0.18) : Theme.overlay(0.08)
 
                                     SvgIcon {
                                         anchors.centerIn: parent
                                         name: modelData.isMounted ? "usb" : "harddrive"
-                                        size: 15
+                                        size: Theme.px(15)
                                         color: modelData.isMounted ? Theme.accentGreen : Theme.textSecondary
                                     }
                                 }
@@ -255,7 +255,7 @@ Item {
                                     Text {
                                         text: modelData.title || modelData.name
                                         font.family: Theme.fontFamily
-                                        font.pixelSize: 12
+                                        font.pixelSize: Theme.fontPx(12)
                                         font.weight: Font.DemiBold
                                         color: Theme.textPrimary
                                         elide: Text.ElideRight
@@ -265,7 +265,7 @@ Item {
                                     Text {
                                         text: (modelData.sizeFormatted ? modelData.sizeFormatted : "") + " • " + modelData.path
                                         font.family: Theme.fontFamily
-                                        font.pixelSize: 10
+                                        font.pixelSize: Theme.fontPx(10)
                                         color: Theme.textTertiary
                                         elide: Text.ElideRight
                                         Layout.fillWidth: true
@@ -275,9 +275,9 @@ Item {
                                 // Safe Eject / Power Off Button
                                 Rectangle {
                                     id: ejectBtn
-                                    Layout.preferredHeight: 24
-                                    Layout.preferredWidth: ejectRow.implicitWidth + 14
-                                    radius: 12
+                                    Layout.preferredHeight: Theme.px(24)
+                                    Layout.preferredWidth: ejectRow.implicitWidth + Theme.px(14)
+                                    radius: Theme.px(12)
                                     property bool isBusy: DeviceService.operatingDevice === modelData.path
                                     enabled: !isBusy
                                     opacity: isBusy ? 0.5 : 1.0
@@ -288,18 +288,18 @@ Item {
                                     RowLayout {
                                         id: ejectRow
                                         anchors.centerIn: parent
-                                        spacing: 4
+                                        spacing: Theme.px(4)
 
                                         SvgIcon {
                                             name: "eject"
-                                            size: 11
+                                            size: Theme.px(11)
                                             color: ejectMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
                                         }
 
                                         Text {
                                             text: "Eject"
                                             font.family: Theme.fontFamily
-                                            font.pixelSize: 10
+                                            font.pixelSize: Theme.fontPx(10)
                                             font.weight: Font.Medium
                                             color: ejectMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
                                         }
@@ -324,7 +324,7 @@ Item {
                                 delegate: Rectangle {
                                     id: partItem
                                     Layout.fillWidth: true
-                                    implicitHeight: partCol.implicitHeight + 12
+                                    implicitHeight: partCol.implicitHeight + Theme.px(12)
                                     radius: Theme.corner(10)
                                     color: Theme.isLight ? Theme.overlay(0.06) : Qt.rgba(0, 0, 0, 0.25)
                                     border.width: 1
@@ -335,25 +335,25 @@ Item {
                                         anchors.left: parent.left
                                         anchors.right: parent.right
                                         anchors.top: parent.top
-                                        anchors.margins: 8
-                                        spacing: 6
+                                        anchors.margins: Theme.px(8)
+                                        spacing: Theme.px(6)
 
                                         // Partition Title & Status Badge
                                         RowLayout {
                                             Layout.fillWidth: true
-                                            spacing: 6
+                                            spacing: Theme.px(6)
 
                                             Rectangle {
-                                                Layout.preferredWidth: 6
-                                                Layout.preferredHeight: 6
-                                                radius: 3
+                                                Layout.preferredWidth: Theme.px(6)
+                                                Layout.preferredHeight: Theme.px(6)
+                                                radius: Theme.px(3)
                                                 color: modelData.isMounted ? Theme.accentGreen : Theme.textTertiary
                                             }
 
                                             Text {
                                                 text: modelData.title
                                                 font.family: Theme.fontFamily
-                                                font.pixelSize: 11
+                                                font.pixelSize: Theme.fontPx(11)
                                                 font.weight: Font.DemiBold
                                                 color: Theme.textPrimary
                                                 elide: Text.ElideRight
@@ -368,7 +368,7 @@ Item {
                                                     return modelData.sizeFormatted;
                                                 }
                                                 font.family: Theme.fontFamily
-                                                font.pixelSize: 10
+                                                font.pixelSize: Theme.fontPx(10)
                                                 color: Theme.textSecondary
                                             }
                                         }
@@ -376,13 +376,13 @@ Item {
                                         // Storage Usage Meter (if mounted)
                                         ColumnLayout {
                                             Layout.fillWidth: true
-                                            spacing: 3
+                                            spacing: Theme.px(3)
                                             visible: modelData.isMounted
 
                                             Rectangle {
                                                 Layout.fillWidth: true
-                                                Layout.preferredHeight: 4
-                                                radius: 2
+                                                Layout.preferredHeight: Theme.px(4)
+                                                radius: Theme.px(2)
                                                 color: Theme.overlay(0.12)
                                                 clip: true
 
@@ -404,7 +404,7 @@ Item {
                                                 Text {
                                                     text: modelData.mountpoint
                                                     font.family: Theme.fontFamily
-                                                    font.pixelSize: 9
+                                                    font.pixelSize: Theme.fontPx(9)
                                                     color: Theme.textTertiary
                                                     elide: Text.ElideMiddle
                                                     Layout.fillWidth: true
@@ -413,7 +413,7 @@ Item {
                                                 Text {
                                                     text: modelData.usePercent + "% used"
                                                     font.family: Theme.fontFamily
-                                                    font.pixelSize: 9
+                                                    font.pixelSize: Theme.fontPx(9)
                                                     color: Theme.textTertiary
                                                 }
                                             }
@@ -422,16 +422,16 @@ Item {
                                         // Partition Action Controls
                                         RowLayout {
                                             Layout.fillWidth: true
-                                            spacing: 6
+                                            spacing: Theme.px(6)
 
                                             Item { Layout.fillWidth: true }
 
                                             // Browse / Open in File Manager (if mounted)
                                             Rectangle {
                                                 visible: modelData.isMounted
-                                                Layout.preferredHeight: 24
-                                                Layout.preferredWidth: browseRow.implicitWidth + 14
-                                                radius: 12
+                                                Layout.preferredHeight: Theme.px(24)
+                                                Layout.preferredWidth: browseRow.implicitWidth + Theme.px(14)
+                                                radius: Theme.px(12)
                                                 color: browseMouse.containsMouse ? Theme.accentTint(0.25) : Theme.overlay(0.08)
 
                                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -439,18 +439,18 @@ Item {
                                                 RowLayout {
                                                     id: browseRow
                                                     anchors.centerIn: parent
-                                                    spacing: 4
+                                                    spacing: Theme.px(4)
 
                                                     SvgIcon {
                                                         name: "folder"
-                                                        size: 11
+                                                        size: Theme.px(11)
                                                         color: browseMouse.containsMouse ? Theme.accent : Theme.textSecondary
                                                     }
 
                                                     Text {
                                                         text: "Open"
                                                         font.family: Theme.fontFamily
-                                                        font.pixelSize: 10
+                                                        font.pixelSize: Theme.fontPx(10)
                                                         font.weight: Font.Medium
                                                         color: browseMouse.containsMouse ? Theme.accent : Theme.textSecondary
                                                     }
@@ -470,9 +470,9 @@ Item {
                                             // Mount / Unmount Toggle Button
                                             Rectangle {
                                                 id: mountToggleBtn
-                                                Layout.preferredHeight: 24
-                                                Layout.preferredWidth: mountToggleRow.implicitWidth + 16
-                                                radius: 12
+                                                Layout.preferredHeight: Theme.px(24)
+                                                Layout.preferredWidth: mountToggleRow.implicitWidth + Theme.px(16)
+                                                radius: Theme.px(12)
                                                 property bool isBusy: DeviceService.operatingDevice === modelData.path
                                                 enabled: !isBusy
                                                 opacity: isBusy ? 0.5 : 1.0
@@ -490,11 +490,11 @@ Item {
                                                 RowLayout {
                                                     id: mountToggleRow
                                                     anchors.centerIn: parent
-                                                    spacing: 4
+                                                    spacing: Theme.px(4)
 
                                                     SvgIcon {
                                                         name: modelData.isMounted ? "eject" : "check"
-                                                        size: 11
+                                                        size: Theme.px(11)
                                                         color: modelData.isMounted ? Theme.accentRedStrong : Theme.accentText
                                                     }
 
@@ -506,7 +506,7 @@ Item {
                                                             return modelData.isMounted ? "Unmount" : "Mount";
                                                         }
                                                         font.family: Theme.fontFamily
-                                                        font.pixelSize: 10
+                                                        font.pixelSize: Theme.fontPx(10)
                                                         font.weight: Font.DemiBold
                                                         color: modelData.isMounted ? Theme.accentRedStrong : Theme.accentText
                                                     }
