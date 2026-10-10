@@ -326,7 +326,7 @@ Item {
                                     Layout.fillWidth: true
                                     implicitHeight: partCol.implicitHeight + 12
                                     radius: Theme.corner(10)
-                                    color: Qt.rgba(0, 0, 0, 0.25)
+                                    color: Theme.isLight ? Theme.overlay(0.06) : Qt.rgba(0, 0, 0, 0.25)
                                     border.width: 1
                                     border.color: Theme.overlay(0.04)
 
@@ -495,7 +495,7 @@ Item {
                                                     SvgIcon {
                                                         name: modelData.isMounted ? "eject" : "check"
                                                         size: 11
-                                                        color: modelData.isMounted ? Theme.accentRed : Theme.accent
+                                                        color: modelData.isMounted ? Theme.accentRedStrong : Theme.accentText
                                                     }
 
                                                     Text {
@@ -508,7 +508,7 @@ Item {
                                                         font.family: Theme.fontFamily
                                                         font.pixelSize: 10
                                                         font.weight: Font.DemiBold
-                                                        color: modelData.isMounted ? Theme.accentRed : Theme.accent
+                                                        color: modelData.isMounted ? Theme.accentRedStrong : Theme.accentText
                                                     }
                                                 }
 

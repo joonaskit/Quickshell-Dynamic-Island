@@ -55,6 +55,8 @@ Singleton {
     // Yellow for icons and text on the panel background: the plain yellow washes out on light
     readonly property color accentYellowStrong: isLight ? "#b38600" : accentYellow
     readonly property color accentRed: "#ff453a"
+    // Red for text and icons on a light panel, where the plain red is too weak
+    readonly property color accentRedStrong: isLight ? "#d70015" : accentRed
     readonly property color accentPurple: "#bf5af2"
     readonly property color accentCyan: "#64d2ff"
     readonly property color accentIndigo: "#5e5ce6"
@@ -84,6 +86,10 @@ Singleton {
     // These roles are not named "onAccent" etc. on purpose: QML reads a binding
     // to a name of the form on<Capital> as a signal handler and silently drops it.
     readonly property color accentForeground: (0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b) > 0.6 ? "#000000" : "#ffffff"
+
+    // The accent for text and icons on a tint of itself: darkened on the light scheme,
+    // where the plain accent washes out
+    readonly property color accentText: isLight ? Qt.darker(accent, 1.7) : accent
 
     // The accent at a given opacity, for selection fills and focus borders
     function accentTint(alpha) {
