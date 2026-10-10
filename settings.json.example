@@ -49,6 +49,7 @@
   "autoHideAppTrayPill": false,
   "showDetachedNotifBubble": true,
   "showOsd": true,
+  "showDesktopOsd": true,
   "showTimerInPill": true,
   "widgets": {
     "calendar": true,

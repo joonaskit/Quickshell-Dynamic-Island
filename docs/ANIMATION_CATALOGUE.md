@@ -343,6 +343,20 @@ Behavior on rotation { NumberAnimation { duration: 180; easing.type: Easing.OutC
 ```
 File: `TopLeftAppCluster.qml` L220–224.
 
+### Desktop switch indicator
+
+A virtual desktop switch shows in the island's OSD slot (the one volume and brightness use) for 1.5 s. `CompactOsdView.qml` draws one dot per desktop and the desktop's name. An accent highlight slides between the dots.
+
+```qml
+// The leading edge moves in 120 ms, the trailing edge in 220 ms, so the highlight stretches toward the new desktop
+Behavior on leftEdge  { NumberAnimation { duration: movingRight ? 220 : 120; easing.type: Easing.OutCubic } }
+Behavior on rightEdge { NumberAnimation { duration: movingRight ? 120 : 220; easing.type: Easing.OutCubic } }
+```
+
+- Rapid switches restart the hide timer and retarget the sliding highlight, so the indicator updates in place.
+- It does not show for a click on the virtual desktops pill (`WindowService.pillSwitchUntil`), or over a fullscreen app, where the island is hidden.
+- The setting is `showDesktopOsd`.
+
 ### Toggle switch knob slide (X axis)
 
 ```qml

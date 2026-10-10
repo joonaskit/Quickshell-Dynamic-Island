@@ -6,7 +6,7 @@ import Quickshell
 Singleton {
     id: root
 
-    // "volume" or "brightness"
+    // "volume", "brightness" or "desktop" (a virtual desktop switch)
     property string kind: "volume"
     property bool isShowing: false
 
@@ -26,10 +26,25 @@ Singleton {
         onTriggered: root.isShowing = false
     }
 
+    // A desktop switch shows the indicator whatever started it, except a click on the
+    // virtual desktops pill, which already shows the change under the pointer. The
+    // first desktop reported after startup is not a switch.
+    property string lastDesktopId: ""
+    Connections {
+        target: WindowService
+        function onCurrentDesktopIdChanged() {
+            let id = WindowService.currentDesktopId;
+            let wasKnown = root.lastDesktopId !== "";
+            root.lastDesktopId = id;
+            if (!wasKnown || id === "" || Date.now() < WindowService.pillSwitchUntil) return;
+            root.show("desktop");
+        }
+    }
+
     // Called for changes made through IPC shortcuts. Plasma shows its own OSD for
     // hardware keys and the sliders show their own value, so neither triggers this.
     function show(kind) {
-        if (!SettingsService.showOsd) return;
+        if (kind === "desktop" ? !SettingsService.showDesktopOsd : !SettingsService.showOsd) return;
         root.kind = kind;
         root.isShowing = true;
         hideTimer.restart();

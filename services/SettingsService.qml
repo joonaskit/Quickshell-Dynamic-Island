@@ -76,6 +76,7 @@ Singleton {
     property bool autoHideAppTrayPill: false
     property bool showDetachedNotifBubble: true
     property bool showOsd: true
+    property bool showDesktopOsd: true
     property bool showTimerInPill: true
 
     // Expanded island widgets: id -> enabled. Ids missing here use the
@@ -199,6 +200,7 @@ Singleton {
         if (data.autoHideAppTrayPill !== undefined) root.autoHideAppTrayPill = !!data.autoHideAppTrayPill;
         if (data.showDetachedNotifBubble !== undefined) root.showDetachedNotifBubble = !!data.showDetachedNotifBubble;
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
+        if (data.showDesktopOsd !== undefined) root.showDesktopOsd = !!data.showDesktopOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
 
         // Also reads the per-widget keys used by older configs
@@ -347,6 +349,7 @@ Singleton {
         root.autoHideAppTrayPill = false;
         root.showDetachedNotifBubble = true;
         root.showOsd = true;
+        root.showDesktopOsd = true;
         root.showTimerInPill = true;
 
         root.widgets = {};
@@ -431,6 +434,7 @@ Singleton {
             "autoHideAppTrayPill": root.autoHideAppTrayPill,
             "showDetachedNotifBubble": root.showDetachedNotifBubble,
             "showOsd": root.showOsd,
+            "showDesktopOsd": root.showDesktopOsd,
             "showTimerInPill": root.showTimerInPill,
             "widgets": root.widgetStates(),
             "launcherDefaultView": root.launcherDefaultView,
