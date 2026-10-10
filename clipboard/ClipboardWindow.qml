@@ -50,14 +50,32 @@ PanelWindow {
 
     readonly property var entries: History.view(ClipboardService.history, window.searchText, window.filter)
     readonly property var selected: entries.length > 0 && list.currentIndex >= 0 && list.currentIndex < entries.length ? entries[list.currentIndex] : null
+    readonly property string home: Quickshell.env("HOME") || ""
     readonly property bool selectedHidden: selected !== null && selected.sensitive && window.revealedId !== selected.id
 
     readonly property var filters: [
         { "label": "All", "value": "all" },
         { "label": "Text", "value": "text" },
         { "label": "Links", "value": "url" },
+        { "label": "Images", "value": "image" },
+        { "label": "Files", "value": "files" },
         { "label": "Pinned", "value": "pinned" }
     ]
+
+    // [label, value] rows describing an entry
+    function metadata(e) {
+        let type = e.type === "image" ? "Image (" + e.mime + ")" : (e.type === "files" ? (e.files.length === 1 ? "File" : e.files.length + " files") : (e.kind === "url" ? "Link" : "Text"));
+        let size = e.type === "text" ? History.formatSize(e.size) + " · " + e.chars + " chars · " + e.lines + (e.lines === 1 ? " line" : " lines")
+            : (e.type === "image" ? History.formatSize(e.size) + (detailImage.status === Image.Ready ? " · " + detailImage.implicitWidth + "×" + detailImage.implicitHeight : "") : "");
+        let rows = [
+            ["Type", type],
+            ["Copied", History.formatAge(e.time, window.nowMs) + (e.count > 1 ? " (" + e.count + " times)" : "")],
+            ["First seen", Qt.formatDateTime(new Date(e.firstTime), "d MMM, hh:mm:ss")]
+        ];
+        if (size !== "") rows.splice(1, 0, ["Size", size]);
+        rows.push(e.type === "files" ? ["Folder", History.displayDir(e.dir, window.home)] : ["Source", e.appTitle !== "" ? e.appTitle : "Unknown"]);
+        return rows;
+    }
 
     // Moves the window, keeping it on its screen
     function moveBy(dx, dy) {
@@ -442,6 +460,7 @@ PanelWindow {
                         id: row
                         required property var modelData
                         required property int index
+                        readonly property string thumb: History.thumbPath(modelData)
                         width: ListView.view.width
                         height: Theme.px(46)
                         radius: Theme.corner(10)
@@ -469,12 +488,23 @@ PanelWindow {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    visible: !row.modelData.sensitive
-                                    text: row.modelData.kind === "url" ? "URL" : "Aa"
+                                    visible: !row.modelData.sensitive && row.thumb === ""
+                                    text: row.modelData.kind === "url" ? "URL" : (row.modelData.kind === "files" ? "File" : (row.modelData.kind === "image" ? "Img" : "Aa"))
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontPx(row.modelData.kind === "url" ? 9 : 11)
+                                    font.pixelSize: Theme.fontPx(row.modelData.kind === "text" ? 11 : 9)
                                     font.weight: Font.Bold
-                                    color: row.modelData.kind === "url" ? Theme.accentText : Theme.textSecondary
+                                    color: row.modelData.kind === "text" ? Theme.textSecondary : Theme.accentText
+                                }
+
+                                Image {
+                                    anchors.fill: parent
+                                    anchors.margins: 1
+                                    visible: row.thumb !== "" && status === Image.Ready
+                                    source: row.thumb !== "" ? History.fileUrl(row.thumb) : ""
+                                    fillMode: Image.PreserveAspectCrop
+                                    asynchronous: true
+                                    sourceSize.width: 56
+                                    sourceSize.height: 56
                                 }
                             }
 
@@ -484,7 +514,7 @@ PanelWindow {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: row.modelData.sensitive ? "••••••••  looks like a credential" : History.preview(row.modelData.text, 70)
+                                    text: row.modelData.sensitive ? "••••••••  looks like a credential" : History.label(row.modelData, 70)
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontPx(12)
                                     color: row.modelData.sensitive ? Theme.textTertiary : Theme.textPrimary
@@ -493,7 +523,8 @@ PanelWindow {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: (row.modelData.appTitle !== "" ? row.modelData.appTitle + " · " : "") + History.formatAge(row.modelData.time, window.nowMs)
+                                    text: (row.modelData.type === "files" ? History.displayDir(row.modelData.dir, window.home) + " · "
+                                        : (row.modelData.appTitle !== "" ? row.modelData.appTitle + " · " : "")) + History.formatAge(row.modelData.time, window.nowMs)
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontPx(10)
                                     color: Theme.textTertiary
@@ -565,23 +596,54 @@ PanelWindow {
                             Layout.fillHeight: true
                             clip: true
                             contentWidth: width
-                            contentHeight: contentText.implicitHeight
+                            contentHeight: contentColumn.implicitHeight
                             boundsBehavior: Flickable.StopAtBounds
 
-                            Text {
-                                id: contentText
+                            Column {
+                                id: contentColumn
                                 width: contentFlick.width
-                                text: window.selected === null ? ""
-                                    : (window.selectedHidden
-                                        ? "Hidden: this looks like a credential." + (SettingsService.clipboardSensitiveExpiry > 0
-                                            ? " It is removed from the history " + SettingsService.clipboardSensitiveExpiry + " s after it was copied." : "")
-                                        : window.selected.text)
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontPx(12)
-                                font.italic: window.selectedHidden
-                                color: window.selectedHidden ? Theme.textTertiary : Theme.textPrimary
-                                wrapMode: Text.WrapAnywhere
-                                lineHeight: 1.2
+                                spacing: Theme.px(8)
+
+                                Image {
+                                    id: detailImage
+                                    readonly property string thumb: window.selected === null ? "" : History.thumbPath(window.selected)
+                                    width: parent.width
+                                    height: status === Image.Ready ? Math.min(Theme.px(220), width * implicitHeight / Math.max(1, implicitWidth)) : 0
+                                    visible: status === Image.Ready
+                                    source: thumb !== "" ? History.fileUrl(thumb) : ""
+                                    fillMode: Image.PreserveAspectFit
+                                    horizontalAlignment: Image.AlignLeft
+                                    asynchronous: true
+                                    sourceSize.width: 1200
+                                }
+
+                                Text {
+                                    id: contentText
+                                    width: parent.width
+                                    visible: window.selected !== null && window.selected.type === "text"
+                                    text: window.selected === null ? ""
+                                        : (window.selectedHidden
+                                            ? "Hidden: this looks like a credential." + (SettingsService.clipboardSensitiveExpiry > 0
+                                                ? " It is removed from the history " + SettingsService.clipboardSensitiveExpiry + " s after it was copied." : "")
+                                            : window.selected.text)
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontPx(12)
+                                    font.italic: window.selectedHidden
+                                    color: window.selectedHidden ? Theme.textTertiary : Theme.textPrimary
+                                    wrapMode: Text.WrapAnywhere
+                                    lineHeight: 1.2
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    visible: window.selected !== null && window.selected.type === "files"
+                                    text: window.selected === null || window.selected.type !== "files" ? "" : window.selected.files.map(f => History.fileName(f)).join("\n")
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontPx(12)
+                                    color: Theme.textPrimary
+                                    wrapMode: Text.WrapAnywhere
+                                    lineHeight: 1.2
+                                }
                             }
                         }
 
@@ -599,13 +661,7 @@ PanelWindow {
                             rowSpacing: Theme.px(3)
 
                             Repeater {
-                                model: window.selected === null ? [] : [
-                                    ["Type", window.selected.kind === "url" ? "Link" : "Text"],
-                                    ["Size", History.formatSize(window.selected.size) + " · " + window.selected.chars + " chars · " + window.selected.lines + (window.selected.lines === 1 ? " line" : " lines")],
-                                    ["Copied", History.formatAge(window.selected.time, window.nowMs) + (window.selected.count > 1 ? " (" + window.selected.count + " times)" : "")],
-                                    ["First seen", Qt.formatDateTime(new Date(window.selected.firstTime), "d MMM, hh:mm:ss")],
-                                    ["Source", window.selected.appTitle !== "" ? window.selected.appTitle : "Unknown"]
-                                ]
+                                model: window.selected === null ? [] : window.metadata(window.selected)
 
                                 delegate: RowLayout {
                                     id: metaRow
@@ -637,6 +693,7 @@ PanelWindow {
                         // Source app is a guess, so say so
                         RowLayout {
                             Layout.fillWidth: true
+                            visible: window.selected !== null && window.selected.type !== "files"
                             spacing: Theme.px(6)
 
                             Text {
@@ -683,6 +740,12 @@ PanelWindow {
                                 visible: window.selected !== null && window.selected.kind === "url"
                                 text: "Open"
                                 onClicked: Quickshell.execDetached(["xdg-open", window.selected.text.trim()])
+                            }
+
+                            ActionButton {
+                                visible: window.selected !== null && window.selected.type === "files"
+                                text: "Open folder"
+                                onClicked: Quickshell.execDetached(["xdg-open", window.selected.dir])
                             }
 
                             Item { Layout.fillWidth: true }

@@ -1,6 +1,7 @@
 """Tests for scripts/clipboard_tracker.py. Run with ./test.sh."""
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
@@ -59,6 +60,36 @@ class UriListTest(unittest.TestCase):
     def test_decodes_paths_and_ignores_other_lines(self):
         raw = "# comment\r\nfile:///home/u/My%20File.txt\r\nhttps://x.y\r\n"
         self.assertEqual(ct.parse_uri_list(raw), ["/home/u/My File.txt"])
+
+
+class ImageTest(unittest.TestCase):
+    def test_prefers_png(self):
+        self.assertEqual(ct.pick_image_type(["text/html", "image/jpeg", "image/png"]), "image/png")
+
+    def test_falls_back_to_first_image_type(self):
+        self.assertEqual(ct.pick_image_type(["text/html", "image/webp", "image/bmp"]), "image/webp")
+
+    def test_no_image_type(self):
+        self.assertIsNone(ct.pick_image_type(["text/html"]))
+
+    def test_saves_image_once_per_content(self):
+        with tempfile.TemporaryDirectory() as d:
+            a = ct.build_image_record(b"abc", "image/png", now_ms=7, directory=d)
+            b = ct.build_image_record(b"abc", "image/png", now_ms=9, directory=d)
+            self.assertEqual(a["hash"], b["hash"])
+            self.assertEqual(a["path"], b["path"])
+            self.assertTrue(a["path"].endswith(".png"))
+            self.assertEqual((a["size"], a["time"]), (3, 7))
+            with open(a["path"], "rb") as f:
+                self.assertEqual(f.read(), b"abc")
+
+    def test_jpeg_extension(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertTrue(ct.build_image_record(b"x", "image/jpeg", directory=d)["path"].endswith(".jpg"))
+
+    def test_empty_and_huge_images_are_skipped(self):
+        self.assertIsNone(ct.build_image_record(b"", "image/png"))
+        self.assertIsNone(ct.build_image_record(b"x" * (ct.MAX_IMAGE_BYTES + 1), "image/png"))
 
 
 if __name__ == "__main__":
