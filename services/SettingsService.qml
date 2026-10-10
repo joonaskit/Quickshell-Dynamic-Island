@@ -91,6 +91,13 @@ Singleton {
     property int launcherGridColumns: 4
     property bool launcherShowGenericNames: true
 
+    // Clipboard history (kept in memory only)
+    property int clipboardMaxItems: 50
+    // Seconds before an item that looks like a credential is dropped from the history; 0 keeps it
+    property int clipboardSensitiveExpiry: 60
+    // App ids (lowercase) whose copies are never recorded
+    property var clipboardIgnoredApps: []
+
     property bool isLoaded: false
     property string lastSavedTime: ""
 
@@ -220,6 +227,15 @@ Singleton {
             root.launcherGridColumns = Math.max(3, Math.min(6, parseInt(data.launcherGridColumns)));
         }
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
+        if (data.clipboardMaxItems !== undefined && !isNaN(data.clipboardMaxItems)) {
+            root.clipboardMaxItems = Math.max(5, Math.min(500, parseInt(data.clipboardMaxItems)));
+        }
+        if (data.clipboardSensitiveExpiry !== undefined && !isNaN(data.clipboardSensitiveExpiry)) {
+            root.clipboardSensitiveExpiry = Math.max(0, Math.min(3600, parseInt(data.clipboardSensitiveExpiry)));
+        }
+        if (Array.isArray(data.clipboardIgnoredApps)) {
+            root.clipboardIgnoredApps = data.clipboardIgnoredApps.map(a => String(a).toLowerCase());
+        }
 
         // Sync with Theme singleton
         root.syncToTheme();
@@ -360,6 +376,9 @@ Singleton {
         root.launcherShowCategories = true;
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
+        root.clipboardMaxItems = 50;
+        root.clipboardSensitiveExpiry = 60;
+        root.clipboardIgnoredApps = [];
 
         root.syncToTheme();
         root.settingsChanged();
@@ -442,7 +461,10 @@ Singleton {
             "launcherStartTab": root.launcherStartTab,
             "launcherShowCategories": root.launcherShowCategories,
             "launcherGridColumns": root.launcherGridColumns,
-            "launcherShowGenericNames": root.launcherShowGenericNames
+            "launcherShowGenericNames": root.launcherShowGenericNames,
+            "clipboardMaxItems": root.clipboardMaxItems,
+            "clipboardSensitiveExpiry": root.clipboardSensitiveExpiry,
+            "clipboardIgnoredApps": root.clipboardIgnoredApps
         };
         let jsonStr = JSON.stringify(data, null, 2);
         saveProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.settingsFilePath, jsonStr];

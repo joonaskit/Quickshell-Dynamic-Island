@@ -9,16 +9,16 @@ Item {
 
     property bool embedded: false
 
-    implicitWidth: embedded ? (parent ? parent.width : 340) : 310
+    implicitWidth: embedded ? (parent ? parent.width : Theme.px(340)) : Theme.px(310)
     implicitHeight: mainCard.height
 
     // Soft Drop Shadow
     Rectangle {
         id: cardShadow
         anchors.centerIn: mainCard
-        width: mainCard.width + 16
-        height: mainCard.height + 12
-        radius: mainCard.radius + 4
+        width: mainCard.width + Theme.px(16)
+        height: mainCard.height + Theme.px(12)
+        radius: mainCard.radius + Theme.px(4)
         color: Theme.islandShadow
         opacity: 0.7
         visible: !root.embedded
@@ -28,8 +28,8 @@ Item {
     Rectangle {
         id: mainCard
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
-        height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
-        radius: root.embedded ? 0 : 18
+        height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
+        radius: root.embedded ? 0 : Theme.px(18)
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
@@ -40,19 +40,19 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: root.embedded ? 10 : 14
-            spacing: 12
+            anchors.margins: root.embedded ? Theme.px(10) : Theme.px(14)
+            spacing: Theme.px(12)
 
             // Top Header: Bluetooth Badge, Status, and Toggle Toggle
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 12
+                spacing: Theme.px(12)
 
                 // Circular Bluetooth Badge
                 Rectangle {
-                    Layout.preferredWidth: 38
-                    Layout.preferredHeight: 38
-                    radius: 19
+                    Layout.preferredWidth: Theme.px(38)
+                    Layout.preferredHeight: Theme.px(38)
+                    radius: Theme.px(19)
                     color: BluetoothService.isEnabled ? Theme.accent : Theme.cardBackgroundHover
 
                     Behavior on color {
@@ -62,7 +62,7 @@ Item {
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "bluetooth"
-                        size: 19
+                        size: Theme.px(19)
                         color: BluetoothService.isEnabled ? Theme.accentForeground : Theme.textPrimary
                     }
 
@@ -78,12 +78,12 @@ Item {
                 // Title and Subtitle
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: Theme.px(2)
 
                     Text {
                         text: "Bluetooth"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 15
+                        font.pixelSize: Theme.fontPx(15)
                         font.weight: Font.Bold
                         color: Theme.textPrimary
                     }
@@ -98,7 +98,7 @@ Item {
                             return "Not Connected";
                         }
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         color: (BluetoothService.isEnabled && BluetoothService.isConnected) ? Theme.accent : Theme.textSecondary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -107,9 +107,9 @@ Item {
 
                 // Toggle switch
                 Rectangle {
-                    Layout.preferredWidth: 46
-                    Layout.preferredHeight: 26
-                    radius: 13
+                    Layout.preferredWidth: Theme.px(46)
+                    Layout.preferredHeight: Theme.px(26)
+                    radius: Theme.px(13)
                     color: BluetoothService.isEnabled ? Theme.accentGreen : Theme.switchTrackOff
 
                     Behavior on color {
@@ -119,11 +119,11 @@ Item {
                     // Sliding Knob
                     Rectangle {
                         id: toggleKnob
-                        y: 2
-                        x: BluetoothService.isEnabled ? 22 : 2
-                        width: 22
-                        height: 22
-                        radius: 11
+                        y: Theme.px(2)
+                        x: BluetoothService.isEnabled ? Theme.px(22) : Theme.px(2)
+                        width: Theme.px(22)
+                        height: Theme.px(22)
+                        radius: Theme.px(11)
                         color: Theme.sliderHandle
 
                         Behavior on x {
@@ -151,7 +151,7 @@ Item {
             // Devices Section
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Theme.px(6)
                 opacity: BluetoothService.isEnabled ? 1.0 : 0.0
                 visible: opacity > 0.01
                 Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
@@ -160,7 +160,7 @@ Item {
                 Text {
                     text: "DEVICES"
                     font.family: Theme.fontFamily
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fontPx(10)
                     font.weight: Font.DemiBold
                     color: Theme.textTertiary
                     Layout.fillWidth: true
@@ -169,7 +169,7 @@ Item {
                 // List of Paired Devices
                 Column {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: Theme.px(2)
 
                     Repeater {
                         model: BluetoothService.pairedDevices.slice(0, 6)
@@ -177,16 +177,16 @@ Item {
                         Rectangle {
                             required property var modelData
                             width: parent.width
-                            height: 34
+                            height: Theme.px(34)
                             radius: Theme.corner(8)
                             color: deviceMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.isConnected ? Theme.accentTint(0.12) : "transparent")
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                             RowLayout {
                                 anchors.fill: parent
-                                anchors.leftMargin: 8
-                                anchors.rightMargin: 8
-                                spacing: 8
+                                anchors.leftMargin: Theme.px(8)
+                                anchors.rightMargin: Theme.px(8)
+                                spacing: Theme.px(8)
 
                                 // Device Icon (headphones or bluetooth)
                                 SvgIcon {
@@ -197,7 +197,7 @@ Item {
                                         }
                                         return "bluetooth";
                                     }
-                                    size: 13
+                                    size: Theme.px(13)
                                     color: modelData.isConnected ? Theme.accent : Theme.textSecondary
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
@@ -206,7 +206,7 @@ Item {
                                 Text {
                                     text: modelData.name
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: 12
+                                    font.pixelSize: Theme.fontPx(12)
                                     font.weight: modelData.isConnected ? Font.Bold : Font.Normal
                                     color: modelData.isConnected ? Theme.accent : Theme.textPrimary
                                     elide: Text.ElideRight
@@ -221,14 +221,14 @@ Item {
                                         return modelData.isConnected ? "Connected" : "Not Connected";
                                     }
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: 10
+                                    font.pixelSize: Theme.fontPx(10)
                                     color: modelData.isConnected ? Theme.accent : Theme.textTertiary
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                                 }
 
                                 SvgIcon {
                                     name: "check"
-                                    size: 12
+                                    size: Theme.px(12)
                                     color: Theme.accent
                                     opacity: modelData.isConnected ? 1.0 : 0.0
                                     scale: modelData.isConnected ? 1.0 : 0.5
@@ -252,7 +252,7 @@ Item {
                     // Empty state
                     Item {
                         width: parent.width
-                        height: 30
+                        height: Theme.px(30)
                         opacity: BluetoothService.pairedDevices.length === 0 ? 1.0 : 0.0
                         visible: opacity > 0.01
                         Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
@@ -261,7 +261,7 @@ Item {
                             anchors.centerIn: parent
                             text: "No paired devices"
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             color: Theme.textTertiary
                         }
                     }
@@ -271,7 +271,7 @@ Item {
             // Message when Bluetooth is disabled
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 36
+                Layout.preferredHeight: Theme.px(36)
                 opacity: !BluetoothService.isEnabled ? 1.0 : 0.0
                 visible: opacity > 0.01
                 Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
@@ -280,7 +280,7 @@ Item {
                     anchors.centerIn: parent
                     text: "Turn on Bluetooth to connect to devices"
                     font.family: Theme.fontFamily
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fontPx(11)
                     color: Theme.textTertiary
                 }
             }
@@ -295,19 +295,19 @@ Item {
             // Footer Link: Bluetooth Settings...
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 28
+                Layout.preferredHeight: Theme.px(28)
                 radius: Theme.corner(8)
                 color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
+                    anchors.leftMargin: Theme.px(8)
+                    anchors.rightMargin: Theme.px(8)
 
                     Text {
                         text: "Bluetooth Settings..."
                         font.family: Theme.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontPx(12)
                         font.weight: Font.Medium
                         color: Theme.textSecondary
                         Layout.fillWidth: true
@@ -315,7 +315,7 @@ Item {
 
                     SvgIcon {
                         name: "chevron-right"
-                        size: 12
+                        size: Theme.px(12)
                         color: Theme.textTertiary
                     }
                 }

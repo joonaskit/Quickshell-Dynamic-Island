@@ -24,16 +24,16 @@ Item {
 
     property bool embedded: false
 
-    implicitWidth: embedded ? (parent ? parent.width : 340) : 310
+    implicitWidth: embedded ? (parent ? parent.width : Theme.px(340)) : Theme.px(310)
     implicitHeight: mainCard.height
 
     // Soft Drop Shadow
     Rectangle {
         id: cardShadow
         anchors.centerIn: mainCard
-        width: mainCard.width + 16
-        height: mainCard.height + 12
-        radius: mainCard.radius + 4
+        width: mainCard.width + Theme.px(16)
+        height: mainCard.height + Theme.px(12)
+        radius: mainCard.radius + Theme.px(4)
         color: Theme.islandShadow
         opacity: 0.7
         visible: !root.embedded
@@ -43,8 +43,8 @@ Item {
     Rectangle {
         id: mainCard
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
-        height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
-        radius: root.embedded ? 0 : 18
+        height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
+        radius: root.embedded ? 0 : Theme.px(18)
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
@@ -55,19 +55,19 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: root.embedded ? 10 : 14
-            spacing: 14
+            anchors.margins: root.embedded ? Theme.px(10) : Theme.px(14)
+            spacing: Theme.px(14)
 
             // Top Header: Battery Status Overview
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 12
+                spacing: Theme.px(12)
 
                 // Battery / Power Icon Badge
                 Rectangle {
-                    Layout.preferredWidth: 38
-                    Layout.preferredHeight: 38
-                    radius: 19
+                    Layout.preferredWidth: Theme.px(38)
+                    Layout.preferredHeight: Theme.px(38)
+                    radius: Theme.px(19)
                     color: !root.isPresent
                         ? Qt.rgba(255/255, 214/255, 10/255, 0.2)
                         : (root.isCharging ? Qt.rgba(48/255, 209/255, 88/255, 0.2) : Theme.overlay(0.08))
@@ -75,7 +75,7 @@ Item {
                     SvgIcon {
                         anchors.centerIn: parent
                         name: !root.isPresent ? "nuclear" : (root.isCharging ? "bolt" : "battery")
-                        size: 20
+                        size: Theme.px(20)
                         color: !root.isPresent ? Theme.accentYellowStrong : (root.isCharging ? Theme.accentGreen : Theme.textPrimary)
                     }
                 }
@@ -83,15 +83,15 @@ Item {
                 // Battery Status Readout
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: Theme.px(2)
 
                     RowLayout {
-                        spacing: 6
+                        spacing: Theme.px(6)
 
                         Text {
                             text: !root.isPresent ? "Direct Power" : "Battery"
                             font.family: Theme.fontDisplay
-                            font.pixelSize: 15
+                            font.pixelSize: Theme.fontPx(15)
                             font.weight: Font.Bold
                             color: Theme.textPrimary
                         }
@@ -99,7 +99,7 @@ Item {
                         Text {
                             text: Math.round(root.percentage * 100) + "%"
                             font.family: Theme.fontDisplay
-                            font.pixelSize: 15
+                            font.pixelSize: Theme.fontPx(15)
                             font.weight: Font.Bold
                             color: root.isCharging ? Theme.accentGreen : Theme.textPrimary
                             visible: root.isPresent
@@ -118,7 +118,7 @@ Item {
                             return rem !== "" ? rem + " remaining" : "On Battery Power";
                         }
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         color: Theme.textSecondary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
@@ -137,7 +137,7 @@ Item {
             Text {
                 text: "POWER OPTIONS"
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Theme.fontPx(10)
                 font.weight: Font.DemiBold
                 color: Theme.textTertiary
             }
@@ -145,30 +145,30 @@ Item {
             // 4 Grid Action Tiles: Lock, Sleep, Restart, Shut Down
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Theme.px(8)
 
                 // 1. Lock Screen
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 64
+                    Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
                     color: lockMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
-                        spacing: 4
+                        spacing: Theme.px(4)
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 28
-                            Layout.preferredHeight: 28
-                            radius: 14
+                            Layout.preferredWidth: Theme.px(28)
+                            Layout.preferredHeight: Theme.px(28)
+                            radius: Theme.px(14)
                             color: Qt.rgba(10/255, 132/255, 255/255, 0.2)
 
                             SvgIcon {
                                 anchors.centerIn: parent
                                 name: "lock"
-                                size: 14
+                                size: Theme.px(14)
                                 color: Theme.accentBlue
                             }
                         }
@@ -177,7 +177,7 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             text: "Lock"
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             font.weight: Font.Medium
                             color: Theme.textPrimary
                         }
@@ -198,25 +198,25 @@ Item {
                 // 2. Sleep / Suspend
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 64
+                    Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
                     color: sleepMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
-                        spacing: 4
+                        spacing: Theme.px(4)
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 28
-                            Layout.preferredHeight: 28
-                            radius: 14
+                            Layout.preferredWidth: Theme.px(28)
+                            Layout.preferredHeight: Theme.px(28)
+                            radius: Theme.px(14)
                             color: Qt.rgba(94/255, 92/255, 230/255, 0.2)
 
                             SvgIcon {
                                 anchors.centerIn: parent
                                 name: "moon"
-                                size: 14
+                                size: Theme.px(14)
                                 color: Theme.accentIndigo
                             }
                         }
@@ -225,7 +225,7 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             text: "Sleep"
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             font.weight: Font.Medium
                             color: Theme.textPrimary
                         }
@@ -246,25 +246,25 @@ Item {
                 // 3. Restart
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 64
+                    Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
                     color: restartMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
-                        spacing: 4
+                        spacing: Theme.px(4)
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 28
-                            Layout.preferredHeight: 28
-                            radius: 14
+                            Layout.preferredWidth: Theme.px(28)
+                            Layout.preferredHeight: Theme.px(28)
+                            radius: Theme.px(14)
                             color: Qt.rgba(255/255, 159/255, 10/255, 0.2)
 
                             SvgIcon {
                                 anchors.centerIn: parent
                                 name: "restart"
-                                size: 14
+                                size: Theme.px(14)
                                 color: Theme.accentOrange
                             }
                         }
@@ -273,7 +273,7 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             text: "Restart"
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             font.weight: Font.Medium
                             color: Theme.textPrimary
                         }
@@ -294,25 +294,25 @@ Item {
                 // 4. Shut Down
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 64
+                    Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
                     color: shutdownMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
-                        spacing: 4
+                        spacing: Theme.px(4)
 
                         Rectangle {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 28
-                            Layout.preferredHeight: 28
-                            radius: 14
+                            Layout.preferredWidth: Theme.px(28)
+                            Layout.preferredHeight: Theme.px(28)
+                            radius: Theme.px(14)
                             color: Qt.rgba(255/255, 69/255, 58/255, 0.2)
 
                             SvgIcon {
                                 anchors.centerIn: parent
                                 name: "power"
-                                size: 14
+                                size: Theme.px(14)
                                 color: Theme.accentRed
                             }
                         }
@@ -321,7 +321,7 @@ Item {
                             Layout.alignment: Qt.AlignHCenter
                             text: "Shut Down"
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fontPx(11)
                             font.weight: Font.Medium
                             color: Theme.textPrimary
                         }
@@ -350,19 +350,19 @@ Item {
             // Footer Link: Energy & Power Settings...
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 28
+                Layout.preferredHeight: Theme.px(28)
                 radius: Theme.corner(8)
                 color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
+                    anchors.leftMargin: Theme.px(8)
+                    anchors.rightMargin: Theme.px(8)
 
                     Text {
                         text: "Energy & Battery Settings..."
                         font.family: Theme.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontPx(12)
                         font.weight: Font.Medium
                         color: Theme.textSecondary
                         Layout.fillWidth: true
@@ -370,7 +370,7 @@ Item {
 
                     SvgIcon {
                         name: "chevron-right"
-                        size: 12
+                        size: Theme.px(12)
                         color: Theme.textTertiary
                     }
                 }

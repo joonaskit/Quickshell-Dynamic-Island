@@ -9,16 +9,16 @@ Item {
 
     property bool embedded: false
 
-    implicitWidth: embedded ? (parent ? parent.width : 340) : 320
+    implicitWidth: embedded ? (parent ? parent.width : Theme.px(340)) : Theme.px(320)
     implicitHeight: mainCard.height
 
     // Soft Drop Shadow
     Rectangle {
         id: cardShadow
         anchors.centerIn: mainCard
-        width: mainCard.width + 16
-        height: mainCard.height + 12
-        radius: mainCard.radius + 4
+        width: mainCard.width + Theme.px(16)
+        height: mainCard.height + Theme.px(12)
+        radius: mainCard.radius + Theme.px(4)
         color: Theme.islandShadow
         opacity: 0.7
         visible: !root.embedded
@@ -28,8 +28,8 @@ Item {
     Rectangle {
         id: mainCard
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
-        height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
-        radius: root.embedded ? 0 : 18
+        height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
+        radius: root.embedded ? 0 : Theme.px(18)
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
@@ -40,36 +40,36 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: root.embedded ? 10 : 14
-            spacing: 12
+            anchors.margins: root.embedded ? Theme.px(10) : Theme.px(14)
+            spacing: Theme.px(12)
 
             // Top Header: Badge & Status
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 12
+                spacing: Theme.px(12)
 
                 Rectangle {
-                    Layout.preferredWidth: 38
-                    Layout.preferredHeight: 38
-                    radius: 19
+                    Layout.preferredWidth: Theme.px(38)
+                    Layout.preferredHeight: Theme.px(38)
+                    radius: Theme.px(19)
                     color: Qt.rgba(10/255, 132/255, 255/255, 0.22)
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "cpu"
-                        size: 20
+                        size: Theme.px(20)
                         color: Theme.accentBlue
                     }
                 }
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: Theme.px(2)
 
                     Text {
                         text: "Hardware Monitor"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.fontPx(13)
                         font.weight: Font.DemiBold
                         color: Theme.textPrimary
                     }
@@ -77,7 +77,7 @@ Item {
                     Text {
                         text: "CPU " + HardwareStatsService.cpuPercent + "% • " + HardwareStatsService.cpuTemp + "°C"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         color: Theme.textSecondary
                     }
                 }
@@ -93,7 +93,7 @@ Item {
             // 1. CPU Usage Meter
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 4
+                spacing: Theme.px(4)
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -101,7 +101,7 @@ Item {
                     Text {
                         text: "PROCESSOR (CPU)"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.fontPx(10)
                         font.weight: Font.DemiBold
                         color: Theme.textTertiary
                     }
@@ -111,7 +111,7 @@ Item {
                     Text {
                         text: HardwareStatsService.cpuPercent + "%"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         font.weight: Font.DemiBold
                         color: Theme.accentBlue
                     }
@@ -119,8 +119,8 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 8
-                    radius: 4
+                    Layout.preferredHeight: Theme.px(8)
+                    radius: Theme.px(4)
                     color: Theme.overlay(0.08)
 
                     Rectangle {
@@ -139,7 +139,7 @@ Item {
             // 2. RAM Usage Meter
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 4
+                spacing: Theme.px(4)
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -147,7 +147,7 @@ Item {
                     Text {
                         text: "MEMORY (RAM)"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 10
+                        font.pixelSize: Theme.fontPx(10)
                         font.weight: Font.DemiBold
                         color: Theme.textTertiary
                     }
@@ -157,7 +157,7 @@ Item {
                     Text {
                         text: HardwareStatsService.ramUsedGb + " / " + HardwareStatsService.ramTotalGb + " GB (" + HardwareStatsService.ramPercent + "%)"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         font.weight: Font.DemiBold
                         color: Theme.accentPurple
                     }
@@ -165,8 +165,8 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 8
-                    radius: 4
+                    Layout.preferredHeight: Theme.px(8)
+                    radius: Theme.px(4)
                     color: Theme.overlay(0.08)
 
                     Rectangle {
@@ -185,27 +185,27 @@ Item {
             // 3. Thermal Status Card
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 38
+                Layout.preferredHeight: Theme.px(38)
                 radius: Theme.corner(8)
                 color: Theme.overlay(0.04)
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    spacing: 8
+                    anchors.leftMargin: Theme.px(10)
+                    anchors.rightMargin: Theme.px(10)
+                    spacing: Theme.px(8)
 
                     Rectangle {
-                        Layout.preferredWidth: 8
-                        Layout.preferredHeight: 8
-                        radius: 4
+                        Layout.preferredWidth: Theme.px(8)
+                        Layout.preferredHeight: Theme.px(8)
+                        radius: Theme.px(4)
                         color: HardwareStatsService.cpuTemp > 75 ? Theme.accentRed : (HardwareStatsService.cpuTemp > 60 ? Theme.accentOrange : Theme.accentGreen)
                     }
 
                     Text {
                         text: "CPU Temperature"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         color: Theme.textSecondary
                         Layout.fillWidth: true
                     }
@@ -213,7 +213,7 @@ Item {
                     Text {
                         text: HardwareStatsService.cpuTemp + " °C"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontPx(12)
                         font.weight: Font.Bold
                         color: HardwareStatsService.cpuTemp > 75 ? Theme.accentRed : (HardwareStatsService.cpuTemp > 60 ? Theme.accentOrange : Theme.accentGreen)
                     }
