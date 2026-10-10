@@ -8,7 +8,7 @@ Item {
     signal requestBack()
     signal requestClose()
 
-    readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "About"]
+    readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "Shortcuts", "About"]
     property int currentTab: 0
 
     // Switches to a tab by its name in `tabs`; unknown names are ignored
@@ -19,7 +19,7 @@ Item {
         currentTab = idx;
     }
     readonly property bool hasSearchResults: displaySettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
-                                             || dockSettings.hasMatches || launcherSettings.hasMatches
+                                             || dockSettings.hasMatches || launcherSettings.hasMatches || shortcutsSettings.hasMatches
 
     // Start from a clean search each time the settings card is opened
     onVisibleChanged: {
@@ -352,8 +352,12 @@ Item {
                 id: launcherSettings
                 visible: SettingsSearch.active ? hasMatches : root.currentTab === 4
             }
+            ShortcutsSettings {
+                id: shortcutsSettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 5
+            }
             AboutSettings {
-                visible: !SettingsSearch.active && root.currentTab === 5
+                visible: !SettingsSearch.active && root.currentTab === 6
             }
 
             // Empty search result
