@@ -1,7 +1,9 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "clipboardHistory.js" as History
 
 Singleton {
     id: root
@@ -27,61 +29,83 @@ Singleton {
     }
     readonly property string imageSource: filePreviewPath !== "" ? "file://" + encodeURI(filePreviewPath)
         : (currentBinaryType.startsWith("image/") && imageVersion > 0 ? "file://" + imagePath + "?v=" + imageVersion : "")
+    // Recent copies, newest first; entries are described in clipboardHistory.js. Held in
+    // memory only: nothing is written to disk and it is gone when the shell stops.
     property var history: []
+    property int nextId: 1
+    // Whether the clipboard history window is open
+    property bool windowOpen: false
+    // Where the window sits, in pixels from the top left of the screen; negative until first shown
+    property real windowX: -1
+    property real windowY: -1
     property bool isAvailable: true
-    readonly property int maxHistory: 15
+    readonly property int maxHistory: SettingsService.clipboardMaxItems
 
-    // Periodic poll to catch clipboard changes from any application
-    Timer {
-        id: pollTimer
-        interval: 1500
-        running: true
-        repeat: true
-        onTriggered: {
-            root.queryClipboard();
+    // Why the clipboard content is not shown or recorded: "secret" (marked by a password
+    // manager), "ignored" (copied in an ignored app), "paused" (incognito) or "" for none
+    property string hiddenReason: ""
+    readonly property string hiddenText: {
+        switch (hiddenReason) {
+        case "secret": return "Hidden: copied from a password manager";
+        case "ignored": return "Hidden: copied in an ignored app";
+        case "paused": return "Paused: incognito mode is on";
+        }
+        return "";
+    }
+    // Whether the text on the clipboard looks like a credential, so views should not show it
+    readonly property bool currentSensitive: currentText !== "" && history.some(e => e.sensitive && e.text === currentText)
+    // While true, text copies are not recorded
+    property bool incognito: false
+    // Text we just put on the clipboard ourselves, so the tracker's report of it is not a new copy
+    property string suppressText: ""
+
+    onMaxHistoryChanged: root.history = History.trim(root.history, root.maxHistory)
+    onIncognitoChanged: {
+        if (incognito) {
+            root.hideCurrent("paused");
+        } else if (root.hiddenReason === "paused") {
+            // What was copied meanwhile stays unrecorded; the next copy shows up as usual
+            root.hiddenReason = "";
         }
     }
 
-    // Process to read current clipboard
+    // Reports every clipboard change as a JSON line (see scripts/clipboard_tracker.py)
     Process {
-        id: queryProc
-        // First line is "text", "none" or the MIME type of non-text content; text follows after it
-        command: ["sh", "-c", "command -v wl-paste >/dev/null 2>&1 || exit 0; "
-            + "t=$(wl-paste --list-types 2>/dev/null) || { echo none; exit 0; }; "
-            + "if printf '%s\\n' \"$t\" | grep -qi '^text/uri-list'; then "
-            + "echo files; wl-paste --type text/uri-list 2>/dev/null; "
-            + "elif printf '%s\\n' \"$t\" | grep -qiE '^(text/plain|UTF8_STRING|STRING|TEXT)'; then "
-            + "echo text; wl-paste -n --type text/plain 2>/dev/null; "
-            + "else m=$(printf '%s\\n' \"$t\" | head -n1); echo \"${m:-none}\"; fi"]
-        stdout: StdioCollector {
-            onTextChanged: {
-                if (text === undefined || text === "") return;
-                let nl = text.indexOf("\n");
-                let kind = nl === -1 ? text : text.slice(0, nl);
-                if (kind === "files") {
-                    root.currentBinaryType = "";
-                    root.currentText = "";
-                    root.currentFiles = text.slice(nl + 1).split("\n")
-                        .map(l => l.trim())
-                        .filter(l => l.startsWith("file://"))
-                        .map(l => decodeURIComponent(l.slice(7)));
-                    return;
-                }
-                root.currentFiles = [];
-                if (kind === "text") {
-                    root.currentBinaryType = "";
-                    root.handleNewClipboardText(nl === -1 ? "" : text.slice(nl + 1));
-                } else if (kind === "none") {
-                    root.currentBinaryType = "";
-                    root.handleNewClipboardText("");
-                } else {
-                    // Non-text content: never read it as text or add it to the history
-                    root.currentBinaryType = kind;
-                    root.currentText = "";
-                    if (kind.startsWith("image/") && root.previewActive) root.fetchImage(kind);
-                }
-            }
+        id: trackerProc
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/clipboard_tracker.py"]
+        running: true
+        stdout: SplitParser {
+            onRead: line => root.handleRecord(line)
         }
+        onExited: restartTimer.start()
+    }
+
+    Timer {
+        id: restartTimer
+        interval: 5000
+        onTriggered: trackerProc.running = true
+    }
+
+    // Drops credential-like entries once they have been around long enough
+    Timer {
+        interval: 5000
+        running: root.history.length > 0
+        repeat: true
+        onTriggered: {
+            let kept = History.expireSensitive(root.history, Date.now(), SettingsService.clipboardSensitiveExpiry);
+            if (kept !== root.history) root.history = kept;
+        }
+    }
+
+    // Clears the clipboard
+    Process {
+        id: clearProc
+        command: ["sh", "-c", "wl-copy -c 2>/dev/null; wl-copy -c -p 2>/dev/null || true"]
+    }
+
+    // Sets the clipboard
+    Process {
+        id: copyProc
     }
 
     // Saves the clipboard image to a temp file and reports whether it differs from the previous one
@@ -94,23 +118,6 @@ Singleton {
         }
     }
 
-    // Process to clear clipboard
-    Process {
-        id: clearProc
-        command: ["sh", "-c", "wl-copy -c 2>/dev/null; wl-copy -c -p 2>/dev/null || true"]
-    }
-
-    // Process to set clipboard
-    Process {
-        id: copyProc
-    }
-
-    function queryClipboard() {
-        if (!queryProc.running) {
-            queryProc.running = true;
-        }
-    }
-
     function fetchImage(mime) {
         if (imageProc.running) return;
         imageProc.command = ["sh", "-c",
@@ -119,69 +126,119 @@ Singleton {
         imageProc.running = true;
     }
 
-    function handleNewClipboardText(newText) {
-        if (newText === root.currentText) return;
-        root.currentText = newText;
+    function toggleWindow() {
+        root.windowOpen = !root.windowOpen;
+    }
 
-        if (newText.trim().length === 0) {
+    function sourceApp() {
+        let app = WindowService.activeAppId;
+        return { "app": app, "title": app !== "" ? WindowService.activeAppTitle : "" };
+    }
+
+    function clearCurrent() {
+        root.currentText = "";
+        root.currentBinaryType = "";
+        root.currentFiles = [];
+    }
+
+    function hideCurrent(reason) {
+        root.clearCurrent();
+        root.hiddenReason = reason;
+    }
+
+    function handleRecord(line) {
+        let rec;
+        try {
+            rec = JSON.parse(line);
+        } catch (e) {
+            console.warn("[ClipboardService] Bad tracker line:", e);
             return;
         }
 
-        // Add or bring to top of history
-        let list = (root.history || []).slice();
-        let idx = list.indexOf(newText);
-        if (idx !== -1) {
-            list.splice(idx, 1);
+        let own = root.suppressText;
+        root.suppressText = "";
+        if ((rec.type === "text" && rec.text === own) || (rec.type === "secret" && own !== "")) return;
+
+        switch (rec.type) {
+        case "text": {
+            let source = root.sourceApp();
+            if (root.incognito) {
+                root.hideCurrent("paused");
+            } else if (History.isIgnoredApp(source.app, SettingsService.clipboardIgnoredApps)) {
+                root.hideCurrent("ignored");
+            } else {
+                root.clearCurrent();
+                root.hiddenReason = "";
+                root.currentText = rec.text;
+                root.history = History.trim(History.addCopy(root.history, rec, source, root.nextId++), root.maxHistory);
+            }
+            break;
         }
-        list.unshift(newText);
-        if (list.length > root.maxHistory) {
-            list = list.slice(0, root.maxHistory);
+        case "files":
+            root.clearCurrent();
+            root.hiddenReason = "";
+            root.currentFiles = rec.files;
+            break;
+        case "image":
+        case "other":
+            root.clearCurrent();
+            root.hiddenReason = "";
+            root.currentBinaryType = rec.mime;
+            if (rec.mime.startsWith("image/") && root.previewActive) root.fetchImage(rec.mime);
+            break;
+        case "secret":
+            root.hideCurrent("secret");
+            break;
+        default:
+            root.clearCurrent();
+            root.hiddenReason = "";
         }
-        root.history = list;
     }
 
-    function copyText(val) {
-        if (val === undefined || val === null) return;
-        root.currentText = val;
-        root.currentBinaryType = "";
-        root.currentFiles = [];
-
-        let list = (root.history || []).slice();
-        let idx = list.indexOf(val);
-        if (idx !== -1) {
-            list.splice(idx, 1);
-        }
-        list.unshift(val);
+    // Puts a history entry's text back on the clipboard and moves it to the front
+    function copyEntry(id) {
+        let idx = root.history.findIndex(e => e.id === id);
+        if (idx === -1) return;
+        let entry = root.history[idx];
+        let list = root.history.slice();
+        list.splice(idx, 1);
+        list.unshift(Object.assign({}, entry, { "time": Date.now() }));
         root.history = list;
 
-        copyProc.command = ["wl-copy", val];
+        root.clearCurrent();
+        root.hiddenReason = "";
+        root.currentText = entry.text;
+        root.suppressText = entry.text;
+        // Credential-like text is marked so other clipboard managers skip it too; older
+        // wl-clipboard releases lack --sensitive, so fall back to a plain copy
+        copyProc.command = entry.sensitive
+            ? ["sh", "-c", "wl-copy --sensitive -- \"$1\" 2>/dev/null || wl-copy -- \"$1\"", "sh", entry.text]
+            : ["wl-copy", "--", entry.text];
         copyProc.running = true;
     }
 
     function clearClipboard() {
-        root.currentText = "";
-        root.currentBinaryType = "";
-        root.currentFiles = [];
-        root.history = [];
+        root.clearCurrent();
+        root.hiddenReason = "";
+        root.history = root.history.filter(e => e.pinned);
+        root.suppressText = "";
         if (!clearProc.running) {
             clearProc.running = true;
         }
     }
 
-    function removeItem(index) {
-        let list = (root.history || []).slice();
-        if (index >= 0 && index < list.length) {
-            let removed = list.splice(index, 1)[0];
-            root.history = list;
-            if (removed === root.currentText) {
-                if (list.length > 0) {
-                    root.copyText(list[0]);
-                } else {
-                    root.clearClipboard();
-                }
-            }
+    // Removes an entry; if it is what the clipboard holds right now, the clipboard is cleared too
+    function removeEntry(id) {
+        let entry = root.history.find(e => e.id === id);
+        if (!entry) return;
+        root.history = root.history.filter(e => e.id !== id);
+        if (entry.text === root.currentText) {
+            root.clearCurrent();
+            if (!clearProc.running) clearProc.running = true;
         }
     }
 
-    Component.onCompleted: queryClipboard()
+    function togglePinned(id) {
+        root.history = root.history.map(e => e.id === id ? Object.assign({}, e, { "pinned": !e.pinned }) : e);
+    }
 }

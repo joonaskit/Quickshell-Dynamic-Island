@@ -78,6 +78,8 @@ Item {
 
                     Text {
                         text: {
+                            if (ClipboardService.hiddenReason !== "")
+                                return ClipboardService.hiddenText;
                             if (ClipboardService.currentFiles.length > 0)
                                 return ClipboardService.currentFiles.length === 1 ? "File on clipboard" : ClipboardService.currentFiles.length + " files on clipboard";
                             if (ClipboardService.currentBinaryType !== "")
@@ -149,6 +151,91 @@ Item {
                 }
             }
 
+            // Incognito and history window
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.px(8)
+
+                Rectangle {
+                    id: incognitoBtn
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.px(30)
+                    radius: Theme.px(15)
+                    color: ClipboardService.incognito ? Theme.accentTint(0.3) : (incognitoBtnMouse.containsMouse ? Theme.overlay(0.14) : Theme.overlay(0.07))
+                    scale: incognitoBtnMouse.pressed ? 0.95 : 1.0
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: Theme.px(6)
+
+                        SvgIcon {
+                            name: "lock"
+                            size: Theme.px(13)
+                            color: ClipboardService.incognito ? Theme.accentText : Theme.textPrimary
+                        }
+
+                        Text {
+                            text: ClipboardService.incognito ? "Incognito on" : "Incognito"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontPx(11)
+                            font.weight: Font.DemiBold
+                            color: ClipboardService.incognito ? Theme.accentText : Theme.textPrimary
+                        }
+                    }
+
+                    MouseArea {
+                        id: incognitoBtnMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: ClipboardService.incognito = !ClipboardService.incognito
+                    }
+                }
+
+                Rectangle {
+                    id: historyBtn
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.px(30)
+                    radius: Theme.px(15)
+                    color: false ? Theme.accentTint(0.3) : (historyBtnMouse.containsMouse ? Theme.overlay(0.14) : Theme.overlay(0.07))
+                    scale: historyBtnMouse.pressed ? 0.95 : 1.0
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: Theme.px(6)
+
+                        SvgIcon {
+                            name: "clipboard"
+                            size: Theme.px(13)
+                            color: false ? Theme.accentText : Theme.textPrimary
+                        }
+
+                        Text {
+                            text: "History"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontPx(11)
+                            font.weight: Font.DemiBold
+                            color: false ? Theme.accentText : Theme.textPrimary
+                        }
+                    }
+
+                    MouseArea {
+                        id: historyBtnMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            ClipboardService.windowOpen = true;
+                            root.requestClose();
+                        }
+                    }
+                }
+            }
+
             // Divider
             Rectangle {
                 Layout.fillWidth: true
@@ -212,10 +299,11 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.top: parent.top
-                                text: ClipboardService.currentText
+                                text: ClipboardService.currentSensitive ? "Hidden: looks like a credential" : ClipboardService.currentText
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(11)
-                                color: Theme.textPrimary
+                                color: ClipboardService.currentSensitive ? Theme.textTertiary : Theme.textPrimary
+                                font.italic: ClipboardService.currentSensitive
                                 wrapMode: Text.WrapAnywhere
                                 maximumLineCount: 4
                                 elide: Text.ElideRight
@@ -262,7 +350,7 @@ Item {
                             }
 
                             Text {
-                                text: ClipboardService.currentBinaryType !== "" ? (ClipboardService.currentBinaryType.startsWith("image/") ? "Image (" : "Non-text content (") + ClipboardService.currentBinaryType + ")" : "Nothing copied yet"
+                                text: ClipboardService.currentBinaryType !== "" ? (ClipboardService.currentBinaryType.startsWith("image/") ? "Image (" : "Non-text content (") + ClipboardService.currentBinaryType + ")" : (ClipboardService.hiddenReason !== "" ? ClipboardService.hiddenText : "Nothing copied yet")
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(11)
                                 color: Theme.textSecondary
@@ -328,10 +416,11 @@ Item {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: modelData.replace(/[\r\n\t]+/g, " ").trim()
+                                text: modelData.sensitive ? "Hidden: looks like a credential" : modelData.text.replace(/[\r\n\t]+/g, " ").trim()
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(11)
-                                color: Theme.textPrimary
+                                font.italic: modelData.sensitive
+                                color: modelData.sensitive ? Theme.textTertiary : Theme.textPrimary
                                 elide: Text.ElideRight
                                 maximumLineCount: 1
                             }
@@ -364,8 +453,7 @@ Item {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        // model index corresponds to actual index + 1 in history
-                                        ClipboardService.removeItem(index + 1);
+                                        ClipboardService.removeEntry(modelData.id);
                                     }
                                 }
                             }
@@ -381,7 +469,7 @@ Item {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                ClipboardService.copyText(modelData);
+                                ClipboardService.copyEntry(modelData.id);
                             }
                         }
                     }

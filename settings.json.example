@@ -65,5 +65,8 @@
   "launcherStartTab": "All",
   "launcherShowCategories": true,
   "launcherGridColumns": 4,
-  "launcherShowGenericNames": true
+  "launcherShowGenericNames": true,
+  "clipboardMaxItems": 50,
+  "clipboardSensitiveExpiry": 60,
+  "clipboardIgnoredApps": []
 }

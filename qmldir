@@ -45,6 +45,7 @@ WifiQuickSettings 1.0 quicksettings/WifiQuickSettings.qml
 BluetoothQuickSettings 1.0 quicksettings/BluetoothQuickSettings.qml
 PowerQuickSettings 1.0 quicksettings/PowerQuickSettings.qml
 ClipboardQuickSettings 1.0 quicksettings/ClipboardQuickSettings.qml
+ClipboardWindow 1.0 clipboard/ClipboardWindow.qml
 MicrophoneQuickSettings 1.0 quicksettings/MicrophoneQuickSettings.qml
 PowerProfileQuickSettings 1.0 quicksettings/PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 quicksettings/HardwareStatsQuickSettings.qml

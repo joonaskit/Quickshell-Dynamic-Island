@@ -22,6 +22,9 @@ case "$1" in
     windows|-w|--windows)
         quickshell ipc -p "$DIR" call launcher windows
         ;;
+    clipboard|-v|--clipboard)
+        quickshell ipc -p "$DIR" call clipboard toggle
+        ;;
     toggle|-t|--toggle)
         echo "Toggling Island..."
         quickshell ipc -p "$DIR" call island toggle
