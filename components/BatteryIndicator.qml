@@ -37,7 +37,7 @@ Item {
         SvgIcon {
             name: "nuclear"
             size: Theme.px(15)
-            color: Theme.accentYellow
+            color: Theme.accentYellowStrong
             visible: !root.isPresent
             Layout.alignment: Qt.AlignVCenter
         }

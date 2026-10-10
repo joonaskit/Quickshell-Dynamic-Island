@@ -87,6 +87,7 @@ Item {
 
     Shape {
         id: shape
+        preferredRendererType: Shape.CurveRenderer
         anchors.centerIn: parent
         width: root.size
         height: root.size
