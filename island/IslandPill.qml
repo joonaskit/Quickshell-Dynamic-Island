@@ -9,10 +9,16 @@ Item {
 
     property bool isExpanded: false
     property bool isSettingsOpen: false
+    // The alerting notification, opened in place by clicking it
+    property bool isNotificationOpen: false
+    property var openedNotification: null
+    readonly property bool isOpen: isExpanded || isSettingsOpen || isNotificationOpen
     property bool isTopBarMode: false
     property bool hasFullscreenApp: false
     property bool isHovered: compactClickArea.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp
     property date currentDate: clock.date
+
+    signal requestShowAllNotifications()
 
     // System services
     SystemClock {
@@ -37,7 +43,7 @@ Item {
     // Pill priority: timer, then activity, then media, except that a failed activity outranks all of them
     readonly property bool isShowingActivity: ActivityService.showInPill && !root.isShowingOsd
     readonly property bool isShowingTimer: TimerService.pillMode !== "" && !root.isShowingOsd && !ActivityService.showInPill
-    readonly property bool isShowingOsd: OsdService.isShowing && !root.isExpanded && !root.isSettingsOpen
+    readonly property bool isShowingOsd: OsdService.isShowing && !root.isOpen
     readonly property bool isAlertingNotification: NotificationService.isAlerting && NotificationService.latestNotification !== null
 
     // Compact base width (stable across hover and expand)
@@ -60,6 +66,9 @@ Item {
         }
         if (root.isExpanded) {
             return Theme.expandedWidth;
+        }
+        if (root.isNotificationOpen) {
+            return Theme.px(380);
         }
         if (root.isShowingOsd) {
             return Theme.px(230);
@@ -86,6 +95,9 @@ Item {
         if (root.isExpanded) {
             return expandedView.implicitHeight;
         }
+        if (root.isNotificationOpen) {
+            return notificationView.implicitHeight;
+        }
         if (root.isTopBarMode) {
             return Theme.topBarHeight + 1;
         }
@@ -94,21 +106,21 @@ Item {
 
     // Corner radii: morphs to 0 in top-bar mode, rounded when floating
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode && !root.isExpanded && !root.isSettingsOpen) return 0;
-        return (root.isExpanded || root.isSettingsOpen) ? Theme.expandedRadius : Theme.compactRadius;
+        if (root.isTopBarMode && !root.isOpen) return 0;
+        return root.isOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     // Bottom radii: rounds to 0 in top-bar mode, expandedRadius when expanded, compactRadius when compact
     readonly property real targetBottomRadius: {
-        if (root.isTopBarMode && !root.isExpanded && !root.isSettingsOpen) return 0;
-        return (root.isExpanded || root.isSettingsOpen) ? Theme.expandedRadius : Theme.compactRadius;
+        if (root.isTopBarMode && !root.isOpen) return 0;
+        return root.isOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     implicitWidth: pillBody.width
     implicitHeight: pillBody.height
 
     function toggle() {
-        if (root.isSettingsOpen) {
+        if (root.isSettingsOpen || root.isNotificationOpen) {
             root.collapse();
         } else {
             root.isExpanded = !root.isExpanded;
@@ -116,19 +128,45 @@ Item {
     }
 
     function expand() {
+        root.closeNotification();
         root.isExpanded = true;
         root.isSettingsOpen = false;
     }
 
     function collapse() {
+        root.closeNotification();
         root.isExpanded = false;
         root.isSettingsOpen = false;
     }
 
     // Opens the settings view, on the named tab if one is given
     function openSettings(tab) {
+        root.closeNotification();
         if (tab) settingsView.showTab(tab);
         root.isSettingsOpen = true;
+    }
+
+    // Opens the alerting notification in place; its alert stays up until closed
+    function openNotification() {
+        root.openedNotification = NotificationService.latestNotification;
+        root.isNotificationOpen = true;
+        NotificationService.holdAlert();
+    }
+
+    function closeNotification() {
+        if (!root.isNotificationOpen) return;
+        root.isNotificationOpen = false;
+        NotificationService.releaseAlert();
+    }
+
+    // Close once the opened notification is dismissed, acted on or replied to
+    Connections {
+        target: NotificationService
+        function onNotificationsChanged() {
+            if (!root.isNotificationOpen || !root.openedNotification) return;
+            let id = root.openedNotification.id;
+            if (!NotificationService.notifications.some(n => n.id === id)) root.collapse();
+        }
     }
 
     function closeSettings() {
@@ -139,7 +177,7 @@ Item {
     Timer {
         id: autoCollapseTimer
         interval: Theme.autoCollapseTimeout > 0 ? Theme.autoCollapseTimeout : 6000
-        running: root.isExpanded && !root.isSettingsOpen && !pillHoverHandler.hovered && Theme.autoCollapseTimeout > 0
+        running: (root.isExpanded || (root.isNotificationOpen && !notificationView.replyActive)) && !root.isSettingsOpen && !pillHoverHandler.hovered && Theme.autoCollapseTimeout > 0
         repeat: false
         onTriggered: {
             root.collapse();
@@ -160,7 +198,7 @@ Item {
         bottomRightRadius: root.targetBottomRadius + Theme.px(4)
 
         color: Theme.islandShadow
-        opacity: (root.isTopBarMode && !root.isExpanded && !root.isSettingsOpen) ? 0.0 : ((root.isExpanded || root.isSettingsOpen) ? 0.65 : 0.45)
+        opacity: (root.isTopBarMode && !root.isOpen) ? 0.0 : (root.isOpen ? 0.65 : 0.45)
         visible: opacity > 0.01
 
         Behavior on opacity {
@@ -172,10 +210,10 @@ Item {
     Rectangle {
         id: pillBody
         anchors.top: parent.top
-        anchors.topMargin: (root.isTopBarMode && (root.isExpanded || root.isSettingsOpen)) ? -1 : 0
+        anchors.topMargin: (root.isTopBarMode && root.isOpen) ? -1 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.targetWidth
-        height: root.targetHeight + ((root.isTopBarMode && (root.isExpanded || root.isSettingsOpen)) ? 1 : 0)
+        height: root.targetHeight + ((root.isTopBarMode && root.isOpen) ? 1 : 0)
 
         topLeftRadius: root.targetTopRadius
         topRightRadius: root.targetTopRadius
@@ -204,8 +242,8 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: Theme.animDuration
-                easing.type: (root.isExpanded || root.isSettingsOpen) ? Theme.animEasing : Easing.OutCubic
-                easing.overshoot: (root.isExpanded || root.isSettingsOpen) ? Theme.animOvershoot : 1.0
+                easing.type: root.isOpen ? Theme.animEasing : Easing.OutCubic
+                easing.overshoot: root.isOpen ? Theme.animOvershoot : 1.0
             }
         }
 
@@ -233,7 +271,7 @@ Item {
             currentTime: root.currentDate
             use24Hour: Theme.use24Hour
             isHovered: root.isHovered
-            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && !root.isShowingActivity && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
+            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && !root.isShowingActivity && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -247,7 +285,7 @@ Item {
             anchors.centerIn: parent
             currentTime: root.currentDate
             player: root.activePlayer
-            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && !root.isShowingActivity && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
+            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && !root.isShowingActivity && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -259,7 +297,7 @@ Item {
         CompactNotificationAlertView {
             id: compactNotificationView
             anchors.centerIn: parent
-            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && root.isAlertingNotification) ? 1.0 : 0.0
+            opacity: (!root.isOpen && !root.isShowingOsd && root.isAlertingNotification) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -284,7 +322,7 @@ Item {
         CompactTimerView {
             id: compactTimerView
             anchors.centerIn: parent
-            opacity: (!root.isExpanded && !root.isSettingsOpen && !root.isShowingOsd && !root.isAlertingNotification && root.isShowingTimer) ? 1.0 : 0.0
+            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && root.isShowingTimer) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -308,12 +346,14 @@ Item {
         MouseArea {
             id: compactClickArea
             anchors.fill: parent
-            enabled: !root.isExpanded && !root.isSettingsOpen
-            hoverEnabled: !root.isExpanded && !root.isSettingsOpen && !root.isTopBarMode && !root.hasFullscreenApp
+            enabled: !root.isOpen
+            hoverEnabled: !root.isOpen && !root.isTopBarMode && !root.hasFullscreenApp
             cursorShape: Qt.PointingHandCursor
 
             onClicked: {
-                if (!root.isExpanded && !root.isSettingsOpen) {
+                if (root.isAlertingNotification && !root.isShowingOsd) {
+                    root.openNotification();
+                } else {
                     root.expand();
                 }
             }
@@ -352,6 +392,24 @@ Item {
             onRequestOpenSettings: {
                 root.openSettings();
             }
+
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+        }
+
+        // Opened Notification View
+        ExpandedNotificationView {
+            id: notificationView
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            notification: root.openedNotification
+
+            opacity: root.isNotificationOpen ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.97
+            visible: opacity > 0.01
+
+            onRequestShowAll: root.requestShowAllNotifications()
 
             Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }

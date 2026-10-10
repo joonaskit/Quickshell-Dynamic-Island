@@ -147,7 +147,7 @@ Item {
                 anchors.centerIn: parent
                 width: parent.width * 0.85
                 height: parent.height * 0.85
-                radius: 10
+                radius: Theme.corner(10)
                 color: Qt.rgba(0, 0, 0, 0.25)
                 z: -1
                 visible: appIcon.status === Image.Ready
@@ -157,7 +157,7 @@ Item {
         // Fallback squircle icon if image fails to load
         Rectangle {
             anchors.fill: parent
-            radius: 11
+            radius: Theme.corner(11)
             visible: appIcon.status !== Image.Ready
             gradient: Gradient {
                 GradientStop { position: 0.0; color: Theme.tileGradientTop }
@@ -216,7 +216,7 @@ Item {
 
         width: root.isVertical ? 8 : (root.isFocused ? 22 : 0)
         height: root.isVertical ? (root.isFocused ? 22 : 0) : 8
-        radius: 4
+        radius: Theme.corner(4)
         color: Theme.accentTint(0.45)
         opacity: (root.isRunning && root.isFocused) ? 1.0 : 0.0
 
@@ -277,7 +277,7 @@ Item {
             id: tooltipBg
             width: tooltipText.implicitWidth + 16
             height: 24
-            radius: 6
+            radius: Theme.corner(6)
             color: Theme.cardBackground
             border.color: Theme.overlay(0.18)
             border.width: 1

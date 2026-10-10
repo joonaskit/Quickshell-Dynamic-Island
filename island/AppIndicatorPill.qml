@@ -553,7 +553,7 @@ Item {
                                 anchors.centerIn: parent
                                 width: parent.width + 6
                                 height: parent.height + 4
-                                radius: 14
+                                radius: Theme.corner(14)
                                 color: Theme.islandShadow
                                 z: -1
                                 opacity: 0.5
@@ -690,7 +690,7 @@ Item {
                         Rectangle {
                             id: actionButton
                             anchors.fill: parent
-                            radius: 6
+                            radius: Theme.corner(6)
                             visible: !modelData.isSeparator
 
                             readonly property bool isExitItem: {
@@ -776,7 +776,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 6
+                        radius: Theme.corner(6)
                         color: fallbackFocusMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                         RowLayout {
@@ -822,7 +822,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 6
+                        radius: Theme.corner(6)
                         color: fallbackQuitMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : "transparent"
 
                         RowLayout {

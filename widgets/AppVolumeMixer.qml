@@ -23,7 +23,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(26)
-            radius: Theme.px(8)
+            radius: Theme.cornerPx(8)
             color: headerMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.04)
             border.width: 1
             border.color: root.expanded ? Theme.accentTint(0.35) : Theme.overlay(0.08)

@@ -9,16 +9,16 @@ Item {
 
     property bool embedded: false
 
-    implicitWidth: embedded ? (parent ? parent.width : 340) : 320
+    implicitWidth: embedded ? (parent ? parent.width : Theme.px(340)) : Theme.px(320)
     implicitHeight: mainCard.height
 
     // Soft Drop Shadow
     Rectangle {
         id: cardShadow
         anchors.centerIn: mainCard
-        width: mainCard.width + 16
-        height: mainCard.height + 12
-        radius: mainCard.radius + 4
+        width: mainCard.width + Theme.px(16)
+        height: mainCard.height + Theme.px(12)
+        radius: mainCard.radius + Theme.px(4)
         color: Theme.islandShadow
         opacity: 0.7
         visible: !root.embedded
@@ -28,8 +28,8 @@ Item {
     Rectangle {
         id: mainCard
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
-        height: contentColumn.implicitHeight + (root.embedded ? 14 : 28)
-        radius: root.embedded ? 0 : 18
+        height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
+        radius: root.embedded ? 0 : Theme.px(18)
         color: root.embedded ? "transparent" : Theme.cardBackground
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
@@ -40,18 +40,18 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: root.embedded ? 10 : 14
-            spacing: 12
+            anchors.margins: root.embedded ? Theme.px(10) : Theme.px(14)
+            spacing: Theme.px(12)
 
             // Top Header: Performance Badge & Title
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 12
+                spacing: Theme.px(12)
 
                 Rectangle {
-                    Layout.preferredWidth: 38
-                    Layout.preferredHeight: 38
-                    radius: 19
+                    Layout.preferredWidth: Theme.px(38)
+                    Layout.preferredHeight: Theme.px(38)
+                    radius: Theme.px(19)
                     color: {
                         if (PowerProfileService.activeProfile === "performance") return Qt.rgba(255/255, 69/255, 58/255, 0.22);
                         if (PowerProfileService.activeProfile === "power-saver") return Qt.rgba(48/255, 209/255, 88/255, 0.22);
@@ -63,7 +63,7 @@ Item {
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "gauge"
-                        size: 20
+                        size: Theme.px(20)
                         color: {
                             if (PowerProfileService.activeProfile === "performance") return Theme.accentRed;
                             if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreen;
@@ -74,12 +74,12 @@ Item {
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 2
+                    spacing: Theme.px(2)
 
                     Text {
                         text: "Performance Mode"
                         font.family: Theme.fontDisplay
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.fontPx(13)
                         font.weight: Font.DemiBold
                         color: Theme.textPrimary
                     }
@@ -91,7 +91,7 @@ Item {
                             return "Balanced";
                         }
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontPx(11)
                         color: Theme.textSecondary
                     }
                 }
@@ -107,13 +107,13 @@ Item {
             // Profile Selection Options
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Theme.px(6)
 
                 // 1. Power Saver
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 46
-                    radius: 10
+                    Layout.preferredHeight: Theme.px(46)
+                    radius: Theme.corner(10)
                     color: PowerProfileService.activeProfile === "power-saver"
                         ? Qt.rgba(48/255, 209/255, 88/255, 0.16)
                         : (saveMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
@@ -124,12 +124,12 @@ Item {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 10
+                        anchors.margins: Theme.px(10)
+                        spacing: Theme.px(10)
 
                         SvgIcon {
                             name: "leaf"
-                            size: 16
+                            size: Theme.px(16)
                             color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreen : Theme.textTertiary
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
@@ -141,7 +141,7 @@ Item {
                             Text {
                                 text: "Power Saver"
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Theme.fontPx(12)
                                 font.weight: Font.DemiBold
                                 color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreen : Theme.textPrimary
                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -149,14 +149,14 @@ Item {
                             Text {
                                 text: "Lower clock speeds, quiet fans"
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: Theme.fontPx(10)
                                 color: Theme.textTertiary
                             }
                         }
 
                         SvgIcon {
                             name: "check"
-                            size: 14
+                            size: Theme.px(14)
                             color: Theme.accentGreen
                             opacity: PowerProfileService.activeProfile === "power-saver" ? 1.0 : 0.0
                             scale: PowerProfileService.activeProfile === "power-saver" ? 1.0 : 0.5
@@ -177,8 +177,8 @@ Item {
                 // 2. Balanced
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 46
-                    radius: 10
+                    Layout.preferredHeight: Theme.px(46)
+                    radius: Theme.corner(10)
                     color: PowerProfileService.activeProfile === "balanced"
                         ? Qt.rgba(10/255, 132/255, 255/255, 0.16)
                         : (balMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
@@ -189,12 +189,12 @@ Item {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 10
+                        anchors.margins: Theme.px(10)
+                        spacing: Theme.px(10)
 
                         SvgIcon {
                             name: "gauge"
-                            size: 16
+                            size: Theme.px(16)
                             color: PowerProfileService.activeProfile === "balanced" ? Theme.accentBlue : Theme.textTertiary
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
@@ -206,7 +206,7 @@ Item {
                             Text {
                                 text: "Balanced"
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Theme.fontPx(12)
                                 font.weight: Font.DemiBold
                                 color: PowerProfileService.activeProfile === "balanced" ? Theme.accentBlue : Theme.textPrimary
                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -214,14 +214,14 @@ Item {
                             Text {
                                 text: "Standard dynamic performance"
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: Theme.fontPx(10)
                                 color: Theme.textTertiary
                             }
                         }
 
                         SvgIcon {
                             name: "check"
-                            size: 14
+                            size: Theme.px(14)
                             color: Theme.accentBlue
                             opacity: PowerProfileService.activeProfile === "balanced" ? 1.0 : 0.0
                             scale: PowerProfileService.activeProfile === "balanced" ? 1.0 : 0.5
@@ -242,8 +242,8 @@ Item {
                 // 3. Performance
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 46
-                    radius: 10
+                    Layout.preferredHeight: Theme.px(46)
+                    radius: Theme.corner(10)
                     color: PowerProfileService.activeProfile === "performance"
                         ? Qt.rgba(255/255, 69/255, 58/255, 0.16)
                         : (perfMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
@@ -254,12 +254,12 @@ Item {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 10
+                        anchors.margins: Theme.px(10)
+                        spacing: Theme.px(10)
 
                         SvgIcon {
                             name: "bolt"
-                            size: 16
+                            size: Theme.px(16)
                             color: PowerProfileService.activeProfile === "performance" ? Theme.accentRed : Theme.textTertiary
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
@@ -271,7 +271,7 @@ Item {
                             Text {
                                 text: "Performance"
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Theme.fontPx(12)
                                 font.weight: Font.DemiBold
                                 color: PowerProfileService.activeProfile === "performance" ? Theme.accentRed : Theme.textPrimary
                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -279,14 +279,14 @@ Item {
                             Text {
                                 text: "Maximum clock speed & throughput"
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: Theme.fontPx(10)
                                 color: Theme.textTertiary
                             }
                         }
 
                         SvgIcon {
                             name: "check"
-                            size: 14
+                            size: Theme.px(14)
                             color: Theme.accentRed
                             opacity: PowerProfileService.activeProfile === "performance" ? 1.0 : 0.0
                             scale: PowerProfileService.activeProfile === "performance" ? 1.0 : 0.5

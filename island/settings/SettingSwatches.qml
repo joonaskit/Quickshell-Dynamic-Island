@@ -42,7 +42,7 @@ Rectangle {
                 visible: swatchRow.iconName !== ""
                 Layout.preferredWidth: 26
                 Layout.preferredHeight: 26
-                radius: 7
+                radius: Theme.corner(7)
                 color: swatchRow.iconBadgeColor
 
                 SvgIcon {

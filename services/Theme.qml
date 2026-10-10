@@ -52,7 +52,11 @@ Singleton {
     readonly property color accentBlue: "#0a84ff"
     readonly property color accentOrange: "#ff9f0a"
     readonly property color accentYellow: "#ffd60a"
+    // Yellow for icons and text on the panel background: the plain yellow washes out on light
+    readonly property color accentYellowStrong: isLight ? "#b38600" : accentYellow
     readonly property color accentRed: "#ff453a"
+    // Red for text and icons on a light panel, where the plain red is too weak
+    readonly property color accentRedStrong: isLight ? "#d70015" : accentRed
     readonly property color accentPurple: "#bf5af2"
     readonly property color accentCyan: "#64d2ff"
     readonly property color accentIndigo: "#5e5ce6"
@@ -83,6 +87,10 @@ Singleton {
     // to a name of the form on<Capital> as a signal handler and silently drops it.
     readonly property color accentForeground: (0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b) > 0.6 ? "#000000" : "#ffffff"
 
+    // The accent for text and icons on a tint of itself: darkened on the light scheme,
+    // where the plain accent washes out
+    readonly property color accentText: isLight ? Qt.darker(accent, 1.7) : accent
+
     // The accent at a given opacity, for selection fills and focus borders
     function accentTint(alpha) {
         return Qt.rgba(accent.r, accent.g, accent.b, alpha);
@@ -94,14 +102,65 @@ Singleton {
     readonly property color sliderHandle: "#ffffff"
     readonly property color switchTrackOff: isLight ? "#d3c9b9" : "#39393d"
 
-    // Fonts
-    readonly property string fontFamily: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
-    readonly property string fontDisplay: "Cantarell, Noto Sans, Liberation Sans, sans-serif"
+    // Fonts. The user's choices (SettingsService.fontFamily / fontDisplayFamily) are
+    // family names, empty for the defaults. The fonts always fall back to the
+    // defaults, so a missing or misspelled choice still gives readable text.
+    property string fontFamilyChoice: ""
+    property string fontDisplayChoice: ""
+    readonly property var fontDefaults: ["Cantarell", "Noto Sans", "Liberation Sans"]
+    readonly property var installedFonts: Qt.fontFamilies()
+
+    // A family name for font.family: the first of the choice and the defaults that
+    // is installed. font.family takes one name, not a fallback list.
+    function resolveFont(choice) {
+        let candidates = choice !== "" ? [choice].concat(fontDefaults) : fontDefaults;
+        if (installedFonts.length === 0) return candidates.join(", ");
+        for (let i = 0; i < candidates.length; i++) {
+            if (installedFonts.indexOf(candidates[i]) >= 0) return candidates[i];
+        }
+        return "sans-serif";
+    }
+
+    readonly property string fontFamily: resolveFont(fontFamilyChoice)
+    // Large and numeric text; follows the interface font unless set separately
+    readonly property string fontDisplay: fontDisplayChoice !== "" ? resolveFont(fontDisplayChoice) : fontFamily
+    // The same fonts as a fallback list, exported to companion apps
+    readonly property string fontFamilyList: (fontFamilyChoice !== "" ? fontFamilyChoice + ", " : "") + fontDefaults.join(", ") + ", sans-serif"
+    readonly property string fontDisplayList: fontDisplayChoice !== "" ? fontDisplayChoice + ", " + fontFamilyList : fontFamilyList
+
+    // Corner roundness (SettingsService.cornerStyle). Panels, cards, buttons and rows
+    // scale their style radii by cornerScale: use corner(n) for an unscaled radius and
+    // cornerPx(n) for one that follows the interface scale. Shapes (pills, circles,
+    // bars and dots, where the radius is half the size) keep a plain number.
+    property string cornerStyle: "default"
+    readonly property var cornerChoices: [
+        { "name": "square", "label": "Square", "scale": 0.2 },
+        { "name": "tight", "label": "Tight", "scale": 0.6 },
+        { "name": "default", "label": "Default", "scale": 1.0 },
+        { "name": "round", "label": "Round", "scale": 1.5 }
+    ]
+    readonly property real cornerScale: {
+        for (let i = 0; i < cornerChoices.length; i++) {
+            if (cornerChoices[i].name === cornerStyle) return cornerChoices[i].scale;
+        }
+        return 1.0;
+    }
+    // The island's expanded view and the dock follow the setting half as much, so
+    // they keep their identity at the extremes
+    readonly property real cornerScaleSoft: 1.0 + (cornerScale - 1.0) * 0.5
+
+    function corner(base) {
+        return base * cornerScale;
+    }
+
+    function cornerPx(base) {
+        return px(base) * cornerScale;
+    }
 
     // Corner radius scale (unscaled), exported to companion apps
-    readonly property int radiusSmall: 6
-    readonly property int radiusMedium: 10
-    readonly property int radiusLarge: 14
+    readonly property int radiusSmall: Math.round(corner(6))
+    readonly property int radiusMedium: Math.round(corner(10))
+    readonly property int radiusLarge: Math.round(corner(14))
 
     // UI Scaling & DPI (limits: 0.80 to 1.25)
     property real uiScale: 1.0
@@ -143,7 +202,7 @@ Singleton {
     property int expandedWidth: px(baseExpandedWidth)
     property int expandedHeight: px(baseExpandedHeight)
     property int expandedHeightWithMedia: px(baseExpandedHeightWithMedia)
-    property int expandedRadius: px(baseExpandedRadius)
+    property int expandedRadius: Math.round(px(baseExpandedRadius) * cornerScaleSoft)
 
     // Animations
     readonly property int animDuration: 360
@@ -175,7 +234,7 @@ Singleton {
     property real dockScaleHover: 1.28
     property real dockScaleAdjacent: 1.12
     property int dockHeight: Math.round(dockIconSize * Math.max(1.2, dockScaleHover) + px(16))
-    property int dockRadius: px(Math.min(22, Math.round(dockHeight / 3)))
+    property int dockRadius: Math.round(px(Math.min(22, Math.round(dockHeight / 3))) * cornerScaleSoft)
     property int dockBottomMargin: px(baseDockBottomMargin)
     property bool dockReserveSpace: false
     property bool dockAutoHideOnFullscreen: true

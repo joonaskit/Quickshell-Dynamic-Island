@@ -26,6 +26,18 @@ ShellRoot {
         }
     }
 
+    IpcHandler {
+        target: "clipboard"
+
+        function toggle() {
+            ClipboardService.toggleWindow();
+        }
+
+        function toggleIncognito() {
+            ClipboardService.incognito = !ClipboardService.incognito;
+        }
+    }
+
     // Global controls for keyboard shortcuts. This lives here, not in IslandWindow,
     // because IslandWindow is created once per screen and IPC targets must be unique.
     // E.g.: `quickshell ipc call system volumeUp`
@@ -111,6 +123,15 @@ ShellRoot {
 
         delegate: Component {
             IslandWindow {}
+        }
+    }
+
+    // Clipboard history
+    Variants {
+        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+
+        delegate: Component {
+            ClipboardWindow {}
         }
     }
 

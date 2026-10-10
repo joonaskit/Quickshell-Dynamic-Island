@@ -111,6 +111,16 @@ Singleton {
         root.notificationReceived(data);
     }
 
+    // Keeps the alert from timing out while the notification is open in the island
+    function holdAlert() {
+        alertTimer.stop();
+    }
+
+    // Ends a held alert, unless a newer notification has restarted the timer
+    function releaseAlert() {
+        if (!alertTimer.running) root.isAlerting = false;
+    }
+
     function toggleDnd() {
         SettingsService.setSetting("dndEnabled", !SettingsService.dndEnabled);
     }

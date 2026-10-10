@@ -20,7 +20,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(28)
-            radius: Theme.px(8)
+            radius: Theme.cornerPx(8)
             color: selectorMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.04)
             border.width: 1
             border.color: root.expanded ? Theme.accentTint(0.35) : Theme.overlay(0.08)
@@ -94,7 +94,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Theme.px(30)
-                    radius: Theme.px(7)
+                    radius: Theme.cornerPx(7)
                     color: itemMouse.containsMouse
                         ? Theme.overlay(0.1)
                         : (modelData.isDefault ? Theme.accentTint(0.16) : Theme.overlay(0.03))

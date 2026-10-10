@@ -48,7 +48,7 @@ Item {
         isVertical: root.isVertical
         dockPosition: root.dockPosition
         filletSize: geo.filletSize
-        cornerRadius: 12
+        cornerRadius: Theme.corner(12)
         startFlush: geo.startFlush
         dockCornerRadius: root.dockCornerRadius
         farFillet: geo.farFillet
@@ -83,7 +83,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: 176
             height: 24
-            radius: 7
+            radius: Theme.corner(7)
             color: Theme.overlay(0.06)
 
             Row {
@@ -101,7 +101,7 @@ Item {
 
                         width: parent.width / segRow.options.length
                         height: parent.height
-                        radius: 5
+                        radius: Theme.corner(5)
                         color: isSelected ? Theme.accent : (segMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
 
                         Behavior on color { ColorAnimation { duration: 100 } }
@@ -137,7 +137,7 @@ Item {
         signal toggled(bool value)
 
         height: 30
-        radius: 6
+        radius: Theme.corner(6)
         color: toggleMouse.containsMouse ? Theme.overlay(0.08) : "transparent"
 
         Text {
@@ -295,7 +295,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 30
-                radius: 6
+                radius: Theme.corner(6)
                 color: settingsLinkMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 SvgIcon {

@@ -118,13 +118,11 @@ Item {
         root.powerMenuOpen = next;
     }
 
+
     function toggleClipboardMenu() {
         let next = !root.clipboardMenuOpen;
         root.closeAllMenus();
         root.clipboardMenuOpen = next;
-        if (root.clipboardMenuOpen) {
-            ClipboardService.queryClipboard();
-        }
     }
 
     function toggleNotificationMenu() {
@@ -528,7 +526,8 @@ Item {
                         size: root.iconSize
                         color: {
                             if (root.clipboardMenuOpen) return Theme.accent;
-                            if (ClipboardService.currentText !== "") return Theme.textPrimary;
+                            if (ClipboardService.incognito) return Theme.accentYellowStrong;
+                            if (ClipboardService.currentText !== "" || ClipboardService.currentBinaryType !== "" || ClipboardService.currentFiles.length > 0) return Theme.textPrimary;
                             return clipboardMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
                         }
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }

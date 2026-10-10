@@ -16,6 +16,7 @@ singleton PowerProfileService 1.0 services/PowerProfileService.qml
 singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
 singleton DeviceService 1.0 services/DeviceService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
+singleton ShortcutService 1.0 services/ShortcutService.qml
 IslandWindow 1.0 island/IslandWindow.qml
 IslandPill 1.0 island/IslandPill.qml
 IslandDetachedBubble 1.0 island/IslandDetachedBubble.qml
@@ -26,6 +27,7 @@ CompactOsdView 1.0 island/CompactOsdView.qml
 CompactTimerView 1.0 island/CompactTimerView.qml
 TimerWidget 1.0 widgets/TimerWidget.qml
 ExpandedView 1.0 island/ExpandedView.qml
+ExpandedNotificationView 1.0 island/ExpandedNotificationView.qml
 NotificationCard 1.0 island/NotificationCard.qml
 NotificationListView 1.0 island/NotificationListView.qml
 MiniCalendarWidget 1.0 widgets/MiniCalendarWidget.qml
@@ -44,6 +46,7 @@ WifiQuickSettings 1.0 quicksettings/WifiQuickSettings.qml
 BluetoothQuickSettings 1.0 quicksettings/BluetoothQuickSettings.qml
 PowerQuickSettings 1.0 quicksettings/PowerQuickSettings.qml
 ClipboardQuickSettings 1.0 quicksettings/ClipboardQuickSettings.qml
+ClipboardWindow 1.0 clipboard/ClipboardWindow.qml
 MicrophoneQuickSettings 1.0 quicksettings/MicrophoneQuickSettings.qml
 PowerProfileQuickSettings 1.0 quicksettings/PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 quicksettings/HardwareStatsQuickSettings.qml
@@ -54,12 +57,15 @@ SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingSegmented 1.0 island/settings/SettingSegmented.qml
 SettingSlider 1.0 island/settings/SettingSlider.qml
 SettingSwatches 1.0 island/settings/SettingSwatches.qml
+SettingFontPicker 1.0 island/settings/SettingFontPicker.qml
 SettingDivider 1.0 island/settings/SettingDivider.qml
+SettingShortcut 1.0 island/settings/SettingShortcut.qml
 DisplaySettings 1.0 island/settings/DisplaySettings.qml
 TopBarSettings 1.0 island/settings/TopBarSettings.qml
 IslandSettings 1.0 island/settings/IslandSettings.qml
 DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
+ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
 SettingsCategory 1.0 island/settings/SettingsCategory.qml
 singleton SettingsSearch 1.0 island/settings/SettingsSearch.qml

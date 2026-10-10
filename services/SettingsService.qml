@@ -14,10 +14,15 @@ Singleton {
     // User settings properties (with default values matching Theme.qml)
     property real uiScale: 1.0
     property real fontScale: 1.0
+    // Font family names; empty means the default fonts, and an empty display font follows the interface font
+    property string fontFamily: ""
+    property string fontDisplayFamily: ""
     // "dark" or "light"
     property string colorScheme: "dark"
     // Name of an entry in Theme.accentChoices
     property string accentColor: "blue"
+    // Name of an entry in Theme.cornerChoices
+    property string cornerStyle: "default"
     property bool use24Hour: true
     property bool showSeconds: false
     property bool showBattery: true
@@ -47,6 +52,7 @@ Singleton {
     property bool showCaffeineIcon: true
     property bool showDndIcon: true
     property bool dndEnabled: false
+    property bool caffeineEnabled: false
     property bool showWifiIcon: true
     property bool showBluetoothIcon: true
     property bool showMicIcon: true
@@ -70,6 +76,7 @@ Singleton {
     property bool autoHideAppTrayPill: false
     property bool showDetachedNotifBubble: true
     property bool showOsd: true
+    property bool showDesktopOsd: true
     property bool showTimerInPill: true
     property bool showActivitiesInPill: true
 
@@ -84,6 +91,13 @@ Singleton {
     property bool launcherShowCategories: true
     property int launcherGridColumns: 4
     property bool launcherShowGenericNames: true
+
+    // Clipboard history (kept in memory only)
+    property int clipboardMaxItems: 50
+    // Seconds before an item that looks like a credential is dropped from the history; 0 keeps it
+    property int clipboardSensitiveExpiry: 60
+    // App ids (lowercase) whose copies are never recorded
+    property var clipboardIgnoredApps: []
 
     property bool isLoaded: false
     property string lastSavedTime: ""
@@ -134,8 +148,13 @@ Singleton {
         if (data.uiScale !== undefined && !isNaN(data.uiScale)) root.uiScale = Math.max(0.80, Math.min(1.25, parseFloat(data.uiScale)));
         if (data.fontScale !== undefined && !isNaN(data.fontScale)) root.fontScale = Math.max(0.85, Math.min(1.25, parseFloat(data.fontScale)));
 
+        if (typeof data.fontFamily === "string") root.fontFamily = data.fontFamily.trim().slice(0, 100);
+        if (typeof data.fontDisplayFamily === "string") root.fontDisplayFamily = data.fontDisplayFamily.trim().slice(0, 100);
+
         if (data.colorScheme === "dark" || data.colorScheme === "light") root.colorScheme = data.colorScheme;
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
+
+        if (data.cornerStyle !== undefined && Theme.cornerChoices.some(c => c.name === data.cornerStyle)) root.cornerStyle = data.cornerStyle;
 
         if (data.use24Hour !== undefined) root.use24Hour = !!data.use24Hour;
         if (data.showSeconds !== undefined) root.showSeconds = !!data.showSeconds;
@@ -167,6 +186,7 @@ Singleton {
         if (data.showCaffeineIcon !== undefined) root.showCaffeineIcon = !!data.showCaffeineIcon;
         if (data.showDndIcon !== undefined) root.showDndIcon = !!data.showDndIcon;
         if (data.dndEnabled !== undefined) root.dndEnabled = !!data.dndEnabled;
+        if (data.caffeineEnabled !== undefined) root.caffeineEnabled = !!data.caffeineEnabled;
         if (data.showWifiIcon !== undefined) root.showWifiIcon = !!data.showWifiIcon;
         if (data.showBluetoothIcon !== undefined) root.showBluetoothIcon = !!data.showBluetoothIcon;
         if (data.showMicIcon !== undefined) root.showMicIcon = !!data.showMicIcon;
@@ -188,6 +208,7 @@ Singleton {
         if (data.autoHideAppTrayPill !== undefined) root.autoHideAppTrayPill = !!data.autoHideAppTrayPill;
         if (data.showDetachedNotifBubble !== undefined) root.showDetachedNotifBubble = !!data.showDetachedNotifBubble;
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
+        if (data.showDesktopOsd !== undefined) root.showDesktopOsd = !!data.showDesktopOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
         if (data.showActivitiesInPill !== undefined) root.showActivitiesInPill = !!data.showActivitiesInPill;
 
@@ -208,6 +229,15 @@ Singleton {
             root.launcherGridColumns = Math.max(3, Math.min(6, parseInt(data.launcherGridColumns)));
         }
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
+        if (data.clipboardMaxItems !== undefined && !isNaN(data.clipboardMaxItems)) {
+            root.clipboardMaxItems = Math.max(5, Math.min(500, parseInt(data.clipboardMaxItems)));
+        }
+        if (data.clipboardSensitiveExpiry !== undefined && !isNaN(data.clipboardSensitiveExpiry)) {
+            root.clipboardSensitiveExpiry = Math.max(0, Math.min(3600, parseInt(data.clipboardSensitiveExpiry)));
+        }
+        if (Array.isArray(data.clipboardIgnoredApps)) {
+            root.clipboardIgnoredApps = data.clipboardIgnoredApps.map(a => String(a).toLowerCase());
+        }
 
         // Sync with Theme singleton
         root.syncToTheme();
@@ -218,7 +248,10 @@ Singleton {
     function syncToTheme() {
         Theme.uiScale = root.uiScale;
         Theme.fontScale = root.fontScale;
+        Theme.fontFamilyChoice = root.fontFamily;
+        Theme.fontDisplayChoice = root.fontDisplayFamily;
         Theme.scheme = root.colorScheme;
+        Theme.cornerStyle = root.cornerStyle;
         Theme.accentName = root.accentColor;
         Theme.use24Hour = root.use24Hour;
         Theme.showSeconds = root.showSeconds;
@@ -283,8 +316,11 @@ Singleton {
     function resetDefaults() {
         root.uiScale = 1.0;
         root.fontScale = 1.0;
+        root.fontFamily = "";
+        root.fontDisplayFamily = "";
         root.colorScheme = "dark";
         root.accentColor = "blue";
+        root.cornerStyle = "default";
         root.use24Hour = true;
         root.showSeconds = false;
         root.showBattery = true;
@@ -309,6 +345,7 @@ Singleton {
         root.showCaffeineIcon = true;
         root.showDndIcon = true;
         root.dndEnabled = false;
+        root.caffeineEnabled = false;
         root.showWifiIcon = true;
         root.showBluetoothIcon = true;
         root.showMicIcon = true;
@@ -330,6 +367,7 @@ Singleton {
         root.autoHideAppTrayPill = false;
         root.showDetachedNotifBubble = true;
         root.showOsd = true;
+        root.showDesktopOsd = true;
         root.showTimerInPill = true;
         root.showActivitiesInPill = true;
 
@@ -341,6 +379,9 @@ Singleton {
         root.launcherShowCategories = true;
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
+        root.clipboardMaxItems = 50;
+        root.clipboardSensitiveExpiry = 60;
+        root.clipboardIgnoredApps = [];
 
         root.syncToTheme();
         root.settingsChanged();
@@ -367,8 +408,11 @@ Singleton {
         let data = {
             "uiScale": root.uiScale,
             "fontScale": root.fontScale,
+            "fontFamily": root.fontFamily,
+            "fontDisplayFamily": root.fontDisplayFamily,
             "colorScheme": root.colorScheme,
             "accentColor": root.accentColor,
+            "cornerStyle": root.cornerStyle,
             "use24Hour": root.use24Hour,
             "showSeconds": root.showSeconds,
             "showBattery": root.showBattery,
@@ -392,6 +436,7 @@ Singleton {
             "showCaffeineIcon": root.showCaffeineIcon,
             "showDndIcon": root.showDndIcon,
             "dndEnabled": root.dndEnabled,
+            "caffeineEnabled": root.caffeineEnabled,
             "showWifiIcon": root.showWifiIcon,
             "showBluetoothIcon": root.showBluetoothIcon,
             "showMicIcon": root.showMicIcon,
@@ -411,6 +456,7 @@ Singleton {
             "autoHideAppTrayPill": root.autoHideAppTrayPill,
             "showDetachedNotifBubble": root.showDetachedNotifBubble,
             "showOsd": root.showOsd,
+            "showDesktopOsd": root.showDesktopOsd,
             "showTimerInPill": root.showTimerInPill,
             "showActivitiesInPill": root.showActivitiesInPill,
             "widgets": root.widgetStates(),
@@ -419,7 +465,10 @@ Singleton {
             "launcherStartTab": root.launcherStartTab,
             "launcherShowCategories": root.launcherShowCategories,
             "launcherGridColumns": root.launcherGridColumns,
-            "launcherShowGenericNames": root.launcherShowGenericNames
+            "launcherShowGenericNames": root.launcherShowGenericNames,
+            "clipboardMaxItems": root.clipboardMaxItems,
+            "clipboardSensitiveExpiry": root.clipboardSensitiveExpiry,
+            "clipboardIgnoredApps": root.clipboardIgnoredApps
         };
         let jsonStr = JSON.stringify(data, null, 2);
         saveProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.settingsFilePath, jsonStr];

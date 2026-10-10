@@ -144,6 +144,19 @@ SettingsCategory {
 
         SettingDivider {}
 
+        SettingToggle {
+            title: "Show Desktop Switch Indicator"
+            description: "Show the current virtual desktop in the island for a moment after a switch"
+            iconName: "desktop"
+            iconColor: Theme.accentPurple
+            checked: SettingsService.showDesktopOsd
+            onToggled: function(val) {
+                SettingsService.setSetting("showDesktopOsd", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 4. Auto-Collapse Timeout Segmented Picker
         SettingSegmented {
             title: "Auto-Collapse Inactivity Timeout"

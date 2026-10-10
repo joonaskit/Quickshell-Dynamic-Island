@@ -1,0 +1,96 @@
+"""Tests for scripts/clipboard_tracker.py. Run with ./test.sh."""
+import os
+import sys
+import tempfile
+import unittest
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
+
+import clipboard_tracker as ct  # noqa: E402
+
+
+class ClassifyTest(unittest.TestCase):
+    def test_plain_text(self):
+        self.assertEqual(ct.classify_text("hello world"), ("text", False))
+
+    def test_url(self):
+        self.assertEqual(ct.classify_text("https://example.com/a?b=1\n"), ("url", False))
+
+    def test_text_containing_url_is_text(self):
+        self.assertEqual(ct.classify_text("see https://example.com now")[0], "text")
+
+    def test_multiline_url_list_is_text(self):
+        self.assertEqual(ct.classify_text("https://a.com\nhttps://b.com")[0], "text")
+
+    def test_github_token_is_sensitive(self):
+        self.assertTrue(ct.classify_text("ghp_" + "a1B2c3D4e5" * 4)[1])
+
+    def test_private_key_is_sensitive(self):
+        self.assertTrue(ct.classify_text("-----BEGIN OPENSSH PRIVATE KEY-----\nabc")[1])
+
+    def test_password_assignment_is_sensitive(self):
+        self.assertTrue(ct.classify_text("password = hunter2hunter2")[1])
+
+    def test_random_token_is_sensitive(self):
+        self.assertTrue(ct.classify_text("q8Zr3LmX9vB2nT7kWp4YcD1aF6hJ0sGe")[1])
+
+    def test_url_with_long_path_is_not_sensitive(self):
+        self.assertFalse(ct.classify_text("https://example.com/Some/Long/Path/AbC123xyz456")[1])
+
+    def test_long_plain_word_is_not_sensitive(self):
+        self.assertFalse(ct.classify_text("internationalizationlocalization")[1])
+
+
+class RecordTest(unittest.TestCase):
+    def test_blank_text_is_skipped(self):
+        self.assertIsNone(ct.build_text_record("  \n\t"))
+
+    def test_huge_text_is_skipped(self):
+        self.assertIsNone(ct.build_text_record("a" * (ct.MAX_CHARS + 1)))
+
+    def test_metadata(self):
+        r = ct.build_text_record("héllo\nworld", now_ms=5)
+        self.assertEqual((r["chars"], r["size"], r["lines"], r["time"]), (11, 12, 2, 5))
+
+    def test_trailing_newline_does_not_add_a_line(self):
+        self.assertEqual(ct.build_text_record("one\n")["lines"], 1)
+
+
+class UriListTest(unittest.TestCase):
+    def test_decodes_paths_and_ignores_other_lines(self):
+        raw = "# comment\r\nfile:///home/u/My%20File.txt\r\nhttps://x.y\r\n"
+        self.assertEqual(ct.parse_uri_list(raw), ["/home/u/My File.txt"])
+
+
+class ImageTest(unittest.TestCase):
+    def test_prefers_png(self):
+        self.assertEqual(ct.pick_image_type(["text/html", "image/jpeg", "image/png"]), "image/png")
+
+    def test_falls_back_to_first_image_type(self):
+        self.assertEqual(ct.pick_image_type(["text/html", "image/webp", "image/bmp"]), "image/webp")
+
+    def test_no_image_type(self):
+        self.assertIsNone(ct.pick_image_type(["text/html"]))
+
+    def test_saves_image_once_per_content(self):
+        with tempfile.TemporaryDirectory() as d:
+            a = ct.build_image_record(b"abc", "image/png", now_ms=7, directory=d)
+            b = ct.build_image_record(b"abc", "image/png", now_ms=9, directory=d)
+            self.assertEqual(a["hash"], b["hash"])
+            self.assertEqual(a["path"], b["path"])
+            self.assertTrue(a["path"].endswith(".png"))
+            self.assertEqual((a["size"], a["time"]), (3, 7))
+            with open(a["path"], "rb") as f:
+                self.assertEqual(f.read(), b"abc")
+
+    def test_jpeg_extension(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertTrue(ct.build_image_record(b"x", "image/jpeg", directory=d)["path"].endswith(".jpg"))
+
+    def test_empty_and_huge_images_are_skipped(self):
+        self.assertIsNone(ct.build_image_record(b"", "image/png"))
+        self.assertIsNone(ct.build_image_record(b"x" * (ct.MAX_IMAGE_BYTES + 1), "image/png"))
+
+
+if __name__ == "__main__":
+    unittest.main()

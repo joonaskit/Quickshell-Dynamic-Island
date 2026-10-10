@@ -72,9 +72,9 @@ The shell owns this file and overwrites it. It is not a place for user edits: ch
 | `colors.accent` | Selection, focus and primary actions. The user picks it in the shell's settings, so it can be any of the `palette` colors |
 | `colors.success`, `warning`, `danger` | Status colors. Use these rather than picking from `palette` |
 | `colors.palette` | The full set of accent colors, for categories and decoration |
-| `fonts.families` | Font families for text, in order of preference |
+| `fonts.families` | Font families for text, in order of preference. The user's chosen font comes first, followed by the defaults |
 | `fonts.displayFamilies` | Font families for large or numeric text such as clocks and titles |
-| `radius.small`, `medium`, `large` | Corner radii in unscaled pixels: small controls, buttons and rows, cards |
+| `radius.small`, `medium`, `large` | Corner radii in unscaled pixels: small controls, buttons and rows, cards. They follow the user's corner roundness setting, so they are smaller on "Square" and larger on "Round" |
 | `scale.ui` | The user's UI scale, `0.80` to `1.25` |
 | `scale.font` | The user's extra font scale, `0.85` to `1.25` |
 

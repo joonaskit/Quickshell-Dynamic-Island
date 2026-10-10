@@ -74,7 +74,7 @@ Item {
                 Rectangle {
                     Layout.preferredWidth: 22
                     Layout.preferredHeight: 22
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: Theme.accentTint(0.2)
 
                     SvgIcon {
@@ -148,7 +148,7 @@ Item {
                     id: fileItem
                     width: parent.width
                     height: 34
-                    radius: 8
+                    radius: Theme.corner(8)
                     color: fileMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 100 } }
@@ -163,7 +163,7 @@ Item {
                         Rectangle {
                             Layout.preferredWidth: 22
                             Layout.preferredHeight: 22
-                            radius: 5
+                            radius: Theme.corner(5)
                             color: Theme.overlay(0.06)
 
                             SvgIcon {
@@ -225,7 +225,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 28
-                radius: 7
+                radius: Theme.corner(7)
                 color: openFolderMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {

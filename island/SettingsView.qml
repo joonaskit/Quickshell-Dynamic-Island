@@ -8,7 +8,7 @@ Item {
     signal requestBack()
     signal requestClose()
 
-    readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "About"]
+    readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "Shortcuts", "About"]
     property int currentTab: 0
 
     // Switches to a tab by its name in `tabs`; unknown names are ignored
@@ -19,7 +19,7 @@ Item {
         currentTab = idx;
     }
     readonly property bool hasSearchResults: displaySettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
-                                             || dockSettings.hasMatches || launcherSettings.hasMatches
+                                             || dockSettings.hasMatches || launcherSettings.hasMatches || shortcutsSettings.hasMatches
 
     // Start from a clean search each time the settings card is opened
     onVisibleChanged: {
@@ -150,7 +150,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
-            radius: 10
+            radius: Theme.corner(10)
             color: Theme.overlay(searchInput.activeFocus ? 0.10 : 0.06)
             border.width: 1
             border.color: searchInput.activeFocus ? Theme.accentTint(0.5) : Theme.overlay(0.08)
@@ -245,7 +245,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
-            radius: 8
+            radius: Theme.corner(8)
             color: Theme.overlay(0.08)
 
             RowLayout {
@@ -260,7 +260,7 @@ Item {
                         id: tabBtn
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 6
+                        radius: Theme.corner(6)
                         readonly property bool isSelected: !SettingsSearch.active && root.currentTab === index
                         color: isSelected ? Theme.overlay(0.22) : (tabMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
 
@@ -352,8 +352,12 @@ Item {
                 id: launcherSettings
                 visible: SettingsSearch.active ? hasMatches : root.currentTab === 4
             }
+            ShortcutsSettings {
+                id: shortcutsSettings
+                visible: SettingsSearch.active ? hasMatches : root.currentTab === 5
+            }
             AboutSettings {
-                visible: !SettingsSearch.active && root.currentTab === 5
+                visible: !SettingsSearch.active && root.currentTab === 6
             }
 
             // Empty search result

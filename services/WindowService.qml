@@ -38,8 +38,12 @@ Singleton {
         return "Desktop 1";
     }
 
+    // Until when a desktop change comes from a click on the virtual desktops pill
+    property double pillSwitchUntil: 0
+
     function switchToDesktop(desktopIdOrIndex) {
         if (desktopIdOrIndex === undefined || desktopIdOrIndex === null) return;
+        root.pillSwitchUntil = Date.now() + 800;
         Quickshell.execDetached(["qdbus-qt6", "org.quickshell.IslandBridge", "/Bridge", "org.quickshell.IslandBridge.switchDesktop", String(desktopIdOrIndex)]);
     }
 
