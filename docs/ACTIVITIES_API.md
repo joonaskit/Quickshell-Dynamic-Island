@@ -103,6 +103,7 @@ With the shell running:
 ```
 python3 examples/activity_client.py          # a fake copy that finishes
 python3 examples/activity_client.py --fail   # one that fails halfway
+python3 examples/activity_tester.py          # a window of buttons for every scenario (needs tkinter)
 ```
 
 Or from a shell, with `busctl`:
