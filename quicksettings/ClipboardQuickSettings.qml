@@ -78,6 +78,10 @@ Item {
 
                     Text {
                         text: {
+                            if (ClipboardService.currentFiles.length > 0)
+                                return ClipboardService.currentFiles.length === 1 ? "File on clipboard" : ClipboardService.currentFiles.length + " files on clipboard";
+                            if (ClipboardService.currentBinaryType !== "")
+                                return ClipboardService.currentBinaryType.startsWith("image/") ? "Image on clipboard" : "Non-text content on clipboard";
                             if (ClipboardService.currentText !== "") {
                                 let len = ClipboardService.history.length;
                                 return len > 1 ? (len + " items saved") : "1 item active";
@@ -98,7 +102,7 @@ Item {
                     Layout.preferredHeight: 28
                     Layout.preferredWidth: emptyRow.implicitWidth + 18
                     radius: 14
-                    enabled: ClipboardService.currentText !== "" || ClipboardService.history.length > 0
+                    enabled: ClipboardService.currentText !== "" || ClipboardService.currentBinaryType !== "" || ClipboardService.currentFiles.length > 0 || ClipboardService.history.length > 0
                     opacity: enabled ? 1.0 : 0.35
                     scale: emptyMouse.pressed ? 0.92 : (emptyMouse.containsMouse && enabled ? 1.05 : 1.0)
                     color: emptyMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.24) : Qt.rgba(255/255, 69/255, 58/255, 0.12)
@@ -171,8 +175,9 @@ Item {
                     Item { Layout.fillWidth: true }
 
                     Text {
-                        visible: ClipboardService.currentText !== ""
-                        text: ClipboardService.currentText.length + " chars"
+                        visible: ClipboardService.currentText !== "" || ClipboardService.currentBinaryType !== "" || ClipboardService.currentFiles.length > 0
+                        text: ClipboardService.currentFiles.length > 0 ? "files"
+                            : (ClipboardService.currentBinaryType !== "" ? ClipboardService.currentBinaryType : ClipboardService.currentText.length + " chars")
                         font.family: Theme.fontFamily
                         font.pixelSize: 10
                         color: Theme.textSecondary
@@ -218,11 +223,36 @@ Item {
                             }
                         }
 
+                        // When Clipboard holds an image
+                        Image {
+                            id: clipImage
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: status === Image.Ready ? Math.min(160, width * implicitHeight / Math.max(1, implicitWidth)) : 0
+                            visible: ClipboardService.imageSource !== "" && status === Image.Ready
+                            source: ClipboardService.imageSource
+                            fillMode: Image.PreserveAspectFit
+                            asynchronous: true
+                            cache: false
+                            sourceSize.width: 600
+                        }
+
+                        // File names, when files are copied
+                        Text {
+                            Layout.fillWidth: true
+                            visible: ClipboardService.currentFiles.length > 0
+                            text: ClipboardService.currentFiles.map(f => f.split("/").pop()).join("\n")
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 11
+                            color: Theme.textPrimary
+                            elide: Text.ElideMiddle
+                            maximumLineCount: 4
+                        }
+
                         // When Clipboard is empty
                         RowLayout {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 28
-                            visible: ClipboardService.currentText === ""
+                            visible: ClipboardService.currentText === "" && ClipboardService.currentFiles.length === 0 && !(ClipboardService.imageSource !== "" && clipImage.status === Image.Ready)
                             spacing: 8
 
                             SvgIcon {
@@ -232,7 +262,7 @@ Item {
                             }
 
                             Text {
-                                text: "Nothing copied yet"
+                                text: ClipboardService.currentBinaryType !== "" ? (ClipboardService.currentBinaryType.startsWith("image/") ? "Image (" : "Non-text content (") + ClipboardService.currentBinaryType + ")" : "Nothing copied yet"
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 11
                                 color: Theme.textSecondary
