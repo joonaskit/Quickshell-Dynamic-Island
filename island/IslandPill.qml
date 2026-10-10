@@ -310,7 +310,7 @@ Item {
             id: compactActivityView
             anchors.centerIn: parent
             z: 1
-            opacity: (!root.isExpanded && !root.isSettingsOpen && root.isShowingActivity && !root.isAlertingNotification) ? 1.0 : 0.0
+            opacity: (!root.isOpen && root.isShowingActivity && !root.isAlertingNotification) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
