@@ -59,7 +59,7 @@ Item {
         Rectangle {
             Layout.preferredWidth: Theme.px(48)
             Layout.preferredHeight: Theme.px(48)
-            radius: Theme.px(10)
+            radius: Theme.cornerPx(10)
             color: Theme.cardBackground
             border.color: Theme.overlay(0.1)
             border.width: 1

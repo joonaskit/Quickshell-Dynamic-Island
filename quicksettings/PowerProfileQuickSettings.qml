@@ -113,7 +113,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 46
-                    radius: 10
+                    radius: Theme.corner(10)
                     color: PowerProfileService.activeProfile === "power-saver"
                         ? Qt.rgba(48/255, 209/255, 88/255, 0.16)
                         : (saveMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
@@ -178,7 +178,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 46
-                    radius: 10
+                    radius: Theme.corner(10)
                     color: PowerProfileService.activeProfile === "balanced"
                         ? Qt.rgba(10/255, 132/255, 255/255, 0.16)
                         : (balMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))
@@ -243,7 +243,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 46
-                    radius: 10
+                    radius: Theme.corner(10)
                     color: PowerProfileService.activeProfile === "performance"
                         ? Qt.rgba(255/255, 69/255, 58/255, 0.16)
                         : (perfMouse.containsMouse ? Theme.overlay(0.06) : Theme.overlay(0.03))

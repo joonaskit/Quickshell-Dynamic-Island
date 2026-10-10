@@ -331,7 +331,7 @@ Item {
                     id: launchpadBg
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
-                    radius: 12
+                    radius: Theme.corner(12)
 
                     x: root.isVertical ? (Math.round((parent.width - width) / 2) + (root.dockPosition === "left" ? launchpadItem.bounceHeight : -launchpadItem.bounceHeight)) : Math.round((parent.width - width) / 2)
                     y: root.isVertical ? Math.round((parent.height - height) / 2) : (Math.round((parent.height - height) / 2) - launchpadItem.bounceHeight)
@@ -382,7 +382,7 @@ Item {
                         id: launchpadTipBg
                         width: launchpadTipText.implicitWidth + 16
                         height: 24
-                        radius: 6
+                        radius: Theme.corner(6)
                         color: Theme.cardBackground
                         border.color: Theme.overlay(0.18)
                         border.width: 1
@@ -666,7 +666,7 @@ Item {
                     id: downloadsIconContainer
                     width: Theme.dockIconSize
                     height: Theme.dockIconSize
-                    radius: 12
+                    radius: Theme.corner(12)
 
                     x: root.isVertical ? (Math.round((parent.width - width) / 2) + (root.dockPosition === "left" ? downloadsItem.bounceHeight : -downloadsItem.bounceHeight)) : Math.round((parent.width - width) / 2)
                     y: root.isVertical ? Math.round((parent.height - height) / 2) : (Math.round((parent.height - height) / 2) - downloadsItem.bounceHeight)
@@ -707,7 +707,7 @@ Item {
                         id: downloadsTipBg
                         width: downloadsTipText.implicitWidth + 16
                         height: 24
-                        radius: 6
+                        radius: Theme.corner(6)
                         color: Theme.cardBackground
                         border.color: Theme.overlay(0.18)
                         border.width: 1
@@ -811,7 +811,7 @@ Item {
                         // Fallback vector icon
                         Rectangle {
                             anchors.fill: parent
-                            radius: 11
+                            radius: Theme.corner(11)
                             color: Theme.cardBackgroundHover
                             border.color: Theme.overlay(0.15)
                             border.width: 1
@@ -844,7 +844,7 @@ Item {
                         id: trashTipBg
                         width: trashTipText.implicitWidth + 16
                         height: 24
-                        radius: 6
+                        radius: Theme.corner(6)
                         color: Theme.cardBackground
                         border.color: Theme.overlay(0.18)
                         border.width: 1
@@ -1007,7 +1007,7 @@ Item {
             isVertical: root.isVertical
             dockPosition: root.dockPosition
             filletSize: trashGeo.filletSize
-            cornerRadius: 12
+            cornerRadius: Theme.corner(12)
             dockCornerRadius: root.endCornerRadius
             endFlush: trashGeo.endFlush
             farFillet: trashGeo.farFillet
@@ -1030,7 +1030,7 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 28
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: openTrashMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     Text {
@@ -1058,7 +1058,7 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 28
-                    radius: 6
+                    radius: Theme.corner(6)
                     color: emptyTrashMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.25) : "transparent"
 
                     Text {

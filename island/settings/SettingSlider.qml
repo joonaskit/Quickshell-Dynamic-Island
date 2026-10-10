@@ -52,7 +52,7 @@ Rectangle {
             Rectangle {
                 Layout.preferredWidth: 26
                 Layout.preferredHeight: 26
-                radius: 7
+                radius: Theme.corner(7)
                 color: Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.16)
 
                 SvgIcon {
@@ -207,7 +207,7 @@ Rectangle {
                     id: presetBtn
                     Layout.fillWidth: true
                     Layout.preferredHeight: 24
-                    radius: 6
+                    radius: Theme.corner(6)
                     readonly property bool isSelected: Math.abs(sliderRow.value - modelData.value) <= Math.max(0.01, sliderRow.stepSize * 0.51)
                     color: isSelected ? Qt.rgba(sliderRow.iconColor.r, sliderRow.iconColor.g, sliderRow.iconColor.b, 0.25) : (presetMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.04))
                     border.width: isSelected ? 1 : 0

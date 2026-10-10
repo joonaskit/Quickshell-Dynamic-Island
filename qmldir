@@ -55,6 +55,7 @@ SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingSegmented 1.0 island/settings/SettingSegmented.qml
 SettingSlider 1.0 island/settings/SettingSlider.qml
 SettingSwatches 1.0 island/settings/SettingSwatches.qml
+SettingFontPicker 1.0 island/settings/SettingFontPicker.qml
 SettingDivider 1.0 island/settings/SettingDivider.qml
 DisplaySettings 1.0 island/settings/DisplaySettings.qml
 TopBarSettings 1.0 island/settings/TopBarSettings.qml

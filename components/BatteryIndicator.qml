@@ -53,7 +53,7 @@ Item {
                 id: capsule
                 width: Theme.px(25)
                 height: Theme.px(12.5)
-                radius: Theme.px(3.5)
+                radius: Theme.cornerPx(3.5)
                 color: "transparent"
                 border.width: 1.2
                 border.color: Theme.overlay(0.55)

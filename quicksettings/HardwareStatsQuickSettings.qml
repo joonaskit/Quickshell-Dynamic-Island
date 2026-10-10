@@ -128,7 +128,7 @@ Item {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: Math.max(8, parent.width * (HardwareStatsService.cpuPercent / 100.0))
-                        radius: 4
+                        radius: Theme.corner(4)
                         color: Theme.accentBlue
 
                         Behavior on width { NumberAnimation { duration: Theme.animDurationProgress; easing.type: Easing.OutQuad } }
@@ -174,7 +174,7 @@ Item {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: Math.max(8, parent.width * (HardwareStatsService.ramPercent / 100.0))
-                        radius: 4
+                        radius: Theme.corner(4)
                         color: Theme.accentPurple
 
                         Behavior on width { NumberAnimation { duration: Theme.animDurationProgress; easing.type: Easing.OutQuad } }
@@ -186,7 +186,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 38
-                radius: 8
+                radius: Theme.corner(8)
                 color: Theme.overlay(0.04)
 
                 RowLayout {

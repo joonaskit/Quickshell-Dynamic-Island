@@ -150,7 +150,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
-            radius: 10
+            radius: Theme.corner(10)
             color: Theme.overlay(searchInput.activeFocus ? 0.10 : 0.06)
             border.width: 1
             border.color: searchInput.activeFocus ? Theme.accentTint(0.5) : Theme.overlay(0.08)
@@ -245,7 +245,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
-            radius: 8
+            radius: Theme.corner(8)
             color: Theme.overlay(0.08)
 
             RowLayout {
@@ -260,7 +260,7 @@ Item {
                         id: tabBtn
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 6
+                        radius: Theme.corner(6)
                         readonly property bool isSelected: !SettingsSearch.active && root.currentTab === index
                         color: isSelected ? Theme.overlay(0.22) : (tabMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
 

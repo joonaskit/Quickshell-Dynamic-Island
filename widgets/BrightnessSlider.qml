@@ -51,7 +51,7 @@ Item {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    radius: Theme.px(9)
+                    radius: Theme.cornerPx(9)
                     color: (dragArea.containsMouse || dragArea.pressed) ? Theme.accentOrange : Theme.sliderFill
                     width: Math.max(0, Math.min(sliderTrack.width, root.brightness * sliderTrack.width))
 

@@ -23,7 +23,7 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.preferredHeight: cardLayout.implicitHeight + Theme.px(14)
-    radius: Theme.px(10)
+    radius: Theme.cornerPx(10)
     color: cardMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.04)
     border.width: 1
     border.color: Theme.overlay(0.06)
@@ -69,7 +69,7 @@ Rectangle {
                 visible: notifCard.showApp
                 Layout.preferredHeight: Theme.px(16)
                 Layout.preferredWidth: appText.implicitWidth + Theme.px(8)
-                radius: Theme.px(4)
+                radius: Theme.cornerPx(4)
                 color: Theme.accentTint(0.15)
 
                 Text {
@@ -205,7 +205,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.topMargin: Theme.px(4)
             Layout.preferredHeight: Theme.px(26)
-            radius: Theme.px(8)
+            radius: Theme.cornerPx(8)
             color: Theme.overlay(0.06)
             border.width: 1
             border.color: replyInput.activeFocus ? Theme.accentTint(0.5) : Theme.overlay(0.08)
@@ -242,7 +242,7 @@ Rectangle {
                 anchors.rightMargin: Theme.px(3)
                 width: Theme.px(22)
                 height: Theme.px(20)
-                radius: Theme.px(7)
+                radius: Theme.cornerPx(7)
                 color: replyInput.text.length > 0 ? Theme.accentTint(sendMouse.containsMouse ? 0.4 : 0.28) : "transparent"
 
                 SvgIcon {

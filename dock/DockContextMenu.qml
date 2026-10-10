@@ -100,7 +100,7 @@ Item {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 8
+                    radius: Theme.corner(8)
                     color: Theme.overlay(0.06)
 
                     RowLayout {
@@ -112,7 +112,7 @@ Item {
                         Rectangle {
                             Layout.preferredWidth: 26
                             Layout.preferredHeight: 26
-                            radius: 6
+                            radius: Theme.corner(6)
                             color: Theme.overlay(0.08)
 
                             SvgIcon {
@@ -247,7 +247,7 @@ Item {
                     id: winItem
                     width: parent.width
                     height: 28
-                    radius: 7
+                    radius: Theme.corner(7)
                     color: winMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     RowLayout {
@@ -342,7 +342,7 @@ Item {
                     id: actionItem
                     width: parent.width
                     height: 28
-                    radius: 7
+                    radius: Theme.corner(7)
                     color: actionMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                     RowLayout {
@@ -405,7 +405,7 @@ Item {
                 })
                 width: parent.width
                 height: 28
-                radius: 7
+                radius: Theme.corner(7)
                 color: newWinMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
@@ -446,7 +446,7 @@ Item {
             Rectangle {
                 width: parent.width
                 height: 28
-                radius: 7
+                radius: Theme.corner(7)
                 color: pinMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
@@ -494,7 +494,7 @@ Item {
                 visible: root.appData !== null && (root.appData.desktopFile || root.appData.id)
                 width: parent.width
                 height: 28
-                radius: 7
+                radius: Theme.corner(7)
                 color: editAppMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
                 RowLayout {
@@ -538,7 +538,7 @@ Item {
                 visible: root.isRunning
                 width: parent.width
                 height: 28
-                radius: 7
+                radius: Theme.corner(7)
                 color: quitMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.25) : "transparent"
 
                 RowLayout {

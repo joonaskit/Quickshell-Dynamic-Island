@@ -1,4 +1,5 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -6,7 +7,12 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    // Whether caffeine is on. Remembered in settings.json (SettingsService.caffeineEnabled)
+    // and taken again when the shell starts, so a restart or reload keeps it on.
+    // It is restored after a reboot too: the setting is the user's last choice, and
+    // the icon shows when it is on.
     property bool isActive: false
+    property bool restored: false
     property string screenSaverCookie: ""
     property string powerManagementCookie: ""
 
@@ -55,7 +61,23 @@ Singleton {
         }
     }
 
+    // Takes the shell's saved state once the settings have loaded
+    Connections {
+        target: SettingsService
+        function onSettingsChanged() {
+            if (!SettingsService.isLoaded || root.restored) return;
+            root.restored = true;
+            if (SettingsService.caffeineEnabled && !root.isActive) root.startInhibit();
+        }
+    }
+
     function enable() {
+        root.restored = true;
+        root.startInhibit();
+        SettingsService.setSetting("caffeineEnabled", true);
+    }
+
+    function startInhibit() {
         root.isActive = true;
         inhibitProc.running = true;
         ssInhibitProc.running = true;
@@ -63,6 +85,7 @@ Singleton {
     }
 
     function disable() {
+        SettingsService.setSetting("caffeineEnabled", false);
         root.isActive = false;
         inhibitProc.running = false;
 

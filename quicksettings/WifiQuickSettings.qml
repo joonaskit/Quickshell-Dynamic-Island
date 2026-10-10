@@ -203,7 +203,7 @@ Item {
                             required property var modelData
                             width: parent.width
                             height: 32
-                            radius: 8
+                            radius: Theme.corner(8)
                             color: itemMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.inUse ? Theme.accentTint(0.12) : "transparent")
 
                             RowLayout {
@@ -311,7 +311,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 28
-                radius: 8
+                radius: Theme.corner(8)
                 color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
 
                 RowLayout {

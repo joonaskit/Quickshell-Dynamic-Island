@@ -178,7 +178,7 @@ Item {
                             required property var modelData
                             width: parent.width
                             height: 34
-                            radius: 8
+                            radius: Theme.corner(8)
                             color: deviceMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.isConnected ? Theme.accentTint(0.12) : "transparent")
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
@@ -296,7 +296,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 28
-                radius: 8
+                radius: Theme.corner(8)
                 color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
 
                 RowLayout {

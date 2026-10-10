@@ -336,7 +336,7 @@ Item {
             id: tooltipBg
             width: Math.min(240, tooltipText.implicitWidth + 18)
             height: 24
-            radius: 7
+            radius: Theme.corner(7)
             color: Theme.cardBackground
             border.width: 1
             border.color: Theme.overlay(0.14)
@@ -345,7 +345,7 @@ Item {
                 anchors.centerIn: parent
                 width: parent.width + 8
                 height: parent.height + 6
-                radius: 9
+                radius: Theme.corner(9)
                 color: Theme.islandShadow
                 opacity: 0.55
                 z: -1
@@ -388,7 +388,7 @@ Item {
             id: menuCard
             width: 180
             height: menuColumn.implicitHeight + 14
-            radius: 12
+            radius: Theme.corner(12)
             color: Theme.islandBackground
             border.width: 0
             clip: true
@@ -397,7 +397,7 @@ Item {
                 anchors.centerIn: parent
                 width: parent.width + 8
                 height: parent.height + 8
-                radius: 14
+                radius: Theme.corner(14)
                 color: Theme.islandShadow
                 opacity: 0.65
                 z: -1
@@ -434,7 +434,7 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 28
-                    radius: 7
+                    radius: Theme.corner(7)
                     scale: switchMouse.pressed ? 0.98 : (switchMouse.containsMouse ? 1.02 : 1.0)
                     transformOrigin: Item.Center
                     Behavior on scale {
@@ -488,7 +488,7 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 28
-                    radius: 7
+                    radius: Theme.corner(7)
                     scale: addMenuMouse.pressed ? 0.98 : (addMenuMouse.containsMouse ? 1.02 : 1.0)
                     transformOrigin: Item.Center
                     Behavior on scale {
@@ -540,7 +540,7 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 28
-                    radius: 7
+                    radius: Theme.corner(7)
                     visible: root.desktopCount > 1
                     scale: removeMouse.pressed ? 0.98 : (removeMouse.containsMouse ? 1.02 : 1.0)
                     transformOrigin: Item.Center
