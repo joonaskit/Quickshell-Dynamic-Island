@@ -16,6 +16,7 @@ singleton PowerProfileService 1.0 services/PowerProfileService.qml
 singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
 singleton DeviceService 1.0 services/DeviceService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
+singleton ShortcutService 1.0 services/ShortcutService.qml
 IslandWindow 1.0 island/IslandWindow.qml
 IslandPill 1.0 island/IslandPill.qml
 IslandDetachedBubble 1.0 island/IslandDetachedBubble.qml
@@ -58,11 +59,13 @@ SettingSlider 1.0 island/settings/SettingSlider.qml
 SettingSwatches 1.0 island/settings/SettingSwatches.qml
 SettingFontPicker 1.0 island/settings/SettingFontPicker.qml
 SettingDivider 1.0 island/settings/SettingDivider.qml
+SettingShortcut 1.0 island/settings/SettingShortcut.qml
 DisplaySettings 1.0 island/settings/DisplaySettings.qml
 TopBarSettings 1.0 island/settings/TopBarSettings.qml
 IslandSettings 1.0 island/settings/IslandSettings.qml
 DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
+ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
 SettingsCategory 1.0 island/settings/SettingsCategory.qml
 singleton SettingsSearch 1.0 island/settings/SettingsSearch.qml

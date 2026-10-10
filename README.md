@@ -45,7 +45,7 @@ cd ~/.config/quickshell/island
 | `./run.sh -e` / `-c` | Expand / collapse |
 | `./run.sh -i <target> <function>` | Call any IPC function, for example `-i system volumeUp` |
 
-The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. You can bind these commands to a global shortcut.
+The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. You can bind these commands to a global shortcut by hand, or in the settings under Shortcuts, which saves them in KDE's shortcut settings (`scripts/shortcuts.py`). The `startTimer` shortcuts there come as 5, 10, 15 and 30 minute presets.
 
 ## Project layout
 
