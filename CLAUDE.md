@@ -8,9 +8,10 @@ QML desktop shell for KDE Plasma (Wayland), built with Quickshell: a morphing to
 - `services/*Service.qml` files are singletons that own state and talk to the system. Views bind to them and hold no system logic.
 - `qmldir` registers every singleton and component. Add new QML files there. Files in subfolders (e.g. `dock/`) must `import ".."` to see the root types.
 - `services/Theme.qml` holds colors, sizes and scale. Use it instead of hardcoding values.
-- `scripts/` holds the Python helpers (`kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*.py`, `downloads_tracker.py`, `clipboard_tracker.py`, `shortcuts.py`) that feed data to the services. `scripts/kwin_script.js` runs inside KWin, loaded by the tracker from its own directory.
+- `scripts/` holds the Python helpers (`kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*.py`, `downloads_tracker.py`, `clipboard_tracker.py`, `shortcuts.py`, `activities_bridge.py`) that feed data to the services. `scripts/kwin_script.js` runs inside KWin, loaded by the tracker from its own directory.
 - `dock/` holds the dock (`Dock*.qml`, including `DockService`).
 - `clipboard/` holds the clipboard history window. `ClipboardService` fills it from `scripts/clipboard_tracker.py`, and the history logic is in `services/clipboardHistory.js`. History stays in memory only, so never write it to disk. The one exception is copied images: the tracker saves them under `$XDG_RUNTIME_DIR` (tmpfs), deletes them when entries go, and wipes the folder when it starts and stops.
+- `ActivityService` runs `scripts/activities_bridge.py`, the D-Bus API (`org.quickshell.IslandActivities`) that lets other apps show progress in the island. The validation, limits and ordering live in `scripts/activities_core.py` (no D-Bus), tested by `tests/test_activities_core.py`. The API is documented in `docs/ACTIVITIES_API.md`, so update that when the API changes. `examples/` holds the reference clients and `activity_tester.py`, a window of buttons for trying every scenario.
 - `quicksettings/` holds the quick-settings popups, selectors and sliders.
 - `services/` holds the `*Service.qml` singletons and `Theme.qml`.
 - `island/` holds the island window, pills, clusters, views and settings UI.

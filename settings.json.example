@@ -51,6 +51,7 @@
   "showOsd": true,
   "showDesktopOsd": true,
   "showTimerInPill": true,
+  "showActivitiesInPill": true,
   "widgets": {
     "calendar": true,
     "timer": true,

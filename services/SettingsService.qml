@@ -78,6 +78,7 @@ Singleton {
     property bool showOsd: true
     property bool showDesktopOsd: true
     property bool showTimerInPill: true
+    property bool showActivitiesInPill: true
 
     // Expanded island widgets: id -> enabled. Ids missing here use the
     // registry default (see WidgetRegistry).
@@ -209,6 +210,7 @@ Singleton {
         if (data.showOsd !== undefined) root.showOsd = !!data.showOsd;
         if (data.showDesktopOsd !== undefined) root.showDesktopOsd = !!data.showDesktopOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
+        if (data.showActivitiesInPill !== undefined) root.showActivitiesInPill = !!data.showActivitiesInPill;
 
         // Also reads the per-widget keys used by older configs
         root.widgets = SettingsMigration.widgetStates(data, WidgetRegistry.widgets.map(w => w.id));
@@ -367,6 +369,7 @@ Singleton {
         root.showOsd = true;
         root.showDesktopOsd = true;
         root.showTimerInPill = true;
+        root.showActivitiesInPill = true;
 
         root.widgets = {};
 
@@ -455,6 +458,7 @@ Singleton {
             "showOsd": root.showOsd,
             "showDesktopOsd": root.showDesktopOsd,
             "showTimerInPill": root.showTimerInPill,
+            "showActivitiesInPill": root.showActivitiesInPill,
             "widgets": root.widgetStates(),
             "launcherDefaultView": root.launcherDefaultView,
             "launcherDensity": root.launcherDensity,

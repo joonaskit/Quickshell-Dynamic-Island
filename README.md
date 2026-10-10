@@ -63,7 +63,8 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 | `docs/ANIMATION_CATALOGUE.md` | Reference for all animations |
 | `docs/WIDGETS.md` | How to add a widget to the expanded view |
 | `docs/THEME.md` | Theme file exported for companion apps |
-| `examples/` | Reference code for companion apps, such as a theme reader |
+| `docs/ACTIVITIES_API.md` | D-Bus API for apps to show progress and status in the island |
+| `examples/` | Reference code for companion apps, such as a theme reader and an activities client |
 | `tests/` | Unit tests, run with `./test.sh` |
 
 ## Configuration
@@ -71,6 +72,8 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 Use the in-app settings view, or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored, as is `launcher_usage.json`, where the launcher keeps its usage counts. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
 
 The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
+
+Other apps can show progress in the island, such as a file copy, through a small D-Bus API: `docs/ACTIVITIES_API.md`. It needs `python-dbus` and `python-gobject`, like the other helper scripts.
 
 ## Development
 

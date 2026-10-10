@@ -73,6 +73,19 @@ SettingsCategory {
 
         SettingDivider {}
 
+        SettingToggle {
+            title: "App Activities in Island"
+            description: "Show progress from other apps, such as file copies, in the compact island"
+            iconName: "download"
+            iconColor: Theme.accentGreen
+            checked: SettingsService.showActivitiesInPill
+            onToggled: function(val) {
+                SettingsService.setSetting("showActivitiesInPill", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 2. Morph to Top Bar When Maximized
         SettingToggle {
             title: "Morph to Top Bar When Windows Maximized"

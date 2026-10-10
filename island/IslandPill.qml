@@ -40,7 +40,9 @@ Item {
     // Hitbox reference for window click-through mask
     property alias hitBox: pillBody
 
-    readonly property bool isShowingTimer: TimerService.pillMode !== "" && !root.isShowingOsd
+    // Pill priority: timer, then activity, then media, except that a failed activity outranks all of them
+    readonly property bool isShowingActivity: ActivityService.showInPill && !root.isShowingOsd
+    readonly property bool isShowingTimer: TimerService.pillMode !== "" && !root.isShowingOsd && !ActivityService.showInPill
     readonly property bool isShowingOsd: OsdService.isShowing && !root.isOpen
     readonly property bool isAlertingNotification: NotificationService.isAlerting && NotificationService.latestNotification !== null
 
@@ -48,6 +50,7 @@ Item {
     readonly property real compactWidth: {
         if (root.isShowingOsd) return Theme.px(230);
         if (root.isAlertingNotification) return Theme.px(310);
+        if (root.isShowingActivity) return Theme.px(260);
         if (root.isShowingTimer) return Theme.px(150);
         return (root.hasMediaPlaying && Theme.showMediaWhenPlaying)
             ? Theme.compactWidthMedia
@@ -72,6 +75,9 @@ Item {
         }
         if (root.isAlertingNotification) {
             return Theme.px(310) + (root.isHovered ? Theme.px(8) : 0);
+        }
+        if (root.isShowingActivity) {
+            return Theme.px(260) + (root.isHovered ? Theme.px(8) : 0);
         }
         if (root.isShowingTimer) {
             return Theme.px(150) + (root.isHovered ? Theme.px(8) : 0);
@@ -265,7 +271,7 @@ Item {
             currentTime: root.currentDate
             use24Hour: Theme.use24Hour
             isHovered: root.isHovered
-            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
+            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && !root.isShowingActivity && (!root.hasMediaPlaying || !Theme.showMediaWhenPlaying)) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -279,7 +285,7 @@ Item {
             anchors.centerIn: parent
             currentTime: root.currentDate
             player: root.activePlayer
-            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
+            opacity: (!root.isOpen && !root.isShowingOsd && !root.isAlertingNotification && !root.isShowingTimer && !root.isShowingActivity && root.hasMediaPlaying && Theme.showMediaWhenPlaying) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
@@ -292,6 +298,19 @@ Item {
             id: compactNotificationView
             anchors.centerIn: parent
             opacity: (!root.isOpen && !root.isShowingOsd && root.isAlertingNotification) ? 1.0 : 0.0
+            scale: opacity > 0.5 ? 1.0 : 0.94
+            visible: opacity > 0.01
+
+            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+        }
+
+        // Compact Activity View (progress published by other apps; z above the click area for its dismiss button)
+        CompactActivityView {
+            id: compactActivityView
+            anchors.centerIn: parent
+            z: 1
+            opacity: (!root.isOpen && root.isShowingActivity && !root.isAlertingNotification) ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.94
             visible: opacity > 0.01
 
