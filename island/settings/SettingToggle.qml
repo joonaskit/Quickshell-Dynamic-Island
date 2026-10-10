@@ -20,7 +20,7 @@ Rectangle {
     visible: matchesSearch
     implicitHeight: descText.text !== "" ? 52 : 42
     color: rowMouse.containsMouse && enabled ? Theme.overlay(0.04) : "transparent"
-    radius: 10
+    radius: Theme.corner(10)
     opacity: enabled ? 1.0 : 0.4
 
     Behavior on color {
@@ -53,7 +53,7 @@ Rectangle {
             visible: toggleRow.iconName !== ""
             Layout.preferredWidth: 26
             Layout.preferredHeight: 26
-            radius: 7
+            radius: Theme.corner(7)
             color: toggleRow.iconBadgeColor
 
             SvgIcon {

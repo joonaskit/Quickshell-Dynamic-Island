@@ -182,7 +182,7 @@ Item {
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: Math.max(sliderTrack.height, sliderTrack.width * MicrophoneService.volume)
-                        radius: 14
+                        radius: Theme.corner(14)
                         color: MicrophoneService.isMuted ? Theme.overlay(0.2) : Theme.accentRed
 
                         Behavior on color { ColorAnimation { duration: 150 } }
@@ -241,7 +241,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 28
-                        radius: 8
+                        radius: Theme.corner(8)
                         color: modelData.isDefault ? Qt.rgba(255/255, 69/255, 58/255, 0.18) : (sourceMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
                         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 

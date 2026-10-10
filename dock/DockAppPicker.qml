@@ -227,7 +227,7 @@ Item {
         dockCornerRadius: root.dockCornerRadius
         farFillet: geo.farFillet
         farOverhang: geo.farOverhang
-        cornerRadius: 18
+        cornerRadius: Theme.corner(18)
         tintAlpha: Theme.dockTransparent ? 0.94 : 0.97
     }
 
@@ -451,7 +451,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
-                    radius: 9
+                    radius: Theme.corner(9)
                     color: Theme.overlay(0.08)
                     border.color: searchInput.activeFocus ? Theme.accent : Theme.overlay(0.08)
                     border.width: 1
@@ -560,7 +560,7 @@ Item {
 
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 9
+                                radius: Theme.corner(9)
                                 color: clearMouse.containsMouse ? Theme.overlay(0.22) : Theme.overlay(0.12)
 
                                 SvgIcon {
@@ -684,7 +684,7 @@ Item {
                                 anchors.centerIn: parent
                                 width: parent.width - 6
                                 height: parent.height - 6
-                                radius: 10
+                                radius: Theme.corner(10)
 
                                 color: gridCell.isSelected ? Theme.accentTint(0.24) : (gridHover.hovered ? Theme.overlay(0.10) : Theme.overlay(0.02))
                                 border.color: gridCell.isSelected ? Theme.accentTint(0.6) : (gridHover.hovered ? Theme.overlay(0.12) : "transparent")
@@ -822,7 +822,7 @@ Item {
                             id: listItemDelegate
                             width: appListView.width
                             height: root.isCompact ? 34 : 42
-                            radius: 8
+                            radius: Theme.corner(8)
                             readonly property bool isSelected: index === appListView.currentIndex
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
@@ -879,7 +879,7 @@ Item {
                                     visible: !!modelData.isWindow
                                     Layout.preferredWidth: root.isCompact ? 22 : 24
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
-                                    radius: 6
+                                    radius: Theme.corner(6)
                                     color: closeWinMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : Theme.overlay(0.06)
                                     border.color: Theme.overlay(0.1)
                                     border.width: 1
@@ -905,7 +905,7 @@ Item {
                                     visible: !modelData.isWindow
                                     Layout.preferredWidth: root.isCompact ? 22 : 24
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
-                                    radius: 6
+                                    radius: Theme.corner(6)
                                     color: editBtnMouse.containsMouse ? Theme.overlay(0.18) : Theme.overlay(0.06)
                                     border.color: Theme.overlay(0.1)
                                     border.width: 1
@@ -934,7 +934,7 @@ Item {
                                     visible: !modelData.isWindow
                                     Layout.preferredWidth: root.isCompact ? 54 : 64
                                     Layout.preferredHeight: root.isCompact ? 22 : 24
-                                    radius: 6
+                                    radius: Theme.corner(6)
                                     color: pinBtnMouse.containsMouse ? (pinned ? Qt.rgba(1, 0.3, 0.3, 0.25) : Theme.accentTint(0.25)) : (pinned ? Theme.overlay(0.08) : Theme.accentTint(0.15))
                                     border.color: pinned ? Theme.overlay(0.12) : Theme.accentTint(0.4)
                                     border.width: 1

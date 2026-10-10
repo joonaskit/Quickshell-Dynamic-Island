@@ -202,7 +202,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: gridColumn.implicitHeight + Theme.px(12)
-            radius: Theme.px(12)
+            radius: Theme.cornerPx(12)
             color: Theme.overlay(0.03)
             border.width: 1
             border.color: Theme.overlay(0.06)
@@ -264,7 +264,7 @@ Item {
                                 anchors.centerIn: parent
                                 width: Theme.px(22)
                                 height: Theme.px(18)
-                                radius: Theme.px(4)
+                                radius: Theme.cornerPx(4)
                                 color: modelData.isCurrentWeek ? Qt.rgba(255/255, 159/255, 10/255, 0.18) : "transparent"
 
                                 Text {

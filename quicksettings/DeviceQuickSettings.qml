@@ -216,7 +216,7 @@ Item {
                         id: deviceCard
                         Layout.fillWidth: true
                         implicitHeight: devCardCol.implicitHeight + 16
-                        radius: 14
+                        radius: Theme.corner(14)
                         color: Theme.overlay(0.04)
                         border.width: 1
                         border.color: Theme.overlay(0.08)
@@ -325,7 +325,7 @@ Item {
                                     id: partItem
                                     Layout.fillWidth: true
                                     implicitHeight: partCol.implicitHeight + 12
-                                    radius: 10
+                                    radius: Theme.corner(10)
                                     color: Qt.rgba(0, 0, 0, 0.25)
                                     border.width: 1
                                     border.color: Theme.overlay(0.04)

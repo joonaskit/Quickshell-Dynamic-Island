@@ -46,7 +46,7 @@ Rectangle {
                 visible: segRow.iconName !== ""
                 Layout.preferredWidth: 26
                 Layout.preferredHeight: 26
-                radius: 7
+                radius: Theme.corner(7)
                 color: segRow.iconBadgeColor
 
                 SvgIcon {
@@ -88,7 +88,7 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
-            radius: 8
+            radius: Theme.corner(8)
             color: Theme.overlay(0.08)
 
             RowLayout {
@@ -103,7 +103,7 @@ Rectangle {
                         id: segOptionBtn
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 6
+                        radius: Theme.corner(6)
                         readonly property bool isSelected: segRow.currentValue === modelData.value
                         color: isSelected ? Theme.overlay(0.22) : (segBtnMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
 

@@ -127,7 +127,7 @@ Item {
                     id: rowItem
                     width: parent.width
                     height: 32
-                    radius: 8
+                    radius: Theme.corner(8)
                     color: rowHover.hovered ? Theme.overlay(0.12) : (modelData.activated ? Theme.accentTint(0.12) : "transparent")
 
                     Behavior on color { ColorAnimation { duration: 100 } }

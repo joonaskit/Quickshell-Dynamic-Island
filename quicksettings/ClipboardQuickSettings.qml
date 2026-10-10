@@ -188,7 +188,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: activeCardContent.implicitHeight + 16
-                    radius: 12
+                    radius: Theme.corner(12)
                     color: Theme.overlay(0.05)
                     border.width: 1
                     border.color: Theme.overlay(0.08)
@@ -307,7 +307,7 @@ Item {
                         id: historyItemRow
                         Layout.fillWidth: true
                         Layout.preferredHeight: 32
-                        radius: 8
+                        radius: Theme.corner(8)
                         color: histMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.03)
 
                         Behavior on color {

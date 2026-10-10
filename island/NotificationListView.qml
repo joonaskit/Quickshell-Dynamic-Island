@@ -194,7 +194,7 @@ Item {
                         Rectangle {
                             Layout.preferredHeight: Theme.px(16)
                             Layout.preferredWidth: groupAppText.implicitWidth + Theme.px(8)
-                            radius: Theme.px(4)
+                            radius: Theme.cornerPx(4)
                             color: Theme.accentTint(0.15)
 
                             Text {
@@ -292,7 +292,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(58)
-            radius: Theme.px(10)
+            radius: Theme.cornerPx(10)
             color: Theme.overlay(0.03)
             opacity: NotificationService.notifications.length === 0 ? 1.0 : 0.0
             visible: opacity > 0.01

@@ -576,7 +576,7 @@ Item {
 
         width: parent ? parent.width : 255
         height: 28
-        radius: 7
+        radius: Theme.corner(7)
         scale: mouse.pressed ? 0.98 : (mouse.containsMouse ? 1.02 : 1.0)
         transformOrigin: Item.Center
 

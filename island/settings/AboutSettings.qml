@@ -8,7 +8,7 @@ SettingsCategory {
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: persistCol.implicitHeight + 20
-        radius: 14
+        radius: Theme.corner(14)
         color: Qt.rgba(0, 0, 0, 0.3)
         border.width: 1
         border.color: Theme.overlay(0.06)

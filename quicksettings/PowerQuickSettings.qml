@@ -151,7 +151,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
-                    radius: 12
+                    radius: Theme.corner(12)
                     color: lockMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
@@ -199,7 +199,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
-                    radius: 12
+                    radius: Theme.corner(12)
                     color: sleepMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
@@ -247,7 +247,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
-                    radius: 12
+                    radius: Theme.corner(12)
                     color: restartMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
@@ -295,7 +295,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
-                    radius: 12
+                    radius: Theme.corner(12)
                     color: shutdownMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
 
                     ColumnLayout {
@@ -351,7 +351,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 28
-                radius: 8
+                radius: Theme.corner(8)
                 color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
 
                 RowLayout {

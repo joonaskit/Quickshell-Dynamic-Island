@@ -38,6 +38,24 @@ SettingsCategory {
         }
     }
 
+    // Shape
+    SettingsSection {
+        title: "SHAPE"
+        titlePixelSize: Theme.fontPx(10)
+
+        SettingSegmented {
+            title: "Corner Roundness"
+            description: "How rounded cards, buttons, popups and the dock are. Pills and circles stay round"
+            iconName: "sliders"
+            iconColor: Theme.accentOrange
+            currentValue: SettingsService.cornerStyle
+            options: Theme.cornerChoices.map(c => ({ label: c.label, value: c.name }))
+            onSelected: function(val) {
+                SettingsService.setSetting("cornerStyle", val);
+            }
+        }
+    }
+
     // Display & Scaling (DPI)
     SettingsSection {
         title: "DISPLAY & SCALING (DPI)"
@@ -87,6 +105,38 @@ SettingsCategory {
             ]
             onValueModified: function(val) {
                 SettingsService.setSetting("fontScale", val);
+            }
+        }
+    }
+
+    // Fonts
+    SettingsSection {
+        title: "FONTS"
+        titlePixelSize: Theme.fontPx(10)
+
+        SettingFontPicker {
+            title: "Interface Font"
+            description: "Font for labels and text. Missing fonts fall back to the defaults"
+            iconName: "type"
+            iconColor: Theme.accentBlue
+            currentValue: SettingsService.fontFamily
+            defaultLabel: "Default (Cantarell)"
+            onSelected: function(val) {
+                SettingsService.setSetting("fontFamily", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingFontPicker {
+            title: "Display Font"
+            description: "Font for the clock, titles and large numbers"
+            iconName: "type"
+            iconColor: Theme.accentPurple
+            currentValue: SettingsService.fontDisplayFamily
+            defaultLabel: "Same as interface font"
+            onSelected: function(val) {
+                SettingsService.setSetting("fontDisplayFamily", val);
             }
         }
     }
