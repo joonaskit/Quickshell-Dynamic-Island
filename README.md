@@ -7,20 +7,22 @@ A compact pill at the top of the screen shows the clock, media and notifications
 ## Features
 
 - **Island pill:** clock, battery, now-playing media and notification alerts, with smooth expand and collapse animations.
-- **Expanded view:** calendar, timer and stopwatch (running ones show in the pill), media controls, notifications, audio output selector, per-app volume mixer, and volume and brightness sliders. Notifications are grouped by app and support action buttons and inline replies.
+- **Expanded view:** calendar, timer and stopwatch (running ones show in the pill), media controls, notifications, audio output selector, per-app volume mixer, and volume and brightness sliders. Notifications are grouped by app and support action buttons and inline replies, and clicking a notification preview in the pill opens it in place.
 - **Status cluster:** Do Not Disturb, Wi-Fi, Bluetooth, microphone, clipboard history, power profile, hardware stats, USB devices, caffeine (inhibit idle) and battery. Each has a quick-settings popup.
 - **Clipboard history:** a floating window (`./run.sh -v`) with search, text and link filters, pinning and details such as size, age and source app. History is kept in memory only. Copies from password managers are never recorded, credential-like text is hidden and expires, and an incognito mode pauses recording.
+- **Desktop switch indicator:** switching virtual desktops briefly shows a row of dots with a sliding highlight in the island's OSD slot, even when the pill is hidden.
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
-- **Settings UI:** toggle every icon and widget, UI and font scale, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings.
+- **Settings UI:** toggle every icon and widget, UI and font scale, interface and display fonts, corner roundness, accent color, dock tint and opacity, an experimental light mode, caffeine that stays on across restarts, 24h clock and more. Settings are saved to `settings.json`.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next.
 
 ## Requirements
 
 - KDE Plasma on Wayland (KWin)
 - [Quickshell](https://quickshell.org)
 - Python 3 with `dbus-python` and `PyGObject`
-- CLI tools: `nmcli`, `bluetoothctl`, `brightnessctl`, `wpctl` / `pactl` (PipeWire or PulseAudio), `wl-clipboard`, `udisksctl`, `lsblk`, `systemd-inhibit`, `loginctl`, `busctl`, `qdbus-qt6`, `xdg-open`, `gtk-launch`
+- CLI tools: `nmcli`, `bluetoothctl`, `brightnessctl`, `wpctl` / `pactl` (PipeWire or PulseAudio), `wl-clipboard`, `udisksctl`, `lsblk`, `systemd-inhibit`, `loginctl`, `busctl`, `qdbus-qt6`, `xdg-open`, `gtk-launch`, `notify-send` (timer alerts)
+- Optional: `kioclient` (the dock's "Properties" entry) and `gio` (fallback for mounting USB drives)
 - UPower, for battery, and power-profiles-daemon, for power profiles
 
 ## Usage
@@ -43,7 +45,7 @@ cd ~/.config/quickshell/island
 | `./run.sh -e` / `-c` | Expand / collapse |
 | `./run.sh -i <target> <function>` | Call any IPC function, for example `-i system volumeUp` |
 
-The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. You can bind these commands to a global shortcut.
+The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. You can bind these commands to a global shortcut.
 
 ## Project layout
 
@@ -66,7 +68,7 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 
 ## Configuration
 
-Use the in-app settings view, or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
+Use the in-app settings view, or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored, as is `launcher_usage.json`, where the launcher keeps its usage counts. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
 
 The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
 
@@ -74,7 +76,7 @@ The shell also writes its colors, fonts and scale to `~/.config/quickshell-islan
 
 Run `./lint.sh` before committing. It runs `qmllint` on the QML files (settings in `.qmllint.ini`) and `ruff` on the Python files (settings in `ruff.toml`). It needs the Qt 6 declarative tools for `qmllint`, and either `ruff` or `uv` for the Python check.
 
-`./test.sh` runs the unit tests in `tests/`: the QML ones headless with `qmltestrunner`, and the Python ones with `unittest`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js` and the reading of older `settings.json` formats in `services/settingsMigration.js`. The UI is checked by hand in the running shell.
+`./test.sh` runs the unit tests in `tests/`: the QML ones headless with `qmltestrunner`, and the Python ones with `unittest`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js`, the reading of older `settings.json` formats in `services/settingsMigration.js`, and the clipboard history logic in `services/clipboardHistory.js` and `scripts/clipboard_tracker.py`. The UI is checked by hand in the running shell.
 
 ## License
 
