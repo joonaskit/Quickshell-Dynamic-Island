@@ -105,6 +105,14 @@ Singleton {
     property string hueAppKey: ""
     property string hueLightId: ""
 
+    // KDE Night Light control. Off by default
+    property bool nightLightEnabled: false
+    // Custom hours: when set, the shell switches Night Light on between the two times ("HH:MM")
+    property bool nightLightCustom: false
+    property bool nightLightScheduleEnabled: false
+    property string nightLightStart: "21:00"
+    property string nightLightEnd: "07:00"
+
     property bool isLoaded: false
     property string lastSavedTime: ""
 
@@ -204,6 +212,11 @@ Singleton {
         if (data.showNotificationIcon !== undefined) root.showNotificationIcon = !!data.showNotificationIcon;
         if (data.pinNotificationIcon !== undefined) root.pinNotificationIcon = !!data.pinNotificationIcon;
         if (data.showBatteryIcon !== undefined) root.showBatteryIcon = !!data.showBatteryIcon;
+        if (data.nightLightEnabled !== undefined) root.nightLightEnabled = !!data.nightLightEnabled;
+        if (data.nightLightCustom !== undefined) root.nightLightCustom = !!data.nightLightCustom;
+        if (data.nightLightScheduleEnabled !== undefined) root.nightLightScheduleEnabled = !!data.nightLightScheduleEnabled;
+        if (typeof data.nightLightStart === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.nightLightStart)) root.nightLightStart = data.nightLightStart;
+        if (typeof data.nightLightEnd === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.nightLightEnd)) root.nightLightEnd = data.nightLightEnd;
         if (data.hueEnabled !== undefined) root.hueEnabled = !!data.hueEnabled;
         if (typeof data.hueBridgeIp === "string") root.hueBridgeIp = data.hueBridgeIp.trim().slice(0, 100);
         if (typeof data.hueAppKey === "string") root.hueAppKey = data.hueAppKey.trim().slice(0, 200);
@@ -367,6 +380,11 @@ Singleton {
         root.showNotificationIcon = true;
         root.pinNotificationIcon = false;
         root.showBatteryIcon = true;
+        root.nightLightEnabled = false;
+        root.nightLightCustom = false;
+        root.nightLightScheduleEnabled = false;
+        root.nightLightStart = "21:00";
+        root.nightLightEnd = "07:00";
         root.hueEnabled = false;
         root.hueBridgeIp = "";
         root.hueAppKey = "";
@@ -462,6 +480,11 @@ Singleton {
             "showNotificationIcon": root.showNotificationIcon,
             "pinNotificationIcon": root.pinNotificationIcon,
             "showBatteryIcon": root.showBatteryIcon,
+            "nightLightEnabled": root.nightLightEnabled,
+            "nightLightCustom": root.nightLightCustom,
+            "nightLightScheduleEnabled": root.nightLightScheduleEnabled,
+            "nightLightStart": root.nightLightStart,
+            "nightLightEnd": root.nightLightEnd,
             "hueEnabled": root.hueEnabled,
             "hueBridgeIp": root.hueBridgeIp,
             "hueAppKey": root.hueAppKey,
