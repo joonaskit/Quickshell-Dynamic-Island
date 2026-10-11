@@ -19,4 +19,20 @@ SettingsCategory {
             }
         }
     }
+
+    SettingsSection {
+        title: "NIGHT LIGHT"
+        subtitle: "Warm the screen colours in the evening"
+
+        SettingToggle {
+            title: "Night Light"
+            description: "Adds a moon icon for switching KDE Night Light on and off and setting its temperature"
+            iconName: "moon"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.nightLightEnabled
+            onToggled: function(val) {
+                SettingsService.setSetting("nightLightEnabled", val);
+            }
+        }
+    }
 }

@@ -19,8 +19,9 @@ Item {
     property bool hardwareMenuOpen: false
     property bool devicesMenuOpen: false
     property bool hueMenuOpen: false
+    property bool nightMenuOpen: false
 
-    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen
+    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen || nightMenuOpen
 
     z: root.anyMenuOpen ? 200 : 1
 
@@ -35,6 +36,7 @@ Item {
     property alias hardwareQuickSettingsHitBox: hardwareQuickSettings
     property alias deviceQuickSettingsHitBox: deviceQuickSettings
     property alias hueQuickSettingsHitBox: hueQuickSettings
+    property alias nightQuickSettingsHitBox: nightQuickSettings
 
     implicitWidth: clusterBackground.width
     implicitHeight: clusterBackground.height
@@ -56,6 +58,9 @@ Item {
     readonly property bool showHardware: SettingsService.showHardwareIcon
     readonly property bool showUsb: SettingsService.showUsbIcon && (SettingsService.pinUsbIcon || DeviceService.hasDevices || root.devicesMenuOpen)
     readonly property bool showHue: SettingsService.hueEnabled
+    readonly property bool showNightLight: SettingsService.nightLightEnabled
+    readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0)
+    readonly property bool showWidgets: widgetCount > 0
     readonly property bool showNotification: SettingsService.showNotificationIcon && (SettingsService.pinNotificationIcon || NotificationService.unreadCount > 0 || NotificationService.notifications.length > 0 || root.notificationMenuOpen)
     readonly property bool showBattery: SettingsService.showBatteryIcon && SettingsService.showBattery
 
@@ -69,7 +74,7 @@ Item {
                                            (showProfile ? 1 : 0) +
                                            (showHardware ? 1 : 0) +
                                            (showUsb ? 1 : 0) +
-                                           (showHue ? 1 : 0) +
+                                           widgetCount +
                                            (showNotification ? 1 : 0) +
                                            (showBattery ? 1 : 0)
 
@@ -82,6 +87,7 @@ Item {
         function onShowProfileIconChanged() { if (!SettingsService.showProfileIcon && root.profileMenuOpen) root.profileMenuOpen = false; }
         function onShowHardwareIconChanged() { if (!SettingsService.showHardwareIcon && root.hardwareMenuOpen) root.hardwareMenuOpen = false; }
         function onShowUsbIconChanged() { if (!SettingsService.showUsbIcon && root.devicesMenuOpen) root.devicesMenuOpen = false; }
+        function onNightLightEnabledChanged() { if (!SettingsService.nightLightEnabled && root.nightMenuOpen) root.nightMenuOpen = false; }
         function onHueEnabledChanged() { if (!SettingsService.hueEnabled && root.hueMenuOpen) root.hueMenuOpen = false; }
         function onShowNotificationIconChanged() { if (!SettingsService.showNotificationIcon && root.notificationMenuOpen) root.notificationMenuOpen = false; }
         function onShowBatteryIconChanged() { if (!SettingsService.showBatteryIcon && root.powerMenuOpen) root.powerMenuOpen = false; }
@@ -98,6 +104,7 @@ Item {
         root.hardwareMenuOpen = false;
         root.devicesMenuOpen = false;
         root.hueMenuOpen = false;
+        root.nightMenuOpen = false;
     }
 
     function toggleWifiMenu() {
@@ -186,6 +193,15 @@ Item {
         root.hueMenuOpen = next;
     }
 
+    function toggleNightMenu() {
+        let next = !root.nightMenuOpen;
+        root.closeAllMenus();
+        root.nightMenuOpen = next;
+        if (root.nightMenuOpen) {
+            NightLightService.refresh();
+        }
+    }
+
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
     readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.anyMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
@@ -210,6 +226,7 @@ Item {
         if (root.hardwareMenuOpen) return hardwareQuickSettings.implicitHeight;
         if (root.devicesMenuOpen) return deviceQuickSettings.implicitHeight;
         if (root.hueMenuOpen) return hueQuickSettings.implicitHeight;
+        if (root.nightMenuOpen) return nightQuickSettings.implicitHeight;
         return 0;
     }
 
@@ -345,6 +362,91 @@ Item {
                     color: Theme.overlay(0.15)
                     visible: root.isTopBarMode && (root.visibleIconCount > 0)
                     Layout.rightMargin: Theme.px(4)
+                }
+
+                // W1. Night Light Button (only when the feature is enabled in the settings)
+                Rectangle {
+                    id: nightButton
+                    visible: root.showNightLight
+                    Layout.preferredWidth: visible ? root.buttonSize : 0
+                    Layout.preferredHeight: root.buttonSize
+                    radius: root.buttonSize / 2
+                    color: {
+                        if (root.nightMenuOpen) return Qt.rgba(255/255, 159/255, 10/255, 0.25);
+                        if (NightLightService.running) return Qt.rgba(255/255, 159/255, 10/255, 0.15);
+                        return "transparent";
+                    }
+                    scale: nightMouse.pressed ? 0.90 : 1.0
+
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "moon"
+                        size: root.iconSize
+                        color: {
+                            if (root.nightMenuOpen || NightLightService.running) return Theme.accentOrange;
+                            return nightMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
+                        }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    }
+
+                    MouseArea {
+                        id: nightMouse
+                        anchors.fill: parent
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggleNightMenu()
+                    }
+                }
+
+                // W2. Philips Hue Button (only when the feature is enabled in the settings)
+                Rectangle {
+                    id: hueButton
+                    visible: root.showHue
+                    Layout.preferredWidth: visible ? root.buttonSize : 0
+                    Layout.preferredHeight: root.buttonSize
+                    radius: root.buttonSize / 2
+                    color: {
+                        if (root.hueMenuOpen) return Qt.rgba(255/255, 159/255, 10/255, 0.25);
+                        if (HueService.anyOn) return Qt.rgba(255/255, 159/255, 10/255, 0.15);
+                        return "transparent";
+                    }
+                    scale: hueMouse.pressed ? 0.90 : 1.0
+
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "bulb"
+                        size: root.iconSize
+                        color: {
+                            if (root.hueMenuOpen || HueService.anyOn) return Theme.accentOrange;
+                            return hueMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
+                        }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    }
+
+                    MouseArea {
+                        id: hueMouse
+                        anchors.fill: parent
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggleHueMenu()
+                    }
+                }
+
+                // Separates the optional widget icons from the system icons
+                Rectangle {
+                    Layout.preferredWidth: visible ? Math.max(1, Theme.px(1)) : 0
+                    Layout.preferredHeight: Theme.px(16)
+                    radius: width / 2
+                    color: Theme.overlay(0.4)
+                    visible: root.showWidgets && root.visibleIconCount > root.widgetCount
+                    Layout.leftMargin: Theme.px(2)
+                    Layout.rightMargin: Theme.px(2)
                 }
 
                 // 0. Interactive Coffee Cup (Caffeine: prevents screen dimming and sleeping)
@@ -681,43 +783,6 @@ Item {
                     }
                 }
 
-                // 7b. Philips Hue Button (only when the feature is enabled in the settings)
-                Rectangle {
-                    id: hueButton
-                    visible: root.showHue
-                    Layout.preferredWidth: visible ? root.buttonSize : 0
-                    Layout.preferredHeight: root.buttonSize
-                    radius: root.buttonSize / 2
-                    color: {
-                        if (root.hueMenuOpen) return Qt.rgba(255/255, 159/255, 10/255, 0.25);
-                        if (HueService.anyOn) return Qt.rgba(255/255, 159/255, 10/255, 0.15);
-                        return "transparent";
-                    }
-                    scale: hueMouse.pressed ? 0.90 : 1.0
-
-                    Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-                    SvgIcon {
-                        anchors.centerIn: parent
-                        name: "bulb"
-                        size: root.iconSize
-                        color: {
-                            if (root.hueMenuOpen || HueService.anyOn) return Theme.accentOrange;
-                            return hueMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                        }
-                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-                    }
-
-                    MouseArea {
-                        id: hueMouse
-                        anchors.fill: parent
-                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.toggleHueMenu()
-                    }
-                }
-
                 // 8. Interactive Notification Bell Button (triggers Notification Menu)
                 Rectangle {
                     id: notifButton
@@ -963,6 +1028,19 @@ Item {
                 opacity: root.hueMenuOpen ? 1.0 : 0.0
                 visible: opacity > 0.01
                 onRequestClose: root.hueMenuOpen = false
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            }
+
+            // 11. Night Light Quick Settings
+            NightLightQuickSettings {
+                id: nightQuickSettings
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                embedded: true
+                opacity: root.nightMenuOpen ? 1.0 : 0.0
+                visible: opacity > 0.01
+                onRequestClose: root.nightMenuOpen = false
                 Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
             }
         }
