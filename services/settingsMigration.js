@@ -31,27 +31,30 @@ function widgetStates(data, widgetIds) {
     return states;
 }
 
-// Returns the ids in `widgetIds` in display order. `saved` is the "widgetOrder"
+// The three functions below serve every user-ordered list: the expanded island
+// widgets ("widgetOrder") and the status-bar icons ("statusIconOrder").
+
+// Returns `ids` (the registry's ids) in display order. `saved` is the order
 // list from settings.json: its known ids come first, in saved order, and the
-// rest follow in `widgetIds` order, so a widget added later goes at the end.
-function widgetOrder(saved, widgetIds) {
+// rest follow in `ids` order, so an entry added later goes at the end.
+function savedOrder(saved, ids) {
     let order = [];
     if (Array.isArray(saved)) {
         for (let i = 0; i < saved.length; i++) {
             let id = saved[i];
-            if (widgetIds.indexOf(id) >= 0 && order.indexOf(id) < 0) order.push(id);
+            if (ids.indexOf(id) >= 0 && order.indexOf(id) < 0) order.push(id);
         }
     }
-    for (let i = 0; i < widgetIds.length; i++) {
-        if (order.indexOf(widgetIds[i]) < 0) order.push(widgetIds[i]);
+    for (let i = 0; i < ids.length; i++) {
+        if (order.indexOf(ids[i]) < 0) order.push(ids[i]);
     }
     return order;
 }
 
-// Index in `order` of the widget that `id` would swap with when moved up
+// Index in `order` of the entry that `id` would swap with when moved up
 // (delta -1) or down (delta 1): the nearest one in the same group, from
 // `groups` ({ id: group }). Returns -1 when there is none.
-function widgetMoveTarget(order, id, delta, groups) {
+function moveTarget(order, id, delta, groups) {
     let from = order.indexOf(id);
     if (from < 0 || (delta !== 1 && delta !== -1)) return -1;
     for (let i = from + delta; i >= 0 && i < order.length; i += delta) {
@@ -62,9 +65,9 @@ function widgetMoveTarget(order, id, delta, groups) {
 
 // Returns a copy of `order` with `id` moved one place up or down within its
 // group, or unchanged when it is already first or last there.
-function movedWidgetOrder(order, id, delta, groups) {
+function movedOrder(order, id, delta, groups) {
     let moved = order.slice();
-    let to = widgetMoveTarget(order, id, delta, groups);
+    let to = moveTarget(order, id, delta, groups);
     if (to < 0) return moved;
     let from = order.indexOf(id);
     moved[from] = order[to];

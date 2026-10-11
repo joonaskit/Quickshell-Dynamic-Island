@@ -44,42 +44,13 @@ SettingsCategory {
                     }
 
                     // Move up / down within the widget's group
-                    Repeater {
-                        model: [
-                            { "icon": "chevron-up", "delta": -1 },
-                            { "icon": "chevron-down", "delta": 1 }
-                        ]
-
-                        delegate: Rectangle {
-                            id: moveButton
-                            required property var modelData
-                            readonly property bool canMove: SettingsService.canMoveWidget(widgetRow.modelData.id, modelData.delta)
-
-                            visible: !SettingsSearch.active
-                            Layout.preferredWidth: 24
-                            Layout.preferredHeight: 24
-                            Layout.rightMargin: modelData.delta > 0 ? 10 : 2
-                            radius: Theme.corner(7)
-                            color: moveMouse.pressed ? Theme.overlay(0.16) : (moveMouse.containsMouse ? Theme.overlay(0.1) : "transparent")
-                            opacity: canMove ? 1.0 : 0.25
-
-                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-                            SvgIcon {
-                                anchors.centerIn: parent
-                                name: moveButton.modelData.icon
-                                size: 14
-                                color: Theme.textSecondary
-                            }
-
-                            MouseArea {
-                                id: moveMouse
-                                anchors.fill: parent
-                                enabled: moveButton.canMove
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: SettingsService.moveWidget(widgetRow.modelData.id, moveButton.modelData.delta)
-                            }
+                    SettingMoveButtons {
+                        visible: !SettingsSearch.active
+                        Layout.rightMargin: 10
+                        canMoveUp: SettingsService.canMoveWidget(widgetRow.modelData.id, -1)
+                        canMoveDown: SettingsService.canMoveWidget(widgetRow.modelData.id, 1)
+                        onMoved: function(delta) {
+                            SettingsService.moveWidget(widgetRow.modelData.id, delta);
                         }
                     }
                 }

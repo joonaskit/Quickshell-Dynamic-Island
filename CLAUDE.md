@@ -15,6 +15,7 @@ QML desktop shell for KDE Plasma (Wayland), built with Quickshell: a morphing to
 - `quicksettings/` holds the quick-settings popups, selectors and sliders.
 - `services/` holds the `*Service.qml` singletons and `Theme.qml`.
 - `island/` holds the island window, pills, clusters, views and settings UI.
+- `island/StatusIconRegistry.qml` lists the top-right status icons in default order. A new icon needs an entry there and a button component in `TopRightStatusCluster.qml` under the same id (`iconComponents`, `isIconShown`). The user's order is `statusIconOrder` in `settings.json`.
 - `components/` holds small shared pieces (`SvgIcon`, `HiddenElementGlow`, `AudioVisualizer`, `BatteryIndicator`).
 - `docs/ANIMATION_CATALOGUE.md` documents the animations.
 

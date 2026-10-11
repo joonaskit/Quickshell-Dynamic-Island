@@ -64,6 +64,11 @@ Singleton {
     property bool showNotificationIcon: true
     property bool pinNotificationIcon: false
     property bool showBatteryIcon: true
+    // Saved left-to-right order of the status-bar icons, as ids (see
+    // StatusIconRegistry). Empty means registry order, and ids missing from it
+    // go at the end.
+    property var statusIconOrder: []
+    readonly property var orderedStatusIcons: SettingsMigration.savedOrder(root.statusIconOrder, StatusIconRegistry.icons.map(i => i.id)).map(id => StatusIconRegistry.byId(id))
 
     // Top Left Pills (Window Controls & Virtual Desktops)
     property bool showWindowControls: true
@@ -86,7 +91,7 @@ Singleton {
     // Saved display order of the widgets, as ids. Empty means registry order,
     // and ids missing from it go at the end.
     property var widgetOrder: []
-    readonly property var orderedWidgets: SettingsMigration.widgetOrder(root.widgetOrder, WidgetRegistry.widgets.map(w => w.id)).map(id => WidgetRegistry.byId(id))
+    readonly property var orderedWidgets: SettingsMigration.savedOrder(root.widgetOrder, WidgetRegistry.widgets.map(w => w.id)).map(id => WidgetRegistry.byId(id))
 
     // App Launcher Customization
     property string launcherDefaultView: "grid"
@@ -220,6 +225,8 @@ Singleton {
         if (data.showNotificationIcon !== undefined) root.showNotificationIcon = !!data.showNotificationIcon;
         if (data.pinNotificationIcon !== undefined) root.pinNotificationIcon = !!data.pinNotificationIcon;
         if (data.showBatteryIcon !== undefined) root.showBatteryIcon = !!data.showBatteryIcon;
+        let savedIconOrder = Array.isArray(data.statusIconOrder) ? SettingsMigration.savedOrder(data.statusIconOrder, StatusIconRegistry.icons.map(i => i.id)) : [];
+        if (JSON.stringify(savedIconOrder) !== JSON.stringify(root.statusIconOrder)) root.statusIconOrder = savedIconOrder;
         if (data.nightLightEnabled !== undefined) root.nightLightEnabled = !!data.nightLightEnabled;
         if (data.nightLightCustom !== undefined) root.nightLightCustom = !!data.nightLightCustom;
         if (data.nightLightScheduleEnabled !== undefined) root.nightLightScheduleEnabled = !!data.nightLightScheduleEnabled;
@@ -248,7 +255,7 @@ Singleton {
         // Also reads the per-widget keys used by older configs
         root.widgets = SettingsMigration.widgetStates(data, WidgetRegistry.widgets.map(w => w.id));
         // Only assigned when it differs, as a new order rebuilds the expanded view
-        let savedOrder = Array.isArray(data.widgetOrder) ? SettingsMigration.widgetOrder(data.widgetOrder, WidgetRegistry.widgets.map(w => w.id)) : [];
+        let savedOrder = Array.isArray(data.widgetOrder) ? SettingsMigration.savedOrder(data.widgetOrder, WidgetRegistry.widgets.map(w => w.id)) : [];
         if (JSON.stringify(savedOrder) !== JSON.stringify(root.widgetOrder)) root.widgetOrder = savedOrder;
 
         if (data.launcherDefaultView !== undefined && (data.launcherDefaultView === "grid" || data.launcherDefaultView === "list")) {
@@ -349,22 +356,33 @@ Singleton {
         return states;
     }
 
-    function widgetGroups() {
+    // { id: group } for the entries of a registry list
+    function groupsOf(entries) {
         let groups = {};
-        for (let i = 0; i < WidgetRegistry.widgets.length; i++) {
-            groups[WidgetRegistry.widgets[i].id] = WidgetRegistry.widgets[i].group;
-        }
+        for (let i = 0; i < entries.length; i++) groups[entries[i].id] = entries[i].group;
         return groups;
     }
 
     // Whether a widget can move up (delta -1) or down (delta 1) within its group
     function canMoveWidget(id, delta) {
-        return SettingsMigration.widgetMoveTarget(root.orderedWidgets.map(w => w.id), id, delta, root.widgetGroups()) >= 0;
+        return SettingsMigration.moveTarget(root.orderedWidgets.map(w => w.id), id, delta, root.groupsOf(WidgetRegistry.widgets)) >= 0;
     }
 
     function moveWidget(id, delta) {
         if (!root.canMoveWidget(id, delta)) return;
-        root.widgetOrder = SettingsMigration.movedWidgetOrder(root.orderedWidgets.map(w => w.id), id, delta, root.widgetGroups());
+        root.widgetOrder = SettingsMigration.movedOrder(root.orderedWidgets.map(w => w.id), id, delta, root.groupsOf(WidgetRegistry.widgets));
+        root.settingsChanged();
+        saveTimer.restart();
+    }
+
+    // The same for a status-bar icon; up is towards the left
+    function canMoveStatusIcon(id, delta) {
+        return SettingsMigration.moveTarget(root.orderedStatusIcons.map(i => i.id), id, delta, root.groupsOf(StatusIconRegistry.icons)) >= 0;
+    }
+
+    function moveStatusIcon(id, delta) {
+        if (!root.canMoveStatusIcon(id, delta)) return;
+        root.statusIconOrder = SettingsMigration.movedOrder(root.orderedStatusIcons.map(i => i.id), id, delta, root.groupsOf(StatusIconRegistry.icons));
         root.settingsChanged();
         saveTimer.restart();
     }
@@ -413,6 +431,7 @@ Singleton {
         root.showNotificationIcon = true;
         root.pinNotificationIcon = false;
         root.showBatteryIcon = true;
+        root.statusIconOrder = [];
         root.nightLightEnabled = false;
         root.nightLightCustom = false;
         root.nightLightScheduleEnabled = false;
@@ -516,6 +535,7 @@ Singleton {
             "showNotificationIcon": root.showNotificationIcon,
             "pinNotificationIcon": root.pinNotificationIcon,
             "showBatteryIcon": root.showBatteryIcon,
+            "statusIconOrder": root.statusIconOrder,
             "nightLightEnabled": root.nightLightEnabled,
             "nightLightCustom": root.nightLightCustom,
             "nightLightScheduleEnabled": root.nightLightScheduleEnabled,
