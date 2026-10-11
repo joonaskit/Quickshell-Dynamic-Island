@@ -15,6 +15,7 @@ singleton MicrophoneService 1.0 services/MicrophoneService.qml
 singleton PowerProfileService 1.0 services/PowerProfileService.qml
 singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
 singleton DeviceService 1.0 services/DeviceService.qml
+singleton HueService 1.0 services/HueService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
 IslandWindow 1.0 island/IslandWindow.qml
@@ -51,6 +52,7 @@ MicrophoneQuickSettings 1.0 quicksettings/MicrophoneQuickSettings.qml
 PowerProfileQuickSettings 1.0 quicksettings/PowerProfileQuickSettings.qml
 HardwareStatsQuickSettings 1.0 quicksettings/HardwareStatsQuickSettings.qml
 DeviceQuickSettings 1.0 quicksettings/DeviceQuickSettings.qml
+HueQuickSettings 1.0 quicksettings/HueQuickSettings.qml
 SettingsView 1.0 island/SettingsView.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml
 SettingToggle 1.0 island/settings/SettingToggle.qml
@@ -65,6 +67,7 @@ TopBarSettings 1.0 island/settings/TopBarSettings.qml
 IslandSettings 1.0 island/settings/IslandSettings.qml
 DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
+WidgetsSettings 1.0 island/settings/WidgetsSettings.qml
 ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
 SettingsCategory 1.0 island/settings/SettingsCategory.qml
