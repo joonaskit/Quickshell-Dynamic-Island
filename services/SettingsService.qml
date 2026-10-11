@@ -83,6 +83,10 @@ Singleton {
     // Expanded island widgets: id -> enabled. Ids missing here use the
     // registry default (see WidgetRegistry).
     property var widgets: ({})
+    // Saved display order of the widgets, as ids. Empty means registry order,
+    // and ids missing from it go at the end.
+    property var widgetOrder: []
+    readonly property var orderedWidgets: SettingsMigration.widgetOrder(root.widgetOrder, WidgetRegistry.widgets.map(w => w.id)).map(id => WidgetRegistry.byId(id))
 
     // App Launcher Customization
     property string launcherDefaultView: "grid"
@@ -243,6 +247,9 @@ Singleton {
 
         // Also reads the per-widget keys used by older configs
         root.widgets = SettingsMigration.widgetStates(data, WidgetRegistry.widgets.map(w => w.id));
+        // Only assigned when it differs, as a new order rebuilds the expanded view
+        let savedOrder = Array.isArray(data.widgetOrder) ? SettingsMigration.widgetOrder(data.widgetOrder, WidgetRegistry.widgets.map(w => w.id)) : [];
+        if (JSON.stringify(savedOrder) !== JSON.stringify(root.widgetOrder)) root.widgetOrder = savedOrder;
 
         if (data.launcherDefaultView !== undefined && (data.launcherDefaultView === "grid" || data.launcherDefaultView === "list")) {
             root.launcherDefaultView = data.launcherDefaultView;
@@ -342,6 +349,26 @@ Singleton {
         return states;
     }
 
+    function widgetGroups() {
+        let groups = {};
+        for (let i = 0; i < WidgetRegistry.widgets.length; i++) {
+            groups[WidgetRegistry.widgets[i].id] = WidgetRegistry.widgets[i].group;
+        }
+        return groups;
+    }
+
+    // Whether a widget can move up (delta -1) or down (delta 1) within its group
+    function canMoveWidget(id, delta) {
+        return SettingsMigration.widgetMoveTarget(root.orderedWidgets.map(w => w.id), id, delta, root.widgetGroups()) >= 0;
+    }
+
+    function moveWidget(id, delta) {
+        if (!root.canMoveWidget(id, delta)) return;
+        root.widgetOrder = SettingsMigration.movedWidgetOrder(root.orderedWidgets.map(w => w.id), id, delta, root.widgetGroups());
+        root.settingsChanged();
+        saveTimer.restart();
+    }
+
     function resetDefaults() {
         root.uiScale = 1.0;
         root.fontScale = 1.0;
@@ -412,6 +439,7 @@ Singleton {
         root.showActivitiesInPill = true;
 
         root.widgets = {};
+        root.widgetOrder = [];
 
         root.launcherDefaultView = "grid";
         root.launcherDensity = "comfortable";
@@ -511,6 +539,7 @@ Singleton {
             "showTimerInPill": root.showTimerInPill,
             "showActivitiesInPill": root.showActivitiesInPill,
             "widgets": root.widgetStates(),
+            "widgetOrder": root.widgetOrder,
             "launcherDefaultView": root.launcherDefaultView,
             "launcherDensity": root.launcherDensity,
             "launcherStartTab": root.launcherStartTab,

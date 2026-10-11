@@ -7,13 +7,14 @@ SettingsCategory {
     // Expanded Island Cards Customization
     SettingsSection {
         title: "EXPANDED ISLAND CARDS"
-        subtitle: "Choose cards shown when expanded"
+        subtitle: "Choose and order the cards shown when expanded"
 
-        // One toggle per registered widget
+        // One row per registered widget, in display order: cards, then controls
         Repeater {
-            model: WidgetRegistry.widgets
+            model: SettingsService.orderedWidgets.filter(w => w.group === "cards").concat(SettingsService.orderedWidgets.filter(w => w.group === "controls"))
 
             delegate: ColumnLayout {
+                id: widgetRow
                 required property var modelData
                 required property int index
                 readonly property bool matchesSearch: widgetToggle.matchesSearch
@@ -23,18 +24,63 @@ SettingsCategory {
                 spacing: 0
 
                 SettingDivider {
-                    visible: index > 0 && !SettingsSearch.active
+                    visible: widgetRow.index > 0 && !SettingsSearch.active
                 }
 
-                SettingToggle {
-                    id: widgetToggle
-                    title: modelData.title
-                    description: modelData.description
-                    iconName: modelData.icon
-                    iconColor: modelData.iconColor
-                    checked: SettingsService.isWidgetEnabled(modelData.id)
-                    onToggled: function(val) {
-                        SettingsService.setWidgetEnabled(modelData.id, val);
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    SettingToggle {
+                        id: widgetToggle
+                        title: widgetRow.modelData.title
+                        description: widgetRow.modelData.description
+                        iconName: widgetRow.modelData.icon
+                        iconColor: widgetRow.modelData.iconColor
+                        checked: SettingsService.isWidgetEnabled(widgetRow.modelData.id)
+                        onToggled: function(val) {
+                            SettingsService.setWidgetEnabled(widgetRow.modelData.id, val);
+                        }
+                    }
+
+                    // Move up / down within the widget's group
+                    Repeater {
+                        model: [
+                            { "icon": "chevron-up", "delta": -1 },
+                            { "icon": "chevron-down", "delta": 1 }
+                        ]
+
+                        delegate: Rectangle {
+                            id: moveButton
+                            required property var modelData
+                            readonly property bool canMove: SettingsService.canMoveWidget(widgetRow.modelData.id, modelData.delta)
+
+                            visible: !SettingsSearch.active
+                            Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
+                            Layout.rightMargin: modelData.delta > 0 ? 10 : 2
+                            radius: Theme.corner(7)
+                            color: moveMouse.pressed ? Theme.overlay(0.16) : (moveMouse.containsMouse ? Theme.overlay(0.1) : "transparent")
+                            opacity: canMove ? 1.0 : 0.25
+
+                            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+
+                            SvgIcon {
+                                anchors.centerIn: parent
+                                name: moveButton.modelData.icon
+                                size: 14
+                                color: Theme.textSecondary
+                            }
+
+                            MouseArea {
+                                id: moveMouse
+                                anchors.fill: parent
+                                enabled: moveButton.canMove
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: SettingsService.moveWidget(widgetRow.modelData.id, moveButton.modelData.delta)
+                            }
+                        }
                     }
                 }
             }

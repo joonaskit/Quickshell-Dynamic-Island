@@ -12,10 +12,10 @@ Item {
     signal requestCollapse()
     signal requestOpenSettings()
 
-    // Widgets come from WidgetRegistry: "cards" are separated by dividers,
-    // "controls" are stacked tightly in one section after them
-    readonly property var cardWidgets: WidgetRegistry.widgets.filter(w => w.group === "cards")
-    readonly property var controlWidgets: WidgetRegistry.widgets.filter(w => w.group === "controls")
+    // Widgets come from WidgetRegistry, in the user's order: "cards" are separated
+    // by dividers, "controls" are stacked tightly in one section after them
+    readonly property var cardWidgets: SettingsService.orderedWidgets.filter(w => w.group === "cards")
+    readonly property var controlWidgets: SettingsService.orderedWidgets.filter(w => w.group === "controls")
 
     function isShown(widget) {
         return SettingsService.isWidgetEnabled(widget.id) && (!widget.available || widget.available(root));
