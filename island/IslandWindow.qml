@@ -31,7 +31,7 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell-island"
     // Lets the settings search box and notification replies take typing once clicked
-    WlrLayershell.keyboardFocus: (islandPill.isSettingsOpen || islandPill.isNotificationOpen || statusCluster.notificationMenuOpen || statusCluster.hueMenuOpen || statusCluster.nightMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: (islandPill.isSettingsOpen || islandPill.isNotificationOpen || statusCluster.notificationMenuOpen || statusCluster.hueMenuOpen || statusCluster.nightMenuOpen || statusCluster.kdeMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     // Check if the active window is on this screen (or screen is unspecified)
     readonly property bool isThisScreenActive: {

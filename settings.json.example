@@ -43,6 +43,8 @@
   "nightLightScheduleEnabled": false,
   "nightLightStart": "21:00",
   "nightLightEnd": "07:00",
+  "kdeConnectEnabled": false,
+  "kdeConnectDeviceId": "",
   "hueEnabled": false,
   "hueBridgeIp": "",
   "hueAppKey": "",

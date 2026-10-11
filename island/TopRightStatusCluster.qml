@@ -20,8 +20,9 @@ Item {
     property bool devicesMenuOpen: false
     property bool hueMenuOpen: false
     property bool nightMenuOpen: false
+    property bool kdeMenuOpen: false
 
-    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen || nightMenuOpen
+    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen || nightMenuOpen || kdeMenuOpen
 
     z: root.anyMenuOpen ? 200 : 1
 
@@ -37,6 +38,7 @@ Item {
     property alias deviceQuickSettingsHitBox: deviceQuickSettings
     property alias hueQuickSettingsHitBox: hueQuickSettings
     property alias nightQuickSettingsHitBox: nightQuickSettings
+    property alias kdeQuickSettingsHitBox: kdeQuickSettings
 
     implicitWidth: clusterBackground.width
     implicitHeight: clusterBackground.height
@@ -59,7 +61,8 @@ Item {
     readonly property bool showUsb: SettingsService.showUsbIcon && (SettingsService.pinUsbIcon || DeviceService.hasDevices || root.devicesMenuOpen)
     readonly property bool showHue: SettingsService.hueEnabled
     readonly property bool showNightLight: SettingsService.nightLightEnabled
-    readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0)
+    readonly property bool showKdeConnect: SettingsService.kdeConnectEnabled
+    readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0) + (showKdeConnect ? 1 : 0)
     readonly property bool showWidgets: widgetCount > 0
     readonly property bool showNotification: SettingsService.showNotificationIcon && (SettingsService.pinNotificationIcon || NotificationService.unreadCount > 0 || NotificationService.notifications.length > 0 || root.notificationMenuOpen)
     readonly property bool showBattery: SettingsService.showBatteryIcon && SettingsService.showBattery
@@ -87,6 +90,7 @@ Item {
         function onShowProfileIconChanged() { if (!SettingsService.showProfileIcon && root.profileMenuOpen) root.profileMenuOpen = false; }
         function onShowHardwareIconChanged() { if (!SettingsService.showHardwareIcon && root.hardwareMenuOpen) root.hardwareMenuOpen = false; }
         function onShowUsbIconChanged() { if (!SettingsService.showUsbIcon && root.devicesMenuOpen) root.devicesMenuOpen = false; }
+        function onKdeConnectEnabledChanged() { if (!SettingsService.kdeConnectEnabled && root.kdeMenuOpen) root.kdeMenuOpen = false; }
         function onNightLightEnabledChanged() { if (!SettingsService.nightLightEnabled && root.nightMenuOpen) root.nightMenuOpen = false; }
         function onHueEnabledChanged() { if (!SettingsService.hueEnabled && root.hueMenuOpen) root.hueMenuOpen = false; }
         function onShowNotificationIconChanged() { if (!SettingsService.showNotificationIcon && root.notificationMenuOpen) root.notificationMenuOpen = false; }
@@ -105,6 +109,7 @@ Item {
         root.devicesMenuOpen = false;
         root.hueMenuOpen = false;
         root.nightMenuOpen = false;
+        root.kdeMenuOpen = false;
     }
 
     function toggleWifiMenu() {
@@ -202,6 +207,15 @@ Item {
         }
     }
 
+    function toggleKdeMenu() {
+        let next = !root.kdeMenuOpen;
+        root.closeAllMenus();
+        root.kdeMenuOpen = next;
+        if (root.kdeMenuOpen) {
+            KdeConnectService.refresh();
+        }
+    }
+
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
     readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.anyMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
@@ -227,6 +241,7 @@ Item {
         if (root.devicesMenuOpen) return deviceQuickSettings.implicitHeight;
         if (root.hueMenuOpen) return hueQuickSettings.implicitHeight;
         if (root.nightMenuOpen) return nightQuickSettings.implicitHeight;
+        if (root.kdeMenuOpen) return kdeQuickSettings.implicitHeight;
         return 0;
     }
 
@@ -435,6 +450,43 @@ Item {
                         hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.toggleHueMenu()
+                    }
+                }
+
+                // W3. KDE Connect Button (only when the feature is enabled in the settings)
+                Rectangle {
+                    id: kdeButton
+                    visible: root.showKdeConnect
+                    Layout.preferredWidth: visible ? root.buttonSize : 0
+                    Layout.preferredHeight: root.buttonSize
+                    radius: root.buttonSize / 2
+                    color: {
+                        if (root.kdeMenuOpen) return Qt.rgba(48/255, 209/255, 88/255, 0.25);
+                        if (KdeConnectService.anyReachable) return Qt.rgba(48/255, 209/255, 88/255, 0.15);
+                        return "transparent";
+                    }
+                    scale: kdeMouse.pressed ? 0.90 : 1.0
+
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "phone"
+                        size: root.iconSize
+                        color: {
+                            if (root.kdeMenuOpen || KdeConnectService.anyReachable) return Theme.accentGreen;
+                            return kdeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
+                        }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    }
+
+                    MouseArea {
+                        id: kdeMouse
+                        anchors.fill: parent
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggleKdeMenu()
                     }
                 }
 
@@ -1028,6 +1080,19 @@ Item {
                 opacity: root.hueMenuOpen ? 1.0 : 0.0
                 visible: opacity > 0.01
                 onRequestClose: root.hueMenuOpen = false
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            }
+
+            // 12. KDE Connect Quick Settings
+            KdeConnectQuickSettings {
+                id: kdeQuickSettings
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                embedded: true
+                opacity: root.kdeMenuOpen ? 1.0 : 0.0
+                visible: opacity > 0.01
+                onRequestClose: root.kdeMenuOpen = false
                 Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
             }
 

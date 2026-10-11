@@ -99,6 +99,10 @@ Singleton {
     // App ids (lowercase) whose copies are never recorded
     property var clipboardIgnoredApps: []
 
+    // KDE Connect (phone) widget. Off by default; the id is the device last picked
+    property bool kdeConnectEnabled: false
+    property string kdeConnectDeviceId: ""
+
     // Philips Hue lamp control. Off by default; the key is the app key from pairing with the bridge
     property bool hueEnabled: false
     property string hueBridgeIp: ""
@@ -217,6 +221,8 @@ Singleton {
         if (data.nightLightScheduleEnabled !== undefined) root.nightLightScheduleEnabled = !!data.nightLightScheduleEnabled;
         if (typeof data.nightLightStart === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.nightLightStart)) root.nightLightStart = data.nightLightStart;
         if (typeof data.nightLightEnd === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.nightLightEnd)) root.nightLightEnd = data.nightLightEnd;
+        if (data.kdeConnectEnabled !== undefined) root.kdeConnectEnabled = !!data.kdeConnectEnabled;
+        if (typeof data.kdeConnectDeviceId === "string" && /^[A-Za-z0-9_]{0,100}$/.test(data.kdeConnectDeviceId)) root.kdeConnectDeviceId = data.kdeConnectDeviceId;
         if (data.hueEnabled !== undefined) root.hueEnabled = !!data.hueEnabled;
         if (typeof data.hueBridgeIp === "string") root.hueBridgeIp = data.hueBridgeIp.trim().slice(0, 100);
         if (typeof data.hueAppKey === "string") root.hueAppKey = data.hueAppKey.trim().slice(0, 200);
@@ -385,6 +391,8 @@ Singleton {
         root.nightLightScheduleEnabled = false;
         root.nightLightStart = "21:00";
         root.nightLightEnd = "07:00";
+        root.kdeConnectEnabled = false;
+        root.kdeConnectDeviceId = "";
         root.hueEnabled = false;
         root.hueBridgeIp = "";
         root.hueAppKey = "";
@@ -485,6 +493,8 @@ Singleton {
             "nightLightScheduleEnabled": root.nightLightScheduleEnabled,
             "nightLightStart": root.nightLightStart,
             "nightLightEnd": root.nightLightEnd,
+            "kdeConnectEnabled": root.kdeConnectEnabled,
+            "kdeConnectDeviceId": root.kdeConnectDeviceId,
             "hueEnabled": root.hueEnabled,
             "hueBridgeIp": root.hueBridgeIp,
             "hueAppKey": root.hueAppKey,
