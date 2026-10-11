@@ -18,8 +18,9 @@ Item {
     property bool profileMenuOpen: false
     property bool hardwareMenuOpen: false
     property bool devicesMenuOpen: false
+    property bool hueMenuOpen: false
 
-    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen
+    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen
 
     z: root.anyMenuOpen ? 200 : 1
 
@@ -33,6 +34,7 @@ Item {
     property alias profileQuickSettingsHitBox: profileQuickSettings
     property alias hardwareQuickSettingsHitBox: hardwareQuickSettings
     property alias deviceQuickSettingsHitBox: deviceQuickSettings
+    property alias hueQuickSettingsHitBox: hueQuickSettings
 
     implicitWidth: clusterBackground.width
     implicitHeight: clusterBackground.height
@@ -53,6 +55,7 @@ Item {
     readonly property bool showProfile: SettingsService.showProfileIcon
     readonly property bool showHardware: SettingsService.showHardwareIcon
     readonly property bool showUsb: SettingsService.showUsbIcon && (SettingsService.pinUsbIcon || DeviceService.hasDevices || root.devicesMenuOpen)
+    readonly property bool showHue: SettingsService.hueEnabled
     readonly property bool showNotification: SettingsService.showNotificationIcon && (SettingsService.pinNotificationIcon || NotificationService.unreadCount > 0 || NotificationService.notifications.length > 0 || root.notificationMenuOpen)
     readonly property bool showBattery: SettingsService.showBatteryIcon && SettingsService.showBattery
 
@@ -66,6 +69,7 @@ Item {
                                            (showProfile ? 1 : 0) +
                                            (showHardware ? 1 : 0) +
                                            (showUsb ? 1 : 0) +
+                                           (showHue ? 1 : 0) +
                                            (showNotification ? 1 : 0) +
                                            (showBattery ? 1 : 0)
 
@@ -78,6 +82,7 @@ Item {
         function onShowProfileIconChanged() { if (!SettingsService.showProfileIcon && root.profileMenuOpen) root.profileMenuOpen = false; }
         function onShowHardwareIconChanged() { if (!SettingsService.showHardwareIcon && root.hardwareMenuOpen) root.hardwareMenuOpen = false; }
         function onShowUsbIconChanged() { if (!SettingsService.showUsbIcon && root.devicesMenuOpen) root.devicesMenuOpen = false; }
+        function onHueEnabledChanged() { if (!SettingsService.hueEnabled && root.hueMenuOpen) root.hueMenuOpen = false; }
         function onShowNotificationIconChanged() { if (!SettingsService.showNotificationIcon && root.notificationMenuOpen) root.notificationMenuOpen = false; }
         function onShowBatteryIconChanged() { if (!SettingsService.showBatteryIcon && root.powerMenuOpen) root.powerMenuOpen = false; }
     }
@@ -92,6 +97,7 @@ Item {
         root.profileMenuOpen = false;
         root.hardwareMenuOpen = false;
         root.devicesMenuOpen = false;
+        root.hueMenuOpen = false;
     }
 
     function toggleWifiMenu() {
@@ -174,6 +180,12 @@ Item {
         }
     }
 
+    function toggleHueMenu() {
+        let next = !root.hueMenuOpen;
+        root.closeAllMenus();
+        root.hueMenuOpen = next;
+    }
+
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
     readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.anyMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
@@ -197,6 +209,7 @@ Item {
         if (root.profileMenuOpen) return profileQuickSettings.implicitHeight;
         if (root.hardwareMenuOpen) return hardwareQuickSettings.implicitHeight;
         if (root.devicesMenuOpen) return deviceQuickSettings.implicitHeight;
+        if (root.hueMenuOpen) return hueQuickSettings.implicitHeight;
         return 0;
     }
 
@@ -668,6 +681,43 @@ Item {
                     }
                 }
 
+                // 7b. Philips Hue Button (only when the feature is enabled in the settings)
+                Rectangle {
+                    id: hueButton
+                    visible: root.showHue
+                    Layout.preferredWidth: visible ? root.buttonSize : 0
+                    Layout.preferredHeight: root.buttonSize
+                    radius: root.buttonSize / 2
+                    color: {
+                        if (root.hueMenuOpen) return Qt.rgba(255/255, 159/255, 10/255, 0.25);
+                        if (HueService.anyOn) return Qt.rgba(255/255, 159/255, 10/255, 0.15);
+                        return "transparent";
+                    }
+                    scale: hueMouse.pressed ? 0.90 : 1.0
+
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+                    SvgIcon {
+                        anchors.centerIn: parent
+                        name: "bulb"
+                        size: root.iconSize
+                        color: {
+                            if (root.hueMenuOpen || HueService.anyOn) return Theme.accentOrange;
+                            return hueMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
+                        }
+                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                    }
+
+                    MouseArea {
+                        id: hueMouse
+                        anchors.fill: parent
+                        hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.toggleHueMenu()
+                    }
+                }
+
                 // 8. Interactive Notification Bell Button (triggers Notification Menu)
                 Rectangle {
                     id: notifButton
@@ -900,6 +950,19 @@ Item {
                 opacity: root.devicesMenuOpen ? 1.0 : 0.0
                 visible: opacity > 0.01
                 onRequestClose: root.devicesMenuOpen = false
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            }
+
+            // 10. Philips Hue Quick Settings
+            HueQuickSettings {
+                id: hueQuickSettings
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                embedded: true
+                opacity: root.hueMenuOpen ? 1.0 : 0.0
+                visible: opacity > 0.01
+                onRequestClose: root.hueMenuOpen = false
                 Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
             }
         }

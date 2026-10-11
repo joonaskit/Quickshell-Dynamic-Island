@@ -99,6 +99,12 @@ Singleton {
     // App ids (lowercase) whose copies are never recorded
     property var clipboardIgnoredApps: []
 
+    // Philips Hue lamp control. Off by default; the key is the app key from pairing with the bridge
+    property bool hueEnabled: false
+    property string hueBridgeIp: ""
+    property string hueAppKey: ""
+    property string hueLightId: ""
+
     property bool isLoaded: false
     property string lastSavedTime: ""
 
@@ -198,6 +204,10 @@ Singleton {
         if (data.showNotificationIcon !== undefined) root.showNotificationIcon = !!data.showNotificationIcon;
         if (data.pinNotificationIcon !== undefined) root.pinNotificationIcon = !!data.pinNotificationIcon;
         if (data.showBatteryIcon !== undefined) root.showBatteryIcon = !!data.showBatteryIcon;
+        if (data.hueEnabled !== undefined) root.hueEnabled = !!data.hueEnabled;
+        if (typeof data.hueBridgeIp === "string") root.hueBridgeIp = data.hueBridgeIp.trim().slice(0, 100);
+        if (typeof data.hueAppKey === "string") root.hueAppKey = data.hueAppKey.trim().slice(0, 200);
+        if (typeof data.hueLightId === "string") root.hueLightId = data.hueLightId.trim().slice(0, 100);
 
         if (data.showWindowControls !== undefined) root.showWindowControls = !!data.showWindowControls;
         if (data.autoHideWindowControls !== undefined) root.autoHideWindowControls = !!data.autoHideWindowControls;
@@ -357,6 +367,10 @@ Singleton {
         root.showNotificationIcon = true;
         root.pinNotificationIcon = false;
         root.showBatteryIcon = true;
+        root.hueEnabled = false;
+        root.hueBridgeIp = "";
+        root.hueAppKey = "";
+        root.hueLightId = "";
 
         root.showWindowControls = true;
         root.autoHideWindowControls = false;
@@ -448,6 +462,10 @@ Singleton {
             "showNotificationIcon": root.showNotificationIcon,
             "pinNotificationIcon": root.pinNotificationIcon,
             "showBatteryIcon": root.showBatteryIcon,
+            "hueEnabled": root.hueEnabled,
+            "hueBridgeIp": root.hueBridgeIp,
+            "hueAppKey": root.hueAppKey,
+            "hueLightId": root.hueLightId,
             "showWindowControls": root.showWindowControls,
             "autoHideWindowControls": root.autoHideWindowControls,
             "showVirtualDesktops": root.showVirtualDesktops,
