@@ -60,6 +60,8 @@ NightLightQuickSettings 1.0 quicksettings/NightLightQuickSettings.qml
 SettingsView 1.0 island/SettingsView.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml
 SettingToggle 1.0 island/settings/SettingToggle.qml
+SettingMoveButtons 1.0 island/settings/SettingMoveButtons.qml
+SettingOrderRow 1.0 island/settings/SettingOrderRow.qml
 SettingSegmented 1.0 island/settings/SettingSegmented.qml
 SettingSlider 1.0 island/settings/SettingSlider.qml
 SettingSwatches 1.0 island/settings/SettingSwatches.qml
@@ -92,6 +94,7 @@ DockDownloadsStack 1.0 dock/DockDownloadsStack.qml
 singleton DownloadsService 1.0 services/DownloadsService.qml
 
 singleton WidgetRegistry 1.0 widgets/WidgetRegistry.qml
+singleton StatusIconRegistry 1.0 island/StatusIconRegistry.qml
 singleton ThemeExportService 1.0 services/ThemeExportService.qml
 DockLauncherMenu 1.0 dock/DockLauncherMenu.qml
 singleton ActivityService 1.0 services/ActivityService.qml

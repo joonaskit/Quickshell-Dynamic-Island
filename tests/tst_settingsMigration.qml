@@ -76,4 +76,68 @@ TestCase {
     function test_ignoresDroppedNotificationsKey() {
         compare(SettingsMigration.widgetStates({ "showExpandedNotifications": false }, ids), {});
     }
+
+    function test_orderWithoutSavedListIsRegistryOrder() {
+        compare(SettingsMigration.savedOrder(undefined, ids), ids);
+        compare(SettingsMigration.savedOrder([], ids), ids);
+        compare(SettingsMigration.savedOrder("broken", ids), ids);
+    }
+
+    function test_orderReadsSavedList() {
+        let saved = ["media", "timer", "calendar", "brightness", "volume", "appMixer", "audioOutput"];
+        compare(SettingsMigration.savedOrder(saved, ids), saved);
+    }
+
+    // A widget added after the order was saved goes at the end, in registry order
+    function test_orderAppendsMissingIds() {
+        compare(SettingsMigration.savedOrder(["media", "calendar"], ids),
+                ["media", "calendar", "timer", "audioOutput", "appMixer", "volume", "brightness"]);
+    }
+
+    function test_orderDropsUnknownAndDuplicateIds() {
+        compare(SettingsMigration.savedOrder(["removedWidget", "media", 7, "media", null], ["calendar", "media"]),
+                ["media", "calendar"]);
+    }
+
+    readonly property var groups: ({ "calendar": "cards", "timer": "cards", "media": "cards", "volume": "controls", "brightness": "controls" })
+    readonly property var groupedOrder: ["calendar", "timer", "media", "volume", "brightness"]
+
+    function test_moveSwapsWithNeighbour() {
+        compare(SettingsMigration.movedOrder(groupedOrder, "timer", -1, groups),
+                ["timer", "calendar", "media", "volume", "brightness"]);
+        compare(SettingsMigration.movedOrder(groupedOrder, "timer", 1, groups),
+                ["calendar", "media", "timer", "volume", "brightness"]);
+    }
+
+    function test_moveStopsAtGroupEdges() {
+        compare(SettingsMigration.movedOrder(groupedOrder, "calendar", -1, groups), groupedOrder);
+        compare(SettingsMigration.movedOrder(groupedOrder, "media", 1, groups), groupedOrder);
+        compare(SettingsMigration.movedOrder(groupedOrder, "volume", -1, groups), groupedOrder);
+        compare(SettingsMigration.moveTarget(groupedOrder, "media", 1, groups), -1);
+        compare(SettingsMigration.moveTarget(groupedOrder, "unknown", 1, groups), -1);
+    }
+
+    // Groups may be interleaved in the saved order; a move skips the other group
+    function test_moveSkipsOtherGroup() {
+        compare(SettingsMigration.movedOrder(["calendar", "volume", "timer"], "calendar", 1, groups),
+                ["timer", "volume", "calendar"]);
+    }
+
+    function test_moveDoesNotChangeInput() {
+        let order = ["calendar", "timer"];
+        SettingsMigration.movedOrder(order, "timer", -1, groups);
+        compare(order, ["calendar", "timer"]);
+    }
+
+    // Status-bar icons use the same functions with their own groups
+    function test_statusIconOrderAndMove() {
+        let iconIds = ["nightLight", "hue", "wifi", "bluetooth", "battery"];
+        let iconGroups = { "nightLight": "widgets", "hue": "widgets", "wifi": "system", "bluetooth": "system", "battery": "system" };
+        let order = SettingsMigration.savedOrder(["battery", "hue", "gone"], iconIds);
+        compare(order, ["battery", "hue", "nightLight", "wifi", "bluetooth"]);
+        compare(SettingsMigration.movedOrder(order, "battery", 1, iconGroups),
+                ["wifi", "hue", "nightLight", "battery", "bluetooth"]);
+        compare(SettingsMigration.moveTarget(order, "battery", -1, iconGroups), -1);
+        compare(SettingsMigration.moveTarget(order, "nightLight", 1, iconGroups), -1);
+    }
 }

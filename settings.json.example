@@ -72,6 +72,8 @@
     "volume": true,
     "brightness": true
   },
+  "widgetOrder": [],
+  "statusIconOrder": [],
   "launcherDefaultView": "grid",
   "launcherDensity": "comfortable",
   "launcherStartTab": "All",

@@ -1,5 +1,6 @@
 import "../.."
 import QtQuick
+import QtQuick.Layouts
 
 SettingsCategory {
 
@@ -301,6 +302,45 @@ SettingsCategory {
             checked: SettingsService.showDetachedNotifBubble
             onToggled: function(val) {
                 SettingsService.setSetting("showDetachedNotifBubble", val);
+            }
+        }
+    }
+
+    // Status bar icon order
+    SettingsSection {
+        title: "STATUS BAR ICON ORDER"
+        subtitle: "Left to right, optional widgets first"
+
+        // One row per registered icon, in display order: widgets, then system icons
+        Repeater {
+            model: SettingsService.orderedStatusIcons.filter(i => i.group === "widgets").concat(SettingsService.orderedStatusIcons.filter(i => i.group === "system"))
+
+            delegate: ColumnLayout {
+                id: iconRow
+                required property var modelData
+                required property int index
+                readonly property bool matchesSearch: orderRow.matchesSearch
+
+                Layout.fillWidth: true
+                visible: matchesSearch
+                spacing: 0
+
+                SettingDivider {
+                    visible: iconRow.index > 0 && !SettingsSearch.active
+                }
+
+                SettingOrderRow {
+                    id: orderRow
+                    title: iconRow.modelData.title
+                    iconName: iconRow.modelData.icon
+                    iconColor: iconRow.modelData.iconColor
+                    active: SettingsService[iconRow.modelData.settingKey]
+                    canMoveUp: SettingsService.canMoveStatusIcon(iconRow.modelData.id, -1)
+                    canMoveDown: SettingsService.canMoveStatusIcon(iconRow.modelData.id, 1)
+                    onMoved: function(delta) {
+                        SettingsService.moveStatusIcon(iconRow.modelData.id, delta);
+                    }
+                }
             }
         }
     }

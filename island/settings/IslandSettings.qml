@@ -7,13 +7,14 @@ SettingsCategory {
     // Expanded Island Cards Customization
     SettingsSection {
         title: "EXPANDED ISLAND CARDS"
-        subtitle: "Choose cards shown when expanded"
+        subtitle: "Choose and order the cards shown when expanded"
 
-        // One toggle per registered widget
+        // One row per registered widget, in display order: cards, then controls
         Repeater {
-            model: WidgetRegistry.widgets
+            model: SettingsService.orderedWidgets.filter(w => w.group === "cards").concat(SettingsService.orderedWidgets.filter(w => w.group === "controls"))
 
             delegate: ColumnLayout {
+                id: widgetRow
                 required property var modelData
                 required property int index
                 readonly property bool matchesSearch: widgetToggle.matchesSearch
@@ -23,18 +24,34 @@ SettingsCategory {
                 spacing: 0
 
                 SettingDivider {
-                    visible: index > 0 && !SettingsSearch.active
+                    visible: widgetRow.index > 0 && !SettingsSearch.active
                 }
 
-                SettingToggle {
-                    id: widgetToggle
-                    title: modelData.title
-                    description: modelData.description
-                    iconName: modelData.icon
-                    iconColor: modelData.iconColor
-                    checked: SettingsService.isWidgetEnabled(modelData.id)
-                    onToggled: function(val) {
-                        SettingsService.setWidgetEnabled(modelData.id, val);
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    SettingToggle {
+                        id: widgetToggle
+                        title: widgetRow.modelData.title
+                        description: widgetRow.modelData.description
+                        iconName: widgetRow.modelData.icon
+                        iconColor: widgetRow.modelData.iconColor
+                        checked: SettingsService.isWidgetEnabled(widgetRow.modelData.id)
+                        onToggled: function(val) {
+                            SettingsService.setWidgetEnabled(widgetRow.modelData.id, val);
+                        }
+                    }
+
+                    // Move up / down within the widget's group
+                    SettingMoveButtons {
+                        visible: !SettingsSearch.active
+                        Layout.rightMargin: 10
+                        canMoveUp: SettingsService.canMoveWidget(widgetRow.modelData.id, -1)
+                        canMoveDown: SettingsService.canMoveWidget(widgetRow.modelData.id, 1)
+                        onMoved: function(delta) {
+                            SettingsService.moveWidget(widgetRow.modelData.id, delta);
+                        }
                     }
                 }
             }
