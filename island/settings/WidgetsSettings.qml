@@ -35,4 +35,20 @@ SettingsCategory {
             }
         }
     }
+
+    SettingsSection {
+        title: "KDE CONNECT"
+        subtitle: "Ping, share and send the clipboard to a paired phone"
+
+        SettingToggle {
+            title: "KDE Connect"
+            description: "Adds a phone icon for a device paired with KDE Connect. Pair the phone from the KDE Connect app first"
+            iconName: "phone"
+            iconColor: Theme.accentGreen
+            checked: SettingsService.kdeConnectEnabled
+            onToggled: function(val) {
+                SettingsService.setSetting("kdeConnectEnabled", val);
+            }
+        }
+    }
 }
