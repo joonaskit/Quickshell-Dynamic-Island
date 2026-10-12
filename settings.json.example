@@ -43,6 +43,7 @@
   "nightLightScheduleEnabled": false,
   "nightLightStart": "21:00",
   "nightLightEnd": "07:00",
+  "onboardingVersion": 0,
   "gameModeEnabled": false,
   "kdeConnectEnabled": false,
   "kdeConnectDeviceId": "",

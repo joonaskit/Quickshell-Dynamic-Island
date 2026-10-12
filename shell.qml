@@ -27,6 +27,24 @@ ShellRoot {
     }
 
     IpcHandler {
+        target: "onboarding"
+
+        // Show the welcome guide again
+        function open() {
+            OnboardingService.show();
+        }
+    }
+
+    IpcHandler {
+        target: "config"
+
+        // Re-read the config files from disk, after scripts/settings_backup.py has imported them
+        function reload() {
+            BackupService.reloadConfig();
+        }
+    }
+
+    IpcHandler {
         target: "clipboard"
 
         function toggle() {
@@ -125,6 +143,9 @@ ShellRoot {
             IslandWindow {}
         }
     }
+
+    // Welcome guide, on the first screen only
+    OnboardingWindow {}
 
     // Clipboard history
     Variants {

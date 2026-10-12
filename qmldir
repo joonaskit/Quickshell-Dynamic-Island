@@ -21,6 +21,17 @@ singleton GameModeService 1.0 services/GameModeService.qml
 singleton NightLightService 1.0 services/NightLightService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
+singleton BackupService 1.0 services/BackupService.qml
+singleton OnboardingService 1.0 services/OnboardingService.qml
+OnboardingWindow 1.0 onboarding/OnboardingWindow.qml
+OnboardingPage 1.0 onboarding/OnboardingPage.qml
+OnboardingButton 1.0 onboarding/OnboardingButton.qml
+OnboardingWelcome 1.0 onboarding/OnboardingWelcome.qml
+OnboardingSystemCheck 1.0 onboarding/OnboardingSystemCheck.qml
+OnboardingImport 1.0 onboarding/OnboardingImport.qml
+OnboardingSetup 1.0 onboarding/OnboardingSetup.qml
+OnboardingTips 1.0 onboarding/OnboardingTips.qml
+OnboardingDone 1.0 onboarding/OnboardingDone.qml
 IslandWindow 1.0 island/IslandWindow.qml
 IslandPill 1.0 island/IslandPill.qml
 IslandDetachedBubble 1.0 island/IslandDetachedBubble.qml

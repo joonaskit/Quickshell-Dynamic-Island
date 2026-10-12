@@ -185,10 +185,10 @@ SettingsCategory {
 
         SettingDivider {}
 
-        // 8. Battery Indicator
+        // 8. Power menu and battery
         SettingToggle {
-            title: "Battery Indicator"
-            description: "Display battery percentage widget & power menu"
+            title: "Power Menu and Battery"
+            description: "Battery level, or a power icon without a battery. Hiding it also hides shut down and restart"
             iconName: "battery"
             iconColor: Theme.accentGreen
             checked: SettingsService.showBatteryIcon
