@@ -108,6 +108,11 @@ Singleton {
     // App ids (lowercase) whose copies are never recorded
     property var clipboardIgnoredApps: []
 
+    // The onboarding version the user has finished or closed; 0 means the welcome guide has
+    // not been shown. A settings.json from before onboarding existed counts as done
+    readonly property int onboardingCurrent: 1
+    property int onboardingVersion: 0
+
     // GameMode widget. Off by default
     property bool gameModeEnabled: false
 
@@ -144,23 +149,32 @@ Singleton {
         root.openSettingsRequested(tab || "");
     }
 
-    // Process to read settings.json on startup
+    // Set by reloadFromDisk: the next load starts from the defaults, so keys the file lacks do not keep their old values
+    property bool resetOnLoad: false
+
+    // Process to read settings.json on startup, and again after an import
     Process {
         id: loadProc
         command: ["python3", "-c", "import sys, os; p=sys.argv[1]; sys.stdout.write(open(p).read() if os.path.exists(p) else '')", root.settingsFilePath]
         running: true
 
         stdout: StdioCollector {
-            onTextChanged: {
+            onStreamFinished: {
                 let t = text.trim();
+                let reset = root.resetOnLoad;
+                root.resetOnLoad = false;
                 if (t.length > 0) {
                     try {
                         let data = JSON.parse(t);
                         console.info("[SettingsService] Settings loaded successfully from settings.json");
+                        if (reset) root.resetDefaults();
                         root.applySettings(data);
                     } catch(e) {
                         console.warn("[SettingsService] Error parsing settings.json: " + e);
                     }
+                } else {
+                    // No settings.json yet: a new install, running on the defaults
+                    root.applySettings({ "onboardingVersion": 0 });
                 }
             }
         }
@@ -170,6 +184,13 @@ Singleton {
         if (!loadProc.running) {
             loadProc.running = true;
         }
+    }
+
+    // Takes settings.json as it is on disk now (after an import), dropping any unsaved change
+    function reloadFromDisk() {
+        saveTimer.stop();
+        root.resetOnLoad = true;
+        loadProc.running = true;
     }
 
     function applySettings(data) {
@@ -235,6 +256,8 @@ Singleton {
         if (data.nightLightScheduleEnabled !== undefined) root.nightLightScheduleEnabled = !!data.nightLightScheduleEnabled;
         if (typeof data.nightLightStart === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.nightLightStart)) root.nightLightStart = data.nightLightStart;
         if (typeof data.nightLightEnd === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(data.nightLightEnd)) root.nightLightEnd = data.nightLightEnd;
+        root.onboardingVersion = (data.onboardingVersion !== undefined && !isNaN(data.onboardingVersion))
+            ? Math.max(0, parseInt(data.onboardingVersion)) : root.onboardingCurrent;
         if (data.gameModeEnabled !== undefined) root.gameModeEnabled = !!data.gameModeEnabled;
         if (data.kdeConnectEnabled !== undefined) root.kdeConnectEnabled = !!data.kdeConnectEnabled;
         if (typeof data.kdeConnectDeviceId === "string" && /^[A-Za-z0-9_]{0,100}$/.test(data.kdeConnectDeviceId)) root.kdeConnectDeviceId = data.kdeConnectDeviceId;
@@ -546,6 +569,7 @@ Singleton {
             "nightLightScheduleEnabled": root.nightLightScheduleEnabled,
             "nightLightStart": root.nightLightStart,
             "nightLightEnd": root.nightLightEnd,
+            "onboardingVersion": root.onboardingVersion,
             "gameModeEnabled": root.gameModeEnabled,
             "kdeConnectEnabled": root.kdeConnectEnabled,
             "kdeConnectDeviceId": root.kdeConnectDeviceId,

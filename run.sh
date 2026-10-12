@@ -39,6 +39,25 @@ case "$1" in
         shift
         quickshell ipc -p "$DIR" call "$@"
         ;;
+    check|--check)
+        # The check is a Python script, so a missing Python has to be reported here
+        if ! command -v python3 >/dev/null 2>&1; then
+            echo "python3 was not found. Install Python 3, then run this check again." >&2
+            exit 1
+        fi
+        shift
+        exec python3 "$DIR/scripts/check_deps.py" "$@"
+        ;;
+    export|--export)
+        shift
+        exec python3 "$DIR/scripts/settings_backup.py" export "$@"
+        ;;
+    import|--import)
+        shift
+        python3 "$DIR/scripts/settings_backup.py" import "$@" || exit 1
+        # A running shell still holds the old config and would write it back, so make it reload
+        quickshell ipc -p "$DIR" call config reload >/dev/null 2>&1 || true
+        ;;
     daemon|-d|--daemon)
         echo "Starting Quickshell Island in background..."
         quickshell kill -p "$DIR" 2>/dev/null || true

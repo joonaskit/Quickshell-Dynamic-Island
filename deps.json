@@ -1,0 +1,587 @@
+{
+  "version": 1,
+  "distros": [
+    "arch",
+    "fedora",
+    "opensuse",
+    "debian"
+  ],
+  "dependencies": [
+    {
+      "id": "quickshell",
+      "name": "Quickshell",
+      "severity": "required",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "quickshell"
+        ]
+      },
+      "features": [
+        "The shell itself"
+      ],
+      "packages": {
+        "arch": "quickshell",
+        "fedora": "quickshell"
+      },
+      "note": "Not packaged by every distro. See https://quickshell.org for other ways to install it"
+    },
+    {
+      "id": "wayland",
+      "name": "Wayland session",
+      "severity": "required",
+      "check": {
+        "type": "session",
+        "value": "wayland"
+      },
+      "features": [
+        "The shell itself (X11 sessions are not supported)"
+      ],
+      "packages": {},
+      "note": "Log in to a Plasma (Wayland) session"
+    },
+    {
+      "id": "kwin",
+      "name": "KWin (KDE Plasma)",
+      "severity": "required",
+      "check": {
+        "type": "dbus",
+        "bus": "user",
+        "name": "org.kde.KWin",
+        "commands": [
+          "kwin_wayland"
+        ]
+      },
+      "features": [
+        "Window tracking, virtual desktops, Night Light"
+      ],
+      "packages": {
+        "arch": "kwin",
+        "fedora": "kwin",
+        "opensuse": "kwin6",
+        "debian": "kwin-wayland"
+      }
+    },
+    {
+      "id": "python3",
+      "name": "Python 3",
+      "severity": "required",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "python3"
+        ]
+      },
+      "features": [
+        "Every helper script (windows, audio devices, clipboard, drives, ...)"
+      ],
+      "packages": {
+        "arch": "python",
+        "fedora": "python3",
+        "opensuse": "python3",
+        "debian": "python3"
+      }
+    },
+    {
+      "id": "python-dbus",
+      "name": "dbus-python",
+      "severity": "recommended",
+      "check": {
+        "type": "python",
+        "module": "dbus"
+      },
+      "features": [
+        "Window tracking for the dock and the active-app pill",
+        "Activities API for other apps"
+      ],
+      "packages": {
+        "arch": "python-dbus",
+        "fedora": "python3-dbus",
+        "opensuse": "python3-dbus-python",
+        "debian": "python3-dbus"
+      }
+    },
+    {
+      "id": "python-gobject",
+      "name": "PyGObject",
+      "severity": "recommended",
+      "check": {
+        "type": "python",
+        "module": "gi"
+      },
+      "features": [
+        "Window tracking for the dock and the active-app pill",
+        "Activities API for other apps"
+      ],
+      "packages": {
+        "arch": "python-gobject",
+        "fedora": "python3-gobject",
+        "opensuse": "python3-gobject",
+        "debian": "python3-gi"
+      }
+    },
+    {
+      "id": "qdbus",
+      "name": "qdbus-qt6",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "qdbus-qt6"
+        ]
+      },
+      "features": [
+        "Window actions (close, minimise, maximise, switch desktop)",
+        "Caffeine"
+      ],
+      "packages": {
+        "arch": "qt6-tools",
+        "fedora": "qt6-qttools",
+        "opensuse": "qt6-tools-qdbus",
+        "debian": "qdbus-qt6"
+      },
+      "note": "The shell calls it as qdbus-qt6. Where the package names it qdbus6 (Arch), add a qdbus-qt6 symlink on PATH"
+    },
+    {
+      "id": "busctl",
+      "name": "busctl",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "busctl"
+        ]
+      },
+      "features": [
+        "Power profiles",
+        "Night Light",
+        "Shortcut settings",
+        "KDE Connect and GameMode widgets",
+        "This dependency check's service tests"
+      ],
+      "packages": {
+        "arch": "systemd",
+        "fedora": "systemd",
+        "opensuse": "systemd",
+        "debian": "systemd"
+      }
+    },
+    {
+      "id": "session-control",
+      "name": "loginctl and systemctl",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "allOf": [
+          "loginctl",
+          "systemctl"
+        ]
+      },
+      "features": [
+        "Power menu (lock, log out, suspend, restart, shut down)"
+      ],
+      "packages": {
+        "arch": "systemd",
+        "fedora": "systemd",
+        "opensuse": "systemd",
+        "debian": "systemd"
+      }
+    },
+    {
+      "id": "wpctl",
+      "name": "wpctl (WirePlumber)",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "wpctl"
+        ]
+      },
+      "features": [
+        "Volume slider, volume keys and the volume OSD",
+        "Microphone volume and mute"
+      ],
+      "packages": {
+        "arch": "wireplumber",
+        "fedora": "wireplumber",
+        "opensuse": "wireplumber",
+        "debian": "wireplumber"
+      }
+    },
+    {
+      "id": "nmcli",
+      "name": "nmcli (NetworkManager)",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "nmcli"
+        ]
+      },
+      "features": [
+        "Wi-Fi and network popup"
+      ],
+      "packages": {
+        "arch": "networkmanager",
+        "fedora": "NetworkManager",
+        "opensuse": "NetworkManager",
+        "debian": "network-manager"
+      }
+    },
+    {
+      "id": "xdg-open",
+      "name": "xdg-open",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "xdg-open"
+        ]
+      },
+      "features": [
+        "Opening downloads, links, folders and drives"
+      ],
+      "packages": {
+        "arch": "xdg-utils",
+        "fedora": "xdg-utils",
+        "opensuse": "xdg-utils",
+        "debian": "xdg-utils"
+      }
+    },
+    {
+      "id": "gtk-launch",
+      "name": "gtk-launch",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "gtk-launch"
+        ]
+      },
+      "features": [
+        "Starting apps from the dock and launcher"
+      ],
+      "packages": {
+        "arch": "gtk3",
+        "fedora": "gtk3",
+        "opensuse": "gtk3-tools",
+        "debian": "libgtk-3-bin"
+      }
+    },
+    {
+      "id": "wl-clipboard",
+      "name": "wl-clipboard",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "allOf": [
+          "wl-paste",
+          "wl-copy"
+        ]
+      },
+      "features": [
+        "Clipboard history"
+      ],
+      "packages": {
+        "arch": "wl-clipboard",
+        "fedora": "wl-clipboard",
+        "opensuse": "wl-clipboard",
+        "debian": "wl-clipboard"
+      }
+    },
+    {
+      "id": "pactl",
+      "name": "pactl",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "pactl"
+        ]
+      },
+      "features": [
+        "Choosing the audio output and input device",
+        "Microphone control when wpctl is missing"
+      ],
+      "packages": {
+        "arch": "libpulse",
+        "fedora": "pulseaudio-utils",
+        "opensuse": "pulseaudio-utils",
+        "debian": "pulseaudio-utils"
+      }
+    },
+    {
+      "id": "bluetoothctl",
+      "name": "bluetoothctl (BlueZ)",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "bluetoothctl"
+        ]
+      },
+      "features": [
+        "Bluetooth popup"
+      ],
+      "packages": {
+        "arch": "bluez-utils",
+        "fedora": "bluez",
+        "opensuse": "bluez",
+        "debian": "bluez"
+      }
+    },
+    {
+      "id": "brightnessctl",
+      "name": "brightnessctl",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "brightnessctl"
+        ]
+      },
+      "features": [
+        "Brightness slider, brightness keys and the brightness OSD"
+      ],
+      "packages": {
+        "arch": "brightnessctl",
+        "fedora": "brightnessctl",
+        "opensuse": "brightnessctl",
+        "debian": "brightnessctl"
+      }
+    },
+    {
+      "id": "udisks",
+      "name": "udisksctl and lsblk",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "allOf": [
+          "udisksctl",
+          "lsblk"
+        ]
+      },
+      "features": [
+        "USB and external drives popup (mount, unmount, eject)"
+      ],
+      "packages": {
+        "arch": "udisks2",
+        "fedora": "udisks2",
+        "opensuse": "udisks2",
+        "debian": "udisks2"
+      }
+    },
+    {
+      "id": "gio",
+      "name": "gio",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "gio"
+        ]
+      },
+      "features": [
+        "Fallback for mounting drives"
+      ],
+      "packages": {
+        "arch": "glib2",
+        "fedora": "glib2",
+        "opensuse": "glib2-tools",
+        "debian": "libglib2.0-bin"
+      }
+    },
+    {
+      "id": "systemd-inhibit",
+      "name": "systemd-inhibit",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "systemd-inhibit"
+        ]
+      },
+      "features": [
+        "Caffeine (keep the screen awake)"
+      ],
+      "packages": {
+        "arch": "systemd",
+        "fedora": "systemd",
+        "opensuse": "systemd",
+        "debian": "systemd"
+      }
+    },
+    {
+      "id": "notify-send",
+      "name": "notify-send",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "notify-send"
+        ]
+      },
+      "features": [
+        "Timer finished alerts"
+      ],
+      "packages": {
+        "arch": "libnotify",
+        "fedora": "libnotify",
+        "opensuse": "libnotify-tools",
+        "debian": "libnotify-bin"
+      }
+    },
+    {
+      "id": "kioclient",
+      "name": "kioclient",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "kioclient"
+        ]
+      },
+      "features": [
+        "The dock's \"Properties\" entry"
+      ],
+      "packages": {
+        "arch": "kde-cli-tools",
+        "fedora": "kde-cli-tools",
+        "opensuse": "kde-cli-tools6",
+        "debian": "kde-cli-tools"
+      }
+    },
+    {
+      "id": "kconfig-tools",
+      "name": "kreadconfig6 and kwriteconfig6",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "allOf": [
+          "kreadconfig6",
+          "kwriteconfig6"
+        ]
+      },
+      "features": [
+        "Night Light widget"
+      ],
+      "packages": {
+        "arch": "kconfig",
+        "fedora": "kf6-kconfig",
+        "opensuse": "kf6-kconfig",
+        "debian": "libkf6config-bin"
+      }
+    },
+    {
+      "id": "file-picker",
+      "name": "kdialog or zenity",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "kdialog",
+          "zenity"
+        ]
+      },
+      "features": [
+        "Picking a file to send in the KDE Connect widget"
+      ],
+      "packages": {
+        "arch": "kdialog",
+        "fedora": "kdialog",
+        "opensuse": "kdialog",
+        "debian": "kdialog"
+      }
+    },
+    {
+      "id": "upower",
+      "name": "UPower",
+      "severity": "optional",
+      "check": {
+        "type": "dbus",
+        "bus": "system",
+        "name": "org.freedesktop.UPower",
+        "units": [
+          "upower.service"
+        ]
+      },
+      "features": [
+        "Battery indicator"
+      ],
+      "packages": {
+        "arch": "upower",
+        "fedora": "upower",
+        "opensuse": "upower",
+        "debian": "upower"
+      }
+    },
+    {
+      "id": "power-profiles",
+      "name": "Power profiles service",
+      "severity": "optional",
+      "check": {
+        "type": "dbus",
+        "bus": "system",
+        "name": "net.hadess.PowerProfiles",
+        "units": [
+          "power-profiles-daemon.service",
+          "tuned-ppd.service"
+        ]
+      },
+      "features": [
+        "Power profiles popup"
+      ],
+      "packages": {
+        "arch": "power-profiles-daemon",
+        "fedora": "tuned-ppd",
+        "opensuse": "power-profiles-daemon",
+        "debian": "power-profiles-daemon"
+      }
+    },
+    {
+      "id": "kdeconnect",
+      "name": "KDE Connect",
+      "severity": "optional",
+      "check": {
+        "type": "dbus",
+        "bus": "user",
+        "name": "org.kde.kdeconnect",
+        "commands": [
+          "kdeconnectd",
+          "kdeconnect-cli"
+        ]
+      },
+      "features": [
+        "KDE Connect widget"
+      ],
+      "packages": {
+        "arch": "kdeconnect",
+        "fedora": "kde-connect",
+        "opensuse": "kdeconnect-kde",
+        "debian": "kdeconnect"
+      }
+    },
+    {
+      "id": "gamemode",
+      "name": "GameMode",
+      "severity": "optional",
+      "check": {
+        "type": "dbus",
+        "bus": "user",
+        "name": "com.feralinteractive.GameMode",
+        "commands": [
+          "gamemoded"
+        ]
+      },
+      "features": [
+        "GameMode widget"
+      ],
+      "packages": {
+        "arch": "gamemode",
+        "fedora": "gamemode",
+        "opensuse": "gamemode",
+        "debian": "gamemode"
+      }
+    }
+  ]
+}

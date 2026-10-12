@@ -29,6 +29,8 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - Optional: `kioclient` (the dock's "Properties" entry) and `gio` (fallback for mounting USB drives)
 - UPower, for battery, and power-profiles-daemon, for power profiles
 
+Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
+
 ## Usage
 
 ```bash
@@ -42,6 +44,9 @@ cd ~/.config/quickshell/island
 | `./run.sh` | Start (restarts if already running) |
 | `./run.sh -d` | Start in the background |
 | `./run.sh -k` | Stop |
+| `./run.sh --check` | Check for missing tools and services |
+| `./run.sh --export <file>` | Save the configuration to one file |
+| `./run.sh --import <file>` | Load a configuration file, see below |
 | `./run.sh -l` | Toggle the app launcher |
 | `./run.sh -w` | Open the launcher on the open-windows tab (window switcher) |
 | `./run.sh -v` | Toggle the clipboard history window |
@@ -49,7 +54,26 @@ cd ~/.config/quickshell/island
 | `./run.sh -e` / `-c` | Expand / collapse |
 | `./run.sh -i <target> <function>` | Call any IPC function, for example `-i system volumeUp` |
 
-The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. You can bind these commands to a global shortcut by hand, or in the settings under Shortcuts, which saves them in KDE's shortcut settings (`scripts/shortcuts.py`). The `startTimer` shortcuts there come as 5, 10, 15 and 30 minute presets.
+The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. The `onboarding` target has `open`, which shows the welcome guide, and the `config` target has `reload`, which re-reads the config files from disk. You can bind these commands to a global shortcut by hand, or in the settings under Shortcuts, which saves them in KDE's shortcut settings (`scripts/shortcuts.py`). The `startTimer` shortcuts there come as 5, 10, 15 and 30 minute presets.
+
+## Welcome guide
+
+On a new install (no `settings.json`, or one whose `onboardingVersion` is `0`, as in `settings.json.example`) the shell opens a welcome guide in the middle of the first screen. Its six steps are: a short tour, a system check (the same as `./run.sh --check`, with the install command to copy), importing a configuration, a few starting choices (clock, sizes, dock position, status icons), tips for the launcher and keyboard shortcuts, and a summary. Every step can be skipped, and closing the guide at any point is enough for it not to come back. The choices are ordinary settings, saved as you make them.
+
+Open it again from the settings under About, or with `./run.sh -i onboarding open`.
+
+## Backing up and moving the configuration
+
+`./run.sh --export <file>` writes the settings and the pinned dock apps to one JSON file, and `./run.sh --import <file>` loads such a file. The same two actions are in the settings under About, with a file dialog (`kdialog` or `zenity`; without either you type the path).
+
+- The launcher's usage history is personal, so it is only exported with `--usage`.
+- The Hue bridge key and the ids of paired devices are left out unless you add `--with-secrets`, so an export is safe to share. An import without them keeps the values this machine already has.
+- `--sections settings,dock,usage` limits an export or an import to those parts.
+- An import is checked before anything changes. A file that is malformed or made by a newer version is refused and nothing is touched. Keys this version does not know are ignored, and settings missing from the file go back to their defaults.
+- The files an import replaces are first copied to `~/.local/state/quickshell-island/backups/<time>/`. Copy them back into the shell's folder to undo it.
+- A running shell takes the imported configuration at once.
+
+The file format is described in `docs/CONFIG_EXPORT.md`.
 
 ## Project layout
 
@@ -57,6 +81,7 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 | --- | --- |
 | `shell.qml` | Entry point, one `IslandWindow` per screen |
 | `island/` | Island window, pill, expanded view, top bar clusters, views and settings UI |
+| `onboarding/` | Welcome guide shown on a new install |
 | `widgets/` | Widgets in the expanded view and their registry, see `docs/WIDGETS.md` |
 | `components/` | Shared pieces such as `SvgIcon` |
 | `quicksettings/` | Popups for each status icon |

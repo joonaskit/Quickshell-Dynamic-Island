@@ -27,7 +27,7 @@ Singleton {
         { "id": "hardware", "title": "Hardware Monitor", "icon": "cpu", "iconColor": Theme.accentBlue, "group": "system", "settingKey": "showHardwareIcon" },
         { "id": "usb", "title": "USB & External Drives", "icon": "usb", "iconColor": Theme.accentGreen, "group": "system", "settingKey": "showUsbIcon" },
         { "id": "notification", "title": "Notification Bell", "icon": "bell", "iconColor": Theme.accentOrange, "group": "system", "settingKey": "showNotificationIcon" },
-        { "id": "battery", "title": "Battery Indicator", "icon": "battery", "iconColor": Theme.accentGreen, "group": "system", "settingKey": "showBatteryIcon" }
+        { "id": "battery", "title": "Power Menu and Battery", "icon": "battery", "iconColor": Theme.accentGreen, "group": "system", "settingKey": "showBatteryIcon" }
     ]
 
     function byId(id) {

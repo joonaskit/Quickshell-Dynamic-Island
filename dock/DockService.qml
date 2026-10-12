@@ -261,7 +261,7 @@ Singleton {
         running: true
 
         stdout: StdioCollector {
-            onTextChanged: {
+            onStreamFinished: {
                 let t = text.trim();
                 if (t.length > 0) {
                     try {
@@ -294,6 +294,14 @@ Singleton {
         }
     }
 
+    // Takes dock_pinned.json and launcher_usage.json as they are on disk now (after an import)
+    function reloadConfig() {
+        savePinnedDebounceTimer.stop();
+        saveUsageDebounceTimer.stop();
+        loadPinnedProc.running = true;
+        loadUsageProc.running = true;
+    }
+
     // Launch usage (count + last used) powering the launcher's Recent / Frequent tabs
     property var usageStats: ({})
     readonly property string usageFilePath: Quickshell.shellDir + "/launcher_usage.json"
@@ -304,7 +312,7 @@ Singleton {
         running: true
 
         stdout: StdioCollector {
-            onTextChanged: {
+            onStreamFinished: {
                 let t = text.trim();
                 if (t.length > 0) {
                     try {
