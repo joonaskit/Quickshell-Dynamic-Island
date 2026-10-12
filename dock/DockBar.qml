@@ -64,6 +64,41 @@ Item {
     property real currentMouseY: -9999
     property bool isMouseInside: false
 
+    // Whether the pointer is over the dock right now. Hover goes to the topmost
+    // hover-enabled area only, so the tracker behind the icons gets no exit when
+    // the pointer leaves from an icon sideways or onto a popup. Every icon and the
+    // tracker are therefore asked directly.
+    function pointerOnDock() {
+        if (dockMouseTracker.containsMouse || launchpadMouse.containsMouse || downloadsMouse.containsMouse || trashMouse.containsMouse) return true;
+        for (let i = 0; i < pinnedRepeater.count; i++) {
+            let item = pinnedRepeater.itemAt(i);
+            if (item && item.isHovered) return true;
+        }
+        for (let j = 0; j < unpinnedRepeater.count; j++) {
+            let item = unpinnedRepeater.itemAt(j);
+            if (item && item.isHovered) return true;
+        }
+        return false;
+    }
+
+    // Called when the pointer leaves the tracker or an icon. It waits for the end of the
+    // event, because the area the pointer moved onto reports its enter before the old one
+    // reports its exit
+    function scheduleHoverCheck() {
+        hoverCheck.restart();
+    }
+
+    Timer {
+        id: hoverCheck
+        interval: 0
+        onTriggered: {
+            if (root.pointerOnDock()) return;
+            root.isMouseInside = false;
+            root.currentMouseX = -9999;
+            root.currentMouseY = -9999;
+        }
+    }
+
     // Drag and drop state for reordering pinned apps
     property int draggedIndex: -1
     property int dragTargetIndex: -1
@@ -172,11 +207,7 @@ Item {
                 root.isMouseInside = true;
             }
 
-            onExited: {
-                root.isMouseInside = false;
-                root.currentMouseX = -9999;
-                root.currentMouseY = -9999;
-            }
+            onExited: root.scheduleHoverCheck()
 
             onPositionChanged: function(mouse) {
                 if (root.isDraggingPinned) return;
@@ -407,6 +438,7 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onEntered: { root.isMouseInside = true; }
+                    onExited: root.scheduleHoverCheck()
                     onPositionChanged: function(mouse) {
                         if (root.isDraggingPinned) return;
                         let p = launchpadMouse.mapToItem(contentContainer, mouse.x, mouse.y);
@@ -508,6 +540,8 @@ Item {
                         }
                     }
 
+                    onMouseExited: root.scheduleHoverCheck()
+
                     onDragStarted: function(idx, startPos) {
                         root.closeAllPopups();
                         root.draggedIndex = idx;
@@ -596,6 +630,8 @@ Item {
                             else root.currentMouseX = coord;
                         }
                     }
+
+                    onMouseExited: root.scheduleHoverCheck()
 
                     contextMenuOpen: root.isContextMenuOpenFor(appData)
                     onRequestContextMenu: function(app, x, y) {
@@ -732,6 +768,7 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onEntered: { root.isMouseInside = true; }
+                    onExited: root.scheduleHoverCheck()
                     onPositionChanged: function(mouse) {
                         if (root.isDraggingPinned) return;
                         let p = downloadsMouse.mapToItem(contentContainer, mouse.x, mouse.y);
@@ -869,6 +906,7 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onEntered: { root.isMouseInside = true; }
+                    onExited: root.scheduleHoverCheck()
                     onPositionChanged: function(mouse) {
                         if (root.isDraggingPinned) return;
                         let p = trashMouse.mapToItem(contentContainer, mouse.x, mouse.y);
