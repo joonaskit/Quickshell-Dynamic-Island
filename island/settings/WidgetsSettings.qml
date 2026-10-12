@@ -51,4 +51,20 @@ SettingsCategory {
             }
         }
     }
+
+    SettingsSection {
+        title: "GAMEMODE"
+        subtitle: "See and force Feral GameMode"
+
+        SettingToggle {
+            title: "GameMode"
+            description: "Adds a gamepad icon that lights up while GameMode is active and lists the games it runs for. The popup can also switch GameMode on without a game. Needs the gamemode package"
+            iconName: "gamepad"
+            iconColor: Theme.accentGreen
+            checked: SettingsService.gameModeEnabled
+            onToggled: function(val) {
+                SettingsService.setSetting("gameModeEnabled", val);
+            }
+        }
+    }
 }

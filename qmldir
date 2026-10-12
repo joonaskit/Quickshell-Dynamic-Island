@@ -17,6 +17,7 @@ singleton HardwareStatsService 1.0 services/HardwareStatsService.qml
 singleton DeviceService 1.0 services/DeviceService.qml
 singleton HueService 1.0 services/HueService.qml
 singleton KdeConnectService 1.0 services/KdeConnectService.qml
+singleton GameModeService 1.0 services/GameModeService.qml
 singleton NightLightService 1.0 services/NightLightService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
@@ -56,6 +57,7 @@ HardwareStatsQuickSettings 1.0 quicksettings/HardwareStatsQuickSettings.qml
 DeviceQuickSettings 1.0 quicksettings/DeviceQuickSettings.qml
 HueQuickSettings 1.0 quicksettings/HueQuickSettings.qml
 KdeConnectQuickSettings 1.0 quicksettings/KdeConnectQuickSettings.qml
+GameModeQuickSettings 1.0 quicksettings/GameModeQuickSettings.qml
 NightLightQuickSettings 1.0 quicksettings/NightLightQuickSettings.qml
 SettingsView 1.0 island/SettingsView.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml

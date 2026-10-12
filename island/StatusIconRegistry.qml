@@ -16,6 +16,7 @@ Singleton {
         { "id": "nightLight", "title": "Night Light", "icon": "moon", "iconColor": Theme.accentOrange, "group": "widgets", "settingKey": "nightLightEnabled" },
         { "id": "hue", "title": "Philips Hue", "icon": "bulb", "iconColor": Theme.accentOrange, "group": "widgets", "settingKey": "hueEnabled" },
         { "id": "kdeConnect", "title": "KDE Connect", "icon": "phone", "iconColor": Theme.accentGreen, "group": "widgets", "settingKey": "kdeConnectEnabled" },
+        { "id": "gameMode", "title": "GameMode", "icon": "gamepad", "iconColor": Theme.accentGreen, "group": "widgets", "settingKey": "gameModeEnabled" },
         { "id": "caffeine", "title": "Caffeine", "icon": "coffee", "iconColor": Theme.accentOrange, "group": "system", "settingKey": "showCaffeineIcon" },
         { "id": "dnd", "title": "Do Not Disturb", "icon": "bell-off", "iconColor": Theme.accentPurple, "group": "system", "settingKey": "showDndIcon" },
         { "id": "wifi", "title": "Wi-Fi & Network", "icon": "wifi", "iconColor": Theme.accentBlue, "group": "system", "settingKey": "showWifiIcon" },
