@@ -31,11 +31,31 @@ A compact pill at the top of the screen shows the clock, media and notifications
 
 Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
 
+## Installation
+
+```bash
+git clone https://github.com/joonaskit/Quickshell-Dynamic-Island ~/.config/quickshell/island
+cd ~/.config/quickshell/island
+./install.sh
+```
+
+The installer checks your system with `./run.sh --check` and shows the command that installs what is missing (Arch, Fedora, openSUSE and Debian or Ubuntu). It runs that command only if you answer yes, because it uses `sudo`. It then creates `settings.json` and `dock_pinned.json` from the `.example` files if you have none, and sets the shell to start at login with an entry in `~/.config/autostart/`. It never overwrites your configuration, and running it again updates the shell with `git pull` and changes nothing else. The welcome guide opens the first time the shell starts.
+
+| Option | Effect |
+| --- | --- |
+| `--prefix <dir>` | Install in `<dir>` instead of `~/.config/quickshell/island`. Run from another checkout, it clones the shell there |
+| `--no-deps` | Do not offer to install missing packages |
+| `--no-autostart` | Do not start the shell at login |
+| `--import <file>` | Load a configuration exported with `./run.sh --export` |
+| `--yes` | Ask nothing and take the defaults. Packages are then never installed, only the command is shown |
+| `--dry-run` | Show what would happen and change nothing |
+| `--uninstall` | Remove the autostart entry and the shell, and ask whether to delete your configuration too |
+
+You can also skip the installer: install the requirements above, clone the repository anywhere and run `./run.sh`.
+
 ## Usage
 
 ```bash
-git clone <this-repo> ~/.config/quickshell/island   # or any directory
-cd ~/.config/quickshell/island
 ./run.sh
 ```
 
