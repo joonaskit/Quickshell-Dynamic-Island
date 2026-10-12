@@ -21,8 +21,9 @@ Item {
     property bool hueMenuOpen: false
     property bool nightMenuOpen: false
     property bool kdeMenuOpen: false
+    property bool gameMenuOpen: false
 
-    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen || nightMenuOpen || kdeMenuOpen
+    readonly property bool anyMenuOpen: wifiMenuOpen || bluetoothMenuOpen || powerMenuOpen || clipboardMenuOpen || notificationMenuOpen || micMenuOpen || profileMenuOpen || hardwareMenuOpen || devicesMenuOpen || hueMenuOpen || nightMenuOpen || kdeMenuOpen || gameMenuOpen
 
     z: root.anyMenuOpen ? 200 : 1
 
@@ -39,6 +40,7 @@ Item {
     property alias hueQuickSettingsHitBox: hueQuickSettings
     property alias nightQuickSettingsHitBox: nightQuickSettings
     property alias kdeQuickSettingsHitBox: kdeQuickSettings
+    property alias gameQuickSettingsHitBox: gameQuickSettings
 
     implicitWidth: clusterBackground.width
     implicitHeight: clusterBackground.height
@@ -62,7 +64,8 @@ Item {
     readonly property bool showHue: SettingsService.hueEnabled
     readonly property bool showNightLight: SettingsService.nightLightEnabled
     readonly property bool showKdeConnect: SettingsService.kdeConnectEnabled
-    readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0) + (showKdeConnect ? 1 : 0)
+    readonly property bool showGameMode: SettingsService.gameModeEnabled
+    readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0) + (showKdeConnect ? 1 : 0) + (showGameMode ? 1 : 0)
     readonly property bool showWidgets: widgetCount > 0
     readonly property bool showNotification: SettingsService.showNotificationIcon && (SettingsService.pinNotificationIcon || NotificationService.unreadCount > 0 || NotificationService.notifications.length > 0 || root.notificationMenuOpen)
     readonly property bool showBattery: SettingsService.showBatteryIcon && SettingsService.showBattery
@@ -90,6 +93,7 @@ Item {
         function onShowProfileIconChanged() { if (!SettingsService.showProfileIcon && root.profileMenuOpen) root.profileMenuOpen = false; }
         function onShowHardwareIconChanged() { if (!SettingsService.showHardwareIcon && root.hardwareMenuOpen) root.hardwareMenuOpen = false; }
         function onShowUsbIconChanged() { if (!SettingsService.showUsbIcon && root.devicesMenuOpen) root.devicesMenuOpen = false; }
+        function onGameModeEnabledChanged() { if (!SettingsService.gameModeEnabled && root.gameMenuOpen) root.gameMenuOpen = false; }
         function onKdeConnectEnabledChanged() { if (!SettingsService.kdeConnectEnabled && root.kdeMenuOpen) root.kdeMenuOpen = false; }
         function onNightLightEnabledChanged() { if (!SettingsService.nightLightEnabled && root.nightMenuOpen) root.nightMenuOpen = false; }
         function onHueEnabledChanged() { if (!SettingsService.hueEnabled && root.hueMenuOpen) root.hueMenuOpen = false; }
@@ -110,6 +114,7 @@ Item {
         root.hueMenuOpen = false;
         root.nightMenuOpen = false;
         root.kdeMenuOpen = false;
+        root.gameMenuOpen = false;
     }
 
     function toggleWifiMenu() {
@@ -207,6 +212,15 @@ Item {
         }
     }
 
+    function toggleGameMenu() {
+        let next = !root.gameMenuOpen;
+        root.closeAllMenus();
+        root.gameMenuOpen = next;
+        if (root.gameMenuOpen) {
+            GameModeService.refresh();
+        }
+    }
+
     function toggleKdeMenu() {
         let next = !root.kdeMenuOpen;
         root.closeAllMenus();
@@ -225,6 +239,7 @@ Item {
         "nightLight": nightButtonComponent,
         "hue": hueButtonComponent,
         "kdeConnect": kdeButtonComponent,
+        "gameMode": gameButtonComponent,
         "caffeine": coffeeButtonComponent,
         "dnd": dndButtonComponent,
         "wifi": wifiButtonComponent,
@@ -243,6 +258,7 @@ Item {
         case "nightLight": return root.showNightLight;
         case "hue": return root.showHue;
         case "kdeConnect": return root.showKdeConnect;
+        case "gameMode": return root.showGameMode;
         case "caffeine": return root.showCaffeine;
         case "dnd": return root.showDnd;
         case "wifi": return root.showWifi;
@@ -346,6 +362,46 @@ Item {
                 hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
                 cursorShape: Qt.PointingHandCursor
                 onClicked: root.toggleHueMenu()
+            }
+        }
+    }
+
+    // W4. GameMode Button (only when the feature is enabled in the settings)
+    Component {
+        id: gameButtonComponent
+
+        Rectangle {
+            id: gameButton
+            implicitWidth: root.buttonSize
+            implicitHeight: root.buttonSize
+            radius: root.buttonSize / 2
+            color: {
+                if (root.gameMenuOpen) return Qt.rgba(48/255, 209/255, 88/255, 0.25);
+                if (GameModeService.active) return Qt.rgba(48/255, 209/255, 88/255, 0.15);
+                return "transparent";
+            }
+            scale: gameMouse.pressed ? 0.90 : 1.0
+
+            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
+
+            SvgIcon {
+                anchors.centerIn: parent
+                name: "gamepad"
+                size: root.iconSize
+                color: {
+                    if (root.gameMenuOpen || GameModeService.active) return Theme.accentGreen;
+                    return gameMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
+                }
+                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+            }
+
+            MouseArea {
+                id: gameMouse
+                anchors.fill: parent
+                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.toggleGameMenu()
             }
         }
     }
@@ -861,6 +917,7 @@ Item {
         if (root.hueMenuOpen) return hueQuickSettings.implicitHeight;
         if (root.nightMenuOpen) return nightQuickSettings.implicitHeight;
         if (root.kdeMenuOpen) return kdeQuickSettings.implicitHeight;
+        if (root.gameMenuOpen) return gameQuickSettings.implicitHeight;
         return 0;
     }
 
@@ -1187,6 +1244,19 @@ Item {
                 opacity: root.hueMenuOpen ? 1.0 : 0.0
                 visible: opacity > 0.01
                 onRequestClose: root.hueMenuOpen = false
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+            }
+
+            // 13. GameMode Quick Settings
+            GameModeQuickSettings {
+                id: gameQuickSettings
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                embedded: true
+                opacity: root.gameMenuOpen ? 1.0 : 0.0
+                visible: opacity > 0.01
+                onRequestClose: root.gameMenuOpen = false
                 Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
             }
 
