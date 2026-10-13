@@ -51,20 +51,25 @@ Item {
     readonly property int buttonSize: Theme.px(26)
     readonly property int iconSize: Theme.px(14)
 
+    // True when the user chose to hide icons whose tools are missing and this one's are
+    function dropped(id) {
+        return SettingsService.hideUnavailableIcons && DepsService.iconUnavailable(id);
+    }
+
     // Hoisted service-backed visibility properties
-    readonly property bool showCaffeine: SettingsService.showCaffeineIcon
+    readonly property bool showCaffeine: SettingsService.showCaffeineIcon && !root.dropped("caffeine")
     readonly property bool showDnd: SettingsService.showDndIcon
-    readonly property bool showWifi: SettingsService.showWifiIcon
-    readonly property bool showBluetooth: SettingsService.showBluetoothIcon
-    readonly property bool showMic: SettingsService.showMicIcon
-    readonly property bool showClipboard: SettingsService.showClipboardIcon
-    readonly property bool showProfile: SettingsService.showProfileIcon
+    readonly property bool showWifi: SettingsService.showWifiIcon && !root.dropped("wifi")
+    readonly property bool showBluetooth: SettingsService.showBluetoothIcon && !root.dropped("bluetooth")
+    readonly property bool showMic: SettingsService.showMicIcon && !root.dropped("mic")
+    readonly property bool showClipboard: SettingsService.showClipboardIcon && !root.dropped("clipboard")
+    readonly property bool showProfile: SettingsService.showProfileIcon && !root.dropped("profile")
     readonly property bool showHardware: SettingsService.showHardwareIcon
-    readonly property bool showUsb: SettingsService.showUsbIcon && (SettingsService.pinUsbIcon || DeviceService.hasDevices || root.devicesMenuOpen)
-    readonly property bool showHue: SettingsService.hueEnabled
-    readonly property bool showNightLight: SettingsService.nightLightEnabled
-    readonly property bool showKdeConnect: SettingsService.kdeConnectEnabled
-    readonly property bool showGameMode: SettingsService.gameModeEnabled
+    readonly property bool showUsb: SettingsService.showUsbIcon && !root.dropped("usb") && (SettingsService.pinUsbIcon || DeviceService.hasDevices || root.devicesMenuOpen)
+    readonly property bool showHue: SettingsService.hueEnabled && !root.dropped("hue")
+    readonly property bool showNightLight: SettingsService.nightLightEnabled && !root.dropped("nightLight")
+    readonly property bool showKdeConnect: SettingsService.kdeConnectEnabled && !root.dropped("kdeConnect")
+    readonly property bool showGameMode: SettingsService.gameModeEnabled && !root.dropped("gameMode")
     readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0) + (showKdeConnect ? 1 : 0) + (showGameMode ? 1 : 0)
     readonly property bool showWidgets: widgetCount > 0
     readonly property bool showNotification: SettingsService.showNotificationIcon && (SettingsService.pinNotificationIcon || NotificationService.unreadCount > 0 || NotificationService.notifications.length > 0 || root.notificationMenuOpen)
@@ -282,6 +287,10 @@ Item {
         Loader {
             required property var modelData
             visible: root.isIconShown(modelData.id)
+            // A missing tool leaves the icon dimmed and inert (or hidden, see dropped())
+            readonly property bool unavailable: DepsService.iconUnavailable(modelData.id)
+            enabled: !unavailable
+            opacity: unavailable ? 0.3 : 1.0
             sourceComponent: root.iconComponents[modelData.id]
         }
     }

@@ -31,6 +31,8 @@ A compact pill at the top of the screen shows the clock, media and notifications
 
 Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
 
+The shell runs the same check at startup. A status icon whose tool is missing (for example Wi-Fi without `nmcli`) is dimmed and does nothing, and the brightness slider says it needs `brightnessctl`. In the settings under Top Bar, the Status Bar Icon Order list names the missing tool and its package, and "Hide Icons With Missing Tools" removes those icons instead of dimming them. The power menu and battery icon are never affected. Install the tool and restart the shell, or press "Check again" in the welcome guide, to bring the feature back.
+
 ## Installation
 
 ```bash

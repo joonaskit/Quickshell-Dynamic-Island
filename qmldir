@@ -22,6 +22,7 @@ singleton NightLightService 1.0 services/NightLightService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
 singleton BackupService 1.0 services/BackupService.qml
+singleton DepsService 1.0 services/DepsService.qml
 singleton OnboardingService 1.0 services/OnboardingService.qml
 OnboardingWindow 1.0 onboarding/OnboardingWindow.qml
 OnboardingPage 1.0 onboarding/OnboardingPage.qml

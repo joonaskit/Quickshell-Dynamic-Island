@@ -54,6 +54,8 @@ Singleton {
     property bool dndEnabled: false
     property bool caffeineEnabled: false
     property bool showWifiIcon: true
+    // Hide status icons whose tools are missing, instead of showing them dimmed
+    property bool hideUnavailableIcons: false
     property bool showBluetoothIcon: true
     property bool showMicIcon: true
     property bool showClipboardIcon: true
@@ -239,6 +241,7 @@ Singleton {
         if (data.dndEnabled !== undefined) root.dndEnabled = !!data.dndEnabled;
         if (data.caffeineEnabled !== undefined) root.caffeineEnabled = !!data.caffeineEnabled;
         if (data.showWifiIcon !== undefined) root.showWifiIcon = !!data.showWifiIcon;
+        if (data.hideUnavailableIcons !== undefined) root.hideUnavailableIcons = !!data.hideUnavailableIcons;
         if (data.showBluetoothIcon !== undefined) root.showBluetoothIcon = !!data.showBluetoothIcon;
         if (data.showMicIcon !== undefined) root.showMicIcon = !!data.showMicIcon;
         if (data.showClipboardIcon !== undefined) root.showClipboardIcon = !!data.showClipboardIcon;
@@ -448,6 +451,7 @@ Singleton {
         root.dndEnabled = false;
         root.caffeineEnabled = false;
         root.showWifiIcon = true;
+        root.hideUnavailableIcons = false;
         root.showBluetoothIcon = true;
         root.showMicIcon = true;
         root.showClipboardIcon = true;
@@ -553,6 +557,7 @@ Singleton {
             "dndEnabled": root.dndEnabled,
             "caffeineEnabled": root.caffeineEnabled,
             "showWifiIcon": root.showWifiIcon,
+            "hideUnavailableIcons": root.hideUnavailableIcons,
             "showBluetoothIcon": root.showBluetoothIcon,
             "showMicIcon": root.showMicIcon,
             "showClipboardIcon": root.showClipboardIcon,

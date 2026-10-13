@@ -311,6 +311,21 @@ SettingsCategory {
         title: "STATUS BAR ICON ORDER"
         subtitle: "Left to right, optional widgets first"
 
+        SettingToggle {
+            title: "Hide Icons With Missing Tools"
+            description: "Icons whose tools are not installed are dimmed. Turn on to hide them instead"
+            iconName: "alert"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.hideUnavailableIcons
+            onToggled: function(val) {
+                SettingsService.setSetting("hideUnavailableIcons", val);
+            }
+        }
+
+        SettingDivider {
+            visible: !SettingsSearch.active
+        }
+
         // One row per registered icon, in display order: widgets, then system icons
         Repeater {
             model: SettingsService.orderedStatusIcons.filter(i => i.group === "widgets").concat(SettingsService.orderedStatusIcons.filter(i => i.group === "system"))
@@ -335,6 +350,7 @@ SettingsCategory {
                     iconName: iconRow.modelData.icon
                     iconColor: iconRow.modelData.iconColor
                     active: SettingsService[iconRow.modelData.settingKey]
+                    note: DepsService.iconProblem(iconRow.modelData.id)
                     canMoveUp: SettingsService.canMoveStatusIcon(iconRow.modelData.id, -1)
                     canMoveDown: SettingsService.canMoveStatusIcon(iconRow.modelData.id, 1)
                     onMoved: function(delta) {

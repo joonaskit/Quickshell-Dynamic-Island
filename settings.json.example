@@ -31,6 +31,7 @@
   "dndEnabled": false,
   "caffeineEnabled": false,
   "showWifiIcon": true,
+  "hideUnavailableIcons": false,
   "showBluetoothIcon": true,
   "showMicIcon": false,
   "showClipboardIcon": true,
