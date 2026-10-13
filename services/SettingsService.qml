@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "settingsMigration.js" as SettingsMigration
+import "launcherExtras.js" as LauncherExtras
 
 Singleton {
     id: root
@@ -104,6 +105,15 @@ Singleton {
     property bool launcherShowCategories: true
     property int launcherGridColumns: 4
     property bool launcherShowGenericNames: true
+    // Instant answers in the launcher's search box
+    property bool launcherCalculator: true
+    property bool launcherConversion: true
+    property bool launcherWebSearch: true
+    property var launcherWebShortcuts: LauncherExtras.DEFAULT_SHORTCUTS
+    // File search through Filehouse: off until asked for, since it walks the folder on every search
+    property bool launcherFileSearch: false
+    property string launcherFileSearchKey: "f"
+    property string launcherFileSearchRoot: "~"
 
     // Clipboard history (kept in memory only)
     property int clipboardMaxItems: 50
@@ -306,6 +316,16 @@ Singleton {
             root.launcherGridColumns = Math.max(3, Math.min(6, parseInt(data.launcherGridColumns)));
         }
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
+        if (data.launcherCalculator !== undefined) root.launcherCalculator = !!data.launcherCalculator;
+        if (data.launcherConversion !== undefined) root.launcherConversion = !!data.launcherConversion;
+        if (data.launcherWebSearch !== undefined) root.launcherWebSearch = !!data.launcherWebSearch;
+        if (data.launcherFileSearch !== undefined) root.launcherFileSearch = !!data.launcherFileSearch;
+        if (typeof data.launcherFileSearchKey === "string" && /^\S{1,12}$/.test(data.launcherFileSearchKey)) root.launcherFileSearchKey = data.launcherFileSearchKey;
+        if (typeof data.launcherFileSearchRoot === "string" && data.launcherFileSearchRoot.trim() !== "") root.launcherFileSearchRoot = data.launcherFileSearchRoot.trim();
+        if (Array.isArray(data.launcherWebShortcuts)) {
+            // Round trip through the text form to drop entries without a key or an http(s) URL
+            root.launcherWebShortcuts = LauncherExtras.parseShortcuts(LauncherExtras.formatShortcuts(data.launcherWebShortcuts.filter(s => s && typeof s.key === "string" && typeof s.url === "string").map(s => ({ key: s.key, name: String(s.name || s.key), url: s.url }))));
+        }
         if (data.clipboardMaxItems !== undefined && !isNaN(data.clipboardMaxItems)) {
             root.clipboardMaxItems = Math.max(5, Math.min(500, parseInt(data.clipboardMaxItems)));
         }
@@ -504,6 +524,13 @@ Singleton {
         root.launcherShowCategories = true;
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
+        root.launcherCalculator = true;
+        root.launcherConversion = true;
+        root.launcherWebSearch = true;
+        root.launcherWebShortcuts = LauncherExtras.DEFAULT_SHORTCUTS;
+        root.launcherFileSearch = false;
+        root.launcherFileSearchKey = "f";
+        root.launcherFileSearchRoot = "~";
         root.clipboardMaxItems = 50;
         root.clipboardSensitiveExpiry = 60;
         root.clipboardIgnoredApps = [];
@@ -609,6 +636,13 @@ Singleton {
             "launcherShowCategories": root.launcherShowCategories,
             "launcherGridColumns": root.launcherGridColumns,
             "launcherShowGenericNames": root.launcherShowGenericNames,
+            "launcherCalculator": root.launcherCalculator,
+            "launcherConversion": root.launcherConversion,
+            "launcherWebSearch": root.launcherWebSearch,
+            "launcherWebShortcuts": root.launcherWebShortcuts,
+            "launcherFileSearch": root.launcherFileSearch,
+            "launcherFileSearchKey": root.launcherFileSearchKey,
+            "launcherFileSearchRoot": root.launcherFileSearchRoot,
             "clipboardMaxItems": root.clipboardMaxItems,
             "clipboardSensitiveExpiry": root.clipboardSensitiveExpiry,
             "clipboardIgnoredApps": root.clipboardIgnoredApps
