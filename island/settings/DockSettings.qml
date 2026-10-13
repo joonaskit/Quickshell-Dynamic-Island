@@ -140,6 +140,40 @@ SettingsCategory {
         }
 
         SettingToggle {
+            title: "Show Downloads"
+            description: "The downloads stack at the end of the dock. Off stops the folder scan too"
+            iconName: "download"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.dockShowDownloads
+            onToggled: function(val) {
+                SettingsService.setSetting("dockShowDownloads", val);
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Theme.overlay(0.06)
+        }
+
+        SettingToggle {
+            title: "Show Trash"
+            description: "The trash icon at the end of the dock"
+            iconName: "trash"
+            iconColor: Theme.accentRed
+            checked: SettingsService.dockShowTrash
+            onToggled: function(val) {
+                SettingsService.setSetting("dockShowTrash", val);
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Theme.overlay(0.06)
+        }
+
+        SettingToggle {
             title: "Show Dock Border"
             description: "Display a subtle border outline and top highlight on the dock capsule"
             iconName: "square"

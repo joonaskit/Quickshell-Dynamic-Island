@@ -27,6 +27,13 @@ Item {
     readonly property real capsuleX: dockCapsule.x
     readonly property real capsuleY: dockCapsule.y
 
+    // The Downloads and Trash items can be turned off in the Dock settings
+    readonly property bool showDownloads: SettingsService.dockShowDownloads
+    readonly property bool showTrash: SettingsService.dockShowTrash
+
+    onShowDownloadsChanged: { if (!showDownloads) downloadsStack.isOpen = false; }
+    onShowTrashChanged: { if (!showTrash) trashMenu.isOpen = false; }
+
     readonly property bool hasOpenPopups: appPickerOpen || contextMenuOpen || trashMenuOpen || launcherMenuOpen || downloadsStackOpen || windowPickerOpen
 
     property bool shouldDropDock: false
@@ -35,8 +42,8 @@ Item {
         let slotSize = Theme.dockIconSize + 8;
         let pinnedCount = (DockService.pinnedApps && DockService.pinnedApps.length) ? DockService.pinnedApps.length : 0;
         let unpinnedCount = (DockService.runningUnpinnedApps && DockService.runningUnpinnedApps.length) ? DockService.runningUnpinnedApps.length : 0;
-        let slots = 3 + pinnedCount + unpinnedCount;
-        let dividers = 2 + (unpinnedCount > 0 ? 1 : 0);
+        let slots = 1 + (showDownloads ? 1 : 0) + (showTrash ? 1 : 0) + pinnedCount + unpinnedCount;
+        let dividers = 1 + (showDownloads || showTrash ? 1 : 0) + (unpinnedCount > 0 ? 1 : 0);
         let totalItems = slots + dividers;
         let spacing = 2;
         return (slots * slotSize) + (dividers * 1) + (Math.max(0, totalItems - 1) * spacing);
@@ -658,6 +665,7 @@ Item {
 
             // Divider before Downloads & Trash
             Item {
+                visible: root.showDownloads || root.showTrash
                 width: root.isVertical ? Theme.dockHeight : 1
                 height: root.isVertical ? 1 : Theme.dockHeight
 
@@ -672,6 +680,7 @@ Item {
             // Downloads / Recent Files Stack Icon
             Item {
                 id: downloadsItem
+                visible: root.showDownloads
                 width: root.isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
                 height: root.isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
 
@@ -798,6 +807,7 @@ Item {
             // Trash Icon
             Item {
                 id: trashItem
+                visible: root.showTrash
                 width: root.isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
                 height: root.isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
 

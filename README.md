@@ -18,7 +18,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
 - **Settings UI:** toggle every icon and widget, UI and font scale, interface and display fonts, corner roundness, accent color, dock tint and opacity, an experimental light mode, caffeine that stays on across restarts, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next. The Downloads stack and the Trash at the end of the dock can each be turned off in the Dock settings.
 
 ## Requirements
 
