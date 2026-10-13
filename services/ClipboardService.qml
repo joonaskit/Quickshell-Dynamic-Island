@@ -80,6 +80,7 @@ Singleton {
         id: trackerProc
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/clipboard_tracker.py"]
         running: true
+        Component.onCompleted: HelperService.watch("clipboard", "Clipboard tracker", trackerProc)
         stdout: SplitParser {
             onRead: line => root.handleRecord(line)
         }

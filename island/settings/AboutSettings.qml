@@ -140,6 +140,8 @@ SettingsCategory {
         }
     }
 
+    HealthSection {}
+
     SettingsSection {
         title: "BACKUP"
         subtitle: "Export the configuration to one file, or import it"

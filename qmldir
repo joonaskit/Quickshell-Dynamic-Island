@@ -23,6 +23,7 @@ singleton SettingsService 1.0 services/SettingsService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
 singleton BackupService 1.0 services/BackupService.qml
 singleton DepsService 1.0 services/DepsService.qml
+singleton HelperService 1.0 services/HelperService.qml
 singleton OnboardingService 1.0 services/OnboardingService.qml
 OnboardingWindow 1.0 onboarding/OnboardingWindow.qml
 OnboardingPage 1.0 onboarding/OnboardingPage.qml
@@ -90,6 +91,7 @@ LauncherSettings 1.0 island/settings/LauncherSettings.qml
 WidgetsSettings 1.0 island/settings/WidgetsSettings.qml
 ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
+HealthSection 1.0 island/settings/HealthSection.qml
 SettingsCategory 1.0 island/settings/SettingsCategory.qml
 singleton SettingsSearch 1.0 island/settings/SettingsSearch.qml
 singleton DockService 1.0 dock/DockService.qml

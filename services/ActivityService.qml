@@ -71,6 +71,7 @@ Singleton {
         id: bridge
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/activities_bridge.py"]
         running: true
+        Component.onCompleted: HelperService.watch("activities", "Activities bridge", bridge)
         stdinEnabled: true
 
         property real startedAt: 0

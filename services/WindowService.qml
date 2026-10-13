@@ -249,6 +249,8 @@ Singleton {
         command: ["python3", Quickshell.shellDir + "/scripts/kwin_window_tracker.py"]
         running: true
 
+        Component.onCompleted: HelperService.watch("windows", "Window tracker", trackerProc)
+
         onRunningChanged: {
             if (!running) {
                 restartTimer.start();
