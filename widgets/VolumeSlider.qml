@@ -7,6 +7,8 @@ Item {
 
     property real volume: AudioService.volume
     property bool isMuted: AudioService.isMuted
+    // wpctl is not installed: the slider and the volume keys cannot change anything
+    readonly property bool unavailable: DepsService.noneUsable(["wpctl"])
 
     implicitHeight: Theme.px(34)
     implicitWidth: parent ? parent.width : Theme.px(370)
@@ -14,6 +16,8 @@ Item {
     RowLayout {
         anchors.fill: parent
         spacing: Theme.px(10)
+        enabled: !root.unavailable
+        opacity: root.unavailable ? 0.4 : 1.0
 
         // Speaker / Mute Toggle Button
         Rectangle {
@@ -122,8 +126,8 @@ Item {
         // Percentage readout
         Text {
             id: percentText
-            Layout.preferredWidth: Theme.px(38)
-            text: root.isMuted ? "Mute" : Math.round(root.volume * 100) + "%"
+            Layout.preferredWidth: root.unavailable ? Theme.px(100) : Theme.px(38)
+            text: root.unavailable ? "Needs wpctl" : root.isMuted ? "Mute" : Math.round(root.volume * 100) + "%"
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontPx(11)
             font.weight: Font.DemiBold
