@@ -118,9 +118,35 @@ busctl --user call org.quickshell.IslandActivities /org/quickshell/IslandActivit
 
 Note that `busctl` is a short-lived sender: its activity counts as abandoned as soon as the command returns, so a running one turns into a failure. For scripts, keep a connection open (for example with Python), or end with a final state.
 
+## Showing a command's progress
+
+For shell scripts and programs that don't speak D-Bus, `scripts/island_run.py` wraps a command and reports it as an activity (`./run.sh --run` starts it too, and `install.sh` adds an `island-run` command to `~/.local/bin` that is a link to it):
+
+```
+island-run rsync -a --info=progress2 ~/Photos /mnt/backup
+island-run --title "System update" sudo dnf upgrade
+island-run --progress none make -j8
+```
+
+The command runs as usual: its output still reaches your terminal (on a terminal it gets a pty, so progress bars still draw), it can still ask for input, and the wrapper exits with its exit code. The island shows the command's last line of output as `text`, and progress when the output has a percentage (`45%`, as rsync, wget, curl and yt-dlp print) or a `[3/12]` count (dnf, ninja). Until one appears, the activity is indeterminate.
+
+| Option | Meaning |
+| --- | --- |
+| `--title TEXT` | The headline (default: the command line) |
+| `--icon NAME` | An icon theme name or an absolute path |
+| `--priority P` | `low`, `normal` (default) or `high` |
+| `--progress MODE` | `auto` (default), `percent`, `fraction` or `none` |
+| `--no-text` | Don't show the command's output in the island |
+| `--no-cancel` | Don't offer a Cancel button |
+
+How it ends: exit code 0 is `done`; stopping it (Ctrl+C, SIGTERM or SIGHUP, or the island's Cancel button, which sends SIGTERM to the command) is `cancelled`; anything else is `failed`, with the exit code and the last line of output as the error. Cancel stops the command itself, not programs it started. If the island isn't running, or `python3-dbus` is missing, the command is simply run.
+
+The output is shown on screen, so use `--no-text` when a command prints something private.
+
 ## Implementation
 
 - `scripts/activities_core.py`: validation, limits, lifetime and ordering, with no D-Bus. Tested in `tests/test_activities_core.py`.
+- `scripts/island_run.py` and `scripts/island_run_core.py`: the command wrapper above. The output parsing and the end states have no D-Bus and are tested in `tests/test_island_run_core.py`.
 - `scripts/activities_bridge.py`: the D-Bus interface. Talks to the shell with one JSON object per line: the full activity list on stdout after every change, and the user's actions and dismissals on stdin.
 - `services/ActivityService.qml`: runs the bridge (restarting it if it dies) and holds the list.
 - `island/CompactActivityView.qml` and `widgets/ActivitiesWidget.qml`: the compact island and the expanded view card.

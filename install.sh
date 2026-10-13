@@ -16,8 +16,11 @@ EXAMPLE_FILES=(settings.json dock_pinned.json)
 
 PREFIX="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/island"
 AUTOSTART_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/autostart/quickshell-island.desktop"
+# island-run: a link to scripts/island_run.py (see docs/ACTIVITIES_API.md), on the usual per-user PATH
+LINK_FILE="${XDG_BIN_HOME:-$HOME/.local/bin}/island-run"
 DEPS=1
 AUTOSTART=1
+LINK=1
 ASSUME_YES=0
 DRY_RUN=0
 UNINSTALL=0
@@ -30,11 +33,13 @@ Usage: ./install.sh [options]
   --prefix <dir>     Install in <dir> (default: ~/.config/quickshell/island)
   --no-deps          Do not offer to install missing packages
   --no-autostart     Do not start the shell at login
+  --no-link          Do not add the island-run command to ~/.local/bin
   --import <file>    Load a configuration exported with ./run.sh --export
   --yes              Do not ask questions, accept the defaults (packages are
                      then never installed: the command is only shown)
   --dry-run          Show what would happen and change nothing
-  --uninstall        Remove the autostart entry and the install folder
+  --uninstall        Remove the autostart entry, the island-run link and the
+                     install folder
   -h, --help         Show this help
 EOF
 }
@@ -234,12 +239,35 @@ EOF
     note "Wrote $AUTOSTART_FILE"
 }
 
+# island-run shows any command's progress in the island. A file that is not our link is left alone
+setup_command() {
+    [ "$LINK" = 1 ] || { say "island-run skipped"; return; }
+    say "island-run command"
+    local target="$PREFIX/scripts/island_run.py"
+    if [ -L "$LINK_FILE" ] && [ "$(readlink "$LINK_FILE")" = "$target" ]; then
+        note "Already set up."
+        return
+    fi
+    if [ -e "$LINK_FILE" ] || [ -L "$LINK_FILE" ]; then
+        note "$LINK_FILE already exists and is not ours, so it is left alone."
+        return
+    fi
+    act mkdir -p "$(dirname "$LINK_FILE")"
+    act ln -s "$target" "$LINK_FILE"
+    [ "$DRY_RUN" = 1 ] || note "Linked $LINK_FILE."
+    case ":$PATH:" in
+        *":$(dirname "$LINK_FILE"):"*) ;;
+        *) note "$(dirname "$LINK_FILE") is not in your PATH. Add it to run island-run by name." ;;
+    esac
+}
+
 print_summary() {
     say ""
     say "Done."
     [ "$DRY_RUN" = 1 ] && say "(Dry run: nothing was changed.)"
     note "Start it now:       $PREFIX/run.sh"
     note "Check the system:   $PREFIX/run.sh --check"
+    [ "$LINK" = 1 ] && note "Show a command in the island: island-run <command>"
     note "Update later:       run $PREFIX/install.sh again"
     note "Remove it:          $PREFIX/install.sh --uninstall"
     [ "$AUTOSTART" = 1 ] && note "It starts at your next login."
@@ -251,6 +279,11 @@ uninstall() {
     if [ -e "$AUTOSTART_FILE" ]; then
         act rm -f "$AUTOSTART_FILE"
         note "Removed the autostart entry."
+    fi
+    # Only a link that points into this install is ours to remove
+    if [ -L "$LINK_FILE" ] && [ "$(readlink "$LINK_FILE")" = "$PREFIX/scripts/island_run.py" ]; then
+        act rm -f "$LINK_FILE"
+        note "Removed the island-run link."
     fi
     if [ ! -e "$PREFIX" ]; then
         note "There is no install in $PREFIX."
@@ -292,6 +325,7 @@ main() {
             --import) [ -n "${2:-}" ] || die "--import needs a file."; IMPORT_FILE="$(realpath -m "$2")"; shift ;;
             --no-deps) DEPS=0 ;;
             --no-autostart) AUTOSTART=0 ;;
+            --no-link) LINK=0 ;;
             --yes|-y) ASSUME_YES=1 ;;
             --dry-run) DRY_RUN=1 ;;
             --uninstall) UNINSTALL=1 ;;
@@ -313,6 +347,7 @@ main() {
     import_configuration
     create_default_configuration
     setup_autostart
+    setup_command
     print_summary
 }
 
