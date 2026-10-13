@@ -110,7 +110,7 @@ Item {
                 }
             }
 
-            // Clear All Button (asks to confirm with a second click)
+            // Clear All Button (asks to confirm with a second click, unless there is only one notification)
             Rectangle {
                 Layout.preferredHeight: Theme.px(22)
                 Layout.preferredWidth: clearRow.implicitWidth + Theme.px(12)
@@ -153,7 +153,7 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (root.confirmingClear) {
+                        if (root.confirmingClear || NotificationService.notifications.length <= 1) {
                             root.confirmingClear = false;
                             confirmTimer.stop();
                             NotificationService.clearAll();
