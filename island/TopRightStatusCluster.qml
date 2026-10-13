@@ -285,13 +285,29 @@ Item {
         id: statusIconDelegate
 
         Loader {
+            id: iconLoader
             required property var modelData
             visible: root.isIconShown(modelData.id)
-            // A missing tool leaves the icon dimmed and inert (or hidden, see dropped())
+            // A missing tool leaves the icon dimmed and inert (or hidden, see dropped()).
+            // The button is disabled, not the Loader, so hovering still shows the reason.
             readonly property bool unavailable: DepsService.iconUnavailable(modelData.id)
-            enabled: !unavailable
-            opacity: unavailable ? 0.3 : 1.0
             sourceComponent: root.iconComponents[modelData.id]
+
+            Binding { target: iconLoader.item; property: "enabled"; value: !iconLoader.unavailable; when: iconLoader.item !== null }
+            Binding { target: iconLoader.item; property: "opacity"; value: iconLoader.unavailable ? 0.3 : 1.0; when: iconLoader.item !== null }
+
+            HoverHandler {
+                id: unavailableHover
+                enabled: iconLoader.unavailable
+                onHoveredChanged: {
+                    if (hovered) {
+                        root.unavailableTip = DepsService.iconProblem(iconLoader.modelData.id);
+                        root.unavailableTipItem = iconLoader;
+                    } else if (root.unavailableTipItem === iconLoader) {
+                        root.unavailableTipItem = null;
+                    }
+                }
+            }
         }
     }
 
@@ -964,6 +980,40 @@ Item {
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
+        }
+    }
+
+    // Names the missing tool when hovering a dimmed icon. It lives here, not in
+    // the icon, because the cluster background clips its children.
+    property string unavailableTip: ""
+    property Item unavailableTipItem: null
+
+    Rectangle {
+        id: unavailableTooltip
+        readonly property point anchorPoint: root.unavailableTipItem
+            ? root.unavailableTipItem.mapToItem(root, root.unavailableTipItem.width / 2, root.unavailableTipItem.height)
+            : Qt.point(0, 0)
+        visible: opacity > 0.01
+        opacity: root.unavailableTipItem && root.unavailableTip !== "" ? 1.0 : 0.0
+        z: 100
+        width: tipText.implicitWidth + Theme.px(16)
+        height: tipText.implicitHeight + Theme.px(10)
+        x: Math.max(0, Math.min(root.width - width, anchorPoint.x - width / 2))
+        y: anchorPoint.y + Theme.px(6)
+        radius: Theme.cornerPx(8)
+        color: Theme.cardBackground
+        border.width: 1
+        border.color: Theme.overlay(0.12)
+
+        Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
+
+        Text {
+            id: tipText
+            anchors.centerIn: parent
+            text: root.unavailableTip
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontPx(11)
+            color: Theme.textPrimary
         }
     }
 

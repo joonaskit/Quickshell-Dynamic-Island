@@ -6,6 +6,8 @@ Item {
     id: root
 
     property bool expanded: false
+    // pactl is not installed: the device list stays empty and cannot be switched
+    readonly property bool unavailable: DepsService.noneUsable(["pactl"])
 
     implicitWidth: parent ? parent.width : Theme.px(370)
     implicitHeight: selectorColumn.implicitHeight
@@ -20,6 +22,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(28)
+            opacity: root.unavailable ? 0.5 : 1.0
             radius: Theme.cornerPx(8)
             color: selectorMouse.containsMouse ? Theme.overlay(0.08) : Theme.overlay(0.04)
             border.width: 1
@@ -48,7 +51,7 @@ Item {
                 // Active Device Name
                 Text {
                     Layout.fillWidth: true
-                    text: AudioService.currentSinkDisplayName || "Audio Output"
+                    text: root.unavailable ? "Needs pactl" : (AudioService.currentSinkDisplayName || "Audio Output")
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.Medium
