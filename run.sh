@@ -5,8 +5,9 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Quickshell does not stop the Python helpers it started; stale ones (e.g. a second
 # kwin_window_tracker) keep the new shell from getting window state
+# island_run.py is started by the user to wrap a command, not by the shell, so it is left running
 stop_helpers() {
-    pkill -f "$DIR/scripts/.*\.py" 2>/dev/null || true
+    pgrep -af "$DIR/scripts/.*\.py" 2>/dev/null | grep -v "island_run\.py" | cut -d' ' -f1 | xargs -r kill 2>/dev/null || true
 }
 
 case "$1" in
@@ -47,6 +48,14 @@ case "$1" in
         fi
         shift
         exec python3 "$DIR/scripts/check_deps.py" "$@"
+        ;;
+    run|--run)
+        if ! command -v python3 >/dev/null 2>&1; then
+            echo "python3 was not found. Install Python 3 to use this." >&2
+            exit 1
+        fi
+        shift
+        exec python3 "$DIR/scripts/island_run.py" "$@"
         ;;
     export|--export)
         shift

@@ -18,7 +18,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
 - **Settings UI:** toggle every icon and widget, UI and font scale, interface and display fonts, corner roundness, accent color, dock tint and opacity, an experimental light mode, caffeine that stays on across restarts, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next. The Downloads stack and the Trash at the end of the dock can each be turned off in the Dock settings.
 
 ## Requirements
 
@@ -31,11 +31,33 @@ A compact pill at the top of the screen shows the clock, media and notifications
 
 Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
 
+The shell runs the same check at startup. A status icon whose tool is missing (for example Wi-Fi without `nmcli`) is dimmed and does nothing, and the brightness slider says it needs `brightnessctl`. In the settings under Top Bar, the Status Bar Icon Order list names the missing tool and its package, and "Hide Icons With Missing Tools" removes those icons instead of dimming them. The power menu and battery icon are never affected. Install the tool and restart the shell, or press "Check again" in the welcome guide, to bring the feature back.
+
+## Installation
+
+```bash
+git clone https://github.com/joonaskit/Quickshell-Dynamic-Island ~/.config/quickshell/island
+cd ~/.config/quickshell/island
+./install.sh
+```
+
+The installer checks your system with `./run.sh --check` and shows the command that installs what is missing (Arch, Fedora, openSUSE and Debian or Ubuntu). It runs that command only if you answer yes, because it uses `sudo`. It then creates `settings.json` and `dock_pinned.json` from the `.example` files if you have none, and sets the shell to start at login with an entry in `~/.config/autostart/`. It never overwrites your configuration, and running it again updates the shell with `git pull` and changes nothing else. The welcome guide opens the first time the shell starts.
+
+| Option | Effect |
+| --- | --- |
+| `--prefix <dir>` | Install in `<dir>` instead of `~/.config/quickshell/island`. Run from another checkout, it clones the shell there |
+| `--no-deps` | Do not offer to install missing packages |
+| `--no-autostart` | Do not start the shell at login |
+| `--import <file>` | Load a configuration exported with `./run.sh --export` |
+| `--yes` | Ask nothing and take the defaults. Packages are then never installed, only the command is shown |
+| `--dry-run` | Show what would happen and change nothing |
+| `--uninstall` | Remove the autostart entry and the shell, and ask whether to delete your configuration too |
+
+You can also skip the installer: install the requirements above, clone the repository anywhere and run `./run.sh`.
+
 ## Usage
 
 ```bash
-git clone <this-repo> ~/.config/quickshell/island   # or any directory
-cd ~/.config/quickshell/island
 ./run.sh
 ```
 
@@ -45,6 +67,7 @@ cd ~/.config/quickshell/island
 | `./run.sh -d` | Start in the background |
 | `./run.sh -k` | Stop |
 | `./run.sh --check` | Check for missing tools and services |
+| `./run.sh --run <command>` | Run a command and show its progress in the island, see `docs/ACTIVITIES_API.md`. The installer also adds this as `island-run` (skip it with `--no-link`) |
 | `./run.sh --export <file>` | Save the configuration to one file |
 | `./run.sh --import <file>` | Load a configuration file, see below |
 | `./run.sh -l` | Toggle the app launcher |

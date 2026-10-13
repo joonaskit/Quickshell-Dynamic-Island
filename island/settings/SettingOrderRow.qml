@@ -10,6 +10,8 @@ Item {
     property color iconColor: Theme.accentBlue
     // False dims the row, for an entry that is currently turned off
     property bool active: true
+    // Shown under the title, for example why the entry does not work
+    property string note: ""
     property alias canMoveUp: moveButtons.canMoveUp
     property alias canMoveDown: moveButtons.canMoveDown
     signal moved(int delta)
@@ -18,7 +20,7 @@ Item {
 
     Layout.fillWidth: true
     visible: matchesSearch
-    implicitHeight: 38
+    implicitHeight: note !== "" ? 52 : 38
 
     RowLayout {
         anchors.fill: parent
@@ -41,15 +43,30 @@ Item {
             }
         }
 
-        Text {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: orderRow.active ? orderRow.title : orderRow.title + " (off)"
-            font.family: Theme.fontFamily
-            font.pixelSize: 12
-            font.weight: Font.DemiBold
-            color: Theme.textPrimary
+            spacing: 1
             opacity: orderRow.active ? 1.0 : 0.4
-            elide: Text.ElideRight
+
+            Text {
+                Layout.fillWidth: true
+                text: orderRow.active ? orderRow.title : orderRow.title + " (off)"
+                font.family: Theme.fontFamily
+                font.pixelSize: 12
+                font.weight: Font.DemiBold
+                color: Theme.textPrimary
+                elide: Text.ElideRight
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: orderRow.note !== ""
+                text: orderRow.note
+                font.family: Theme.fontFamily
+                font.pixelSize: 10
+                color: Theme.accentOrange
+                elide: Text.ElideRight
+            }
         }
 
         SettingMoveButtons {

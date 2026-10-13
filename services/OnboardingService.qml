@@ -16,10 +16,10 @@ Singleton {
     property int step: 0
     property bool decided: false
 
-    // Result of scripts/check_deps.py --json, or null before the first check and when it cannot run
-    property var report: null
-    property bool checkFailed: false
-    readonly property bool checking: checkProc.running
+    // The dependency check lives in DepsService, which also feeds the status icons
+    readonly property var report: DepsService.report
+    readonly property bool checkFailed: DepsService.checkFailed
+    readonly property bool checking: DepsService.checking
     readonly property var problems: root.report ? root.report.dependencies.filter(d => d.status !== "found") : []
     readonly property var importantProblems: root.problems.filter(d => d.severity !== "optional")
     readonly property var optionalProblems: root.problems.filter(d => d.severity === "optional")
@@ -53,7 +53,7 @@ Singleton {
     }
 
     function runCheck() {
-        if (!checkProc.running) checkProc.running = true;
+        DepsService.runCheck();
     }
 
     function copy(text) {
@@ -70,26 +70,6 @@ Singleton {
             if (!SettingsService.isLoaded || root.decided) return;
             root.decided = true;
             if (SettingsService.onboardingVersion < SettingsService.onboardingCurrent) root.show();
-        }
-    }
-
-    Process {
-        id: checkProc
-        // Exits 1 when something required is missing, but still prints the report
-        command: ["python3", Quickshell.shellDir + "/scripts/check_deps.py", "--json"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    let parsed = JSON.parse(text.trim());
-                    if (parsed && Array.isArray(parsed.dependencies)) {
-                        root.report = parsed;
-                        root.checkFailed = false;
-                        return;
-                    }
-                } catch (e) {}
-                root.report = null;
-                root.checkFailed = true;
-            }
         }
     }
 
