@@ -36,6 +36,8 @@ Singleton {
     property bool dockAutoHideOnFullscreen: true
     property bool dockAutoHideFromWindows: true
     property bool dockAutoHideAlways: false
+    property bool dockShowDownloads: true
+    property bool dockShowTrash: true
     property bool dockShowBorder: false
     property bool dockTransparent: false
     // Name of an entry in Theme.dockTintChoices
@@ -54,6 +56,8 @@ Singleton {
     property bool dndEnabled: false
     property bool caffeineEnabled: false
     property bool showWifiIcon: true
+    // Hide status icons whose tools are missing, instead of showing them dimmed
+    property bool hideUnavailableIcons: false
     property bool showBluetoothIcon: true
     property bool showMicIcon: true
     property bool showClipboardIcon: true
@@ -217,6 +221,8 @@ Singleton {
         if (data.dockAutoHideOnFullscreen !== undefined) root.dockAutoHideOnFullscreen = !!data.dockAutoHideOnFullscreen;
         if (data.dockAutoHideFromWindows !== undefined) root.dockAutoHideFromWindows = !!data.dockAutoHideFromWindows;
         if (data.dockAutoHideAlways !== undefined) root.dockAutoHideAlways = !!data.dockAutoHideAlways;
+        if (data.dockShowDownloads !== undefined) root.dockShowDownloads = !!data.dockShowDownloads;
+        if (data.dockShowTrash !== undefined) root.dockShowTrash = !!data.dockShowTrash;
         if (data.dockShowBorder !== undefined) root.dockShowBorder = !!data.dockShowBorder;
         if (data.dockTransparent !== undefined) root.dockTransparent = !!data.dockTransparent;
         if (data.dockTint !== undefined && Theme.dockTintChoices.some(c => c.name === data.dockTint)) root.dockTint = data.dockTint;
@@ -239,6 +245,7 @@ Singleton {
         if (data.dndEnabled !== undefined) root.dndEnabled = !!data.dndEnabled;
         if (data.caffeineEnabled !== undefined) root.caffeineEnabled = !!data.caffeineEnabled;
         if (data.showWifiIcon !== undefined) root.showWifiIcon = !!data.showWifiIcon;
+        if (data.hideUnavailableIcons !== undefined) root.hideUnavailableIcons = !!data.hideUnavailableIcons;
         if (data.showBluetoothIcon !== undefined) root.showBluetoothIcon = !!data.showBluetoothIcon;
         if (data.showMicIcon !== undefined) root.showMicIcon = !!data.showMicIcon;
         if (data.showClipboardIcon !== undefined) root.showClipboardIcon = !!data.showClipboardIcon;
@@ -433,6 +440,8 @@ Singleton {
         root.dockAutoHideOnFullscreen = true;
         root.dockAutoHideFromWindows = true;
         root.dockAutoHideAlways = false;
+        root.dockShowDownloads = true;
+        root.dockShowTrash = true;
         root.dockShowBorder = false;
         root.dockTransparent = false;
         root.dockTint = "cool";
@@ -448,6 +457,7 @@ Singleton {
         root.dndEnabled = false;
         root.caffeineEnabled = false;
         root.showWifiIcon = true;
+        root.hideUnavailableIcons = false;
         root.showBluetoothIcon = true;
         root.showMicIcon = true;
         root.showClipboardIcon = true;
@@ -539,6 +549,8 @@ Singleton {
             "dockAutoHideOnFullscreen": root.dockAutoHideOnFullscreen,
             "dockAutoHideFromWindows": root.dockAutoHideFromWindows,
             "dockAutoHideAlways": root.dockAutoHideAlways,
+            "dockShowDownloads": root.dockShowDownloads,
+            "dockShowTrash": root.dockShowTrash,
             "dockShowBorder": root.dockShowBorder,
             "dockTransparent": root.dockTransparent,
             "dockTint": root.dockTint,
@@ -553,6 +565,7 @@ Singleton {
             "dndEnabled": root.dndEnabled,
             "caffeineEnabled": root.caffeineEnabled,
             "showWifiIcon": root.showWifiIcon,
+            "hideUnavailableIcons": root.hideUnavailableIcons,
             "showBluetoothIcon": root.showBluetoothIcon,
             "showMicIcon": root.showMicIcon,
             "showClipboardIcon": root.showClipboardIcon,

@@ -18,7 +18,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
 - **Settings UI:** toggle every icon and widget, UI and font scale, interface and display fonts, corner roundness, accent color, dock tint and opacity, an experimental light mode, caffeine that stays on across restarts, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next. The Downloads stack and the Trash at the end of the dock can each be turned off in the Dock settings.
 
 ## Requirements
 
@@ -30,6 +30,8 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - UPower, for battery, and power-profiles-daemon, for power profiles
 
 Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
+
+The shell runs the same check at startup. A status icon whose tool is missing (for example Wi-Fi without `nmcli`) is dimmed and does nothing, and the brightness slider says it needs `brightnessctl`. In the settings under Top Bar, the Status Bar Icon Order list names the missing tool and its package, and "Hide Icons With Missing Tools" removes those icons instead of dimming them. The power menu and battery icon are never affected. Install the tool and restart the shell, or press "Check again" in the welcome guide, to bring the feature back.
 
 ## Installation
 

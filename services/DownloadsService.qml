@@ -1,4 +1,5 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -9,6 +10,10 @@ Singleton {
     property string downloadsDir: ""
     property var recentFiles: []
     property bool isScanning: false
+
+    // The scan only runs while the dock shows the Downloads item
+    readonly property bool enabled: SettingsService.dockShowDownloads
+    onEnabledChanged: { if (enabled) refresh(); }
 
     // Scanner process that queries the downloads folder and recent files
     Process {
@@ -38,7 +43,7 @@ Singleton {
     Timer {
         interval: 8000
         repeat: true
-        running: true
+        running: root.enabled
         onTriggered: root.refresh()
     }
 
@@ -47,7 +52,7 @@ Singleton {
     }
 
     function refresh() {
-        if (!scanProc.running) {
+        if (root.enabled && !scanProc.running) {
             root.isScanning = true;
             scanProc.running = true;
         }

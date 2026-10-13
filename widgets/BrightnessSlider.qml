@@ -6,6 +6,8 @@ Item {
     id: root
 
     property real brightness: BrightnessService.brightness
+    // brightnessctl is not installed: the slider cannot change anything
+    readonly property bool unavailable: DepsService.noneUsable(["brightnessctl"])
 
     implicitHeight: Theme.px(34)
     implicitWidth: parent ? parent.width : Theme.px(370)
@@ -13,6 +15,8 @@ Item {
     RowLayout {
         anchors.fill: parent
         spacing: Theme.px(10)
+        enabled: !root.unavailable
+        opacity: root.unavailable ? 0.4 : 1.0
 
         // Brightness Icon
         Rectangle {
@@ -107,8 +111,8 @@ Item {
         // Percentage readout
         Text {
             id: percentText
-            Layout.preferredWidth: Theme.px(38)
-            text: Math.round(root.brightness * 100) + "%"
+            Layout.preferredWidth: root.unavailable ? Theme.px(110) : Theme.px(38)
+            text: root.unavailable ? "Needs brightnessctl" : Math.round(root.brightness * 100) + "%"
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontPx(11)
             font.weight: Font.DemiBold
