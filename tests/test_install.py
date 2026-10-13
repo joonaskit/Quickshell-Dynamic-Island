@@ -16,10 +16,12 @@ class InstallScriptTest(unittest.TestCase):
         self.home = os.path.join(self.tmp.name, "home")
         self.prefix = os.path.join(self.home, ".config", "quickshell", "island")
         self.autostart = os.path.join(self.home, ".config", "autostart", "quickshell-island.desktop")
+        self.link = os.path.join(self.home, ".local", "bin", "island-run")
         os.makedirs(self.home)
 
     def run_install(self, *args):
         env = dict(os.environ, HOME=self.home, XDG_CONFIG_HOME=os.path.join(self.home, ".config"))
+        env.pop("XDG_BIN_HOME", None)
         return subprocess.run(["bash", INSTALL, *args], capture_output=True, text=True, env=env, timeout=60, stdin=subprocess.DEVNULL)
 
     def make_install(self, config=("settings.json", "dock_pinned.json")):
@@ -61,6 +63,28 @@ class InstallScriptTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertTrue(os.path.exists(os.path.join(self.prefix, "shell.qml")))
         self.assertTrue(os.path.exists(self.autostart))
+
+    def test_dry_run_mentions_the_island_run_link(self):
+        result = self.run_install("--dry-run", "--yes")
+        self.assertIn("island-run", result.stdout)
+        self.assertIn("island-run skipped", self.run_install("--dry-run", "--yes", "--no-link").stdout)
+
+    def test_uninstall_removes_the_island_run_link(self):
+        self.make_install()
+        os.makedirs(os.path.dirname(self.link))
+        os.symlink(os.path.join(self.prefix, "scripts", "island_run.py"), self.link)
+        self.assertEqual(self.run_install("--uninstall", "--yes").returncode, 0)
+        self.assertFalse(os.path.lexists(self.link))
+
+    def test_uninstall_leaves_a_foreign_island_run_alone(self):
+        self.make_install()
+        os.makedirs(os.path.dirname(self.link))
+        with open(self.link, "w") as f:
+            f.write("mine")
+        os.symlink("/usr/bin/true", self.link + "-other")
+        self.assertEqual(self.run_install("--uninstall", "--yes").returncode, 0)
+        self.assertTrue(os.path.exists(self.link))
+        self.assertTrue(os.path.lexists(self.link + "-other"))
 
     def test_uninstall_keeps_the_configuration_by_default(self):
         self.make_install()
