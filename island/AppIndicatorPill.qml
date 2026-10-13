@@ -351,6 +351,14 @@ Item {
         }
     }
 
+    // Tooltip state, set by the hovered app button. The tooltip itself lives
+    // outside the clipped pill so it can show below it.
+    property string hoveredTooltipText: ""
+    property real hoveredTooltipTargetX: 0
+    property Item hoveredTooltipItem: null
+    property bool hoveredTooltipPressed: false
+    readonly property bool isTooltipActive: hoveredTooltipItem !== null && !hoveredTooltipPressed
+
     // Ambient drop shadow, morphing smoothly with the pill capsule
     Rectangle {
         id: shadow
@@ -369,6 +377,44 @@ Item {
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
+        }
+    }
+
+    // Floating tooltip below the pill
+    Item {
+        id: tooltipWrapper
+        anchors.top: pillBackground.bottom
+        anchors.topMargin: 8
+        x: Math.max(0, Math.min(root.width - tooltipBg.width, root.hoveredTooltipTargetX - tooltipBg.width / 2))
+        z: 300
+
+        readonly property bool shown: root.isTooltipActive && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+        opacity: shown ? 1.0 : 0.0
+        scale: shown ? 1.0 : 0.85
+        visible: opacity > 0.01
+
+        Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }
+        Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutBack; easing.overshoot: Theme.animEntranceOvershoot } }
+        Behavior on x { NumberAnimation { duration: Theme.animDurationPopover; easing.type: Easing.OutCubic } }
+
+        Rectangle {
+            id: tooltipBg
+            width: tooltipText.implicitWidth + 16
+            height: 24
+            radius: 12
+            color: Theme.islandBackground
+            border.width: 1
+            border.color: Theme.islandBorder
+
+            Text {
+                id: tooltipText
+                anchors.centerIn: parent
+                text: root.hoveredTooltipText
+                font.family: Theme.fontFamily
+                font.pixelSize: 11
+                font.weight: Font.Medium
+                color: Theme.textPrimary
+            }
         }
     }
 
@@ -461,6 +507,15 @@ Item {
                         HoverHandler {
                             id: itemHoverHandler
                             enabled: !root.isTopBarMode && !root.hasFullscreenApp
+                            onHoveredChanged: {
+                                if (hovered) {
+                                    root.hoveredTooltipText = root.getAppTitle(modelData);
+                                    root.hoveredTooltipTargetX = appButton.mapToItem(root, appButton.width / 2, 0).x;
+                                    root.hoveredTooltipItem = appButton;
+                                } else if (root.hoveredTooltipItem === appButton) {
+                                    root.hoveredTooltipItem = null;
+                                }
+                            }
                         }
 
                         color: isSelectedForMenu ? Theme.overlay(0.22) : (mouseArea.pressed ? Theme.overlay(0.20) : (itemHoverHandler.hovered ? Theme.overlay(0.12) : "transparent"))
@@ -505,6 +560,10 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
+                            onPressedChanged: {
+                                if (root.hoveredTooltipItem === appButton) root.hoveredTooltipPressed = pressed;
+                            }
+
                             onClicked: function(mouse) {
                                 if (root.isIslandExpanded) {
                                     root.collapseIslandRequested();
@@ -520,53 +579,6 @@ Item {
                                     root.closeContextMenu();
                                     root.activateApp(modelData);
                                 }
-                            }
-                        }
-
-                        // OLED Floating Tooltip Badge
-                        Rectangle {
-                            id: tooltipBadge
-                            anchors.top: parent.bottom
-                            anchors.topMargin: 8
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            height: 24
-                            width: tooltipText.implicitWidth + 16
-                            radius: 12
-                            color: Theme.islandBackground
-                            border.width: 1
-                            border.color: Theme.islandBorder
-                            z: 300
-
-                            opacity: (itemHoverHandler.hovered && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
-                            scale: (itemHoverHandler.hovered && !mouseArea.pressed && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.85
-                            visible: opacity > 0.01
-
-                            Behavior on opacity {
-                                NumberAnimation { duration: Theme.animDurationTooltip }
-                            }
-                            Behavior on scale {
-                                NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutBack; easing.overshoot: Theme.animEntranceOvershoot }
-                            }
-
-                            // Subtle shadow under tooltip
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: parent.width + 6
-                                height: parent.height + 4
-                                radius: Theme.corner(14)
-                                color: Theme.islandShadow
-                                z: -1
-                                opacity: 0.5
-                            }
-
-                            Text {
-                                id: tooltipText
-                                anchors.centerIn: parent
-                                text: root.getAppTitle(modelData)
-                                font.family: Theme.fontFamily
-                                font.pixelSize: 11
-                                font.weight: Font.Medium
-                                color: Theme.textPrimary
                             }
                         }
                     }

@@ -1,12 +1,19 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
+import "../services/launcherExtras.js" as LauncherExtras
 
 Item {
     id: root
 
     property bool isOpen: false
     property string searchText: ""
+    // The search as typed. searchText is lower-cased for matching apps.
+    property string rawSearch: ""
+    // Set once the arrow keys move through the app list, so Enter opens that app and not the extra
+    property bool listNavigated: false
     property string selectedCategory: "All"
     property string viewMode: SettingsService.launcherDefaultView || "grid"
 
@@ -70,6 +77,59 @@ Item {
     y: geo.y
     width: geo.width
     height: geo.height
+
+    // File search: the words after the key ("f report"), or null when it is not asked for.
+    // While it is, the files take the place of the apps; app search itself is untouched.
+    readonly property var fileQuery: (SettingsService.launcherFileSearch && !root.isWindowMode) ? LauncherExtras.fileQuery(root.rawSearch, SettingsService.launcherFileSearchKey) : null
+    readonly property bool fileMode: fileQuery !== null
+    readonly property string homeDir: Quickshell.env("HOME") || ""
+
+    onFileQueryChanged: {
+        if (root.fileQuery === null) FileSearchService.clear();
+        else FileSearchService.search(root.fileQuery);
+        if (fileListView) fileListView.currentIndex = 0;
+    }
+
+    readonly property string fileStatus: {
+        if (!FileSearchService.available) return "Filehouse is not installed, so files cannot be searched";
+        if (FileSearchService.error !== "") return FileSearchService.error;
+        if (root.fileQuery === "") return "Type a name to search in " + SettingsService.launcherFileSearchRoot;
+        let n = FileSearchService.results.length;
+        if (FileSearchService.searching) return n > 0 ? n + " found, searching…" : "Searching…";
+        if (n === 0) return "No files found";
+        return (FileSearchService.more ? "First " + n + " shown" : n + " found") + "  ·  Enter opens, Alt+Enter shows in folder";
+    }
+
+    // Enter on a file opens it with its default app; Alt+Enter shows it in Filehouse
+    function openFile(item, showInFolder) {
+        if (!item) return;
+        if (showInFolder) {
+            Quickshell.execDetached(["filehouse", item.path]);
+        } else {
+            Qt.openUrlExternally(LauncherExtras.fileUrl(item.path));
+        }
+        root.close();
+    }
+
+    function openCurrentFile(showInFolder) {
+        let list = FileSearchService.results;
+        if (list.length === 0) return;
+        let idx = fileListView ? fileListView.currentIndex : 0;
+        if (idx < 0 || idx >= list.length) idx = 0;
+        root.openFile(list[idx], showInFolder);
+    }
+
+    // Calculator, unit conversion or web search answer for the typed text, shown above the
+    // apps. It never changes the app list itself.
+    readonly property var extra: {
+        if (root.isWindowMode || !root.rawSearch || root.fileMode) return null;
+        return LauncherExtras.answer(root.rawSearch, {
+            calculator: SettingsService.launcherCalculator,
+            conversion: SettingsService.launcherConversion,
+            web: SettingsService.launcherWebSearch,
+            shortcuts: SettingsService.launcherWebShortcuts
+        });
+    }
 
     readonly property var categoryList: [
         "All", "Recent", "Frequent", "Windows", "Internet", "Development", "Multimedia", "Graphics", "Office", "Games", "System", "Utilities"
@@ -191,6 +251,7 @@ Item {
         } else {
             searchInput.text = "";
             root.searchText = "";
+            root.rawSearch = "";
             focusTimer.stop();
         }
     }
@@ -205,6 +266,23 @@ Item {
                 searchInput.selectAll();
             }
         }
+    }
+
+    // Enter on the extra: open the search in the browser, or copy the result
+    function runExtra() {
+        let e = root.extra;
+        if (!e) return;
+        if (e.url) {
+            Qt.openUrlExternally(e.url);
+        } else if (e.copy) {
+            copyProc.command = ["wl-copy", "--", e.copy];
+            copyProc.running = true;
+        }
+        root.close();
+    }
+
+    Process {
+        id: copyProc
     }
 
     function launchCurrentApp() {
@@ -483,12 +561,26 @@ Item {
                             cursorVisible: activeFocus
                             onTextChanged: {
                                 root.searchText = text.toLowerCase();
+                                root.rawSearch = text;
+                                root.listNavigated = false;
                                 if (appGridView) appGridView.currentIndex = 0;
                                 if (appListView) appListView.currentIndex = 0;
                             }
 
+                            // Before the field's own Enter, for the file search and its Alt+Enter
+                            Keys.onReturnPressed: function(event) {
+                                if (!root.fileMode) { event.accepted = false; return; }
+                                root.openCurrentFile((event.modifiers & Qt.AltModifier) !== 0);
+                            }
+                            Keys.onEnterPressed: function(event) {
+                                if (!root.fileMode) { event.accepted = false; return; }
+                                root.openCurrentFile((event.modifiers & Qt.AltModifier) !== 0);
+                            }
+
                             onAccepted: {
-                                root.launchCurrentApp();
+                                if (root.fileMode) return;
+                                if (root.extra && !root.listNavigated) root.runExtra();
+                                else root.launchCurrentApp();
                             }
 
                             Keys.onEscapePressed: function(event) {
@@ -497,6 +589,15 @@ Item {
                             }
 
                             Keys.onDownPressed: function(event) {
+                                if (root.fileMode) {
+                                    if (fileListView.count > 0) {
+                                        fileListView.currentIndex = Math.min(fileListView.count - 1, fileListView.currentIndex + 1);
+                                        fileListView.positionViewAtIndex(fileListView.currentIndex, ListView.Contain);
+                                    }
+                                    event.accepted = true;
+                                    return;
+                                }
+                                root.listNavigated = true;
                                 if (root.isGrid) {
                                     if (appGridView && appGridView.count > 0) {
                                         appGridView.currentIndex = Math.min(appGridView.count - 1, appGridView.currentIndex + root.gridCols);
@@ -512,6 +613,15 @@ Item {
                             }
 
                             Keys.onUpPressed: function(event) {
+                                if (root.fileMode) {
+                                    if (fileListView.count > 0) {
+                                        fileListView.currentIndex = Math.max(0, fileListView.currentIndex - 1);
+                                        fileListView.positionViewAtIndex(fileListView.currentIndex, ListView.Contain);
+                                    }
+                                    event.accepted = true;
+                                    return;
+                                }
+                                root.listNavigated = true;
                                 if (root.isGrid) {
                                     if (appGridView && appGridView.count > 0) {
                                         appGridView.currentIndex = Math.max(0, appGridView.currentIndex - root.gridCols);
@@ -527,6 +637,9 @@ Item {
                             }
 
                             Keys.onRightPressed: function(event) {
+                                // Files are one column: the arrows move the text cursor
+                                if (root.fileMode) { event.accepted = false; return; }
+                                if (root.isGrid) root.listNavigated = true;
                                 if (root.isGrid && appGridView && appGridView.count > 0) {
                                     appGridView.currentIndex = Math.min(appGridView.count - 1, appGridView.currentIndex + 1);
                                     appGridView.positionViewAtIndex(appGridView.currentIndex, GridView.Contain);
@@ -535,6 +648,9 @@ Item {
                             }
 
                             Keys.onLeftPressed: function(event) {
+                                // Files are one column: the arrows move the text cursor
+                                if (root.fileMode) { event.accepted = false; return; }
+                                if (root.isGrid) root.listNavigated = true;
                                 if (root.isGrid && appGridView && appGridView.count > 0) {
                                     appGridView.currentIndex = Math.max(0, appGridView.currentIndex - 1);
                                     appGridView.positionViewAtIndex(appGridView.currentIndex, GridView.Contain);
@@ -651,6 +767,65 @@ Item {
                     }
                 }
 
+                // Calculator, conversion or web search answer
+                Rectangle {
+                    id: extraCard
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.extra ? 46 : 0
+                    visible: root.extra !== null
+                    radius: Theme.corner(12)
+                    color: extraMouse.containsMouse ? Theme.accentTint(0.22) : Theme.accentTint(root.listNavigated ? 0.08 : 0.16)
+                    border.width: 1
+                    border.color: Theme.accentTint(root.listNavigated ? 0.15 : 0.4)
+
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 10
+
+                        SvgIcon {
+                            name: root.extra ? (root.extra.kind === "web" ? "search" : (root.extra.kind === "convert" ? "refresh" : "bolt")) : "search"
+                            size: 16
+                            color: Theme.accent
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: root.extra ? root.extra.title : ""
+                                elide: Text.ElideRight
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 14
+                                font.weight: Font.DemiBold
+                                color: Theme.textPrimary
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: root.extra ? root.extra.subtitle : ""
+                                elide: Text.ElideRight
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 10
+                                color: Theme.textSecondary
+                            }
+                        }
+                    }
+
+                    MouseArea {
+                        id: extraMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.runExtra()
+                    }
+                }
+
                 // Main App Display Container
                 Item {
                     Layout.fillWidth: true
@@ -661,7 +836,7 @@ Item {
                         id: appGridView
                         anchors.fill: parent
                         anchors.bottomMargin: 6
-                        visible: root.isGrid && root.filteredApps.length > 0
+                        visible: root.isGrid && !root.fileMode && root.filteredApps.length > 0
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
                         currentIndex: 0
@@ -810,7 +985,7 @@ Item {
                         id: appListView
                         anchors.fill: parent
                         anchors.bottomMargin: 6
-                        visible: !root.isGrid && root.filteredApps.length > 0
+                        visible: !root.isGrid && !root.fileMode && root.filteredApps.length > 0
                         clip: true
                         spacing: 3
                         currentIndex: 0
@@ -989,10 +1164,108 @@ Item {
                         }
                     }
 
+                    // 3. File search results (from Filehouse), in place of the apps
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.bottomMargin: 6
+                        visible: root.fileMode
+                        spacing: 6
+
+                        Text {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 4
+                            text: root.fileStatus
+                            elide: Text.ElideRight
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 10
+                            color: (FileSearchService.error !== "" || !FileSearchService.available) ? Theme.accentOrange : Theme.textSecondary
+                        }
+
+                        ListView {
+                            id: fileListView
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            spacing: 3
+                            currentIndex: 0
+                            boundsBehavior: Flickable.StopAtBounds
+
+                            model: root.fileMode ? FileSearchService.results : []
+
+                            delegate: Rectangle {
+                                id: fileRow
+                                required property var modelData
+                                required property int index
+                                width: fileListView.width
+                                height: root.isCompact ? 34 : 42
+                                radius: Theme.corner(8)
+                                readonly property bool isSelected: index === fileListView.currentIndex
+
+                                color: isSelected ? Theme.accentTint(0.22) : (fileMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
+                                border.color: isSelected ? Theme.accentTint(0.5) : "transparent"
+                                border.width: isSelected ? 1 : 0
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 8
+                                    spacing: 10
+
+                                    Image {
+                                        Layout.preferredWidth: root.isCompact ? 22 : 28
+                                        Layout.preferredHeight: root.isCompact ? 22 : 28
+                                        source: Quickshell.iconPath(LauncherExtras.fileIconName(fileRow.modelData), fileRow.modelData.dir ? "folder" : "text-x-generic")
+                                        sourceSize.width: 64
+                                        sourceSize.height: 64
+                                        fillMode: Image.PreserveAspectFit
+                                        mipmap: true
+                                        smooth: true
+                                    }
+
+                                    Column {
+                                        Layout.fillWidth: true
+                                        spacing: 1
+
+                                        Text {
+                                            text: fileRow.modelData.name
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: root.isCompact ? 12 : 13
+                                            font.weight: fileRow.isSelected ? Font.DemiBold : Font.Medium
+                                            color: Theme.textPrimary
+                                            elide: Text.ElideMiddle
+                                            width: parent.width
+                                        }
+
+                                        Text {
+                                            text: LauncherExtras.shortFolder(fileRow.modelData.folder, root.homeDir)
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: 10
+                                            color: fileRow.isSelected ? Theme.overlay(0.8) : Theme.textSecondary
+                                            elide: Text.ElideMiddle
+                                            width: parent.width
+                                            visible: !root.isCompact
+                                        }
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: fileMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    onClicked: function(mouse) {
+                                        root.openFile(fileRow.modelData, mouse.button === Qt.RightButton || (mouse.modifiers & Qt.AltModifier) !== 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // Empty state when search or category yields no matches
                     Item {
                         anchors.fill: parent
-                        visible: root.filteredApps.length === 0
+                        visible: root.filteredApps.length === 0 && !root.extra && !root.fileMode
 
                         Column {
                             anchors.centerIn: parent

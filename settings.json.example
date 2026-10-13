@@ -85,6 +85,18 @@
   "launcherShowCategories": true,
   "launcherGridColumns": 4,
   "launcherShowGenericNames": true,
+  "launcherCalculator": true,
+  "launcherConversion": true,
+  "launcherWebSearch": true,
+  "launcherWebShortcuts": [
+    { "key": "g", "name": "Google", "url": "https://www.google.com/search?q=%s" },
+    { "key": "ddg", "name": "DuckDuckGo", "url": "https://duckduckgo.com/?q=%s" },
+    { "key": "w", "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search=%s" },
+    { "key": "yt", "name": "YouTube", "url": "https://www.youtube.com/results?search_query=%s" }
+  ],
+  "launcherFileSearch": false,
+  "launcherFileSearchKey": "f",
+  "launcherFileSearchRoot": "~",
   "clipboardMaxItems": 50,
   "clipboardSensitiveExpiry": 60,
   "clipboardIgnoredApps": []

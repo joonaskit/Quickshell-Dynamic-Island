@@ -582,6 +582,22 @@
         "opensuse": "gamemode",
         "debian": "gamemode"
       }
+    },
+    {
+      "id": "filehouse",
+      "name": "Filehouse",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "filehouse"
+        ]
+      },
+      "features": [
+        "File search in the launcher"
+      ],
+      "packages": {},
+      "note": "The companion file browser, with --search. See https://github.com/joonaskit/filehouse"
     }
   ]
 }

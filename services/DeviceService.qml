@@ -1,4 +1,5 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -54,6 +55,8 @@ Singleton {
         id: monitorProc
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/devices.py", "monitor"]
         running: true
+
+        Component.onCompleted: HelperService.watch("devices", "Device monitor", monitorProc)
 
         onRunningChanged: {
             if (!running) {
