@@ -211,7 +211,7 @@ SettingsCategory {
 
         SettingToggle {
             title: "File Search"
-            description: "Type " + SettingsService.launcherFileSearchKey + " and a name, such as " + SettingsService.launcherFileSearchKey + " report 2024, to find files and folders by name. Enter opens one, Alt+Enter shows it in its folder. Uses Filehouse" + (FileSearchService.available ? "" : ", which is not installed")
+            description: "Files and folders are found by name as you type, below the apps. Type " + SettingsService.launcherFileSearchKey + " first, such as " + SettingsService.launcherFileSearchKey + " report 2024, to list only files. Enter opens one, Alt+Enter shows it in its folder. Uses Filehouse" + (FileSearchService.available ? "" : ", which is not installed")
             iconName: "folder"
             iconColor: Theme.accentOrange
             checked: SettingsService.launcherFileSearch
