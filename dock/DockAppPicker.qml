@@ -43,7 +43,15 @@ Item {
 
     // Full size of the launcher; animates when the layout settings change
     property real finalWidth: gridCols >= 5 ? 540 : 460
-    property real finalHeight: isCompact ? 440 : 480
+    // Room above the dock (or the whole height beside a vertical dock), so the top is not cut off
+    readonly property real maxHeight: {
+        let h = root.parent ? root.parent.height : 1000;
+        if (root.isVertical) return h - 32;
+        let dockTop = root.dockCapsuleY > 0 ? root.dockCapsuleY : (h - Theme.dockHeight);
+        return dockTop - 32;
+    }
+    // Taller while apps and files are listed together
+    property real finalHeight: root.combinedFiles ? Math.min(isCompact ? 640 : 700, root.maxHeight) : (isCompact ? 440 : 480)
 
     Behavior on finalWidth {
         NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -84,21 +92,40 @@ Item {
     readonly property bool fileMode: fileQuery !== null
     readonly property string homeDir: Quickshell.env("HOME") || ""
 
-    onFileQueryChanged: {
-        if (root.fileQuery === null) FileSearchService.clear();
-        else FileSearchService.search(root.fileQuery);
+    // Plain typing also searches files when file search is on: the apps stay first and
+    // the files follow below a line. Calculator, conversion and web answers skip it.
+    readonly property string plainFileQuery: {
+        if (!SettingsService.launcherFileSearch || root.isWindowMode || root.fileMode || root.extra) return "";
+        if (root.selectedCategory === "Windows") return "";
+        let t = root.rawSearch ? root.rawSearch.trim() : "";
+        return t.length >= 2 ? t : "";
+    }
+    readonly property bool combinedFiles: plainFileQuery !== ""
+    // The text sent to Filehouse, or null when no file search is wanted
+    readonly property var fileSearchText: root.fileMode ? root.fileQuery : (root.combinedFiles ? root.plainFileQuery : null)
+    // Arrow keys move in the file list instead of the apps (combined view only)
+    property bool filesFocused: false
+
+    onFileSearchTextChanged: {
+        if (root.fileSearchText === null) FileSearchService.clear();
+        else FileSearchService.search(root.fileSearchText);
         if (fileListView) fileListView.currentIndex = 0;
+        root.filesFocused = false;
     }
 
     readonly property string fileStatus: {
         if (!FileSearchService.available) return "Filehouse is not installed, so files cannot be searched";
         if (FileSearchService.error !== "") return FileSearchService.error;
-        if (root.fileQuery === "") return "Type a name to search in " + SettingsService.launcherFileSearchRoot;
+        if (root.fileSearchText === "") return "Type a name to search in " + SettingsService.launcherFileSearchRoot;
         let n = FileSearchService.results.length;
         if (FileSearchService.searching) return n > 0 ? n + " found, searching…" : "Searching…";
         if (n === 0) return "No files found";
         return (FileSearchService.more ? "First " + n + " shown" : n + " found") + "  ·  Enter opens, Alt+Enter shows in folder";
     }
+
+    // Room kept at the bottom of the app area for the files in the combined view
+    readonly property real filePaneHeight: root.isCompact ? 200 : 236
+    readonly property real filePaneSpace: root.combinedFiles ? root.filePaneHeight + 12 : 0
 
     // Enter on a file opens it with its default app; Alt+Enter shows it in Filehouse
     function openFile(item, showInFolder) {
@@ -109,6 +136,46 @@ Item {
             Qt.openUrlExternally(LauncherExtras.fileUrl(item.path));
         }
         root.close();
+    }
+
+    // Enter in the combined view opens the file when it is selected, or when no app matched.
+    // Alt+Enter always shows the file in its folder.
+    function fileEnter(showInFolder) {
+        if (!root.combinedFiles || FileSearchService.results.length === 0) return false;
+        if (!root.filesFocused && root.filteredApps.length > 0) return false;
+        root.openCurrentFile(showInFolder);
+        return true;
+    }
+
+    // Down and Up in the combined view cross between the apps and the files.
+    // Returns false when the key should move inside the app list as usual.
+    function moveInCombined(dir) {
+        let files = FileSearchService.results.length;
+        if (root.filesFocused) {
+            if (dir > 0) {
+                fileListView.currentIndex = Math.min(files - 1, fileListView.currentIndex + 1);
+                fileListView.positionViewAtIndex(fileListView.currentIndex, ListView.Contain);
+            } else if (fileListView.currentIndex > 0) {
+                fileListView.currentIndex--;
+                fileListView.positionViewAtIndex(fileListView.currentIndex, ListView.Contain);
+            } else if (root.filteredApps.length > 0) {
+                root.filesFocused = false;
+            }
+            return true;
+        }
+        if (dir < 0 || files === 0) return false;
+        let apps = root.filteredApps.length;
+        let view = root.isGrid ? appGridView : appListView;
+        let step = root.isGrid ? root.gridCols : 1;
+        // On the last row of apps, Down goes on to the files
+        if (apps === 0 || Math.floor(view.currentIndex / step) >= Math.floor((apps - 1) / step)) {
+            root.filesFocused = true;
+            fileListView.currentIndex = 0;
+            fileListView.positionViewAtBeginning();
+            root.listNavigated = true;
+            return true;
+        }
+        return false;
     }
 
     function openCurrentFile(showInFolder) {
@@ -569,11 +636,17 @@ Item {
 
                             // Before the field's own Enter, for the file search and its Alt+Enter
                             Keys.onReturnPressed: function(event) {
-                                if (!root.fileMode) { event.accepted = false; return; }
+                                if (!root.fileMode) {
+                                    if (!root.fileEnter((event.modifiers & Qt.AltModifier) !== 0)) event.accepted = false;
+                                    return;
+                                }
                                 root.openCurrentFile((event.modifiers & Qt.AltModifier) !== 0);
                             }
                             Keys.onEnterPressed: function(event) {
-                                if (!root.fileMode) { event.accepted = false; return; }
+                                if (!root.fileMode) {
+                                    if (!root.fileEnter((event.modifiers & Qt.AltModifier) !== 0)) event.accepted = false;
+                                    return;
+                                }
                                 root.openCurrentFile((event.modifiers & Qt.AltModifier) !== 0);
                             }
 
@@ -589,6 +662,7 @@ Item {
                             }
 
                             Keys.onDownPressed: function(event) {
+                                if (root.combinedFiles && root.moveInCombined(1)) { event.accepted = true; return; }
                                 if (root.fileMode) {
                                     if (fileListView.count > 0) {
                                         fileListView.currentIndex = Math.min(fileListView.count - 1, fileListView.currentIndex + 1);
@@ -613,6 +687,7 @@ Item {
                             }
 
                             Keys.onUpPressed: function(event) {
+                                if (root.combinedFiles && root.moveInCombined(-1)) { event.accepted = true; return; }
                                 if (root.fileMode) {
                                     if (fileListView.count > 0) {
                                         fileListView.currentIndex = Math.max(0, fileListView.currentIndex - 1);
@@ -835,7 +910,7 @@ Item {
                     GridView {
                         id: appGridView
                         anchors.fill: parent
-                        anchors.bottomMargin: 6
+                        anchors.bottomMargin: 6 + root.filePaneSpace
                         visible: root.isGrid && !root.fileMode && root.filteredApps.length > 0
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
@@ -851,7 +926,7 @@ Item {
                             width: appGridView.cellWidth
                             height: appGridView.cellHeight
 
-                            readonly property bool isSelected: index === appGridView.currentIndex
+                            readonly property bool isSelected: index === appGridView.currentIndex && !root.filesFocused
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
                             Rectangle {
@@ -984,7 +1059,7 @@ Item {
                     ListView {
                         id: appListView
                         anchors.fill: parent
-                        anchors.bottomMargin: 6
+                        anchors.bottomMargin: 6 + root.filePaneSpace
                         visible: !root.isGrid && !root.fileMode && root.filteredApps.length > 0
                         clip: true
                         spacing: 3
@@ -998,7 +1073,7 @@ Item {
                             width: appListView.width
                             height: root.isCompact ? 34 : 42
                             radius: Theme.corner(8)
-                            readonly property bool isSelected: index === appListView.currentIndex
+                            readonly property bool isSelected: index === appListView.currentIndex && !root.filesFocused
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
                             color: isSelected ? Theme.accentTint(0.22) : (itemMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
@@ -1164,11 +1239,26 @@ Item {
                         }
                     }
 
-                    // 3. File search results (from Filehouse), in place of the apps
+                    // 3. File search results (from Filehouse): in place of the apps for the
+                    // key, or under the apps, below a line, while typing normally
+                    Rectangle {
+                        visible: root.combinedFiles
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: filePane.top
+                        anchors.bottomMargin: 5
+                        height: 1
+                        color: Theme.overlay(0.12)
+                    }
+
                     ColumnLayout {
-                        anchors.fill: parent
+                        id: filePane
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
                         anchors.bottomMargin: 6
-                        visible: root.fileMode
+                        height: root.combinedFiles ? root.filePaneHeight : parent.height - 6
+                        visible: root.fileMode || root.combinedFiles
                         spacing: 6
 
                         Text {
@@ -1190,7 +1280,7 @@ Item {
                             currentIndex: 0
                             boundsBehavior: Flickable.StopAtBounds
 
-                            model: root.fileMode ? FileSearchService.results : []
+                            model: root.fileSearchText !== null ? FileSearchService.results : []
 
                             delegate: Rectangle {
                                 id: fileRow
@@ -1199,7 +1289,7 @@ Item {
                                 width: fileListView.width
                                 height: root.isCompact ? 34 : 42
                                 radius: Theme.corner(8)
-                                readonly property bool isSelected: index === fileListView.currentIndex
+                                readonly property bool isSelected: index === fileListView.currentIndex && (!root.combinedFiles || root.filesFocused)
 
                                 color: isSelected ? Theme.accentTint(0.22) : (fileMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
                                 border.color: isSelected ? Theme.accentTint(0.5) : "transparent"
@@ -1265,7 +1355,7 @@ Item {
                     // Empty state when search or category yields no matches
                     Item {
                         anchors.fill: parent
-                        visible: root.filteredApps.length === 0 && !root.extra && !root.fileMode
+                        visible: root.filteredApps.length === 0 && !root.extra && !root.fileMode && !root.combinedFiles
 
                         Column {
                             anchors.centerIn: parent

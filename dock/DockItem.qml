@@ -228,15 +228,24 @@ Item {
         Behavior on height { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
     }
 
-    // Running indicator dot / active pill
-    Rectangle {
+    // Running indicator: one dot per window (up to maxIndicatorDots), or an
+    // active pill when a single window has focus. The accent colour marks focus.
+    Item {
         id: runningDot
         z: 2
 
-        width: root.isVertical ? 4 : (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4))
-        height: root.isVertical ? (root.isFocused ? 14 : (root.windowCount > 1 ? 8 : 4)) : 4
-        radius: 2
-        color: root.isFocused ? Theme.accent : Theme.overlay(0.75)
+        readonly property int maxIndicatorDots: 3
+        readonly property int dotSize: 4
+        readonly property int dotSpacing: 3
+        readonly property bool multi: root.windowCount > 1
+        readonly property int dotCount: multi ? Math.min(root.windowCount, maxIndicatorDots) : 1
+        // Length along the dock's main axis
+        readonly property real span: multi ? dotCount * dotSize + (dotCount - 1) * dotSpacing
+                                           : (root.isFocused && !root.isVertical ? 14 : dotSize)
+        readonly property real vSpan: multi ? span : (root.isFocused ? 14 : dotSize)
+
+        width: root.isVertical ? dotSize : span
+        height: root.isVertical ? vSpan : dotSize
         opacity: root.isRunning ? 1.0 : 0.0
 
         x: root.isVertical ? (root.dockPosition === "left" ? 4 : (parent.width - width - 4)) : Math.round((parent.width - width) / 2)
@@ -251,8 +260,27 @@ Item {
         Behavior on height {
             NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
         }
-        Behavior on color {
-            ColorAnimation { duration: Theme.animDurationFast }
+
+        Repeater {
+            model: runningDot.dotCount
+
+            Rectangle {
+                required property int index
+                readonly property bool single: !runningDot.multi
+
+                // A lone dot stretches into the focus pill; several stay round dots.
+                width: single ? parent.width : runningDot.dotSize
+                height: single ? parent.height : runningDot.dotSize
+                radius: 2
+                color: root.isFocused ? Theme.accent : Theme.overlay(0.75)
+
+                x: root.isVertical ? 0 : (single ? 0 : index * (runningDot.dotSize + runningDot.dotSpacing))
+                y: root.isVertical ? (single ? 0 : index * (runningDot.dotSize + runningDot.dotSpacing)) : 0
+
+                Behavior on color {
+                    ColorAnimation { duration: Theme.animDurationFast }
+                }
+            }
         }
     }
 
