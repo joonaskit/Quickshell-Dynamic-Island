@@ -85,6 +85,7 @@
   "launcherShowCategories": true,
   "launcherGridColumns": 4,
   "launcherShowGenericNames": true,
+  "launcherSpotlight": true,
   "launcherCalculator": true,
   "launcherConversion": true,
   "launcherWebSearch": true,

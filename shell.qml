@@ -164,5 +164,14 @@ ShellRoot {
             DockWindow {}
         }
     }
+
+    // Centred launcher, used while the dock is hidden
+    Variants {
+        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+
+        delegate: Component {
+            SpotlightWindow {}
+        }
+    }
     
 }

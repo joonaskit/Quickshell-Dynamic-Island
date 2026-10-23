@@ -474,6 +474,8 @@ The background absorbs hover over the whole popup. The dock's magnification trac
 | `DockLauncherMenu.qml` | Launcher button's right-click menu | `"start"` |
 | `DockBar.qml` (`trashMenu`) | Trash menu | `"end"` |
 
+While the dock is hidden, the launcher opens in `SpotlightWindow.qml` instead, with `centered: true` on `DockAppPicker`. It does not use the flyout geometry there: it starts as the island pill (its compact size, or the top bar while a window is maximized) and grows down into the middle of the screen in the island's colours, with the island's spring (`Theme.animDuration`, `Theme.animEasing`). The content fades in over the last 60%. It shrinks back into the pill to close (`animDurationFast`, `OutCubic`). Its top stays put when it grows for file results.
+
 ---
 
 ## Inconsistencies — Resolution Log
