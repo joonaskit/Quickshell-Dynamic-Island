@@ -57,6 +57,15 @@ case "$1" in
         shift
         exec python3 "$DIR/scripts/island_run.py" "$@"
         ;;
+    sandbox|--sandbox)
+        # A private bus with its own activities bridge, for trying the D-Bus helpers
+        if ! command -v dbus-run-session >/dev/null 2>&1; then
+            echo "dbus-run-session was not found. Install dbus (dbus-daemon or dbus-broker) to use this." >&2
+            exit 1
+        fi
+        shift
+        ISLAND_SANDBOX_BUS=1 exec dbus-run-session --config-file="$DIR/scripts/sandbox_bus.conf" -- bash "$DIR/scripts/sandbox.sh" "$@"
+        ;;
     export|--export)
         shift
         exec python3 "$DIR/scripts/settings_backup.py" export "$@"

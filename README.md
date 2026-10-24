@@ -68,6 +68,7 @@ You can also skip the installer: install the requirements above, clone the repos
 | `./run.sh -k` | Stop |
 | `./run.sh --check` | Check for missing tools and services |
 | `./run.sh --run <command>` | Run a command and show its progress in the island, see `docs/ACTIVITIES_API.md`. The installer also adds this as `island-run` (skip it with `--no-link`) |
+| `./run.sh --sandbox [command]` | Run a command (or a shell) on a private D-Bus bus with its own activities bridge, for trying the D-Bus helpers without touching the running island |
 | `./run.sh --export <file>` | Save the configuration to one file |
 | `./run.sh --import <file>` | Load a configuration file, see below |
 | `./run.sh -l` | Toggle the app launcher |
@@ -135,9 +136,11 @@ Copies and moves from Dolphin and other KDE apps show up there too, in place of 
 
 ## Development
 
-Run `./lint.sh` before committing. It runs `qmllint` on the QML files (settings in `.qmllint.ini`) and `ruff` on the Python files (settings in `ruff.toml`). It needs the Qt 6 declarative tools for `qmllint`, and either `ruff` or `uv` for the Python check.
+Run `./lint.sh` before committing. It runs `qmllint` on the QML files, untracked ones included (settings in `.qmllint.ini`), and `ruff` on the Python files (settings in `ruff.toml`). It needs the Qt 6 declarative tools for `qmllint`, and either `ruff` or `uv` for the Python check.
 
 `./test.sh` runs the unit tests in `tests/`: the QML ones headless with `qmltestrunner`, and the Python ones with `unittest`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js`, the reading of older `settings.json` formats in `services/settingsMigration.js`, and the clipboard history logic in `services/clipboardHistory.js` and `scripts/clipboard_tracker.py`. The UI is checked by hand in the running shell.
+
+GitHub Actions runs both on every push and on pull requests to `main` (`.github/workflows/check.yml`), in a Fedora container so `qmllint` can resolve the Quickshell types.
 
 ## License
 

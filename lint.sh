@@ -11,7 +11,10 @@ status=0
 QMLLINT="$(command -v qmllint qmllint6 /usr/lib64/qt6/bin/qmllint /usr/lib/qt6/bin/qmllint 2>/dev/null | head -n 1)"
 if [ -n "$QMLLINT" ]; then
     echo "== qmllint"
-    git ls-files -z '*.qml' | xargs -0 "$QMLLINT" || status=1
+    # Tracked and untracked (not ignored) files, minus any deleted but not yet committed
+    git ls-files -z --cached --others --exclude-standard '*.qml' \
+        | while IFS= read -r -d '' f; do [ -f "$f" ] && printf '%s\0' "$f"; done \
+        | xargs -0 "$QMLLINT" || status=1
 else
     echo "qmllint not found (install the Qt 6 declarative tools)" >&2
     status=1

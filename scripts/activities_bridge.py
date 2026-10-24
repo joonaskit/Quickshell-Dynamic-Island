@@ -18,8 +18,8 @@ import sys
 import time
 
 import dbus
-import dbus.mainloop.glib
 import dbus.lowlevel
+import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
 
