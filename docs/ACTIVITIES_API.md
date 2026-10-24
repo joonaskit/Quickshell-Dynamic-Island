@@ -147,7 +147,7 @@ The output is shown on screen, so use `--no-text` when a command prints somethin
 
 - `scripts/kio_jobs.py` is a client of this API that shows copies and moves from KDE apps, see `docs/KIO_JOBS.md`.
 - `scripts/activities_core.py`: validation, limits, lifetime and ordering, with no D-Bus. Tested in `tests/test_activities_core.py`.
-- `scripts/island_run.py` and `scripts/island_run_core.py`: the command wrapper above. The output parsing and the end states have no D-Bus and are tested in `tests/test_island_run_core.py`.
+- `scripts/island_run.py` and `scripts/island_run_core.py`: the command wrapper above. The output parsing and the end states have no D-Bus and are tested in `tests/test_island_run_core.py`. The user starts it, so `stop_helpers` in `run.sh` leaves it running. For its `island-run` link, see `docs/INSTALLER.md`.
 - `scripts/activities_bridge.py`: the D-Bus interface. Talks to the shell with one JSON object per line: the full activity list on stdout after every change, and the user's actions and dismissals on stdin.
 - `services/ActivityService.qml`: runs the bridge (restarting it if it dies) and holds the list.
 - `island/CompactActivityView.qml` and `widgets/ActivitiesWidget.qml`: the compact island and the expanded view card.

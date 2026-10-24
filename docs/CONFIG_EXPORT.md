@@ -44,3 +44,9 @@ The `settings` section leaves out the keys that belong to one machine (`hueBridg
 - Machine-specific keys missing from the file keep the values the importing machine already has.
 - Before writing, the files about to be replaced are copied to `$XDG_STATE_HOME/quickshell-island/backups/<time>/` (`~/.local/state` when the variable is unset).
 - Pinned apps whose desktop file is not installed are still imported, and reported as a note.
+
+## Implementation
+
+- `scripts/settings_backup.py` writes and reads the file, tested by `tests/test_settings_backup.py`. `services/BackupService.qml` runs it for the Backup section of the About settings page.
+- After an import the running shell must re-read the files: `SettingsService.reloadFromDisk` and `DockService.reloadConfig`, or the `config reload` IPC call.
+- The machine-specific keys are `PRIVATE_KEYS` in the script. A new one goes there and in the list above.

@@ -119,6 +119,8 @@ The file format is described in `docs/CONFIG_EXPORT.md`.
 | `docs/KDE_THEME.md` | How the shell's colours are applied to KDE apps |
 | `docs/ACTIVITIES_API.md` | D-Bus API for apps to show progress and status in the island |
 | `docs/KIO_JOBS.md` | How copies and moves from Dolphin and other KDE apps reach the island |
+| `docs/SETTINGS.md`, `LAUNCHER.md`, `TOP_BAR.md`, `HELPERS.md`, `INSTALLER.md`, `CLIPBOARD.md`, `ONBOARDING.md` | Developer notes for those parts of the shell |
+| `CODING_STANDARDS.md` | Rules for writing and reviewing changes |
 | `examples/` | Reference code for companion apps, such as a theme reader and an activities client |
 | `tests/` | Unit tests, run with `./test.sh` |
 
