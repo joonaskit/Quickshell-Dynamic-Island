@@ -72,7 +72,7 @@ def parse_color(value):
 
 def mix(a, b, amount):
     """`a` moved `amount` (0 to 1) of the way towards `b`."""
-    return tuple(round(x + (y - x) * amount) for x, y in zip(a, b))
+    return tuple(round(x + (y - x) * amount) for x, y in zip(a, b, strict=True))
 
 
 def rgb(color):
@@ -298,9 +298,9 @@ def run_apply_tool(name):
     try:
         result = subprocess.run([APPLY_TOOL, name], capture_output=True, text=True, timeout=60)
     except FileNotFoundError:
-        raise SchemeError(APPLY_TOOL + " is not installed")
+        raise SchemeError(APPLY_TOOL + " is not installed") from None
     except subprocess.TimeoutExpired:
-        raise SchemeError(APPLY_TOOL + " did not finish")
+        raise SchemeError(APPLY_TOOL + " did not finish") from None
     if result.returncode != 0:
         raise SchemeError((result.stderr or result.stdout).strip() or APPLY_TOOL + " failed")
 

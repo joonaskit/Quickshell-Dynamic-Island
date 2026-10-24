@@ -8,7 +8,7 @@ import QtQuick.Shapes
 Item {
     id: root
 
-    property Item body: null
+    property Rectangle body: null
     property bool active: Theme.notchStyle
     property color color: body ? body.color : Theme.islandBackground
 

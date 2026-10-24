@@ -1,0 +1,26 @@
+# Runs ./lint.sh and ./test.sh. Fedora packages Quickshell, so qmllint can resolve its types.
+name: Lint and test
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: fedora:44
+    steps:
+      - name: Install tools
+        run: >
+          dnf install -y --setopt=install_weak_deps=False
+          git quickshell qt6-qtdeclarative-devel qt6-qt5compat ruff
+          python3 python3-dbus python3-gobject dbus-daemon
+      - uses: actions/checkout@v4
+      - name: Trust the checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Lint
+        run: ./lint.sh
+      - name: Test
+        if: success() || failure()
+        run: ./test.sh

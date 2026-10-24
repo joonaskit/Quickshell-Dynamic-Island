@@ -1,5 +1,7 @@
 # Lint settings for the Python in scripts/, tests/ and examples/, used by lint.sh
 target-version = "py311"
+# The helpers import each other from scripts/, so count those modules as first-party
+src = [".", "scripts"]
 
 [lint]
 # pyflakes, pycodestyle, bugbear, import sorting

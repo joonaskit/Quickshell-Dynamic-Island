@@ -25,10 +25,13 @@ PanelWindow {
         top: true
         left: true
     }
+    // The linter cannot resolve the type of Quickshell's margins
+    // qmllint disable unresolved-type
     margins {
         left: Math.max(0, SettingsService.windowX)
         top: Math.max(0, SettingsService.windowY)
     }
+    // qmllint enable unresolved-type
     exclusionMode: ExclusionMode.Ignore
 
     WlrLayershell.layer: WlrLayer.Top

@@ -78,11 +78,11 @@ Item {
     function pointerOnDock() {
         if (dockMouseTracker.containsMouse || launchpadMouse.containsMouse || downloadsMouse.containsMouse || trashMouse.containsMouse) return true;
         for (let i = 0; i < pinnedRepeater.count; i++) {
-            let item = pinnedRepeater.itemAt(i);
+            let item = pinnedRepeater.itemAt(i) as DockItem;
             if (item && item.isHovered) return true;
         }
         for (let j = 0; j < unpinnedRepeater.count; j++) {
-            let item = unpinnedRepeater.itemAt(j);
+            let item = unpinnedRepeater.itemAt(j) as DockItem;
             if (item && item.isHovered) return true;
         }
         return false;
