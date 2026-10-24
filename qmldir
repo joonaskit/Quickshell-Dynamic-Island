@@ -120,6 +120,7 @@ singleton ThemeExportService 1.0 services/ThemeExportService.qml
 singleton KdeThemeService 1.0 services/KdeThemeService.qml
 DockLauncherMenu 1.0 dock/DockLauncherMenu.qml
 singleton ActivityService 1.0 services/ActivityService.qml
+singleton KioJobsService 1.0 services/KioJobsService.qml
 CompactActivityView 1.0 island/CompactActivityView.qml
 ActivitiesWidget 1.0 widgets/ActivitiesWidget.qml
 ActivityIcon 1.0 components/ActivityIcon.qml

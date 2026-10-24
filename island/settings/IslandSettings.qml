@@ -103,6 +103,23 @@ SettingsCategory {
 
         SettingDivider {}
 
+        SettingToggle {
+            readonly property bool shown: SettingsService.showActivitiesInPill || SettingsService.isWidgetEnabled("activities")
+            title: "Show File Copy Progress"
+            description: shown ? "Copies and moves from Dolphin and other KDE apps, in place of their own progress window"
+                               : "Turn on App Activities, in the island or as a card, to use this"
+            iconName: "download"
+            iconColor: Theme.accentGreen
+            isSubOption: true
+            enabled: shown
+            checked: SettingsService.kioJobActivities
+            onToggled: function(val) {
+                SettingsService.setSetting("kioJobActivities", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 2. Morph to Top Bar When Maximized
         SettingToggle {
             title: "Morph to Top Bar When Windows Maximized"

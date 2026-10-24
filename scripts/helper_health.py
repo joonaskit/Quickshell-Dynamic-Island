@@ -22,6 +22,7 @@ LONG_RUNNING = {
     "hardware_stats.py": None,
     "clipboard_tracker.py": None,
     "activities_bridge.py": None,
+    "kio_jobs.py": None,
     "devices.py": "monitor",
 }
 

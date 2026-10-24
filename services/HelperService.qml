@@ -11,7 +11,8 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // One entry per helper: { id, name, running, starts, crashes, lastExit }
+    // One entry per helper: { id, name, running, starts, crashes, lastExit, off, note }.
+    // off is a helper the user turned off, note a word on how a running one is doing
     property var entries: []
     // Helpers running that this shell did not start: [{ pid, script }]
     property var stale: []
@@ -20,7 +21,7 @@ Singleton {
 
     readonly property int problemCount: {
         let n = root.stale.length;
-        for (let e of root.entries) if (!e.running || e.crashes > 0) n++;
+        for (let e of root.entries) if (!e.off && (!e.running || e.crashes > 0)) n++;
         return n;
     }
 
@@ -35,6 +36,11 @@ Singleton {
         root.update(id, { name: name, running: proc.running, starts: proc.running ? 1 : 0, crashes: 0, lastExit: null });
         proc.runningChanged.connect(() => root.onRunningChanged(id));
         proc.exited.connect((code, status) => root.onExited(id, code, status));
+    }
+
+    // Sets off or note for a helper that can be turned off or that reports how it is doing
+    function setStatus(id, fields) {
+        if (root.find(id)) root.update(id, fields);
     }
 
     function find(id) {
@@ -58,7 +64,7 @@ Singleton {
     function onExited(id, code, status) {
         let entry = root.find(id);
         if (!entry) return;
-        let expected = !!root.stopping[id];
+        let expected = !!root.stopping[id] || !!entry.off;
         root.update(id, {
             running: false,
             crashes: expected ? entry.crashes : entry.crashes + 1,
@@ -67,9 +73,10 @@ Singleton {
     }
 
     function statusText(e) {
+        if (e.off) return "Off";
         if (!e.running) return e.lastExit ? "Stopped (" + e.lastExit + ")" : "Not running";
         let restarts = e.starts - 1;
-        if (restarts <= 0) return "Running";
+        if (restarts <= 0) return e.note ? e.note : "Running";
         return "Running, restarted " + restarts + (restarts === 1 ? " time" : " times");
     }
 
@@ -77,6 +84,7 @@ Singleton {
     // do the same, so a helper that is already back is left alone.
     function restartAll() {
         for (let id in root.procs) {
+            if (root.find(id).off) continue;
             root.stopping[id] = true;
             root.procs[id].running = false;
         }
@@ -90,6 +98,7 @@ Singleton {
         onTriggered: {
             for (let id in root.procs) {
                 root.stopping[id] = false;
+                if (root.find(id).off) continue;
                 if (!root.procs[id].running) root.procs[id].running = true;
             }
             root.notice = "Helpers restarted";

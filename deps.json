@@ -92,7 +92,8 @@
       },
       "features": [
         "Window tracking for the dock and the active-app pill",
-        "Activities API for other apps"
+        "Activities API for other apps",
+        "File copy progress from KDE apps"
       ],
       "packages": {
         "arch": "python-dbus",
@@ -111,7 +112,8 @@
       },
       "features": [
         "Window tracking for the dock and the active-app pill",
-        "Activities API for other apps"
+        "Activities API for other apps",
+        "File copy progress from KDE apps"
       ],
       "packages": {
         "arch": "python-gobject",

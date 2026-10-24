@@ -100,6 +100,8 @@ Singleton {
     property bool showDesktopOsd: true
     property bool showTimerInPill: true
     property bool showActivitiesInPill: true
+    // Copies and moves from KDE apps as activities (KioJobsService)
+    property bool kioJobActivities: true
 
     // Expanded island widgets: id -> enabled. Ids missing here use the
     // registry default (see WidgetRegistry).
@@ -323,6 +325,7 @@ Singleton {
         if (data.showDesktopOsd !== undefined) root.showDesktopOsd = !!data.showDesktopOsd;
         if (data.showTimerInPill !== undefined) root.showTimerInPill = !!data.showTimerInPill;
         if (data.showActivitiesInPill !== undefined) root.showActivitiesInPill = !!data.showActivitiesInPill;
+        if (data.kioJobActivities !== undefined) root.kioJobActivities = !!data.kioJobActivities;
 
         // Also reads the per-widget keys used by older configs
         root.widgets = SettingsMigration.widgetStates(data, WidgetRegistry.widgets.map(w => w.id));
@@ -550,6 +553,7 @@ Singleton {
         root.showDesktopOsd = true;
         root.showTimerInPill = true;
         root.showActivitiesInPill = true;
+        root.kioJobActivities = true;
 
         root.widgets = {};
         root.widgetOrder = [];
@@ -671,6 +675,7 @@ Singleton {
             "showDesktopOsd": root.showDesktopOsd,
             "showTimerInPill": root.showTimerInPill,
             "showActivitiesInPill": root.showActivitiesInPill,
+            "kioJobActivities": root.kioJobActivities,
             "widgets": root.widgetStates(),
             "widgetOrder": root.widgetOrder,
             "launcherDefaultView": root.launcherDefaultView,
