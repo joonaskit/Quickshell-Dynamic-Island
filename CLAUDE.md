@@ -47,6 +47,7 @@ QML desktop shell for KDE Plasma (Wayland), built with Quickshell: a morphing to
 
 - `settings.json` and `dock_pinned.json` are the user's live config and are gitignored. Never overwrite or commit them.
 - Put new default keys in the `.example` files.
+- A new `settings.json` key needs its default in `settings.json.example` and, in `SettingsService.qml`, a property, a load line in `applySettings`, a reset in `resetDefaults` and an entry in `saveSettings`. `tests/test_settings_keys.py` checks all five; keys handled differently on purpose go in its allow-lists.
 
 ## Git
 
