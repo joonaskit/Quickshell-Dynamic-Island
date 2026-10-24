@@ -80,6 +80,11 @@ Item {
         }
     }
 
+    NotchEars {
+        body: pillBackground
+        active: Theme.notchStyle && !root.isTopBarMode
+    }
+
     // Pill Capsule Background
     Rectangle {
         id: pillBackground
@@ -87,7 +92,9 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: root.targetWidth
         height: root.pillHeight
-        radius: root.isTopBarMode ? Theme.px(13) : Theme.compactRadius
+        radius: root.isTopBarMode ? Theme.px(13) : (Theme.notchStyle ? Theme.notchRadius : Theme.compactRadius)
+        topLeftRadius: (Theme.notchStyle && !root.isTopBarMode) ? 0 : radius
+        topRightRadius: (Theme.notchStyle && !root.isTopBarMode) ? 0 : radius
         clip: false
 
         HoverHandler {
@@ -96,9 +103,9 @@ Item {
         }
 
         // Frosted glass appearance
-        color: root.isTopBarMode ? Theme.overlay(0.08) : (Theme.isLight ? Qt.rgba(0.97, 0.95, 0.92, 0.8) : Qt.rgba(0.12, 0.12, 0.14, 0.65))
+        color: root.isTopBarMode ? Theme.overlay(0.08) : Theme.pillFrosted
         border.width: 1
-        border.color: root.isTopBarMode ? Theme.overlay(0.06) : Theme.overlay(0.09)
+        border.color: root.isTopBarMode ? Theme.overlay(0.06) : Theme.pillFrostedBorder
 
         Behavior on width {
             NumberAnimation {

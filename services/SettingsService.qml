@@ -28,6 +28,13 @@ Singleton {
     property string kdeColorBase: "gray"
     // Name of an entry in Theme.cornerChoices
     property string cornerStyle: "default"
+    // "floating" or "notch": whether the island's pills hang below the top edge or hug it
+    property string pillStyle: "floating"
+    // Notch style: the app tray and the virtual desktops sit half behind their neighbour,
+    // like folder tabs, and slide out under the pointer
+    property bool tuckPills: true
+    // The status icons in the frosted look of the side pills instead of solid
+    property bool frostedStatusIcons: false
     property bool use24Hour: true
     property bool showSeconds: false
     property bool showBattery: true
@@ -184,7 +191,7 @@ Singleton {
     // Process to read settings.json on startup, and again after an import
     Process {
         id: loadProc
-        command: ["python3", "-c", "import sys, os; p=sys.argv[1]; sys.stdout.write(open(p).read() if os.path.exists(p) else '')", root.settingsFilePath]
+        command: ["python3", "-c", "import sys, os, time; p=sys.argv[1]\nt = open(p).read() if os.path.exists(p) else ''\nif not t.strip() and os.path.exists(p):\n    time.sleep(0.3)\n    t = open(p).read()\nsys.stdout.write(t)", root.settingsFilePath]
         running: true
 
         stdout: StdioCollector {
@@ -236,7 +243,11 @@ Singleton {
         if (data.kdeColorScheme !== undefined) root.kdeColorScheme = !!data.kdeColorScheme;
         if (data.kdeColorBase === "gray" || data.kdeColorBase === "black") root.kdeColorBase = data.kdeColorBase;
 
+        if (data.cornerStyle === "breeze") data.cornerStyle = "kde";
         if (data.cornerStyle !== undefined && Theme.cornerChoices.some(c => c.name === data.cornerStyle)) root.cornerStyle = data.cornerStyle;
+        if (data.pillStyle === "floating" || data.pillStyle === "notch") root.pillStyle = data.pillStyle;
+        if (data.tuckPills !== undefined) root.tuckPills = !!data.tuckPills;
+        if (data.frostedStatusIcons !== undefined) root.frostedStatusIcons = !!data.frostedStatusIcons;
 
         if (data.use24Hour !== undefined) root.use24Hour = !!data.use24Hour;
         if (data.showSeconds !== undefined) root.showSeconds = !!data.showSeconds;
@@ -368,6 +379,7 @@ Singleton {
         Theme.fontDisplayChoice = root.fontDisplayFamily;
         Theme.scheme = root.colorScheme;
         Theme.cornerStyle = root.cornerStyle;
+        Theme.pillStyle = root.pillStyle;
         Theme.accentName = root.accentColor;
         Theme.use24Hour = root.use24Hour;
         Theme.showSeconds = root.showSeconds;
@@ -470,6 +482,9 @@ Singleton {
         root.kdeColorScheme = false;
         root.kdeColorBase = "gray";
         root.cornerStyle = "default";
+        root.pillStyle = "floating";
+        root.tuckPills = true;
+        root.frostedStatusIcons = false;
         root.use24Hour = true;
         root.showSeconds = false;
         root.showBattery = true;
@@ -590,6 +605,9 @@ Singleton {
             "kdeColorScheme": root.kdeColorScheme,
             "kdeColorBase": root.kdeColorBase,
             "cornerStyle": root.cornerStyle,
+            "pillStyle": root.pillStyle,
+            "tuckPills": root.tuckPills,
+            "frostedStatusIcons": root.frostedStatusIcons,
             "use24Hour": root.use24Hour,
             "showSeconds": root.showSeconds,
             "showBattery": root.showBattery,
@@ -675,7 +693,7 @@ Singleton {
             "clipboardIgnoredApps": root.clipboardIgnoredApps
         };
         let jsonStr = JSON.stringify(data, null, 2);
-        saveProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.settingsFilePath, jsonStr];
+        saveProc.command = ["python3", "-c", "import sys, os; p=sys.argv[1]; t=p+'.tmp'; open(t, 'w').write(sys.argv[2]); os.replace(t, p)", root.settingsFilePath, jsonStr];
         saveProc.running = true;
         root.lastSavedTime = Qt.formatTime(new Date(), "hh:mm:ss");
     }

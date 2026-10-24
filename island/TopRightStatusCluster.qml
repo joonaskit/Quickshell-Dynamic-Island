@@ -953,12 +953,13 @@ Item {
     }
 
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode) return 0;
+        if (root.isTopBarMode || Theme.notchStyle) return 0;
         return root.anyMenuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     readonly property real targetBottomRadius: {
         if (root.isTopBarMode) return root.anyMenuOpen ? Theme.px(18) : 0;
+        if (Theme.notchStyle && !root.anyMenuOpen) return Theme.notchRadius;
         return root.anyMenuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
@@ -1017,6 +1018,11 @@ Item {
         }
     }
 
+    NotchEars {
+        body: clusterBackground
+        active: Theme.notchStyle && !root.isTopBarMode
+    }
+
     // Morphed Cluster Background capsule: Exactly matches the Island physics and styling
     Rectangle {
         id: clusterBackground
@@ -1037,9 +1043,11 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.anyMenuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
+        // Solid, or frosted like the side pills while compact (frostedStatusIcons); a menu is always solid, for reading
+        readonly property bool frosted: SettingsService.frostedStatusIcons && !root.anyMenuOpen
+        color: (root.isTopBarMode && !root.anyMenuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : (frosted ? Theme.pillFrosted : Theme.islandBackground)
         border.width: root.isTopBarMode ? 0 : 1
-        border.color: Theme.islandBorder
+        border.color: frosted ? Theme.pillFrostedBorder : Theme.islandBorder
 
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }

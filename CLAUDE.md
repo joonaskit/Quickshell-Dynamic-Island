@@ -26,7 +26,7 @@ QML desktop shell for KDE Plasma (Wayland), built with Quickshell: a morphing to
 - `island/` holds the island window, pills, clusters and views. `island/settings/` holds the settings pages and controls.
 - `settings/SettingsWindow.qml` is the settings window, a floating panel styled like the clipboard window (one per screen, shown on the active one). Open it with `SettingsService.requestOpenSettings(tab)`; its open state and position are `SettingsService.windowOpen`, `windowX` and `windowY`.
 - `island/StatusIconRegistry.qml` lists the top-right status icons in default order. A new icon needs an entry there and a button component in `TopRightStatusCluster.qml` under the same id (`iconComponents`, `isIconShown`). The user's order is `statusIconOrder` in `settings.json`.
-- `components/` holds small shared pieces (`SvgIcon`, `HiddenElementGlow`, `AudioVisualizer`, `BatteryIndicator`).
+- `components/` holds small shared pieces (`SvgIcon`, `HiddenElementGlow`, `AudioVisualizer`, `BatteryIndicator`). The `pillStyle` setting (`Theme.notchStyle`) makes the top pills hug the screen edge: `IslandWindow.pillTopY` is their resting y, each pill returns a flat top radius and `Theme.notchRadius` at the bottom, and `NotchEars` (placed next to the body, which clips) draws the curves into the edge. A new top pill needs the same three things. With `tuckPills` on, the app tray and the virtual desktops sit half behind the status cluster and the window controls (`tabsEnabled`, `appTabTucked`, `desktopsTabTucked` in `IslandWindow`), and slide out while the pointer is over the part that shows.
 - `docs/ANIMATION_CATALOGUE.md` documents the animations.
 
 ## Running
@@ -50,3 +50,17 @@ QML desktop shell for KDE Plasma (Wayland), built with Quickshell: a morphing to
 
 - Commit only when the user asks.
 - Keep messages concise: a short capitalized summary of the work done, with no prefixes and no body unless needed. For example: "Fix app launcher window matching".
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for joonaskit/Quickshell-Dynamic-Island (via `gh`). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context. See `docs/agents/domain.md`.

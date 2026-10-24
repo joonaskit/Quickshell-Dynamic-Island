@@ -139,6 +139,13 @@ PanelWindow {
         Region {
             item: (!window.hasFullscreenApp && window.isMaximized) ? topBarHitBox : null
         }
+        // The tab hover areas, so the gap beside a slid-out tab still counts as over it
+        Region {
+            item: (window.tabsEnabled && SettingsService.showAppTrayPill && appIndicatorPill.visible && !window.appIndicatorShouldHide) ? appTabHoverArea : null
+        }
+        Region {
+            item: (window.tabsEnabled && SettingsService.showVirtualDesktops && virtualDesktopsPill.visible && !window.virtualDesktopsShouldHide) ? desktopsTabHoverArea : null
+        }
         Region {
             item: (!window.hasFullscreenApp) ? islandPill.hitBox : null
         }
@@ -209,17 +216,96 @@ PanelWindow {
         }
     }
 
+    // Notch style, tab effect: the app tray tucks half behind the status icons and the
+    // virtual desktops half behind the window controls until the pointer is over the
+    // part that shows. A short hold keeps a tab out while the pointer crosses to it.
+    readonly property bool tabsEnabled: Theme.notchStyle && SettingsService.tuckPills && !window.isMaximized && !window.hasFullscreenApp
+    readonly property bool appTabOut: appTabHover.hovered || appIndicatorPill.contextMenuOpen || appTabHold.running
+    readonly property bool appTabTucked: window.tabsEnabled && statusCluster.width > 0 && !window.appIndicatorShouldHide && !window.appTabOut
+    readonly property bool desktopsTabOut: desktopsTabHover.hovered || virtualDesktopsPill.menuOpen || desktopsTabHold.running
+    readonly property bool desktopsTabTucked: window.tabsEnabled && SettingsService.showWindowControls && appCluster.visible && !window.appClusterShouldHide && !window.virtualDesktopsShouldHide && !window.desktopsTabOut
+
+    Timer {
+        id: appTabHold
+        interval: 350
+    }
+
+    Timer {
+        id: desktopsTabHold
+        interval: 350
+    }
+
+    // Hovering a tab, also the half under its neighbour, pushes it out. Above every pill,
+    // since the pills' own hover areas take the event before anything under them; it only
+    // watches hover, so clicks still reach the pills.
+    // Each area always reaches from the tab's outer edge to where its tucked half ends under
+    // the neighbour, so it covers both the tucked and the slid-out tab and the gap between.
+    // An area that moved with the tab would slide away from a pointer near the seam, tuck the
+    // tab back under it and reveal it again, over and over.
+    Item {
+        id: appTabHoverArea
+        readonly property real tuckedEnd: statusCluster.x + Math.round(appIndicatorPill.width * 0.5)
+        z: 500
+        x: appIndicatorPill.x
+        y: appIndicatorPill.y
+        width: Math.max(appIndicatorPill.width, tuckedEnd - appIndicatorPill.x)
+        height: appIndicatorPill.height
+
+        HoverHandler {
+            id: appTabHover
+            enabled: window.tabsEnabled
+            blocking: false
+            onHoveredChanged: if (!hovered) appTabHold.restart()
+        }
+    }
+
+    Item {
+        id: desktopsTabHoverArea
+        readonly property real tuckedStart: appCluster.x + appCluster.width - Math.round(virtualDesktopsPill.width * 0.5)
+        z: 500
+        x: Math.min(virtualDesktopsPill.x, tuckedStart)
+        y: virtualDesktopsPill.y
+        width: virtualDesktopsPill.x + virtualDesktopsPill.width - x
+        height: virtualDesktopsPill.height
+
+        HoverHandler {
+            id: desktopsTabHover
+            enabled: window.tabsEnabled
+            blocking: false
+            onHoveredChanged: if (!hovered) desktopsTabHold.restart()
+        }
+    }
+
+    // Glow along the seam where the virtual desktops go under the window controls.
+    // Between the two: the pill is at z 0 and the window controls at 15.
+    TabSeamGlow {
+        z: 1
+        active: window.desktopsTabTucked && virtualDesktopsPill.visible
+        tab: virtualDesktopsPill.hitBox
+        tabX: virtualDesktopsPill.x + virtualDesktopsPill.hitBox.x
+        tabY: virtualDesktopsPill.y + virtualDesktopsPill.hitBox.y
+        front: appCluster.hitBox
+        frontX: appCluster.x + appCluster.hitBox.x
+        frontY: appCluster.y + appCluster.hitBox.y
+        toRight: true
+        accentColor: Theme.accentCyan
+    }
+
+    // Resting top of the pills: flush in the top bar, one pixel above the screen in notch
+    // style (so the body's top border is off screen), else hanging below the edge
+    readonly property real pillTopY: window.isMaximized ? 0 : (Theme.notchStyle ? -1 : Theme.topMargin)
+
     // Target Y coordinates for smooth gliding
     readonly property bool appClusterShouldHide: SettingsService.autoHideWindowControls && !window.topLeftRevealed && !appCluster.menuOpen
     readonly property real appClusterTargetY: {
         if (appClusterShouldHide) return -appCluster.height - 18;
-        return window.isMaximized ? 0 : Theme.topMargin;
+        return window.pillTopY;
     }
 
     readonly property bool virtualDesktopsShouldHide: SettingsService.autoHideVirtualDesktops && !window.topLeftRevealed && !virtualDesktopsPill.menuOpen
     readonly property real virtualDesktopsTargetY: {
         if (virtualDesktopsShouldHide) return -virtualDesktopsPill.height - 18;
-        return window.isMaximized ? 0 : Theme.topMargin;
+        return window.pillTopY;
     }
 
     // Auto-hide reveal state for app indicator pill
@@ -260,7 +346,7 @@ PanelWindow {
     readonly property bool appIndicatorShouldHide: SettingsService.autoHideAppTrayPill && !window.appIndicatorRevealed && !appIndicatorPill.contextMenuOpen
     readonly property real appIndicatorTargetY: {
         if (appIndicatorShouldHide) return -Math.max(appIndicatorPill.height, Theme.compactHeight) - 24;
-        return window.isMaximized ? 0 : Theme.topMargin;
+        return window.pillTopY;
     }
 
     // Edge trigger strip for top-left pills when auto-hide is enabled
@@ -388,7 +474,7 @@ PanelWindow {
     // Companion Pill for Virtual Desktops / Workspaces
     VirtualDesktopsPill {
         id: virtualDesktopsPill
-        x: (SettingsService.showWindowControls && appCluster.visible) ? (appCluster.x + appCluster.width + 8) : 16
+        x: (SettingsService.showWindowControls && appCluster.visible) ? (appCluster.x + appCluster.width + (window.desktopsTabTucked ? -Math.round(virtualDesktopsPill.width * 0.5) : 8)) : 16
         y: window.virtualDesktopsTargetY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
@@ -401,6 +487,13 @@ PanelWindow {
             }
         }
 
+
+        Behavior on x {
+            NumberAnimation {
+                duration: Theme.animDuration
+                easing.type: Easing.OutCubic
+            }
+        }
 
         Behavior on y {
             NumberAnimation {
@@ -419,7 +512,7 @@ PanelWindow {
         id: islandPill
         z: (islandPill.isOpen) ? 300 : 20
         anchors.horizontalCenter: parent.horizontalCenter
-        y: window.isMaximized ? 0 : Theme.topMargin
+        y: window.pillTopY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
 
@@ -464,7 +557,7 @@ PanelWindow {
     AppIndicatorPill {
         id: appIndicatorPill
         anchors.right: statusCluster.left
-        anchors.rightMargin: 8
+        anchors.rightMargin: window.appTabTucked ? -Math.round(appIndicatorPill.width * 0.5) : 8
         y: window.appIndicatorTargetY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
@@ -485,6 +578,13 @@ PanelWindow {
         }
 
         Behavior on y {
+            NumberAnimation {
+                duration: Theme.animDuration
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on anchors.rightMargin {
             NumberAnimation {
                 duration: Theme.animDuration
                 easing.type: Easing.OutCubic
@@ -537,12 +637,27 @@ PanelWindow {
         }
     }
 
+    // Glow along the seam where the app tray goes under the status icons. Both are at
+    // z 1, so it is declared between them to sit above the tray and below the icons.
+    TabSeamGlow {
+        z: 1
+        active: window.appTabTucked && appIndicatorPill.visible
+        tab: appIndicatorPill.hitBox
+        tabX: appIndicatorPill.x + appIndicatorPill.hitBox.x
+        tabY: appIndicatorPill.y + appIndicatorPill.hitBox.y
+        front: statusCluster.hitBox
+        frontX: statusCluster.x + statusCluster.hitBox.x
+        frontY: statusCluster.y + statusCluster.hitBox.y
+        toRight: false
+        accentColor: Theme.accent
+    }
+
     // Status Cluster positioned at top-right corner
     TopRightStatusCluster {
         id: statusCluster
         anchors.right: parent.right
         anchors.rightMargin: 16
-        y: window.isMaximized ? 0 : Theme.topMargin
+        y: window.pillTopY
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
         currentDate: islandPill.currentDate

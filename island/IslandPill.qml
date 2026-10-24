@@ -98,12 +98,14 @@ Item {
     // Corner radii: morphs to 0 in top-bar mode, rounded when floating
     readonly property real targetTopRadius: {
         if (root.isTopBarMode && !root.isOpen) return 0;
+        if (Theme.notchStyle) return 0;
         return root.isOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     // Bottom radii: rounds to 0 in top-bar mode, expandedRadius when expanded, compactRadius when compact
     readonly property real targetBottomRadius: {
         if (root.isTopBarMode && !root.isOpen) return 0;
+        if (Theme.notchStyle && !root.isOpen) return Theme.notchRadius;
         return root.isOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
@@ -182,6 +184,11 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
         }
+    }
+
+    NotchEars {
+        body: pillBody
+        active: Theme.notchStyle && !root.isTopBarMode
     }
 
     // Island Body

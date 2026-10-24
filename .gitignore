@@ -1,4 +1,5 @@
 settings.json
+settings.json.tmp
 dock_pinned.json
 __pycache__/
 *.py[cod]
