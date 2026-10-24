@@ -73,6 +73,7 @@
   "showDesktopOsd": true,
   "showTimerInPill": true,
   "showActivitiesInPill": true,
+  "kioJobActivities": true,
   "widgets": {
     "calendar": true,
     "timer": true,

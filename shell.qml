@@ -12,6 +12,7 @@ ShellRoot {
     // Singletons are created on first use; nothing else references these
     readonly property var themeExport: ThemeExportService
     readonly property var kdeTheme: KdeThemeService
+    readonly property var kioJobs: KioJobsService
 
     // IPC handler for external scripts / shortcuts
     IpcHandler {

@@ -131,7 +131,7 @@ SettingsSection {
                 spacing: 8
 
                 StatusDot {
-                    dotColor: !modelData.running ? Theme.accentRed : (modelData.crashes > 0 ? Theme.accentOrange : Theme.accentGreen)
+                    dotColor: modelData.off ? Theme.textSecondary : !modelData.running ? Theme.accentRed : (modelData.crashes > 0 || modelData.note ? Theme.accentOrange : Theme.accentGreen)
                 }
 
                 Text {
@@ -147,7 +147,7 @@ SettingsSection {
                     text: HelperService.statusText(modelData)
                     font.family: Theme.fontFamily
                     font.pixelSize: 10
-                    color: modelData.running && modelData.crashes === 0 ? Theme.textSecondary : Theme.accentOrange
+                    color: modelData.off || (modelData.running && modelData.crashes === 0 && !modelData.note) ? Theme.textSecondary : Theme.accentOrange
                 }
             }
         }

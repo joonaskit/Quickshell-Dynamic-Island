@@ -117,6 +117,7 @@ The file format is described in `docs/CONFIG_EXPORT.md`.
 | `docs/THEME.md` | Theme file exported for companion apps |
 | `docs/KDE_THEME.md` | How the shell's colours are applied to KDE apps |
 | `docs/ACTIVITIES_API.md` | D-Bus API for apps to show progress and status in the island |
+| `docs/KIO_JOBS.md` | How copies and moves from Dolphin and other KDE apps reach the island |
 | `examples/` | Reference code for companion apps, such as a theme reader and an activities client |
 | `tests/` | Unit tests, run with `./test.sh` |
 
@@ -129,6 +130,8 @@ The shell also writes its colors, fonts and scale to `~/.config/quickshell-islan
 To use the same colours in KDE apps, turn on **Apply to KDE Apps** in Settings → Display. The shell then applies them as a KDE colour scheme, and turning the setting off restores your previous one. Breeze titlebars follow it too, while most Aurorae decorations keep their own colours. See `docs/KDE_THEME.md`.
 
 Other apps can show progress in the island, such as a file copy, through a small D-Bus API: `docs/ACTIVITIES_API.md`. It needs `python-dbus` and `python-gobject`, like the other helper scripts.
+
+Copies and moves from Dolphin and other KDE apps show up there too, in place of their own progress window (**Show File Copy Progress** in the Island settings). See `docs/KIO_JOBS.md`.
 
 ## Development
 
