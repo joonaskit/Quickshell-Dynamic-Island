@@ -35,16 +35,16 @@ Item {
         width: root.isMaximized ? root.width : root.compactCenterWidth
 
         // Vertical glide: moves smoothly from topMargin (10px) to top edge (0px)
-        y: root.isMaximized ? 0 : Theme.topMargin
+        y: root.isMaximized ? 0 : (Theme.notchStyle ? -1 : Theme.topMargin)
 
         // Height adjusts from compact pill height (38px) to top bar height (35px)
         height: root.isMaximized ? (Theme.topBarHeight + 1) : Theme.compactHeight
 
         // Radii: morphs from pill radius (19px) to flat (0px) as wings meet the display bezels
-        topLeftRadius: root.isMaximized ? 0 : Theme.compactRadius
-        topRightRadius: root.isMaximized ? 0 : Theme.compactRadius
-        bottomLeftRadius: root.isMaximized ? 0 : Theme.compactRadius
-        bottomRightRadius: root.isMaximized ? 0 : Theme.compactRadius
+        topLeftRadius: (root.isMaximized || Theme.notchStyle) ? 0 : Theme.compactRadius
+        topRightRadius: (root.isMaximized || Theme.notchStyle) ? 0 : Theme.compactRadius
+        bottomLeftRadius: root.isMaximized ? 0 : (Theme.notchStyle ? Theme.notchRadius : Theme.compactRadius)
+        bottomRightRadius: root.isMaximized ? 0 : (Theme.notchStyle ? Theme.notchRadius : Theme.compactRadius)
 
         color: Theme.islandBackground
         clip: true

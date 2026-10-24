@@ -22,7 +22,8 @@ PanelWindow {
     }
 
     implicitHeight: window.isVertical ? (window.screen ? window.screen.height : 1080) : 660
-    implicitWidth: window.isVertical ? 660 : (window.screen ? window.screen.width : 1920)
+    // Beside a vertical dock the launcher can be as wide as its settings column adds
+    implicitWidth: window.isVertical ? (660 + Theme.launcherSettingsPaneWidth) : (window.screen ? window.screen.width : 1920)
 
     // Reserve space at dock screen edge if configured in Theme and not hidden
     exclusiveZone: (Theme.dockReserveSpace && !window.shouldDropDock) ? (Theme.dockHeight + Theme.dockBottomMargin) : 0

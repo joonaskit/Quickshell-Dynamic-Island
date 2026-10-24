@@ -21,6 +21,9 @@ Singleton {
     // OLED true black and sleek translucent border
     readonly property color islandBackground: isLight ? "#faf6ef" : "#000000"
     readonly property color islandBorder: Qt.rgba(1, 1, 1, 0)
+    // Frosted glass for the quieter side pills (virtual desktops, app tray)
+    readonly property color pillFrosted: isLight ? Qt.rgba(0.97, 0.95, 0.92, 0.8) : Qt.rgba(0.12, 0.12, 0.14, 0.65)
+    readonly property color pillFrostedBorder: overlay(0.09)
     readonly property color islandBorderHover: Qt.rgba(1, 1, 1, 0)
     readonly property color islandShadow: Qt.rgba(0, 0, 0, 0)
 
@@ -133,8 +136,29 @@ Singleton {
     // cornerPx(n) for one that follows the interface scale. Shapes (pills, circles,
     // bars and dots, where the radius is half the size) keep a plain number.
     property string cornerStyle: "default"
+    // The corner radius of the KDE style in use (Kirigami.Units.cornerRadius). Kirigami
+    // is loaded at runtime so the shell still starts without it, and then reports 5,
+    // the radius of Breeze.
+    property real kdeCornerRadius: 5
+    property var kdeCornerProbe: null
+
+    Component.onCompleted: {
+        try {
+            theme.kdeCornerProbe = Qt.createQmlObject(
+                'import QtQuick; import org.kde.kirigami as Kirigami; QtObject { property real value: Kirigami.Units.cornerRadius }',
+                theme, "KdeCornerProbe");
+            theme.kdeCornerRadius = theme.kdeCornerProbe.value;
+            theme.kdeCornerProbe.valueChanged.connect(() => { theme.kdeCornerRadius = theme.kdeCornerProbe.value; });
+        } catch (e) {
+            console.warn("Theme: Kirigami not available, using a 5px KDE corner radius");
+        }
+    }
+
     readonly property var cornerChoices: [
         { "name": "square", "label": "Square", "scale": 0.2 },
+        // The radius of the KDE style in use: Breeze's own widgets use 5px, which is
+        // corner(10) at half
+        { "name": "kde", "label": "KDE", "scale": kdeCornerRadius / 10 },
         { "name": "tight", "label": "Tight", "scale": 0.6 },
         { "name": "default", "label": "Default", "scale": 1.0 },
         { "name": "round", "label": "Round", "scale": 1.5 }
@@ -156,6 +180,15 @@ Singleton {
     function cornerPx(base) {
         return px(base) * cornerScale;
     }
+
+    // Pill style (SettingsService.pillStyle): "floating" pills hang below the top edge,
+    // "notch" pills hug it with a flat top and soft curves (NotchEars) flaring into the
+    // screen edge. The maximised top bar is unaffected.
+    property string pillStyle: "floating"
+    readonly property bool notchStyle: pillStyle === "notch"
+    property int notchEar: px(10)
+    // Bottom corners of a compact pill in notch style
+    property int notchRadius: px(14)
 
     // Corner radius scale (unscaled), exported to companion apps
     readonly property int radiusSmall: Math.round(corner(6))
@@ -244,6 +277,8 @@ Singleton {
     property int launcherCombinedHeightCompact: px(640)
     property int launcherFilePaneHeight: px(236)
     property int launcherFilePaneHeightCompact: px(200)
+    // Column of System Settings pages beside the apps
+    property int launcherSettingsPaneWidth: px(250)
     property int dockBottomMargin: px(baseDockBottomMargin)
     property bool dockReserveSpace: false
     property bool dockAutoHideOnFullscreen: true

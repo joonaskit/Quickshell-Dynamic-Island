@@ -66,12 +66,13 @@ Item {
     }
 
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode) return 0;
+        if (root.isTopBarMode || Theme.notchStyle) return 0;
         return root.menuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     readonly property real targetBottomRadius: {
         if (root.isTopBarMode) return root.menuOpen ? Theme.px(18) : 0;
+        if (Theme.notchStyle && !root.menuOpen) return Theme.notchRadius;
         return root.menuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
@@ -106,6 +107,11 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }
         }
+    }
+
+    NotchEars {
+        body: clusterBackground
+        active: Theme.notchStyle && !root.isTopBarMode
     }
 
     // Morphed Background capsule: seamlessly connects to top bar when maximized, or acts as pill when floating

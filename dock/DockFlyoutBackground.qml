@@ -56,6 +56,9 @@ Item {
     readonly property real nearF: flush ? 0 : Math.max(0, Math.min(fitsOnDock ? filletSize : 0, h - r))
     readonly property real farF: Math.max(0, Math.min(farFillet, h - r))
     readonly property real farR: Math.max(0, Math.min(farOverhang, r))
+    // Where the overhanging underside meets the end of the dock, a soft concave curve
+    // instead of a right angle. It needs a straight stretch of underside to start from.
+    readonly property real farJoin: Math.max(0, Math.min(filletSize, farOverhang - farR))
     readonly property real dockR: flush ? Math.max(0, dockCornerRadius) : 0
 
     // Outline, clockwise from the near (left) side's base. Arcs: "A rx ry 0 0 sweep x y",
@@ -78,6 +81,10 @@ Item {
         // Far side: rounded off when it overhangs the dock, else a fillet onto it
         if (farR > 0.01) {
             p += ` L ${nx(w)} ${n(h - farR)}` + arc(farR, 1, w - farR, h);
+            // Along the underside to the dock's end, then curve down onto its side
+            if (farJoin > 0.01) {
+                p += ` L ${nx(w - farOverhang + farJoin)} ${n(h)}` + arc(farJoin, 0, w - farOverhang, h + farJoin) + ` L ${nx(w - farOverhang)} ${n(h)}`;
+            }
         } else {
             p += ` L ${nx(w)} ${n(h - farF)}` + arc(farF, 0, w + farF, h);
         }

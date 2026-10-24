@@ -47,11 +47,12 @@ Item {
     readonly property real targetHeight: root.contextMenuOpen ? expandedHeight : compactHeight
 
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode) return 0;
+        if (root.isTopBarMode || Theme.notchStyle) return 0;
         return root.contextMenuOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
 
     readonly property real targetBottomRadius: {
+        if (Theme.notchStyle && !root.contextMenuOpen && !root.isTopBarMode) return Theme.notchRadius;
         return root.contextMenuOpen ? Theme.expandedRadius : (root.isTopBarMode ? 0 : Theme.compactRadius);
     }
 
@@ -437,9 +438,10 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
+        // Frosted like the virtual desktops while compact; solid once the menu opens, for reading
+        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : (root.contextMenuOpen ? Theme.islandBackground : Theme.pillFrosted)
         border.width: root.isTopBarMode ? 0 : 1
-        border.color: Theme.islandBorder
+        border.color: root.contextMenuOpen ? Theme.islandBorder : Theme.pillFrostedBorder
 
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }

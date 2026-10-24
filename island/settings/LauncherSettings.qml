@@ -223,6 +223,17 @@ SettingsCategory {
         SettingDivider {}
 
         SettingToggle {
+            title: "System Settings Pages"
+            description: "Pages of KDE System Settings, such as Display or Night Light, are listed in a column that opens beside the apps as you type (two letters or more). Tab moves into it, Enter opens a page" + (DepsService.noneUsable(["systemsettings", "kcmshell6"]) ? ". System Settings is not installed" : "")
+            iconName: "settings"
+            iconColor: Theme.accentPurple
+            checked: SettingsService.launcherSettingsSearch
+            onToggled: function(val) { SettingsService.setSetting("launcherSettingsSearch", val); }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
             title: "File Search"
             description: "Files and folders are found by name as you type, below the apps. Type " + SettingsService.launcherFileSearchKey + " first, such as " + SettingsService.launcherFileSearchKey + " report 2024, to list only files. Enter opens one, Alt+Enter shows it in its folder. Uses Filehouse" + (FileSearchService.available ? "" : ", which is not installed")
             iconName: "folder"

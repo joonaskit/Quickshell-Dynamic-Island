@@ -57,8 +57,19 @@ Item {
     readonly property real openProgress: centered ? popProgress : geo.progress
     property real dockCornerRadius: Theme.dockRadius
 
+    // Width of the apps side; the settings column is added to it while there are pages to show
+    readonly property real mainWidth: gridCols >= 5 ? 540 : 460
+    readonly property real wantedWidth: root.mainWidth + (root.settingsColumn ? Theme.launcherSettingsPaneWidth : 0)
+    // A launcher that reaches the end of a horizontal dock, or goes past it, would leave
+    // a notch against the dock's rounded corner. It then covers the whole dock instead of
+    // ending just short of it, and the dock straightens that corner under it.
+    readonly property bool reachesDockEnd: !root.centered && !root.isVertical && root.dockCapsuleWidth > 0 && root.wantedWidth >= root.dockCapsuleWidth - Theme.dockRadius - geo.filletSize
+    property real dockEndProgress: root.reachesDockEnd ? root.openProgress : 0
+    Behavior on dockEndProgress {
+        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+    }
     // Full size of the launcher; animates when the layout settings change
-    property real finalWidth: gridCols >= 5 ? 540 : 460
+    property real finalWidth: root.reachesDockEnd ? Math.max(root.wantedWidth, root.dockCapsuleWidth) : root.wantedWidth
     // Room above the dock (or the whole height beside a vertical dock), so the top is not cut off
     readonly property real maxHeight: {
         let h = root.parent ? root.parent.height : 1000;
@@ -111,6 +122,56 @@ Item {
     y: centered ? originY + (centeredY - originY) * popProgress : geo.y
     width: centered ? centeredWidth : geo.width
     height: centered ? Math.max(0, originHeight + (finalHeight - originHeight) * popProgress) : geo.height
+
+    // System Settings pages that fit the typed text, in a column beside the apps. Two letters
+    // are enough to start; the file search key and the window switcher leave it out.
+    readonly property string settingsQuery: (SettingsService.launcherSettingsSearch && !root.isWindowMode && !root.fileMode && root.rawSearch) ? root.rawSearch.trim() : ""
+    readonly property var settingsPages: root.settingsQuery.length >= 2 ? SettingsPagesService.search(root.settingsQuery) : []
+    readonly property bool settingsColumn: root.settingsPages.length > 0
+    // Arrow keys move in the settings column instead of the apps (Tab switches)
+    property bool settingsFocused: false
+
+    onSettingsPagesChanged: {
+        if (settingsList) settingsList.currentIndex = 0;
+        root.settingsFocused = false;
+    }
+
+    // Enter goes to the settings column when it has focus, or when no app matched
+    readonly property bool settingsActive: root.settingsColumn && !root.filesFocused && (root.settingsFocused || (root.filteredApps.length === 0 && !(root.extra && !root.listNavigated)))
+
+    function openSettingsPage(page) {
+        SettingsPagesService.open(page);
+        root.close();
+    }
+
+    function openCurrentSettingsPage() {
+        let list = root.settingsPages;
+        if (list.length === 0) return;
+        let idx = settingsList ? settingsList.currentIndex : 0;
+        if (idx < 0 || idx >= list.length) idx = 0;
+        root.openSettingsPage(list[idx]);
+    }
+
+    // Up and Down while the settings column has focus
+    function moveInSettings(dir) {
+        let n = root.settingsPages.length;
+        if (n === 0) return;
+        settingsList.currentIndex = Math.max(0, Math.min(n - 1, settingsList.currentIndex + dir));
+        settingsList.positionViewAtIndex(settingsList.currentIndex, ListView.Contain);
+    }
+
+    // Tab moves between the apps and the settings column
+    function toggleSettingsFocus() {
+        if (!root.settingsColumn) return false;
+        root.settingsFocused = !root.settingsFocused;
+        if (root.settingsFocused) {
+            root.filesFocused = false;
+            root.listNavigated = true;
+            settingsList.currentIndex = 0;
+            settingsList.positionViewAtBeginning();
+        }
+        return true;
+    }
 
     // File search: the words after the key ("f report"), or null when it is not asked for.
     // While it is, the files take the place of the apps; app search itself is untouched.
@@ -175,7 +236,7 @@ Item {
     function fileEnter(showInFolder) {
         // Results of an earlier query stay until the new search starts; they are not opened
         if (!root.combinedFiles || FileSearchService.hasPending || FileSearchService.results.length === 0) return false;
-        if (!root.filesFocused && root.filteredApps.length > 0) return false;
+        if (!root.filesFocused && (root.filteredApps.length > 0 || root.settingsActive)) return false;
         root.openCurrentFile(showInFolder);
         return true;
     }
@@ -203,6 +264,7 @@ Item {
         // On the last row of apps, Down goes on to the files
         if (apps === 0 || Math.floor(view.currentIndex / step) >= Math.floor((apps - 1) / step)) {
             root.filesFocused = true;
+            root.settingsFocused = false;
             fileListView.currentIndex = 0;
             fileListView.positionViewAtBeginning();
             root.listNavigated = true;
@@ -335,6 +397,7 @@ Item {
     onIsOpenChanged: {
         if (isOpen) {
             DockService.updateInstalledApps();
+            SettingsPagesService.load();
             searchInput.text = "";
             root.searchText = "";
             let startTab = root.pendingCategory || SettingsService.launcherStartTab || "All";
@@ -352,6 +415,7 @@ Item {
             searchInput.text = "";
             root.searchText = "";
             root.rawSearch = "";
+            root.settingsFocused = false;
             focusTimer.stop();
         }
     }
@@ -386,6 +450,10 @@ Item {
     }
 
     function launchCurrentApp() {
+        if (root.settingsActive) {
+            root.openCurrentSettingsPage();
+            return;
+        }
         let list = root.filteredApps;
         if (list && list.length > 0) {
             let idx = root.isGrid ? (appGridView ? appGridView.currentIndex : 0) : (appListView ? appListView.currentIndex : 0);
@@ -445,8 +513,12 @@ Item {
             }
 
             ColumnLayout {
-                anchors.fill: parent
+                id: mainColumn
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
                 anchors.margins: 14
+                width: root.mainWidth - 28
                 spacing: 10
 
                 // Header: Title + count badge, View Mode switcher, Edit Menu, KRunner, Close
@@ -706,7 +778,12 @@ Item {
                                 event.accepted = true;
                             }
 
+                            Keys.onTabPressed: function(event) {
+                                event.accepted = root.toggleSettingsFocus();
+                            }
+
                             Keys.onDownPressed: function(event) {
+                                if (root.settingsFocused) { root.moveInSettings(1); event.accepted = true; return; }
                                 if (root.combinedFiles && root.moveInCombined(1)) { event.accepted = true; return; }
                                 if (root.fileMode) {
                                     if (fileListView.count > 0) {
@@ -732,6 +809,7 @@ Item {
                             }
 
                             Keys.onUpPressed: function(event) {
+                                if (root.settingsFocused) { root.moveInSettings(-1); event.accepted = true; return; }
                                 if (root.combinedFiles && root.moveInCombined(-1)) { event.accepted = true; return; }
                                 if (root.fileMode) {
                                     if (fileListView.count > 0) {
@@ -757,6 +835,7 @@ Item {
                             }
 
                             Keys.onRightPressed: function(event) {
+                                if (root.settingsFocused) { event.accepted = false; return; }
                                 // Files are one column: the arrows move the text cursor
                                 if (root.fileMode || root.filesFocused) { event.accepted = false; return; }
                                 if (root.isGrid) root.listNavigated = true;
@@ -768,6 +847,8 @@ Item {
                             }
 
                             Keys.onLeftPressed: function(event) {
+                                // Back from the settings column to the apps
+                                if (root.settingsFocused) { root.settingsFocused = false; event.accepted = true; return; }
                                 // Files are one column: the arrows move the text cursor
                                 if (root.fileMode || root.filesFocused) { event.accepted = false; return; }
                                 if (root.isGrid) root.listNavigated = true;
@@ -971,7 +1052,7 @@ Item {
                             width: appGridView.cellWidth
                             height: appGridView.cellHeight
 
-                            readonly property bool isSelected: index === appGridView.currentIndex && !root.filesFocused
+                            readonly property bool isSelected: index === appGridView.currentIndex && !root.filesFocused && !root.settingsFocused
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
                             Rectangle {
@@ -1118,7 +1199,7 @@ Item {
                             width: appListView.width
                             height: root.isCompact ? 34 : 42
                             radius: Theme.corner(8)
-                            readonly property bool isSelected: index === appListView.currentIndex && !root.filesFocused
+                            readonly property bool isSelected: index === appListView.currentIndex && !root.filesFocused && !root.settingsFocused
                             readonly property bool pinned: DockService.isPinned(modelData.id)
 
                             color: isSelected ? Theme.accentTint(0.22) : (itemMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
@@ -1424,6 +1505,148 @@ Item {
                                 font.pixelSize: 13
                                 color: Theme.textSecondary
                             }
+                        }
+                    }
+                }
+            }
+
+            // System Settings pages that fit the search, in a column beside the apps
+            Rectangle {
+                visible: root.settingsColumn
+                x: root.mainWidth - 7
+                y: 14
+                width: 1
+                height: parent.height - 28
+                color: Theme.overlay(0.12)
+            }
+
+            ColumnLayout {
+                id: settingsPane
+                visible: root.settingsColumn
+                x: root.mainWidth + 7
+                y: 14
+                width: Theme.launcherSettingsPaneWidth - 21
+                height: parent.height - 28
+                spacing: 8
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 28
+                    spacing: 8
+
+                    Text {
+                        text: "Settings"
+                        font.family: Theme.fontDisplay
+                        font.pixelSize: 16
+                        font.weight: Font.DemiBold
+                        color: Theme.textPrimary
+                    }
+
+                    Rectangle {
+                        Layout.preferredHeight: 18
+                        Layout.preferredWidth: settingsCountText.implicitWidth + 12
+                        radius: 9
+                        color: Theme.overlay(0.08)
+
+                        Text {
+                            id: settingsCountText
+                            anchors.centerIn: parent
+                            text: "" + root.settingsPages.length
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 10
+                            font.weight: Font.Medium
+                            color: Theme.textSecondary
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 4
+                    text: root.settingsFocused ? "Up and Down choose, Enter opens, Tab goes back" : "Tab to choose a page"
+                    elide: Text.ElideRight
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 10
+                    color: Theme.textSecondary
+                }
+
+                ListView {
+                    id: settingsList
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    spacing: 3
+                    currentIndex: 0
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: root.settingsPages
+
+                    delegate: Rectangle {
+                        id: pageRow
+                        required property int index
+                        required property var modelData
+                        width: settingsList.width
+                        height: root.isCompact ? 38 : 46
+                        radius: Theme.corner(8)
+                        readonly property bool isSelected: index === settingsList.currentIndex && root.settingsActive
+
+                        color: isSelected ? Theme.accentTint(0.22) : (pageMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
+                        border.color: isSelected ? Theme.accentTint(0.5) : "transparent"
+                        border.width: isSelected ? 1 : 0
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            spacing: 10
+
+                            Image {
+                                Layout.preferredWidth: root.isCompact ? 22 : 28
+                                Layout.preferredHeight: root.isCompact ? 22 : 28
+                                source: Quickshell.iconPath(pageRow.modelData.icon, "preferences-system")
+                                sourceSize.width: 64
+                                sourceSize.height: 64
+                                fillMode: Image.PreserveAspectFit
+                                mipmap: true
+                                smooth: true
+                            }
+
+                            Column {
+                                Layout.fillWidth: true
+                                spacing: 1
+
+                                Text {
+                                    text: pageRow.modelData.name
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: root.isCompact ? 12 : 13
+                                    font.weight: pageRow.isSelected ? Font.DemiBold : Font.Medium
+                                    color: Theme.textPrimary
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                }
+
+                                Text {
+                                    text: pageRow.modelData.comment
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: 10
+                                    color: pageRow.isSelected ? Theme.overlay(0.8) : Theme.textSecondary
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                    visible: !root.isCompact && text !== ""
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: pageMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: {
+                                if (root.settingsActive) settingsList.currentIndex = pageRow.index;
+                            }
+                            onClicked: root.openSettingsPage(pageRow.modelData)
                         }
                     }
                 }

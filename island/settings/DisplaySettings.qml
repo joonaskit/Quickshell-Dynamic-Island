@@ -79,7 +79,7 @@ SettingsCategory {
 
         SettingSegmented {
             title: "Corner Roundness"
-            description: "How rounded cards, buttons, popups and the dock are. Pills and circles stay round"
+            description: "How rounded cards, buttons, popups and the dock are. KDE follows the corner radius of your KDE style, currently " + Math.round(Theme.kdeCornerRadius) + "px. Pills and circles stay round"
             iconName: "sliders"
             iconColor: Theme.accentOrange
             currentValue: SettingsService.cornerStyle
@@ -87,6 +87,50 @@ SettingsCategory {
             onSelected: function(val) {
                 SettingsService.setSetting("cornerStyle", val);
             }
+        }
+    }
+
+    // Pill style
+    SettingsSection {
+        title: "PILLS"
+        titlePixelSize: Theme.fontPx(10)
+
+        SettingSegmented {
+            title: "Pill Style"
+            description: "Floating pills hang below the top edge. Notch pills hug it with a flat top and soft curves into the screen edge, like the MacBook notch"
+            iconName: "window"
+            iconColor: Theme.accentCyan
+            currentValue: SettingsService.pillStyle
+            options: [
+                { label: "Floating", value: "floating" },
+                { label: "Notch", value: "notch" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("pillStyle", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Tuck Side Pills"
+            description: "Notch style only: the app tray slides half behind the status icons and the virtual desktops half behind the window controls, like tabs in a folder. They slide out when the pointer is over them"
+            iconName: "pin"
+            iconColor: Theme.accentPurple
+            isSubOption: true
+            checked: SettingsService.tuckPills
+            onToggled: function(val) { SettingsService.setSetting("tuckPills", val); }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Frosted Status Icons"
+            description: "Give the status icons the see-through frosted look of the app tray and virtual desktops instead of solid. Their menus stay solid"
+            iconName: "sliders"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.frostedStatusIcons
+            onToggled: function(val) { SettingsService.setSetting("frostedStatusIcons", val); }
         }
     }
 
