@@ -142,6 +142,8 @@ Run `./lint.sh` before committing. It runs `qmllint` on the QML files, untracked
 
 `./test.sh` runs the unit tests in `tests/`: the QML ones headless with `qmltestrunner`, and the Python ones with `unittest`. They cover pure logic that has been moved into plain JS files, such as the window-to-app matching in `dock/windowMatching.js`, the reading of older `settings.json` formats in `services/settingsMigration.js`, and the clipboard history logic in `services/clipboardHistory.js` and `scripts/clipboard_tracker.py`. The UI is checked by hand in the running shell.
 
+For the editor's QML language server (qmlls), `./run.sh` creates an empty `.qmlls.ini`, and the running shell links it to a config with its import paths, so the editor's warnings match `./lint.sh`. Restart the language server after the first run. While the shell isn't running the link points nowhere, and a qmlls the editor downloaded itself (as VS Code's Qt extension does) reports every QtQuick and Quickshell type as not found. Start the shell, or add your Qt QML folder (`/usr/lib64/qt6/qml` on Fedora, `/usr/lib/qt6/qml` on Arch) to the editor's import paths (`qt-qml.qmlls.additionalImportPaths` in VS Code).
+
 GitHub Actions runs both on every push and on pull requests to `main` (`.github/workflows/check.yml`), in a Fedora container so `qmllint` can resolve the Quickshell types.
 
 ## License
