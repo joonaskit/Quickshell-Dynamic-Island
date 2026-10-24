@@ -63,7 +63,7 @@ Item {
         }
     }
 
-    implicitWidth: isVertical ? (hasOpenPopups ? 660 : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.finalWidth + 64) : 0)
+    implicitWidth: isVertical ? (hasOpenPopups ? (660 + Theme.launcherSettingsPaneWidth) : (dockCapsule.width + Theme.dockBottomMargin)) : Math.max(dockCapsule.width, appPickerOpen ? (appPicker.finalWidth + 64) : 0)
     implicitHeight: isVertical ? Math.max(dockCapsule.height, appPickerOpen ? (appPicker.finalHeight + 64) : 0) : (hasOpenPopups ? 660 : (dockCapsule.height + Theme.dockBottomMargin))
 
     // Mouse tracking for fluid magnification wave
@@ -246,7 +246,8 @@ Item {
     // line, so the dock straightens its corner under them as they open. Start is
     // the launcher's end (left, or top for a vertical dock).
     readonly property real startCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
-    readonly property real endCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, trashGeo.progress * 3)))
+    // The launcher also straightens the end corner when it is wide enough to reach it
+    readonly property real endCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
 
     // Dock capsule background
     Rectangle {

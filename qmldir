@@ -25,6 +25,7 @@ singleton BackupService 1.0 services/BackupService.qml
 singleton DepsService 1.0 services/DepsService.qml
 singleton HelperService 1.0 services/HelperService.qml
 singleton FileSearchService 1.0 services/FileSearchService.qml
+singleton SettingsPagesService 1.0 services/SettingsPagesService.qml
 singleton OnboardingService 1.0 services/OnboardingService.qml
 OnboardingWindow 1.0 onboarding/OnboardingWindow.qml
 OnboardingPage 1.0 onboarding/OnboardingPage.qml

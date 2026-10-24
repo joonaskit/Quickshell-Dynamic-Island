@@ -97,6 +97,7 @@
     { "key": "w", "name": "Wikipedia", "url": "https://en.wikipedia.org/w/index.php?search=%s" },
     { "key": "yt", "name": "YouTube", "url": "https://www.youtube.com/results?search_query=%s" }
   ],
+  "launcherSettingsSearch": true,
   "launcherFileSearch": false,
   "launcherFileSearchKey": "f",
   "launcherFileSearchRoot": "~",

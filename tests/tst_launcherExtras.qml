@@ -222,4 +222,36 @@ TestCase {
         compare(Extras.fileIconName({ dir: false, type: "application/pdf" }), "application-pdf");
         compare(Extras.fileIconName({ dir: false, type: "" }), "text-x-generic");
     }
+
+    readonly property var pages: [
+        { name: "Wi-Fi & Internet", comment: "Network connections", keywords: ["wifi", "network"] },
+        { name: "Display Configuration", comment: "Resolution and scale", keywords: ["monitor", "screen"] },
+        { name: "Night Light", comment: "Warmer colours in the evening", keywords: [] },
+        { name: "Colors", comment: "Choose the colour scheme", keywords: ["theme"] },
+        { name: "Notifications", comment: "", keywords: [] }
+    ]
+
+    function names(list) { return list.map(function(p) { return p.name; }); }
+
+    function test_settingsPagesRankByWhereTheyMatch() {
+        // name start, then inside the name, then keyword, then description
+        compare(names(Extras.matchSettingsPages(pages, "n", 8)), ["Night Light", "Notifications", "Display Configuration", "Wi-Fi & Internet"]);
+        compare(names(Extras.matchSettingsPages(pages, "light", 8)), ["Night Light"]);
+        compare(names(Extras.matchSettingsPages(pages, "monitor", 8)), ["Display Configuration"]);
+        compare(names(Extras.matchSettingsPages(pages, "evening", 8)), ["Night Light"]);
+    }
+
+    function test_settingsPagesNeedEveryWord() {
+        compare(names(Extras.matchSettingsPages(pages, "colour scheme", 8)), ["Colors"]);
+        compare(names(Extras.matchSettingsPages(pages, "night scheme", 8)), []);
+        compare(names(Extras.matchSettingsPages(pages, "  DISPLAY  ", 8)), ["Display Configuration"]);
+    }
+
+    function test_settingsPagesLimitAndEmpty() {
+        compare(Extras.matchSettingsPages(pages, "n", 2).length, 2);
+        compare(Extras.matchSettingsPages(pages, "", 8).length, 0);
+        compare(Extras.matchSettingsPages(pages, "   ", 8).length, 0);
+        compare(Extras.matchSettingsPages(null, "n", 8).length, 0);
+        compare(Extras.matchSettingsPages(pages, "n".repeat(300), 8).length, 0);
+    }
 }

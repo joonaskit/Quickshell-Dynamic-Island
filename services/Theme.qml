@@ -244,6 +244,8 @@ Singleton {
     property int launcherCombinedHeightCompact: px(640)
     property int launcherFilePaneHeight: px(236)
     property int launcherFilePaneHeightCompact: px(200)
+    // Column of System Settings pages beside the apps
+    property int launcherSettingsPaneWidth: px(250)
     property int dockBottomMargin: px(baseDockBottomMargin)
     property bool dockReserveSpace: false
     property bool dockAutoHideOnFullscreen: true

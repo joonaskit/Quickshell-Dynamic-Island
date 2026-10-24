@@ -353,6 +353,42 @@ function fileIconName(result) {
     return result.type ? result.type.replace(/\//g, "-") : "text-x-generic";
 }
 
+// ----- System settings pages -----
+
+// The pages of `pages` ({ name, comment, keywords }) that fit the typed text, best
+// first, at most `limit`. Every word typed must be found in a page. A page ranks by
+// where the first word hits: start of the name, start of a word in it, inside it,
+// a keyword, then the description.
+function matchSettingsPages(pages, text, limit) {
+    if (typeof text !== "string" || !Array.isArray(pages)) return [];
+    var words = text.trim().toLowerCase().split(/\s+/).filter(function(w) { return w.length > 0; });
+    if (words.length === 0 || text.length > MAX_QUERY) return [];
+    var scored = [];
+    for (var i = 0; i < pages.length; i++) {
+        var page = pages[i];
+        var name = (page.name || "").toLowerCase();
+        var keywords = (page.keywords || []).join(" ").toLowerCase();
+        var comment = (page.comment || "").toLowerCase();
+        var total = 0;
+        var ok = true;
+        for (var w = 0; w < words.length; w++) {
+            var word = words[w];
+            var at = name.indexOf(word);
+            var rank;
+            if (at === 0) rank = 0;
+            else if (at > 0 && /[\s\-_\/]/.test(name.charAt(at - 1))) rank = 1;
+            else if (at > 0) rank = 2;
+            else if (keywords.indexOf(word) >= 0) rank = 3;
+            else if (comment.indexOf(word) >= 0) rank = 4;
+            else { ok = false; break; }
+            total += rank;
+        }
+        if (ok) scored.push({ page: page, rank: total });
+    }
+    scored.sort(function(a, b) { return (a.rank - b.rank) || a.page.name.localeCompare(b.page.name); });
+    return scored.slice(0, limit > 0 ? limit : 8).map(function(s) { return s.page; });
+}
+
 // ----- Together -----
 
 // opts: { calculator, conversion, web, shortcuts }. The first extra that applies:

@@ -116,6 +116,8 @@ Singleton {
     property bool launcherConversion: true
     property bool launcherWebSearch: true
     property var launcherWebShortcuts: LauncherExtras.DEFAULT_SHORTCUTS
+    // KDE System Settings pages in a column beside the apps while typing
+    property bool launcherSettingsSearch: true
     // File search through Filehouse: off until asked for, since it walks the folder on every search
     property bool launcherFileSearch: false
     property string launcherFileSearchKey: "f"
@@ -335,6 +337,7 @@ Singleton {
         if (data.launcherCalculator !== undefined) root.launcherCalculator = !!data.launcherCalculator;
         if (data.launcherConversion !== undefined) root.launcherConversion = !!data.launcherConversion;
         if (data.launcherWebSearch !== undefined) root.launcherWebSearch = !!data.launcherWebSearch;
+        if (data.launcherSettingsSearch !== undefined) root.launcherSettingsSearch = !!data.launcherSettingsSearch;
         if (data.launcherFileSearch !== undefined) root.launcherFileSearch = !!data.launcherFileSearch;
         if (typeof data.launcherFileSearchKey === "string" && /^\S{1,12}$/.test(data.launcherFileSearchKey)) root.launcherFileSearchKey = data.launcherFileSearchKey;
         if (typeof data.launcherFileSearchRoot === "string" && data.launcherFileSearchRoot.trim() !== "") root.launcherFileSearchRoot = data.launcherFileSearchRoot.trim();
@@ -547,6 +550,7 @@ Singleton {
         root.launcherConversion = true;
         root.launcherWebSearch = true;
         root.launcherWebShortcuts = LauncherExtras.DEFAULT_SHORTCUTS;
+        root.launcherSettingsSearch = true;
         root.launcherFileSearch = false;
         root.launcherFileSearchKey = "f";
         root.launcherFileSearchRoot = "~";
@@ -662,6 +666,7 @@ Singleton {
             "launcherConversion": root.launcherConversion,
             "launcherWebSearch": root.launcherWebSearch,
             "launcherWebShortcuts": root.launcherWebShortcuts,
+            "launcherSettingsSearch": root.launcherSettingsSearch,
             "launcherFileSearch": root.launcherFileSearch,
             "launcherFileSearchKey": root.launcherFileSearchKey,
             "launcherFileSearchRoot": root.launcherFileSearchRoot,

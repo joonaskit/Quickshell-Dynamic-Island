@@ -618,6 +618,27 @@
       ],
       "packages": {},
       "note": "The companion file browser, with --search. See https://github.com/joonaskit/filehouse"
+    },
+    {
+      "id": "systemsettings",
+      "name": "KDE System Settings",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "systemsettings",
+          "kcmshell6"
+        ]
+      },
+      "features": [
+        "Settings pages in the launcher search"
+      ],
+      "packages": {
+        "arch": "systemsettings",
+        "fedora": "plasma-systemsettings",
+        "opensuse": "systemsettings6",
+        "debian": "systemsettings"
+      }
     }
   ]
 }
