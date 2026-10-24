@@ -150,7 +150,13 @@ Item {
     }
 
     // Room kept at the bottom of the app area for the files in the combined view
-    readonly property real filePaneHeight: root.isCompact ? Theme.launcherFilePaneHeightCompact : Theme.launcherFilePaneHeight
+    // It takes what the taller launcher adds, so the apps keep their usual room, and gets
+    // shorter when the screen or the dock leaves less (a bottom dock caps the height)
+    readonly property real filePaneHeight: {
+        let wanted = root.isCompact ? Theme.launcherFilePaneHeightCompact : Theme.launcherFilePaneHeight;
+        let extra = root.finalHeight - (root.isCompact ? 440 : 480) - 12;
+        return Math.min(wanted, Math.max(Theme.px(110), extra));
+    }
     readonly property real filePaneSpace: root.combinedFiles ? root.filePaneHeight + 12 : 0
 
     // Enter on a file opens it with its default app; Alt+Enter shows it in Filehouse
