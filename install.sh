@@ -293,6 +293,10 @@ uninstall() {
     if [ -x "$PREFIX/run.sh" ]; then
         act "$PREFIX/run.sh" -k >/dev/null 2>&1 || true
     fi
+    # Puts back the KDE colour scheme from before the "Apply to KDE Apps" setting, if it is on
+    if [ -f "$PREFIX/scripts/kde_colors.py" ] && command -v python3 >/dev/null; then
+        act python3 "$PREFIX/scripts/kde_colors.py" restore >/dev/null 2>&1 || true
+    fi
 
     local name kept=()
     for name in "${CONFIG_FILES[@]}"; do

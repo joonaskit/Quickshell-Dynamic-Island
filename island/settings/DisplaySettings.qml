@@ -36,6 +36,40 @@ SettingsCategory {
                 SettingsService.setSetting("accentColor", val);
             }
         }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Apply to KDE Apps"
+            description: KdeThemeService.error !== ""
+                ? "Could not apply: " + KdeThemeService.error
+                : "Use these colours in KDE apps and in titlebars that follow the colour scheme. Turning it off restores your previous scheme"
+            iconName: "contrast"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.kdeColorScheme
+            onToggled: function(val) {
+                SettingsService.setSetting("kdeColorScheme", val);
+            }
+        }
+
+        SettingSegmented {
+            title: "KDE Window Background"
+            description: Theme.isLight
+                ? "For the dark appearance only"
+                : "Gray is easier on the eyes in large windows. The island and top bar stay black"
+            iconName: "contrast"
+            iconColor: Theme.accentIndigo
+            isSubOption: true
+            enabled: SettingsService.kdeColorScheme && !Theme.isLight
+            currentValue: SettingsService.kdeColorBase
+            options: [
+                { label: "Gray", value: "gray" },
+                { label: "Black", value: "black" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("kdeColorBase", val);
+            }
+        }
     }
 
     // Shape

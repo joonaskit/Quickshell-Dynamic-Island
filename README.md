@@ -115,6 +115,7 @@ The file format is described in `docs/CONFIG_EXPORT.md`.
 | `docs/ANIMATION_CATALOGUE.md` | Reference for all animations |
 | `docs/WIDGETS.md` | How to add a widget to the expanded view |
 | `docs/THEME.md` | Theme file exported for companion apps |
+| `docs/KDE_THEME.md` | How the shell's colours are applied to KDE apps |
 | `docs/ACTIVITIES_API.md` | D-Bus API for apps to show progress and status in the island |
 | `examples/` | Reference code for companion apps, such as a theme reader and an activities client |
 | `tests/` | Unit tests, run with `./test.sh` |
@@ -124,6 +125,8 @@ The file format is described in `docs/CONFIG_EXPORT.md`.
 Use the settings window (the gear in the expanded island), or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored, as is `launcher_usage.json`, where the launcher keeps its usage counts. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
 
 The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
+
+To use the same colours in KDE apps, turn on **Apply to KDE Apps** in Settings → Display. The shell then applies them as a KDE colour scheme, and turning the setting off restores your previous one. Breeze titlebars follow it too, while most Aurorae decorations keep their own colours. See `docs/KDE_THEME.md`.
 
 Other apps can show progress in the island, such as a file copy, through a small D-Bus API: `docs/ACTIVITIES_API.md`. It needs `python-dbus` and `python-gobject`, like the other helper scripts.
 

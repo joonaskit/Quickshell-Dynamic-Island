@@ -120,4 +120,6 @@ Reading the file once at startup is enough for a first version of an app. To fol
 
 To export a new value: add it to `Theme.qml`, to the map in `ThemeExportService.qml`, to `build` in `themeExport.js`, to this document and to the defaults in `examples/read_theme.py`.
 
+The same colours can also be applied to KDE apps as a colour scheme: see [KDE_THEME.md](KDE_THEME.md).
+
 Not everything in the shell uses `Theme.qml` yet. Translucent overlays (hover highlights, dividers, borders) are still written inline as `Qt.rgba(...)` in many files. They are derived from white at a low opacity and are not exported.

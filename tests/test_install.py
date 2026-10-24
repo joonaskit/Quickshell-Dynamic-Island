@@ -21,7 +21,9 @@ class InstallScriptTest(unittest.TestCase):
 
     def run_install(self, *args):
         env = dict(os.environ, HOME=self.home, XDG_CONFIG_HOME=os.path.join(self.home, ".config"))
-        env.pop("XDG_BIN_HOME", None)
+        # The uninstall's KDE colour scheme restore must only see the fake home
+        for name in ("XDG_BIN_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME"):
+            env.pop(name, None)
         return subprocess.run(["bash", INSTALL, *args], capture_output=True, text=True, env=env, timeout=60, stdin=subprocess.DEVNULL)
 
     def make_install(self, config=("settings.json", "dock_pinned.json")):

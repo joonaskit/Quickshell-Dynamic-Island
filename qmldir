@@ -114,6 +114,7 @@ singleton DownloadsService 1.0 services/DownloadsService.qml
 singleton WidgetRegistry 1.0 widgets/WidgetRegistry.qml
 singleton StatusIconRegistry 1.0 island/StatusIconRegistry.qml
 singleton ThemeExportService 1.0 services/ThemeExportService.qml
+singleton KdeThemeService 1.0 services/KdeThemeService.qml
 DockLauncherMenu 1.0 dock/DockLauncherMenu.qml
 singleton ActivityService 1.0 services/ActivityService.qml
 CompactActivityView 1.0 island/CompactActivityView.qml

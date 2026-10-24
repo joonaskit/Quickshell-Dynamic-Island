@@ -22,6 +22,10 @@ Singleton {
     property string colorScheme: "dark"
     // Name of an entry in Theme.accentChoices
     property string accentColor: "blue"
+    // Apply the shell's colours to KDE apps and titlebars as a colour scheme (KdeThemeService). Off by default
+    property bool kdeColorScheme: false
+    // What KDE windows are built on in the dark scheme: "gray" (the surface, as Filehouse) or "black"
+    property string kdeColorBase: "gray"
     // Name of an entry in Theme.cornerChoices
     property string cornerStyle: "default"
     property bool use24Hour: true
@@ -227,6 +231,8 @@ Singleton {
 
         if (data.colorScheme === "dark" || data.colorScheme === "light") root.colorScheme = data.colorScheme;
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
+        if (data.kdeColorScheme !== undefined) root.kdeColorScheme = !!data.kdeColorScheme;
+        if (data.kdeColorBase === "gray" || data.kdeColorBase === "black") root.kdeColorBase = data.kdeColorBase;
 
         if (data.cornerStyle !== undefined && Theme.cornerChoices.some(c => c.name === data.cornerStyle)) root.cornerStyle = data.cornerStyle;
 
@@ -458,6 +464,8 @@ Singleton {
         root.fontDisplayFamily = "";
         root.colorScheme = "dark";
         root.accentColor = "blue";
+        root.kdeColorScheme = false;
+        root.kdeColorBase = "gray";
         root.cornerStyle = "default";
         root.use24Hour = true;
         root.showSeconds = false;
@@ -575,6 +583,8 @@ Singleton {
             "fontDisplayFamily": root.fontDisplayFamily,
             "colorScheme": root.colorScheme,
             "accentColor": root.accentColor,
+            "kdeColorScheme": root.kdeColorScheme,
+            "kdeColorBase": root.kdeColorBase,
             "cornerStyle": root.cornerStyle,
             "use24Hour": root.use24Hour,
             "showSeconds": root.showSeconds,

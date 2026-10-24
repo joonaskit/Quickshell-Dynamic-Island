@@ -5,6 +5,8 @@
   "fontDisplayFamily": "",
   "colorScheme": "dark",
   "accentColor": "blue",
+  "kdeColorScheme": false,
+  "kdeColorBase": "gray",
   "cornerStyle": "default",
   "use24Hour": true,
   "showSeconds": false,
