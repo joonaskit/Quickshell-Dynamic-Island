@@ -36,9 +36,25 @@ Item {
 
     signal closed()
 
+    // Centred (SpotlightWindow): drops out of the rect given by origin* (the island
+    // pill) into the middle of its parent, instead of growing out of the dock
+    property bool centered: false
+    property real originY: 0
+    property real originWidth: 0
+    property real originHeight: 0
+    property real originRadius: 0
+    property real popProgress: (centered && isOpen) ? 1.0 : 0.0
+    Behavior on popProgress {
+        NumberAnimation {
+            duration: root.isOpen ? Theme.animDuration : Theme.animDurationFast
+            easing.type: root.isOpen ? Theme.animEasing : Easing.OutCubic
+            easing.overshoot: Theme.animOvershoot
+        }
+    }
+
     // How far open the launcher is (0 to 1), and the current radius of the dock
     // corner it sits on; the dock straightens that corner as the launcher opens
-    readonly property real openProgress: geo.progress
+    readonly property real openProgress: centered ? popProgress : geo.progress
     property real dockCornerRadius: Theme.dockRadius
 
     // Full size of the launcher; animates when the layout settings change
@@ -46,6 +62,7 @@ Item {
     // Room above the dock (or the whole height beside a vertical dock), so the top is not cut off
     readonly property real maxHeight: {
         let h = root.parent ? root.parent.height : 1000;
+        if (root.centered) return h - 64;
         if (root.isVertical) return h - 32;
         let dockTop = root.dockCapsuleY > 0 ? root.dockCapsuleY : (h - Theme.dockHeight);
         return dockTop - 32;
@@ -64,7 +81,7 @@ Item {
     // launcher button, with its side continuing the end of the dock in one line.
     DockFlyoutGeometry {
         id: geo
-        open: root.isOpen
+        open: root.isOpen && !root.centered
         isVertical: root.isVertical
         dockPosition: root.dockPosition
         dockCapsuleX: root.dockCapsuleX
@@ -78,13 +95,22 @@ Item {
         parentHeight: root.parent ? root.parent.height : 1000
     }
 
-    visible: geo.progress > 0.001
-    opacity: Math.min(1.0, geo.progress * 4)
+    visible: openProgress > 0.001
+    opacity: centered ? 1.0 : Math.min(1.0, geo.progress * 4)
 
-    x: geo.x
-    y: geo.y
-    width: geo.width
-    height: geo.height
+    // Centred, the top stays put when the launcher grows for file results
+    readonly property real centeredY: {
+        let h = root.parent ? root.parent.height : 1000;
+        let baseHeight = root.isCompact ? 440 : 480;
+        return Math.round(Math.max(32, Math.min((h - baseHeight) / 2, h - root.finalHeight - 32)));
+    }
+
+    readonly property real centeredWidth: originWidth + (finalWidth - originWidth) * popProgress
+
+    x: centered ? Math.round(((root.parent ? root.parent.width : 1000) - centeredWidth) / 2) : geo.x
+    y: centered ? originY + (centeredY - originY) * popProgress : geo.y
+    width: centered ? centeredWidth : geo.width
+    height: centered ? Math.max(0, originHeight + (finalHeight - originHeight) * popProgress) : geo.height
 
     // File search: the words after the key ("f report"), or null when it is not asked for.
     // While it is, the files take the place of the apps; app search itself is untouched.
@@ -365,6 +391,7 @@ Item {
     }
 
     DockFlyoutBackground {
+        visible: !root.centered
         isVertical: root.isVertical
         dockPosition: root.dockPosition
         filletSize: geo.filletSize
@@ -376,6 +403,17 @@ Item {
         tintAlpha: Theme.dockTransparent ? 0.94 : 0.97
     }
 
+    // Free-standing body when centred, in the island's colours so it reads as the
+    // pill stretching down
+    Rectangle {
+        visible: root.centered
+        anchors.fill: parent
+        radius: Math.min(height / 2, root.originRadius + (Theme.corner(18) - root.originRadius) * Math.min(1, root.popProgress))
+        color: Theme.islandBackground
+        border.color: Theme.overlay(0.1)
+        border.width: 1
+    }
+
     // Content is clipped to the body so it is revealed as the launcher grows
     Item {
         id: contentClip
@@ -385,11 +423,11 @@ Item {
         // Full-size content area; rides out with the growing body
         Item {
             id: contentArea
-            x: geo.contentX
-            y: geo.contentY
+            x: root.centered ? (root.width - root.finalWidth) / 2 : geo.contentX
+            y: root.centered ? 0 : geo.contentY
             width: root.finalWidth
             height: root.finalHeight
-            opacity: geo.contentOpacity
+            opacity: root.centered ? Math.max(0, Math.min(1, (root.popProgress - 0.4) / 0.6)) : geo.contentOpacity
 
             // Clicking on the background returns focus to search input
             MouseArea {

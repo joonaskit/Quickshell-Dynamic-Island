@@ -22,6 +22,10 @@ Singleton {
     property string colorScheme: "dark"
     // Name of an entry in Theme.accentChoices
     property string accentColor: "blue"
+    // Apply the shell's colours to KDE apps and titlebars as a colour scheme (KdeThemeService). Off by default
+    property bool kdeColorScheme: false
+    // What KDE windows are built on in the dark scheme: "gray" (the surface, as Filehouse) or "black"
+    property string kdeColorBase: "gray"
     // Name of an entry in Theme.cornerChoices
     property string cornerStyle: "default"
     property bool use24Hour: true
@@ -105,6 +109,8 @@ Singleton {
     property bool launcherShowCategories: true
     property int launcherGridColumns: 4
     property bool launcherShowGenericNames: true
+    // Open the launcher in the middle of the screen while the dock is hidden
+    property bool launcherSpotlight: true
     // Instant answers in the launcher's search box
     property bool launcherCalculator: true
     property bool launcherConversion: true
@@ -154,12 +160,19 @@ Singleton {
     // Signal emitted when any setting changes
     signal settingsChanged()
 
-    // Asks the island to open the settings view on a tab (a name from
-    // SettingsView.tabs, e.g. "Launcher"). Lets other windows, such as the dock,
-    // link to a settings page.
+    // Whether the settings window is open
+    property bool windowOpen: false
+    // Where the window sits, in pixels from the top left of the screen; negative until first shown
+    property real windowX: -1
+    property real windowY: -1
+
+    // Opens the settings window on a tab (a name from SettingsWindow.tabs, e.g.
+    // "Launcher"), or on the last one when no tab is given. Lets other windows, such
+    // as the dock, link to a settings page.
     signal openSettingsRequested(string tab)
 
     function requestOpenSettings(tab) {
+        root.windowOpen = true;
         root.openSettingsRequested(tab || "");
     }
 
@@ -218,6 +231,8 @@ Singleton {
 
         if (data.colorScheme === "dark" || data.colorScheme === "light") root.colorScheme = data.colorScheme;
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
+        if (data.kdeColorScheme !== undefined) root.kdeColorScheme = !!data.kdeColorScheme;
+        if (data.kdeColorBase === "gray" || data.kdeColorBase === "black") root.kdeColorBase = data.kdeColorBase;
 
         if (data.cornerStyle !== undefined && Theme.cornerChoices.some(c => c.name === data.cornerStyle)) root.cornerStyle = data.cornerStyle;
 
@@ -316,6 +331,7 @@ Singleton {
             root.launcherGridColumns = Math.max(3, Math.min(6, parseInt(data.launcherGridColumns)));
         }
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
+        if (data.launcherSpotlight !== undefined) root.launcherSpotlight = !!data.launcherSpotlight;
         if (data.launcherCalculator !== undefined) root.launcherCalculator = !!data.launcherCalculator;
         if (data.launcherConversion !== undefined) root.launcherConversion = !!data.launcherConversion;
         if (data.launcherWebSearch !== undefined) root.launcherWebSearch = !!data.launcherWebSearch;
@@ -448,6 +464,8 @@ Singleton {
         root.fontDisplayFamily = "";
         root.colorScheme = "dark";
         root.accentColor = "blue";
+        root.kdeColorScheme = false;
+        root.kdeColorBase = "gray";
         root.cornerStyle = "default";
         root.use24Hour = true;
         root.showSeconds = false;
@@ -524,6 +542,7 @@ Singleton {
         root.launcherShowCategories = true;
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
+        root.launcherSpotlight = true;
         root.launcherCalculator = true;
         root.launcherConversion = true;
         root.launcherWebSearch = true;
@@ -564,6 +583,8 @@ Singleton {
             "fontDisplayFamily": root.fontDisplayFamily,
             "colorScheme": root.colorScheme,
             "accentColor": root.accentColor,
+            "kdeColorScheme": root.kdeColorScheme,
+            "kdeColorBase": root.kdeColorBase,
             "cornerStyle": root.cornerStyle,
             "use24Hour": root.use24Hour,
             "showSeconds": root.showSeconds,
@@ -636,6 +657,7 @@ Singleton {
             "launcherShowCategories": root.launcherShowCategories,
             "launcherGridColumns": root.launcherGridColumns,
             "launcherShowGenericNames": root.launcherShowGenericNames,
+            "launcherSpotlight": root.launcherSpotlight,
             "launcherCalculator": root.launcherCalculator,
             "launcherConversion": root.launcherConversion,
             "launcherWebSearch": root.launcherWebSearch,

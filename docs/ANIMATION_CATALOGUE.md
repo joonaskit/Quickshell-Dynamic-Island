@@ -170,7 +170,7 @@ Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
 
 | File | Element | Trigger |
 |---|---|---|
-| `IslandPill.qml` L221–302 | `compactClockView`, `compactMediaView`, `compactNotificationView`, `expandedView`, `notificationView`, `settingsView` | `isExpanded` / `isNotificationOpen` / `isSettingsOpen` / media state |
+| `IslandPill.qml` L221–302 | `compactClockView`, `compactMediaView`, `compactNotificationView`, `expandedView`, `notificationView` | `isExpanded` / `isNotificationOpen` / media state |
 | `TopRightStatusCluster.qml` L736–863 | `menuContainer` + 9 individual sub-menus (WiFi, BT, Power, Clipboard, Notifications, Mic, Profile, Hardware, Devices) | `root.anyMenuOpen` + per-menu booleans |
 | `TopRightStatusCluster.qml` L720–725 | Divider between status icons and menu content | `root.anyMenuOpen` |
 | `TopLeftAppCluster.qml` L248–270 | `divider`, `menuContainer` | `root.menuOpen` |
@@ -473,6 +473,8 @@ The background absorbs hover over the whole popup. The dock's magnification trac
 | `DockAppPicker.qml` | Launcher | `"start"` |
 | `DockLauncherMenu.qml` | Launcher button's right-click menu | `"start"` |
 | `DockBar.qml` (`trashMenu`) | Trash menu | `"end"` |
+
+While the dock is hidden, the launcher opens in `SpotlightWindow.qml` instead, with `centered: true` on `DockAppPicker`. It does not use the flyout geometry there: it starts as the island pill (its compact size, or the top bar while a window is maximized) and grows down into the middle of the screen in the island's colours, with the island's spring (`Theme.animDuration`, `Theme.animEasing`). The content fades in over the last 60%. It shrinks back into the pill to close (`animDurationFast`, `OutCubic`). Its top stays put when it grows for file results.
 
 ---
 

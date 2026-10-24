@@ -108,6 +108,19 @@ SettingsCategory {
                 SettingsService.setSetting("launcherShowGenericNames", val);
             }
         }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Centre When Dock Is Hidden"
+            description: "Open the launcher in the middle of the screen, dropping out of the island, while the dock is hidden"
+            iconName: "search"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.launcherSpotlight
+            onToggled: function(val) {
+                SettingsService.setSetting("launcherSpotlight", val);
+            }
+        }
     }
 
     // Instant answers typed into the search box

@@ -9,8 +9,9 @@ ShellRoot {
     readonly property real volumeStep: 0.05
     readonly property real brightnessStep: 0.05
 
-    // Singletons are created on first use; nothing else references this one
+    // Singletons are created on first use; nothing else references these
     readonly property var themeExport: ThemeExportService
+    readonly property var kdeTheme: KdeThemeService
 
     // IPC handler for external scripts / shortcuts
     IpcHandler {
@@ -156,12 +157,30 @@ ShellRoot {
         }
     }
 
+    // Settings
+    Variants {
+        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+
+        delegate: Component {
+            SettingsWindow {}
+        }
+    }
+
     // Floating Dock
     Variants {
         model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
 
         delegate: Component {
             DockWindow {}
+        }
+    }
+
+    // Centred launcher, used while the dock is hidden
+    Variants {
+        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+
+        delegate: Component {
+            SpotlightWindow {}
         }
     }
     

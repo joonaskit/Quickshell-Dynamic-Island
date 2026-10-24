@@ -91,6 +91,11 @@ Singleton {
     signal stateUpdated()
     signal toggleAppLauncherRequested()
     signal windowSwitcherRequested()
+    // Open or close the centred launcher on a screen (used while the dock is hidden)
+    signal spotlightRequested(string screenName, string category)
+
+    // True while a centred launcher is open, so the next toggle closes it
+    property bool spotlightOpen: false
 
     Component.onCompleted: {
         loadPinnedApps();

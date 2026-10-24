@@ -156,12 +156,18 @@ PanelWindow {
         }
     }
 
+    // While the dock is hidden the launcher opens in the middle of the screen
+    // (SpotlightWindow) instead of pulling the dock up
+    readonly property bool useSpotlight: DockService.spotlightOpen || (SettingsService.launcherSpotlight && window.shouldDropDock && !dockBar.appPickerOpen)
+
     // Handle global shortcut / DBus trigger to toggle the app launcher
     Connections {
         target: DockService
         function onToggleAppLauncherRequested() {
             if (window.isThisScreenActive) {
-                if (dockBar.appPickerOpen) {
+                if (window.useSpotlight) {
+                    DockService.spotlightRequested(window.screen ? window.screen.name : "", "");
+                } else if (dockBar.appPickerOpen) {
                     dockBar.closeAllPopups();
                 } else {
                     window.dockRevealed = true;
@@ -172,7 +178,9 @@ PanelWindow {
 
         function onWindowSwitcherRequested() {
             if (window.isThisScreenActive) {
-                if (dockBar.appPickerOpen) {
+                if (window.useSpotlight) {
+                    DockService.spotlightRequested(window.screen ? window.screen.name : "", "Windows");
+                } else if (dockBar.appPickerOpen) {
                     dockBar.closeAllPopups();
                 } else {
                     window.dockRevealed = true;

@@ -18,7 +18,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
 - **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
 - **Settings UI:** toggle every icon and widget, UI and font scale, interface and display fonts, corner roundness, accent color, dock tint and opacity, an experimental light mode, caffeine that stays on across restarts, 24h clock and more. Settings are saved to `settings.json`.
-- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. The search box also answers sums (`2*(3+4)`), unit conversions (`5 km in mi`) and web search shortcuts (`g cats`, configurable in the Launcher settings); Enter copies the result or opens the search. With File Search turned on in the same settings, ordinary typing also finds files and folders by name through [Filehouse](https://github.com/joonaskit/filehouse) (`filehouse --search`): the launcher grows taller and lists the apps first, then a line, then the files. Down moves from the apps into the files; Enter opens one and Alt+Enter shows it in its folder. `f report 2024` lists only files. Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next. The Downloads stack and the Trash at the end of the dock can each be turned off in the Dock settings.
+- **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. The search box also answers sums (`2*(3+4)`), unit conversions (`5 km in mi`) and web search shortcuts (`g cats`, configurable in the Launcher settings); Enter copies the result or opens the search. With File Search turned on in the same settings, ordinary typing also finds files and folders by name through [Filehouse](https://github.com/joonaskit/filehouse) (`filehouse --search`): the launcher grows taller and lists the apps first, then a line, then the files. Down moves from the apps into the files; Enter opens one and Alt+Enter shows it in its folder. `f report 2024` lists only files. While the dock is hidden, the launcher shortcut drops it out of the island into the middle of the screen instead (Centre When Dock Is Hidden, in the Launcher settings). Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next. The Downloads stack and the Trash at the end of the dock can each be turned off in the Dock settings.
 
 ## Requirements
 
@@ -115,15 +115,18 @@ The file format is described in `docs/CONFIG_EXPORT.md`.
 | `docs/ANIMATION_CATALOGUE.md` | Reference for all animations |
 | `docs/WIDGETS.md` | How to add a widget to the expanded view |
 | `docs/THEME.md` | Theme file exported for companion apps |
+| `docs/KDE_THEME.md` | How the shell's colours are applied to KDE apps |
 | `docs/ACTIVITIES_API.md` | D-Bus API for apps to show progress and status in the island |
 | `examples/` | Reference code for companion apps, such as a theme reader and an activities client |
 | `tests/` | Unit tests, run with `./test.sh` |
 
 ## Configuration
 
-Use the in-app settings view, or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored, as is `launcher_usage.json`, where the launcher keeps its usage counts. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
+Use the settings window (the gear in the expanded island), or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored, as is `launcher_usage.json`, where the launcher keeps its usage counts. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
 
 The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
+
+To use the same colours in KDE apps, turn on **Apply to KDE Apps** in Settings → Display. The shell then applies them as a KDE colour scheme, and turning the setting off restores your previous one. Breeze titlebars follow it too, while most Aurorae decorations keep their own colours. See `docs/KDE_THEME.md`.
 
 Other apps can show progress in the island, such as a file copy, through a small D-Bus API: `docs/ACTIVITIES_API.md`. It needs `python-dbus` and `python-gobject`, like the other helper scripts.
 

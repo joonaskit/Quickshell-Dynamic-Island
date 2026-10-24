@@ -73,7 +73,7 @@ HueQuickSettings 1.0 quicksettings/HueQuickSettings.qml
 KdeConnectQuickSettings 1.0 quicksettings/KdeConnectQuickSettings.qml
 GameModeQuickSettings 1.0 quicksettings/GameModeQuickSettings.qml
 NightLightQuickSettings 1.0 quicksettings/NightLightQuickSettings.qml
-SettingsView 1.0 island/SettingsView.qml
+SettingsWindow 1.0 settings/SettingsWindow.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml
 SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingMoveButtons 1.0 island/settings/SettingMoveButtons.qml
@@ -103,6 +103,7 @@ DockContextMenu 1.0 dock/DockContextMenu.qml
 DockFlyoutGeometry 1.0 dock/DockFlyoutGeometry.qml
 DockFlyoutBackground 1.0 dock/DockFlyoutBackground.qml
 DockAppPicker 1.0 dock/DockAppPicker.qml
+SpotlightWindow 1.0 dock/SpotlightWindow.qml
 TopLeftAppCluster 1.0 island/TopLeftAppCluster.qml
 VirtualDesktopsPill 1.0 island/VirtualDesktopsPill.qml
 HiddenElementGlow 1.0 components/HiddenElementGlow.qml
@@ -113,6 +114,7 @@ singleton DownloadsService 1.0 services/DownloadsService.qml
 singleton WidgetRegistry 1.0 widgets/WidgetRegistry.qml
 singleton StatusIconRegistry 1.0 island/StatusIconRegistry.qml
 singleton ThemeExportService 1.0 services/ThemeExportService.qml
+singleton KdeThemeService 1.0 services/KdeThemeService.qml
 DockLauncherMenu 1.0 dock/DockLauncherMenu.qml
 singleton ActivityService 1.0 services/ActivityService.qml
 CompactActivityView 1.0 island/CompactActivityView.qml

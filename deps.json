@@ -473,6 +473,26 @@
       }
     },
     {
+      "id": "plasma-apply-colorscheme",
+      "name": "plasma-apply-colorscheme",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "plasma-apply-colorscheme"
+        ]
+      },
+      "features": [
+        "Apply the shell's colours to KDE apps"
+      ],
+      "packages": {
+        "arch": "plasma-workspace",
+        "fedora": "plasma-workspace",
+        "opensuse": "plasma6-workspace",
+        "debian": "plasma-workspace"
+      }
+    },
+    {
       "id": "file-picker",
       "name": "kdialog or zenity",
       "severity": "optional",

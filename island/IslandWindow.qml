@@ -30,8 +30,8 @@ PanelWindow {
     // Top layer sits above regular/maximized windows but below fullscreen windows
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell-island"
-    // Lets the settings search box and notification replies take typing once clicked
-    WlrLayershell.keyboardFocus: (islandPill.isSettingsOpen || islandPill.isNotificationOpen || statusCluster.notificationMenuOpen || statusCluster.hueMenuOpen || statusCluster.nightMenuOpen || statusCluster.kdeMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    // Lets notification replies and menus with text fields take typing once clicked
+    WlrLayershell.keyboardFocus: (islandPill.isNotificationOpen || statusCluster.notificationMenuOpen || statusCluster.hueMenuOpen || statusCluster.nightMenuOpen || statusCluster.kdeMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     // Check if the active window is on this screen (or screen is unspecified)
     readonly property bool isThisScreenActive: {
@@ -114,10 +114,8 @@ PanelWindow {
         }
     }
 
-    // The expanded island and an opened notification close on an outside click, like
-    // the menus. The settings view does not: it is common to click elsewhere while
-    // adjusting settings (e.g. to try the dock), and it has its own close and back buttons.
-    readonly property bool expandedDismissable: (islandPill.isExpanded || islandPill.isNotificationOpen) && !islandPill.isSettingsOpen
+    // The expanded island and an opened notification close on an outside click, like the menus
+    readonly property bool expandedDismissable: islandPill.isExpanded || islandPill.isNotificationOpen
     readonly property bool hasDismissablePopup: statusCluster.anyMenuOpen || appIndicatorPill.contextMenuOpen || appCluster.menuOpen || virtualDesktopsPill.menuOpen || expandedDismissable
 
     // Dismiss overlay to close the expanded island, Quick Settings popovers or context menus when clicking anywhere outside
@@ -491,18 +489,6 @@ PanelWindow {
                 duration: Theme.animDuration
                 easing.type: Easing.OutCubic
             }
-        }
-    }
-
-    // Another window (e.g. the dock) asked for a settings page
-    Connections {
-        target: SettingsService
-        function onOpenSettingsRequested(tab) {
-            if (!window.isThisScreenActive || window.hasFullscreenApp) return;
-            statusCluster.closeAllMenus();
-            appCluster.closeMenu();
-            virtualDesktopsPill.closeMenu();
-            islandPill.openSettings(tab);
         }
     }
 
