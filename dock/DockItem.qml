@@ -235,17 +235,16 @@ Item {
         z: 2
 
         readonly property int maxIndicatorDots: 3
-        readonly property int dotSize: 4
-        readonly property int dotSpacing: 3
+        readonly property int dotSize: Theme.dockDotSize
+        readonly property int dotSpacing: Theme.dockDotSpacing
         readonly property bool multi: root.windowCount > 1
         readonly property int dotCount: multi ? Math.min(root.windowCount, maxIndicatorDots) : 1
         // Length along the dock's main axis
         readonly property real span: multi ? dotCount * dotSize + (dotCount - 1) * dotSpacing
-                                           : (root.isFocused && !root.isVertical ? 14 : dotSize)
-        readonly property real vSpan: multi ? span : (root.isFocused ? 14 : dotSize)
+                                           : (root.isFocused ? Theme.px(14) : dotSize)
 
         width: root.isVertical ? dotSize : span
-        height: root.isVertical ? vSpan : dotSize
+        height: root.isVertical ? span : dotSize
         opacity: root.isRunning ? 1.0 : 0.0
 
         x: root.isVertical ? (root.dockPosition === "left" ? 4 : (parent.width - width - 4)) : Math.round((parent.width - width) / 2)
