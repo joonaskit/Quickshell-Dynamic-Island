@@ -4,3 +4,4 @@ dock_pinned.json
 __pycache__/
 *.py[cod]
 launcher_usage.json
+.qmlls.ini

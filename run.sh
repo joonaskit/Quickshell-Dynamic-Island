@@ -10,6 +10,13 @@ stop_helpers() {
     pgrep -af "$DIR/scripts/.*\.py" 2>/dev/null | grep -v "island_run\.py" | cut -d' ' -f1 | xargs -r kill 2>/dev/null || true
 }
 
+# Quickshell gives editors its import paths only when .qmlls.ini exists: it then replaces the
+# file with a link to the config it writes under $XDG_RUNTIME_DIR. Without it, the editor's
+# qmlls reports every QtQuick and Quickshell type as not found
+enable_qml_tooling() {
+    [ -e "$DIR/.qmlls.ini" ] || [ -L "$DIR/.qmlls.ini" ] || : > "$DIR/.qmlls.ini"
+}
+
 case "$1" in
     kill|-k|--kill)
         echo "Stopping Quickshell Island..."
@@ -80,12 +87,14 @@ case "$1" in
         echo "Starting Quickshell Island in background..."
         quickshell kill -p "$DIR" 2>/dev/null || true
         stop_helpers
+        enable_qml_tooling
         quickshell -p "$DIR" --daemonize
         ;;
     *)
         echo "Starting Quickshell Island..."
         quickshell kill -p "$DIR" 2>/dev/null || true
         stop_helpers
+        enable_qml_tooling
         exec quickshell -p "$DIR"
         ;;
 esac
