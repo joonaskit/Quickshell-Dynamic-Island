@@ -19,6 +19,7 @@ import time
 
 import dbus
 import dbus.mainloop.glib
+import dbus.lowlevel
 import dbus.service
 from gi.repository import GLib
 
@@ -92,6 +93,8 @@ class ActivityService(dbus.service.Object):
             return dbus.UInt32(core.API_VERSION)
         raise dbus.exceptions.DBusException(f"Unknown property {name}", name="org.freedesktop.DBus.Error.UnknownProperty")
 
+    # Declared for introspection only. The signals are sent to the owner alone
+    # (send_signal), so calling these would broadcast them to the whole bus.
     @dbus.service.signal(INTERFACE, signature="ss")
     def ActionInvoked(self, activity_id, action):
         pass
@@ -99,6 +102,14 @@ class ActivityService(dbus.service.Object):
     @dbus.service.signal(INTERFACE, signature="s")
     def Dismissed(self, activity_id):
         pass
+
+    def send_signal(self, destination, name, signature, *args):
+        """Send a signal to one connection. Ids are only unique per sender, and other
+        apps should not see them."""
+        msg = dbus.lowlevel.SignalMessage(OBJECT_PATH, INTERFACE, name)
+        msg.set_destination(destination)
+        msg.append(*args, signature=signature)
+        self.bus.send_message(msg)
 
     # -- calls from the shell ----------------------------------------------
 
@@ -115,11 +126,11 @@ class ActivityService(dbus.service.Object):
         if cmd.get("cmd") == "action":
             known = {a["id"] for a in item["actions"]}
             if cmd.get("action") in known and not item.get("orphaned"):
-                self.ActionInvoked(item["id"], cmd["action"])
+                self.send_signal(item["sender"], "ActionInvoked", "ss", item["id"], cmd["action"])
         elif cmd.get("cmd") == "dismiss":
             self.store.dismiss_key(cmd["key"])
             if not item.get("orphaned"):
-                self.Dismissed(item["id"])
+                self.send_signal(item["sender"], "Dismissed", "s", item["id"])
             self.after_change()
 
     # -- plumbing ----------------------------------------------------------

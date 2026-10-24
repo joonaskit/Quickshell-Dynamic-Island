@@ -32,7 +32,7 @@ The service lives in `scripts/activities_bridge.py`, which the shell starts. If 
 | `ActionInvoked(id, action)` | `ss` | The user pressed one of the activity's actions |
 | `Dismissed(id)` | `s` | The user dismissed the activity in the island |
 
-Signals are sent to everyone on the bus, not just the owning app, so match on your own `id`s. Don't put anything in an `id` that you wouldn't want other apps to see.
+Both signals are sent only to the app that owns the activity, not broadcast, so two apps that use the same `id` never see each other's signals. Subscribe as usual (a match rule on this service's name and interface); you only receive your own.
 
 ## Fields
 

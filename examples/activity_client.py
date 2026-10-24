@@ -43,8 +43,7 @@ class CopyDemo:
             "progress": 0.0,
             "actions": [("cancel", "Cancel")],
         })
-        # Actions come back as a signal. It is sent to everyone on the bus, so
-        # match on your own activity id.
+        # Actions come back as a signal, sent to this app only.
         self.bus.add_signal_receiver(self.on_action, "ActionInvoked", INTERFACE, BUS_NAME)
         GLib.timeout_add(400, self.step)
         self.loop.run()
