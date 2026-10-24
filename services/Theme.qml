@@ -235,6 +235,15 @@ Singleton {
     property real dockScaleAdjacent: 1.12
     property int dockHeight: Math.round(dockIconSize * Math.max(1.2, dockScaleHover) + px(16))
     property int dockRadius: Math.round(px(Math.min(22, Math.round(dockHeight / 3))) * cornerScaleSoft)
+    // Running-indicator dots under the dock icons
+    property int dockDotSize: px(4)
+    property int dockDotSpacing: px(3)
+    // Launcher: gap to the screen edge, height with file results, height of the file pane
+    property int launcherEdgeMargin: px(32)
+    property int launcherCombinedHeight: px(700)
+    property int launcherCombinedHeightCompact: px(640)
+    property int launcherFilePaneHeight: px(236)
+    property int launcherFilePaneHeightCompact: px(200)
     property int dockBottomMargin: px(baseDockBottomMargin)
     property bool dockReserveSpace: false
     property bool dockAutoHideOnFullscreen: true
