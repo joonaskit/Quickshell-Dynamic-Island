@@ -156,6 +156,15 @@ ShellRoot {
         }
     }
 
+    // Settings
+    Variants {
+        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+
+        delegate: Component {
+            SettingsWindow {}
+        }
+    }
+
     // Floating Dock
     Variants {
         model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])

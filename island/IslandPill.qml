@@ -8,11 +8,10 @@ Item {
     id: root
 
     property bool isExpanded: false
-    property bool isSettingsOpen: false
     // The alerting notification, opened in place by clicking it
     property bool isNotificationOpen: false
     property var openedNotification: null
-    readonly property bool isOpen: isExpanded || isSettingsOpen || isNotificationOpen
+    readonly property bool isOpen: isExpanded || isNotificationOpen
     property bool isTopBarMode: false
     property bool hasFullscreenApp: false
     property bool isHovered: compactClickArea.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp
@@ -57,13 +56,8 @@ Item {
             : Theme.compactWidthClock;
     }
 
-    readonly property real settingsWidth: Theme.px(540)
-
     // Target dimensions based on state
     readonly property real targetWidth: {
-        if (root.isSettingsOpen) {
-            return root.settingsWidth;
-        }
         if (root.isExpanded) {
             return Theme.expandedWidth;
         }
@@ -89,9 +83,6 @@ Item {
     }
 
     readonly property real targetHeight: {
-        if (root.isSettingsOpen) {
-            return settingsView.implicitHeight;
-        }
         if (root.isExpanded) {
             return expandedView.implicitHeight;
         }
@@ -120,7 +111,7 @@ Item {
     implicitHeight: pillBody.height
 
     function toggle() {
-        if (root.isSettingsOpen || root.isNotificationOpen) {
+        if (root.isNotificationOpen) {
             root.collapse();
         } else {
             root.isExpanded = !root.isExpanded;
@@ -130,20 +121,11 @@ Item {
     function expand() {
         root.closeNotification();
         root.isExpanded = true;
-        root.isSettingsOpen = false;
     }
 
     function collapse() {
         root.closeNotification();
         root.isExpanded = false;
-        root.isSettingsOpen = false;
-    }
-
-    // Opens the settings view, on the named tab if one is given
-    function openSettings(tab) {
-        root.closeNotification();
-        if (tab) settingsView.showTab(tab);
-        root.isSettingsOpen = true;
     }
 
     // Opens the alerting notification in place; its alert stays up until closed
@@ -169,15 +151,11 @@ Item {
         }
     }
 
-    function closeSettings() {
-        root.isSettingsOpen = false;
-    }
-
-    // Inactivity auto-collapse timer (disabled when settings is open or timeout is 0)
+    // Inactivity auto-collapse timer (disabled when timeout is 0)
     Timer {
         id: autoCollapseTimer
         interval: Theme.autoCollapseTimeout > 0 ? Theme.autoCollapseTimeout : 6000
-        running: (root.isExpanded || (root.isNotificationOpen && !notificationView.replyActive)) && !root.isSettingsOpen && !pillHoverHandler.hovered && Theme.autoCollapseTimeout > 0
+        running: (root.isExpanded || (root.isNotificationOpen && !notificationView.replyActive)) && !pillHoverHandler.hovered && Theme.autoCollapseTimeout > 0
         repeat: false
         onTriggered: {
             root.collapse();
@@ -363,7 +341,7 @@ Item {
         MouseArea {
             id: expandedClickArea
             anchors.fill: parent
-            enabled: root.isExpanded && !root.isSettingsOpen
+            enabled: root.isExpanded
             cursorShape: Qt.ArrowCursor
 
             onClicked: {
@@ -381,7 +359,7 @@ Item {
             player: root.activePlayer
             displayBattery: UPower.displayDevice
 
-            opacity: (root.isExpanded && !root.isSettingsOpen) ? 1.0 : 0.0
+            opacity: root.isExpanded ? 1.0 : 0.0
             scale: opacity > 0.5 ? 1.0 : 0.97
             visible: opacity > 0.01
 
@@ -390,7 +368,8 @@ Item {
             }
 
             onRequestOpenSettings: {
-                root.openSettings();
+                root.collapse();
+                SettingsService.requestOpenSettings("");
             }
 
             Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
@@ -410,29 +389,6 @@ Item {
             visible: opacity > 0.01
 
             onRequestShowAll: root.requestShowAllNotifications()
-
-            Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
-        }
-
-        // Settings Card View
-        SettingsView {
-            id: settingsView
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-
-            opacity: root.isSettingsOpen ? 1.0 : 0.0
-            scale: opacity > 0.5 ? 1.0 : 0.97
-            visible: opacity > 0.01
-
-            onRequestBack: {
-                root.isSettingsOpen = false;
-            }
-
-            onRequestClose: {
-                root.collapse();
-            }
 
             Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }

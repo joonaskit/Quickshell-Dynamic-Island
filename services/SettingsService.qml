@@ -156,12 +156,19 @@ Singleton {
     // Signal emitted when any setting changes
     signal settingsChanged()
 
-    // Asks the island to open the settings view on a tab (a name from
-    // SettingsView.tabs, e.g. "Launcher"). Lets other windows, such as the dock,
-    // link to a settings page.
+    // Whether the settings window is open
+    property bool windowOpen: false
+    // Where the window sits, in pixels from the top left of the screen; negative until first shown
+    property real windowX: -1
+    property real windowY: -1
+
+    // Opens the settings window on a tab (a name from SettingsWindow.tabs, e.g.
+    // "Launcher"), or on the last one when no tab is given. Lets other windows, such
+    // as the dock, link to a settings page.
     signal openSettingsRequested(string tab)
 
     function requestOpenSettings(tab) {
+        root.windowOpen = true;
         root.openSettingsRequested(tab || "");
     }
 

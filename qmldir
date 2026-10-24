@@ -73,7 +73,7 @@ HueQuickSettings 1.0 quicksettings/HueQuickSettings.qml
 KdeConnectQuickSettings 1.0 quicksettings/KdeConnectQuickSettings.qml
 GameModeQuickSettings 1.0 quicksettings/GameModeQuickSettings.qml
 NightLightQuickSettings 1.0 quicksettings/NightLightQuickSettings.qml
-SettingsView 1.0 island/SettingsView.qml
+SettingsWindow 1.0 settings/SettingsWindow.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml
 SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingMoveButtons 1.0 island/settings/SettingMoveButtons.qml
