@@ -28,10 +28,12 @@ Singleton {
     property string pending: ""
     property bool hasPending: false
 
-    function search(text) {
+    // delay: how long typing must pause before the walk starts
+    function search(text, delay) {
         root.pending = text;
         root.hasPending = true;
         root.searching = text.length > 0 && root.available;
+        debounce.interval = delay === undefined ? 250 : delay;
         debounce.restart();
     }
 

@@ -63,12 +63,12 @@ Item {
     readonly property real maxHeight: {
         let h = root.parent ? root.parent.height : 1000;
         if (root.centered) return h - 64;
-        if (root.isVertical) return h - 32;
+        if (root.isVertical) return h - Theme.launcherEdgeMargin;
         let dockTop = root.dockCapsuleY > 0 ? root.dockCapsuleY : (h - Theme.dockHeight);
-        return dockTop - 32;
+        return dockTop - Theme.launcherEdgeMargin;
     }
     // Taller while apps and files are listed together
-    property real finalHeight: root.combinedFiles ? Math.min(isCompact ? 640 : 700, root.maxHeight) : (isCompact ? 440 : 480)
+    property real finalHeight: root.combinedFiles ? Math.min(isCompact ? Theme.launcherCombinedHeightCompact : Theme.launcherCombinedHeight, root.maxHeight) : (isCompact ? 440 : 480)
 
     Behavior on finalWidth {
         NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -102,7 +102,7 @@ Item {
     readonly property real centeredY: {
         let h = root.parent ? root.parent.height : 1000;
         let baseHeight = root.isCompact ? 440 : 480;
-        return Math.round(Math.max(32, Math.min((h - baseHeight) / 2, h - root.finalHeight - 32)));
+        return Math.round(Math.max(Theme.launcherEdgeMargin, Math.min((h - baseHeight) / 2, h - root.finalHeight - Theme.launcherEdgeMargin)));
     }
 
     readonly property real centeredWidth: originWidth + (finalWidth - originWidth) * popProgress
@@ -119,12 +119,12 @@ Item {
     readonly property string homeDir: Quickshell.env("HOME") || ""
 
     // Plain typing also searches files when file search is on: the apps stay first and
-    // the files follow below a line. Calculator, conversion and web answers skip it.
+    // the files follow below a line, after a longer pause so launching an app does not
+    // walk the folder. Calculator, conversion and web answers skip it.
     readonly property string plainFileQuery: {
-        if (!SettingsService.launcherFileSearch || root.isWindowMode || root.fileMode || root.extra) return "";
-        if (root.selectedCategory === "Windows") return "";
+        if (!SettingsService.launcherFileSearch || !FileSearchService.available || root.isWindowMode || root.fileMode || root.extra) return "";
         let t = root.rawSearch ? root.rawSearch.trim() : "";
-        return t.length >= 2 ? t : "";
+        return t.length >= 3 ? t : "";
     }
     readonly property bool combinedFiles: plainFileQuery !== ""
     // The text sent to Filehouse, or null when no file search is wanted
@@ -134,7 +134,7 @@ Item {
 
     onFileSearchTextChanged: {
         if (root.fileSearchText === null) FileSearchService.clear();
-        else FileSearchService.search(root.fileSearchText);
+        else FileSearchService.search(root.fileSearchText, root.fileMode ? 250 : 700);
         if (fileListView) fileListView.currentIndex = 0;
         root.filesFocused = false;
     }
@@ -150,7 +150,7 @@ Item {
     }
 
     // Room kept at the bottom of the app area for the files in the combined view
-    readonly property real filePaneHeight: root.isCompact ? 200 : 236
+    readonly property real filePaneHeight: root.isCompact ? Theme.launcherFilePaneHeightCompact : Theme.launcherFilePaneHeight
     readonly property real filePaneSpace: root.combinedFiles ? root.filePaneHeight + 12 : 0
 
     // Enter on a file opens it with its default app; Alt+Enter shows it in Filehouse
@@ -167,7 +167,8 @@ Item {
     // Enter in the combined view opens the file when it is selected, or when no app matched.
     // Alt+Enter always shows the file in its folder.
     function fileEnter(showInFolder) {
-        if (!root.combinedFiles || FileSearchService.results.length === 0) return false;
+        // Results of an earlier query stay until the new search starts; they are not opened
+        if (!root.combinedFiles || FileSearchService.hasPending || FileSearchService.results.length === 0) return false;
         if (!root.filesFocused && root.filteredApps.length > 0) return false;
         root.openCurrentFile(showInFolder);
         return true;
@@ -751,7 +752,7 @@ Item {
 
                             Keys.onRightPressed: function(event) {
                                 // Files are one column: the arrows move the text cursor
-                                if (root.fileMode) { event.accepted = false; return; }
+                                if (root.fileMode || root.filesFocused) { event.accepted = false; return; }
                                 if (root.isGrid) root.listNavigated = true;
                                 if (root.isGrid && appGridView && appGridView.count > 0) {
                                     appGridView.currentIndex = Math.min(appGridView.count - 1, appGridView.currentIndex + 1);
@@ -762,7 +763,7 @@ Item {
 
                             Keys.onLeftPressed: function(event) {
                                 // Files are one column: the arrows move the text cursor
-                                if (root.fileMode) { event.accepted = false; return; }
+                                if (root.fileMode || root.filesFocused) { event.accepted = false; return; }
                                 if (root.isGrid) root.listNavigated = true;
                                 if (root.isGrid && appGridView && appGridView.count > 0) {
                                     appGridView.currentIndex = Math.max(0, appGridView.currentIndex - 1);
@@ -1318,16 +1319,17 @@ Item {
                             currentIndex: 0
                             boundsBehavior: Flickable.StopAtBounds
 
-                            model: root.fileSearchText !== null ? FileSearchService.results : []
+                            // A count, so results arriving one by one keep the selection and scroll
+                            model: root.fileSearchText !== null ? FileSearchService.results.length : 0
 
                             delegate: Rectangle {
                                 id: fileRow
-                                required property var modelData
                                 required property int index
+                                readonly property var modelData: FileSearchService.results[index] || ({ path: "", name: "", folder: "", dir: false, type: "" })
                                 width: fileListView.width
                                 height: root.isCompact ? 34 : 42
                                 radius: Theme.corner(8)
-                                readonly property bool isSelected: index === fileListView.currentIndex && (!root.combinedFiles || root.filesFocused)
+                                readonly property bool isSelected: index === fileListView.currentIndex && (!root.combinedFiles || root.filesFocused || (root.filteredApps.length === 0 && !FileSearchService.hasPending))
 
                                 color: isSelected ? Theme.accentTint(0.22) : (fileMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
                                 border.color: isSelected ? Theme.accentTint(0.5) : "transparent"
@@ -1393,7 +1395,8 @@ Item {
                     // Empty state when search or category yields no matches
                     Item {
                         anchors.fill: parent
-                        visible: root.filteredApps.length === 0 && !root.extra && !root.fileMode && !root.combinedFiles
+                        anchors.bottomMargin: root.filePaneSpace
+                        visible: root.filteredApps.length === 0 && !root.extra && !root.fileMode
 
                         Column {
                             anchors.centerIn: parent
