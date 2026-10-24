@@ -52,6 +52,17 @@ python3 examples/kio_job_client.py --crash   # the app exits halfway
 kioclient --interactive copy ~/big-folder /some/other/disk/
 ```
 
+Without the shell, and without taking the names from the desktop, run it on a private bus. The activity lists the island would get go to the file in `$ISLAND_SANDBOX_LOG`:
+
+```
+./run.sh --sandbox
+python3 scripts/kio_jobs.py &
+python3 examples/kio_job_client.py --fail
+cat "$ISLAND_SANDBOX_LOG"
+```
+
+`tests/test_kio_jobs_sandbox.py` runs a finished, a failed and a crashed job this way.
+
 ## Implementation
 
 - `scripts/kio_jobs_core.py`: the property mapping, the one second delay, how jobs end and which calls go to the island when. No D-Bus. Tested in `tests/test_kio_jobs_core.py`.

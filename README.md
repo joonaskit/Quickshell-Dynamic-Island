@@ -68,6 +68,7 @@ You can also skip the installer: install the requirements above, clone the repos
 | `./run.sh -k` | Stop |
 | `./run.sh --check` | Check for missing tools and services |
 | `./run.sh --run <command>` | Run a command and show its progress in the island, see `docs/ACTIVITIES_API.md`. The installer also adds this as `island-run` (skip it with `--no-link`) |
+| `./run.sh --sandbox [command]` | Run a command (or a shell) on a private D-Bus bus with its own activities bridge, for trying the D-Bus helpers without touching the running island |
 | `./run.sh --export <file>` | Save the configuration to one file |
 | `./run.sh --import <file>` | Load a configuration file, see below |
 | `./run.sh -l` | Toggle the app launcher |
