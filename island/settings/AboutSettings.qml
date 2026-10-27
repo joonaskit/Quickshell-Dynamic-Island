@@ -116,6 +116,7 @@ SettingsCategory {
     }
 
     SettingsSection {
+        key: "welcome"
         title: "WELCOME GUIDE"
         subtitle: "The tour shown on a new install"
 
@@ -143,6 +144,7 @@ SettingsCategory {
     HealthSection {}
 
     SettingsSection {
+        key: "backup"
         title: "BACKUP"
         subtitle: "Export the configuration to one file, or import it"
 

@@ -597,6 +597,58 @@ Item {
                         }
                     }
                 }
+
+                // Opens the settings at the left pills
+                Rectangle {
+                    width: parent.width
+                    height: 28
+                    radius: Theme.corner(7)
+                    scale: settingsMenuMouse.pressed ? 0.98 : (settingsMenuMouse.containsMouse ? 1.02 : 1.0)
+                    transformOrigin: Item.Center
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Theme.animDurationFast
+                            easing.type: Theme.animEasing
+                            easing.overshoot: Theme.animOvershoot
+                        }
+                    }
+                    color: settingsMenuMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
+                    Behavior on color {
+                        ColorAnimation { duration: 100 }
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 8
+                        anchors.rightMargin: 8
+                        spacing: 8
+
+                        SvgIcon {
+                            name: "sliders"
+                            size: 13
+                            color: Theme.textSecondary
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Top Bar Settings…"
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 12
+                            color: Theme.textSecondary
+                        }
+                    }
+
+                    MouseArea {
+                        id: settingsMenuMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.closeMenu();
+                            SettingsService.requestOpenSettings("Top bar", "pills");
+                        }
+                    }
+                }
             }
         }
     }

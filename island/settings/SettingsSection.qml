@@ -7,6 +7,8 @@ ColumnLayout {
     id: section
     property string title: ""
     property string subtitle: ""
+    // Name for opening the window at this section, see SettingsService.requestOpenSettings
+    property string key: ""
     property real titlePixelSize: 10
     default property alias rows: rowsCol.data
 
@@ -17,6 +19,11 @@ ColumnLayout {
             if (items[i].matchesSearch === true) return true;
         }
         return false;
+    }
+
+    // Briefly outlines the section, after the window was opened at it
+    function highlight() {
+        highlightAnim.restart();
     }
 
     Layout.fillWidth: true
@@ -52,6 +59,23 @@ ColumnLayout {
         color: Theme.overlay(0.04)
         border.width: 1
         border.color: Theme.overlay(0.08)
+
+        Rectangle {
+            id: highlightRing
+            anchors.fill: parent
+            radius: parent.radius
+            color: "transparent"
+            border.width: 2
+            border.color: Theme.accent
+            opacity: 0
+        }
+
+        SequentialAnimation {
+            id: highlightAnim
+            NumberAnimation { target: highlightRing; property: "opacity"; to: 1; duration: Theme.animDurationFast }
+            PauseAnimation { duration: 700 }
+            NumberAnimation { target: highlightRing; property: "opacity"; to: 0; duration: Theme.animDuration }
+        }
 
         ColumnLayout {
             id: rowsCol

@@ -7,6 +7,7 @@ SettingsCategory {
 
     // App Launcher Customization
     SettingsSection {
+        key: "launcher"
         title: "APP LAUNCHER"
 
         // 1. Default View Layout (Grid vs List)
@@ -125,6 +126,7 @@ SettingsCategory {
 
     // Instant answers typed into the search box
     SettingsSection {
+        key: "searchExtras"
         title: "SEARCH EXTRAS"
         subtitle: "Answers shown above the apps. Enter runs them"
 

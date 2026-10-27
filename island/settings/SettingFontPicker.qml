@@ -18,7 +18,9 @@ Rectangle {
     property bool expanded: false
     signal selected(string val)
 
-    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
+    // Other words this row is found by in the search, not shown
+    property string keywords: ""
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description, keywords)
     readonly property var families: {
         let needle = filterInput.text.trim().toLowerCase();
         let list = Theme.installedFonts.filter(f => needle === "" || f.toLowerCase().indexOf(needle) >= 0);

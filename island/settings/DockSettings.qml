@@ -6,6 +6,7 @@ SettingsCategory {
 
     // Dock Behavior
     SettingsSection {
+        key: "dock"
         title: "DOCK"
 
         // 1. Dock Screen Edge Position

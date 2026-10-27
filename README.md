@@ -31,7 +31,7 @@ A compact pill at the top of the screen shows the clock, media and notifications
 
 Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
 
-The shell runs the same check at startup. A status icon whose tool is missing (for example Wi-Fi without `nmcli`) is dimmed and does nothing, and hovering it names the missing tool and its package. The brightness, volume and audio output controls say which tool they need (`brightnessctl`, `wpctl`, `pactl`). In the settings under Top Bar, the Status Bar Icon Order list names the missing tool and its package, and "Hide Icons With Missing Tools" removes those icons instead of dimming them. The power menu and battery icon are never affected. Install the tool and restart the shell, or press "Check again" in the welcome guide, to bring the feature back.
+The shell runs the same check at startup. A status icon whose tool is missing (for example Wi-Fi without `nmcli`) is dimmed and does nothing, and hovering it names the missing tool and its package. The brightness, volume and audio output controls say which tool they need (`brightnessctl`, `wpctl`, `pactl`). In the Top bar settings, the status icon list names the missing tool and its package, and "Hide Icons With Missing Tools" removes those icons instead of dimming them. The power menu and battery icon are never affected. Install the tool and restart the shell, or press "Check again" in the welcome guide, to bring the feature back.
 
 ## Installation
 
@@ -78,7 +78,7 @@ You can also skip the installer: install the requirements above, clone the repos
 | `./run.sh -e` / `-c` | Expand / collapse |
 | `./run.sh -i <target> <function>` | Call any IPC function, for example `-i system volumeUp` |
 
-The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. The `onboarding` target has `open`, which shows the welcome guide, and the `config` target has `reload`, which re-reads the config files from disk. You can bind these commands to a global shortcut by hand, or in the settings under Shortcuts, which saves them in KDE's shortcut settings (`scripts/shortcuts.py`). The `startTimer` shortcuts there come as 5, 10, 15 and 30 minute presets.
+The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc call island ...`). `quickshell ipc call island toggleCaffeine` toggles caffeine. The `system` target has `toggleDnd`, `volumeUp`, `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `mediaPlayPause`, `mediaNext`, `mediaPrevious`, `startTimer <minutes>`, `toggleTimer`, `cancelTimer`, `toggleStopwatch` and `resetStopwatch`. The `clipboard` target has `toggle` and `toggleIncognito`. The `launcher` target has `toggle` and `windows`. The `settings` target has `toggle` and `open <tab> <section>`, which opens the settings window on a tab (`"Top bar"`) and scrolls to a section (`statusIcons`; either can be `""`). The `onboarding` target has `open`, which shows the welcome guide, and the `config` target has `reload`, which re-reads the config files from disk. You can bind these commands to a global shortcut by hand, or in the settings under Shortcuts, which saves them in KDE's shortcut settings (`scripts/shortcuts.py`). The `startTimer` shortcuts there come as 5, 10, 15 and 30 minute presets.
 
 ## Welcome guide
 
@@ -130,7 +130,7 @@ Use the settings window (the gear in the expanded island), or edit `settings.jso
 
 The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
 
-To use the same colours in KDE apps, turn on **Apply to KDE Apps** in Settings → Display. The shell then applies them as a KDE colour scheme, and turning the setting off restores your previous one. Breeze titlebars follow it too, while most Aurorae decorations keep their own colours. See `docs/KDE_THEME.md`.
+To use the same colours in KDE apps, turn on **Apply to KDE Apps** in Settings → Appearance. The shell then applies them as a KDE colour scheme, and turning the setting off restores your previous one. Breeze titlebars follow it too, while most Aurorae decorations keep their own colours. See `docs/KDE_THEME.md`.
 
 Other apps can show progress in the island, such as a file copy, through a small D-Bus API: `docs/ACTIVITIES_API.md`. It needs `python-dbus` and `python-gobject`, like the other helper scripts.
 

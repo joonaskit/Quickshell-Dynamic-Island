@@ -46,11 +46,28 @@ PanelWindow {
     readonly property bool shown: SettingsService.windowOpen && isThisScreenActive
     visible: shown || card.opacity > 0.01
 
-    readonly property var tabs: ["Display", "Top bar", "Island", "Dock", "Launcher", "Widgets", "Shortcuts", "About"]
+    readonly property var tabs: ["Appearance", "Top bar", "Island", "Dock", "Launcher", "Shortcuts", "About"]
     property int currentTab: 0
 
-    readonly property bool hasSearchResults: displaySettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
-                                             || dockSettings.hasMatches || launcherSettings.hasMatches || widgetsSettings.hasMatches || shortcutsSettings.hasMatches
+    readonly property bool hasSearchResults: appearanceSettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
+                                             || dockSettings.hasMatches || launcherSettings.hasMatches || shortcutsSettings.hasMatches
+
+    readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, shortcutsSettings, aboutSettings]
+    // Section key to scroll to once the requested tab is laid out
+    property string pendingSection: ""
+
+    // Scrolls the current page to its SettingsSection with this key and highlights it
+    function scrollToSection(key) {
+        let page = window.pages[window.currentTab];
+        let found = null;
+        for (let i = 0; page && i < page.children.length; i++) {
+            if (page.children[i].key === key) found = page.children[i];
+        }
+        if (!found) return;
+        let y = found.mapToItem(contentColumn, 0, 0).y;
+        scrollContainer.contentY = Math.max(0, Math.min(scrollContainer.contentHeight - scrollContainer.height, y - Theme.px(4)));
+        found.highlight();
+    }
 
     // Switches to a tab by its name in `tabs`; unknown names are ignored
     function showTab(name) {
@@ -86,9 +103,18 @@ PanelWindow {
 
     Connections {
         target: SettingsService
-        function onOpenSettingsRequested(tab) {
+        function onOpenSettingsRequested(tab, section) {
             if (tab) window.showTab(tab);
+            window.pendingSection = section;
+            if (section) sectionTimer.restart();
         }
+    }
+
+    // Waits for the page to be shown and laid out before scrolling to the section
+    Timer {
+        id: sectionTimer
+        interval: 60
+        onTriggered: window.scrollToSection(window.pendingSection)
     }
 
     // Small pill button, as in the clipboard window
@@ -374,36 +400,40 @@ PanelWindow {
                             spacing: 14
 
                             // Categories: the active tab, or every category with matches while searching
-                            DisplaySettings {
-                                id: displaySettings
+                            AppearanceSettings {
+                                id: appearanceSettings
+                                title: window.tabs[0]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 0
                             }
                             TopBarSettings {
                                 id: topBarSettings
+                                title: window.tabs[1]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 1
                             }
                             IslandSettings {
                                 id: islandSettings
+                                title: window.tabs[2]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 2
                             }
                             DockSettings {
                                 id: dockSettings
+                                title: window.tabs[3]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 3
                             }
                             LauncherSettings {
                                 id: launcherSettings
+                                title: window.tabs[4]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 4
-                            }
-                            WidgetsSettings {
-                                id: widgetsSettings
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 5
                             }
                             ShortcutsSettings {
                                 id: shortcutsSettings
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 6
+                                title: window.tabs[5]
+                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 5
                             }
                             AboutSettings {
-                                visible: !SettingsSearch.active && window.currentTab === 7
+                                id: aboutSettings
+                                title: window.tabs[6]
+                                visible: !SettingsSearch.active && window.currentTab === 6
                             }
 
                             // Empty search result

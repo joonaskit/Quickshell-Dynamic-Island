@@ -38,6 +38,20 @@ ShellRoot {
     }
 
     IpcHandler {
+        target: "settings"
+
+        function toggle() {
+            if (SettingsService.windowOpen) SettingsService.windowOpen = false;
+            else SettingsService.requestOpenSettings("", "");
+        }
+
+        // Open on a tab by its name, at a section by its key ("" for either is fine)
+        function open(tab: string, section: string) {
+            SettingsService.requestOpenSettings(tab, section);
+        }
+    }
+
+    IpcHandler {
         target: "config"
 
         // Re-read the config files from disk, after scripts/settings_backup.py has imported them
