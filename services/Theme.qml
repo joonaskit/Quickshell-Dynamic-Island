@@ -43,16 +43,25 @@ Singleton {
     // clearer; without it the fill stays milky enough to read over a sharp background.
     readonly property bool glass: style === "glass"
     property bool blurAvailable: false
+    // Opacity of the glass (SettingsService.glassOpacity, glassMenuOpacity): the island
+    // and its pills, and the menus, popups and launcher, which carry more text
+    property real glassOpacity: 0.6
+    property real glassMenuOpacity: 0.8
+    // Without blur a sharp background shows through, so the same setting gives a
+    // more opaque fill: 60% becomes 84%
+    function glassAlpha(opacity) {
+        return blurAvailable ? opacity : opacity + (1 - opacity) * 0.6;
+    }
     // Without blur the fill is a neutral grey rather than white: white over a sharp
     // background reads as a flat white panel, not glass, and the white rim needs a
     // darker body to show against
     readonly property color glassFill: isLight
-        ? (blurAvailable ? Qt.rgba(0.965, 0.965, 0.975, 0.6) : Qt.rgba(0.87, 0.87, 0.885, 0.84))
-        : (blurAvailable ? Qt.rgba(0.11, 0.11, 0.13, 0.55) : Qt.rgba(0.10, 0.10, 0.12, 0.84))
-    // Open menus and the expanded island, which carry more text
+        ? (blurAvailable ? Qt.rgba(0.965, 0.965, 0.975, glassAlpha(glassOpacity)) : Qt.rgba(0.87, 0.87, 0.885, glassAlpha(glassOpacity)))
+        : (blurAvailable ? Qt.rgba(0.11, 0.11, 0.13, glassAlpha(glassOpacity)) : Qt.rgba(0.10, 0.10, 0.12, glassAlpha(glassOpacity)))
+    // Open menus, the expanded island, the launcher and the dock's popups
     readonly property color glassFillStrong: isLight
-        ? (blurAvailable ? Qt.rgba(0.975, 0.975, 0.98, 0.78) : Qt.rgba(0.91, 0.91, 0.92, 0.93))
-        : (blurAvailable ? Qt.rgba(0.10, 0.10, 0.12, 0.74) : Qt.rgba(0.09, 0.09, 0.11, 0.93))
+        ? (blurAvailable ? Qt.rgba(0.975, 0.975, 0.98, glassAlpha(glassMenuOpacity)) : Qt.rgba(0.91, 0.91, 0.92, glassAlpha(glassMenuOpacity)))
+        : (blurAvailable ? Qt.rgba(0.10, 0.10, 0.12, glassAlpha(glassMenuOpacity)) : Qt.rgba(0.09, 0.09, 0.11, glassAlpha(glassMenuOpacity)))
     // Dark on light, to part the glass from a light background; light on dark
     readonly property color glassHairline: isLight ? Qt.rgba(0, 0, 0, 0.09) : Qt.rgba(1, 1, 1, 0.1)
     // The light on the glass (GlassSurface): much fainter on dark, where a bright rim
@@ -427,5 +436,5 @@ Singleton {
     // Opacity of the dock's popups: well above a see-through dock so their content
     // reads, but less on blurred glass, where the blur does part of that. Follows the
     // dock when the dock is more opaque.
-    readonly property real dockPopupAlpha: Math.max(dockAlpha, (glass && blurAvailable) ? glassFillStrong.a : (glass ? 0.9 : 0.97))
+    readonly property real dockPopupAlpha: Math.max(dockAlpha, glass ? glassFillStrong.a : 0.97)
 }

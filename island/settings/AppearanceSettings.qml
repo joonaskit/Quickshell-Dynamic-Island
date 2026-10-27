@@ -43,6 +43,52 @@ SettingsCategory {
             }
         }
 
+        SettingSlider {
+            title: "Glass Opacity"
+            keywords: "transparency translucent see-through island pills"
+            description: Theme.glass ? "The island and its pills. The dock has its own, in Dock" : "For the Glass style"
+            iconName: "contrast"
+            iconColor: Theme.accentCyan
+            enabled: Theme.glass
+            opacity: enabled ? 1.0 : 0.4
+            value: SettingsService.glassOpacity
+            minimumValue: 0.30
+            maximumValue: 1.00
+            stepSize: 0.05
+            presets: [
+                { label: "40%", value: 0.40 },
+                { label: "60% (Default)", value: 0.60 },
+                { label: "80%", value: 0.80 },
+                { label: "Solid", value: 1.00 }
+            ]
+            onValueModified: function(val) {
+                SettingsService.setSetting("glassOpacity", val);
+            }
+        }
+
+        SettingSlider {
+            title: "Menu Opacity"
+            keywords: "transparency translucent see-through popups launcher"
+            description: Theme.glass ? "Menus, popups, the expanded island and the launcher" : "For the Glass style"
+            iconName: "contrast"
+            iconColor: Theme.accentCyan
+            enabled: Theme.glass
+            opacity: enabled ? 1.0 : 0.4
+            value: SettingsService.glassMenuOpacity
+            minimumValue: 0.30
+            maximumValue: 1.00
+            stepSize: 0.05
+            presets: [
+                { label: "60%", value: 0.60 },
+                { label: "80% (Default)", value: 0.80 },
+                { label: "90%", value: 0.90 },
+                { label: "Solid", value: 1.00 }
+            ]
+            onValueModified: function(val) {
+                SettingsService.setSetting("glassMenuOpacity", val);
+            }
+        }
+
         SettingDivider {}
 
         SettingSwatches {

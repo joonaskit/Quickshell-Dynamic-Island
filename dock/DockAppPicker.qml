@@ -477,7 +477,7 @@ Item {
         farFillet: geo.farFillet
         farOverhang: geo.farOverhang
         cornerRadius: Theme.corner(18)
-        tintAlpha: (Theme.glass && Theme.blurAvailable) ? Theme.dockPopupAlpha : (Theme.glass ? 0.94 : 0.97)
+        tintAlpha: Theme.dockPopupAlpha
     }
 
     // Free-standing body when centred, in the island's colours so it reads as the

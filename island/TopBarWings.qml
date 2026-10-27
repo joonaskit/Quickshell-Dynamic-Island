@@ -25,8 +25,14 @@ Item {
     anchors.top: parent.top
     height: Theme.topMargin + Theme.compactHeight + Theme.px(6)
 
-    // Bar visibility: visible when maximized or while fluidly growing/retracting
-    visible: root.isMaximized || barBackground.width > (root.compactCenterWidth + 2)
+    // Set while the bar retracts into the island after the window is unmaximized
+    property bool retracting: false
+    onIsMaximizedChanged: retracting = !isMaximized
+
+    // Bar visibility: visible when maximized or while fluidly growing/retracting. Not
+    // when the island itself changes width: the bar follows it a little behind, and
+    // showing that drew a second, wider body behind the pill, which shows through glass.
+    visible: root.isMaximized || (root.retracting && barBackground.width > (root.compactCenterWidth + 2))
 
     // Full-width continuous top bar background that grows fluidly from the center Island
     Rectangle {
@@ -50,6 +56,10 @@ Item {
 
         color: Theme.islandSurface
         clip: true
+
+        onWidthChanged: {
+            if (root.retracting && width <= root.compactCenterWidth + 2) root.retracting = false;
+        }
 
         Behavior on width {
             NumberAnimation {
