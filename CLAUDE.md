@@ -33,7 +33,7 @@ Read the doc for an area before changing it:
 
 ## Running
 
-- Quickshell hot-reloads on save for most QML changes, but not for everything. Icon changes (e.g. `SvgIcon`) do not reload, so the user must kill and start the process again (`./run.sh -k`, then `./run.sh`). Tell the user when a change needs this. If it has crashed, the user restarts it too.
+- Quickshell hot-reloads on save for most QML changes, but not for everything. Icon changes (e.g. `SvgIcon`) do not reload, and edits to singleton services (e.g. `DockService`, `WindowService`) may not either, so the user must kill and start the process again (`./run.sh -k`, then `./run.sh`). Tell the user when a change needs this. If it has crashed, the user restarts it too.
 - `./run.sh` starts it. Other flags: `-l` toggles the launcher, `-k` kills it, `-d` runs it as a daemon.
 - The session bus is the user's live desktop. Try D-Bus helpers under `./run.sh --sandbox [COMMAND...]` (`scripts/sandbox.sh`): a private bus with its own `activities_bridge.py`, whose activity lists go to the file in `$ISLAND_SANDBOX_LOG`. `tests/test_kio_jobs_sandbox.py` uses it.
 - `./test.sh` runs the unit tests and `./lint.sh` the linters; both must pass before reporting work done. CI runs both (`.github/workflows/check.yml`). UI changes are still checked by hand in the running shell.

@@ -518,7 +518,7 @@ Item {
                     visible: root.isDesktop
                     iconName: "folder"
                     iconColor: Theme.accentBlue
-                    label: "Files (Dolphin)"
+                    label: "Files"
                     onClicked: {
                         WindowService.openFileManager();
                         root.closeMenu();
