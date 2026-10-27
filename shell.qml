@@ -139,19 +139,19 @@ ShellRoot {
     }
 
     Variants {
-        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+        model: ScreenService.targetScreens
 
         delegate: Component {
             IslandWindow {}
         }
     }
 
-    // Welcome guide, on the first screen only
+    // Welcome guide, on the main screen only
     OnboardingWindow {}
 
     // Clipboard history
     Variants {
-        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+        model: ScreenService.targetScreens
 
         delegate: Component {
             ClipboardWindow {}
@@ -160,7 +160,7 @@ ShellRoot {
 
     // Settings
     Variants {
-        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+        model: ScreenService.targetScreens
 
         delegate: Component {
             SettingsWindow {}
@@ -169,7 +169,7 @@ ShellRoot {
 
     // Floating Dock
     Variants {
-        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+        model: ScreenService.targetScreens
 
         delegate: Component {
             DockWindow {}
@@ -178,7 +178,7 @@ ShellRoot {
 
     // Centred launcher, used while the dock is hidden
     Variants {
-        model: Theme.allScreens ? Quickshell.screens : (Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : [])
+        model: ScreenService.targetScreens
 
         delegate: Component {
             SpotlightWindow {}

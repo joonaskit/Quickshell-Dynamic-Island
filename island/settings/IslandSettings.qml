@@ -141,10 +141,38 @@ SettingsCategory {
             iconName: "maximize"
             iconColor: Theme.accentCyan
             isSubOption: true
-            enabled: SettingsService.morphToTopBarWhenMaximized
+            enabled: SettingsService.morphToTopBarWhenMaximized || SettingsService.alwaysTopBar
             checked: SettingsService.reserveSpaceWhenMaximized
             onToggled: function(val) {
                 SettingsService.setSetting("reserveSpaceWhenMaximized", val);
+            }
+        }
+
+        SettingDivider {}
+
+        // 2c. Always Top Bar (tiling window managers)
+        SettingToggle {
+            title: "Always Show as Top Bar"
+            description: "Keeps the full-width top bar whatever the windows do, for tiled layouts"
+            iconName: "window"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.alwaysTopBar
+            onToggled: function(val) {
+                SettingsService.setSetting("alwaysTopBar", val);
+            }
+        }
+
+        SettingDivider {}
+
+        // 2d. Auto-hide the whole bar
+        SettingToggle {
+            title: "Auto-Hide Top Bar"
+            description: "Slides the whole bar off screen until the pointer rests at the top edge. Frees the reserved space"
+            iconName: "desktop"
+            iconColor: Theme.accentCyan
+            checked: SettingsService.autoHideTopBar
+            onToggled: function(val) {
+                SettingsService.setSetting("autoHideTopBar", val);
             }
         }
 

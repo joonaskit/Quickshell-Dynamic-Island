@@ -9,6 +9,7 @@ Read `CODING_STANDARDS.md` before writing code.
 - `shell.qml` is the entry point. It creates `IslandWindow` and `DockWindow` per screen and registers the IPC handlers.
 - `qmldir` registers every singleton and component. Add new QML files there (`tests/test_qmldir.py` checks it). Files in subfolders (e.g. `dock/`) must `import ".."` to see the root types.
 - `services/` holds the `*Service.qml` singletons and `Theme.qml`. `scripts/` holds the Python helpers they run.
+- `ScreenService` decides which screens get the windows (`screenMode`: main, all or a named one). The main screen is the one KDE gives priority 1 in `kscreen-doctor -j`, else the first. `shell.qml` and `OnboardingWindow` take their screens from it.
 - `island/` holds the island window, pills, clusters and views, and `island/settings/` the settings pages. `dock/` holds the dock and the launcher, `quicksettings/` the status icon popups, `widgets/` the expanded-view widgets, and `components/` small shared pieces.
 - `clipboard/`, `onboarding/` and `settings/` hold the clipboard, welcome guide and settings windows.
 
@@ -33,7 +34,7 @@ Read the doc for an area before changing it:
 
 ## Running
 
-- Quickshell hot-reloads on save for most QML changes, but not for everything. Icon changes (e.g. `SvgIcon`) do not reload, so the user must kill and start the process again (`./run.sh -k`, then `./run.sh`). Tell the user when a change needs this. If it has crashed, the user restarts it too.
+- Quickshell hot-reloads on save for most QML changes, but not for everything. Icon changes (e.g. `SvgIcon`) do not reload, and edits to singleton services (e.g. `DockService`, `WindowService`) may not either, so the user must kill and start the process again (`./run.sh -k`, then `./run.sh`). Tell the user when a change needs this. If it has crashed, the user restarts it too.
 - `./run.sh` starts it. Other flags: `-l` toggles the launcher, `-k` kills it, `-d` runs it as a daemon.
 - The session bus is the user's live desktop. Try D-Bus helpers under `./run.sh --sandbox [COMMAND...]` (`scripts/sandbox.sh`): a private bus with its own `activities_bridge.py`, whose activity lists go to the file in `$ISLAND_SANDBOX_LOG`. `tests/test_kio_jobs_sandbox.py` uses it.
 - `./test.sh` runs the unit tests and `./lint.sh` the linters; both must pass before reporting work done. CI runs both (`.github/workflows/check.yml`). UI changes are still checked by hand in the running shell.

@@ -82,7 +82,7 @@ The toggle, expand and collapse commands use Quickshell IPC (`quickshell ipc cal
 
 ## Welcome guide
 
-On a new install (no `settings.json`, or one whose `onboardingVersion` is `0`, as in `settings.json.example`) the shell opens a welcome guide in the middle of the first screen. Its six steps are: a short tour, a system check (the same as `./run.sh --check`, with the install command to copy), importing a configuration, a few starting choices (clock, sizes, dock position, status icons), tips for the launcher and keyboard shortcuts, and a summary. Every step can be skipped, and closing the guide at any point is enough for it not to come back. The choices are ordinary settings, saved as you make them.
+On a new install (no `settings.json`, or one whose `onboardingVersion` is `0`, as in `settings.json.example`) the shell opens a welcome guide in the middle of the main screen. Its six steps are: a short tour, a system check (the same as `./run.sh --check`, with the install command to copy), importing a configuration, a few starting choices (clock, sizes, dock position, status icons), tips for the launcher and keyboard shortcuts, and a summary. Every step can be skipped, and closing the guide at any point is enough for it not to come back. The choices are ordinary settings, saved as you make them.
 
 Open it again from the settings under About, or with `./run.sh -i onboarding open`.
 

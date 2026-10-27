@@ -20,6 +20,7 @@ singleton KdeConnectService 1.0 services/KdeConnectService.qml
 singleton GameModeService 1.0 services/GameModeService.qml
 singleton NightLightService 1.0 services/NightLightService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
+singleton ScreenService 1.0 services/ScreenService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
 singleton BackupService 1.0 services/BackupService.qml
 singleton DepsService 1.0 services/DepsService.qml

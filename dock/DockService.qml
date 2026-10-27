@@ -176,7 +176,11 @@ Singleton {
     }
 
     function openTrash() {
-        WindowService.launchCommand(["dolphin", "trash:/"], "org.kde.dolphin");
+        // Open in the default file manager, falling back to Dolphin
+        WindowService.launchCommand(["sh", "-c",
+            "fm=$(xdg-mime query default inode/directory); " +
+            "if [ -n \"$fm\" ] && command -v gtk-launch >/dev/null 2>&1; then exec gtk-launch \"$fm\" trash:///; " +
+            "else exec dolphin trash:/; fi"], "file-manager");
     }
 
     function emptyTrash() {

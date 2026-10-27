@@ -177,7 +177,11 @@ Singleton {
     }
 
     function openFileManager() {
-        launchCommand(["dolphin"], "org.kde.dolphin");
+        // Default file manager, falling back to Dolphin
+        launchCommand(["sh", "-c",
+            "fm=$(xdg-mime query default inode/directory); " +
+            "if [ -n \"$fm\" ] && command -v gtk-launch >/dev/null 2>&1; then exec gtk-launch \"$fm\"; " +
+            "else exec dolphin; fi"], "file-manager");
     }
 
     function openSettings() {

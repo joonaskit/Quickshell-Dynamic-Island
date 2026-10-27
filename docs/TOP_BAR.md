@@ -22,3 +22,9 @@ The `pillStyle` setting (`Theme.notchStyle`) makes the top pills hug the screen 
 ## Tucked pills
 
 With `tuckPills` on, the app tray and the virtual desktops sit half behind the status cluster and the window controls, and slide out while the pointer is over the part that shows. The state is `tabsEnabled`, `appTabTucked` and `desktopsTabTucked` in `island/IslandWindow.qml`.
+
+## Top bar mode and auto-hide
+
+`island/IslandWindow.qml` flattens the pills into the full-width bar (`isMaximized`) when a window is maximized or tiled, or always with `alwaysTopBar`, which suits tiling layouts. Fullscreen still hides everything.
+
+With `autoHideTopBar` the whole bar slides up (`barHidden`, `barHideOffset` in `pillTopY`) and reserves no space. `barHoverArea` is a thin strip along the top edge while hidden; resting the pointer there for a moment brings the bar back, and it goes again shortly after the pointer leaves. Open menus and the expanded island keep it down. While it is down, pills with their own auto-hide (window controls, virtual desktops, app tray) are shown too (`barDown`).

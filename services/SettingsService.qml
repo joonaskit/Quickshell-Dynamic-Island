@@ -26,6 +26,9 @@ Singleton {
     property bool kdeColorScheme: false
     // What KDE windows are built on in the dark scheme: "gray" (the surface, as Filehouse) or "black"
     property string kdeColorBase: "gray"
+    // Which screens show the shell: "primary" (the main display in KDE), "all", or "named" (screenName)
+    property string screenMode: "primary"
+    property string screenName: ""
     // Name of an entry in Theme.cornerChoices
     property string cornerStyle: "default"
     // "floating" or "notch": whether the island's pills hang below the top edge or hug it
@@ -41,6 +44,8 @@ Singleton {
     property bool showMediaWhenPlaying: true
     property bool morphToTopBarWhenMaximized: true
     property bool reserveSpaceWhenMaximized: true
+    property bool alwaysTopBar: false
+    property bool autoHideTopBar: false
     property bool hideOnFullscreen: true
     property int autoCollapseTimeout: 6000
 
@@ -245,6 +250,9 @@ Singleton {
         if (data.kdeColorScheme !== undefined) root.kdeColorScheme = !!data.kdeColorScheme;
         if (data.kdeColorBase === "gray" || data.kdeColorBase === "black") root.kdeColorBase = data.kdeColorBase;
 
+        if (data.screenMode === "primary" || data.screenMode === "all" || data.screenMode === "named") root.screenMode = data.screenMode;
+        if (typeof data.screenName === "string") root.screenName = data.screenName.trim().slice(0, 100);
+
         if (data.cornerStyle === "breeze") data.cornerStyle = "kde";
         if (data.cornerStyle !== undefined && Theme.cornerChoices.some(c => c.name === data.cornerStyle)) root.cornerStyle = data.cornerStyle;
         if (data.pillStyle === "floating" || data.pillStyle === "notch") root.pillStyle = data.pillStyle;
@@ -257,6 +265,8 @@ Singleton {
         if (data.showMediaWhenPlaying !== undefined) root.showMediaWhenPlaying = !!data.showMediaWhenPlaying;
         if (data.morphToTopBarWhenMaximized !== undefined) root.morphToTopBarWhenMaximized = !!data.morphToTopBarWhenMaximized;
         if (data.reserveSpaceWhenMaximized !== undefined) root.reserveSpaceWhenMaximized = !!data.reserveSpaceWhenMaximized;
+        if (data.alwaysTopBar !== undefined) root.alwaysTopBar = !!data.alwaysTopBar;
+        if (data.autoHideTopBar !== undefined) root.autoHideTopBar = !!data.autoHideTopBar;
         if (data.hideOnFullscreen !== undefined) root.hideOnFullscreen = !!data.hideOnFullscreen;
         if (data.dockAutoHideOnFullscreen !== undefined) root.dockAutoHideOnFullscreen = !!data.dockAutoHideOnFullscreen;
         if (data.dockAutoHideFromWindows !== undefined) root.dockAutoHideFromWindows = !!data.dockAutoHideFromWindows;
@@ -484,6 +494,8 @@ Singleton {
         root.accentColor = "blue";
         root.kdeColorScheme = false;
         root.kdeColorBase = "gray";
+        root.screenMode = "primary";
+        root.screenName = "";
         root.cornerStyle = "default";
         root.pillStyle = "floating";
         root.tuckPills = true;
@@ -494,6 +506,8 @@ Singleton {
         root.showMediaWhenPlaying = true;
         root.morphToTopBarWhenMaximized = true;
         root.reserveSpaceWhenMaximized = true;
+        root.alwaysTopBar = false;
+        root.autoHideTopBar = false;
         root.hideOnFullscreen = true;
         root.autoCollapseTimeout = 6000;
         root.dockAutoHideOnFullscreen = true;
@@ -608,6 +622,8 @@ Singleton {
             "accentColor": root.accentColor,
             "kdeColorScheme": root.kdeColorScheme,
             "kdeColorBase": root.kdeColorBase,
+            "screenMode": root.screenMode,
+            "screenName": root.screenName,
             "cornerStyle": root.cornerStyle,
             "pillStyle": root.pillStyle,
             "tuckPills": root.tuckPills,
@@ -618,6 +634,8 @@ Singleton {
             "showMediaWhenPlaying": root.showMediaWhenPlaying,
             "morphToTopBarWhenMaximized": root.morphToTopBarWhenMaximized,
             "reserveSpaceWhenMaximized": root.reserveSpaceWhenMaximized,
+            "alwaysTopBar": root.alwaysTopBar,
+            "autoHideTopBar": root.autoHideTopBar,
             "hideOnFullscreen": root.hideOnFullscreen,
             "autoCollapseTimeout": root.autoCollapseTimeout,
             "dockAutoHideOnFullscreen": root.dockAutoHideOnFullscreen,

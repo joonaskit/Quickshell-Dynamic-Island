@@ -4,7 +4,7 @@ What the user sees is described in the README under Welcome guide. This is how i
 
 ## Files
 
-`onboarding/` holds `OnboardingWindow`, one centred overlay window on the first screen, created in `shell.qml`, and one `Onboarding*.qml` page per step. `OnboardingService` holds its state.
+`onboarding/` holds `OnboardingWindow`, one centred overlay window on the main screen (`ScreenService.primaryScreen`), created in `shell.qml`, and one `Onboarding*.qml` page per step. `OnboardingService` holds its state.
 
 ## When it opens
 
