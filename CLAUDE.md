@@ -22,6 +22,7 @@ Read the doc for an area before changing it:
 - Status icons, pill style, tucked pills: `docs/TOP_BAR.md`
 - Helper scripts, `HelperService`, `deps.json`: `docs/HELPERS.md`
 - `install.sh`: `docs/INSTALLER.md`
+- Check for updates, update channels: `docs/UPDATES.md`
 - Clipboard history: `docs/CLIPBOARD.md`
 - Welcome guide: `docs/ONBOARDING.md`
 - Activities D-Bus API and `island-run`: `docs/ACTIVITIES_API.md`

@@ -662,6 +662,26 @@
         "opensuse": "systemsettings6",
         "debian": "systemsettings"
       }
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "git"
+        ]
+      },
+      "features": [
+        "Checking for updates and updating from the settings"
+      ],
+      "packages": {
+        "arch": "git",
+        "fedora": "git",
+        "opensuse": "git",
+        "debian": "git"
+      }
     }
   ]
 }

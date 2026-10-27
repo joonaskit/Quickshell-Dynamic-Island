@@ -112,5 +112,6 @@
   "launcherFileSearchRoot": "~",
   "clipboardMaxItems": 50,
   "clipboardSensitiveExpiry": 60,
-  "clipboardIgnoredApps": []
+  "clipboardIgnoredApps": [],
+  "updateChannel": "stable"
 }
