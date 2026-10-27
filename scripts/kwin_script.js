@@ -254,8 +254,11 @@ function hookWindow(win) {
 
     try {
         if (win.frameGeometryChanged) {
+            // Only a drag or resize floods this, so other changes go out at once: a throttled
+            // send would drop the snap into a tile that lands just after the drag ends
             win.frameGeometryChanged.connect(function() {
-                sendStateThrottled();
+                if (win.move || win.resize) sendStateThrottled();
+                else sendState();
             });
         }
     } catch (e) {}
