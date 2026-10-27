@@ -60,6 +60,12 @@ PanelWindow {
     // at the very top as a bar while a window is maximized.
     readonly property bool pillIsBar: WindowService.isMaximized && Theme.morphToTopBarWhenMaximized && !WindowService.hasFullscreenApp
 
+    // Frosted glass behind the launcher on the light scheme
+    WindowBlur {
+        target: window
+        items: [picker.body]
+    }
+
     DockAppPicker {
         id: picker
         centered: true

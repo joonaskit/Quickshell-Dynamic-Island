@@ -38,6 +38,8 @@ Item {
 
     // Hitbox reference for window click-through mask
     property alias hitBox: pillBody
+    // The notch ears, for the window's blur
+    property alias ears: notchEars
 
     // Pill priority: timer, then activity, then media, except that a failed activity outranks all of them
     readonly property bool isShowingActivity: ActivityService.showInPill && !root.isShowingOsd
@@ -187,6 +189,7 @@ Item {
     }
 
     NotchEars {
+        id: notchEars
         body: pillBody
         active: Theme.notchStyle && !root.isTopBarMode
     }
@@ -205,8 +208,13 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: Theme.islandBackground
+        // Glass is clear while compact in the top bar, which draws the glass behind it
+        color: (Theme.glass && root.isTopBarMode && !root.isOpen) ? "transparent" : (root.isOpen ? Theme.menuSurface : Theme.islandSurface)
         clip: true
+
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
 
         HoverHandler {
             id: pillHoverHandler
@@ -214,7 +222,8 @@ Item {
         }
 
         border.color: root.isHovered ? Theme.islandBorderHover : Theme.islandBorder
-        border.width: root.isTopBarMode ? 0 : 1
+        // On glass with notch ears, GlassSurface draws the hairline instead
+        border.width: (root.isTopBarMode || (Theme.glass && notchEars.active)) ? 0 : 1
 
         Behavior on width {
             NumberAnimation {
@@ -247,6 +256,11 @@ Item {
 
         Behavior on border.color {
             ColorAnimation { duration: 180 }
+        }
+
+        GlassSurface {
+            body: pillBody
+            flushTop: notchEars.active
         }
 
         // Compact Clock View

@@ -10,6 +10,8 @@ Item {
     property date currentDate: new Date()
     property var displayBattery: UPower.displayDevice
     property real compactCenterWidth: Theme.compactWidthClock
+    // The bar's body, for the window's blur
+    property alias bar: barBackground
 
     Behavior on compactCenterWidth {
         NumberAnimation {
@@ -46,7 +48,7 @@ Item {
         bottomLeftRadius: root.isMaximized ? 0 : (Theme.notchStyle ? Theme.notchRadius : Theme.compactRadius)
         bottomRightRadius: root.isMaximized ? 0 : (Theme.notchStyle ? Theme.notchRadius : Theme.compactRadius)
 
-        color: Theme.islandBackground
+        color: Theme.islandSurface
         clip: true
 
         Behavior on width {
@@ -81,6 +83,10 @@ Item {
         }
         Behavior on bottomRightRadius {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+
+        GlassSurface {
+            body: barBackground
         }
 
         // Ultra-sleek hairline border separating top bar from maximized application

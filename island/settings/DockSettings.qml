@@ -191,19 +191,6 @@ SettingsCategory {
             color: Theme.overlay(0.06)
         }
 
-        SettingToggle {
-            title: "Transparent Glass Dock"
-            description: "Use a translucent frosted glass effect with specular highlights for the dock capsule"
-            iconName: "contrast"
-            iconColor: Theme.accentIndigo
-            checked: SettingsService.dockTransparent
-            onToggled: function(val) {
-                SettingsService.setSetting("dockTransparent", val);
-            }
-        }
-
-        SettingDivider {}
-
         SettingSwatches {
             title: "Dock & Launcher Tint"
             description: "Hue of the dock, the launcher and the dock's menus"
@@ -243,18 +230,18 @@ SettingsCategory {
 
         SettingDivider {}
 
-        // One slider, two remembered values: the solid dock and the glass dock
-        // each keep their own opacity
+        // One slider, two remembered values: the solid dock and the glass dock (the
+        // Glass style in Appearance) each keep their own opacity
         SettingSlider {
             title: "Dock Opacity"
-            description: SettingsService.dockTransparent ? "Opacity of the transparent glass dock" : "Opacity of the dock (the launcher and menus stay readable)"
+            description: Theme.glass ? "Opacity of the glass dock. The Glass style is set in Appearance" : "Opacity of the dock (the launcher and menus stay readable)"
             iconName: "contrast"
             iconColor: Theme.accentIndigo
-            value: SettingsService.dockTransparent ? SettingsService.dockGlassOpacity : SettingsService.dockOpacity
+            value: Theme.glass ? SettingsService.dockGlassOpacity : SettingsService.dockOpacity
             minimumValue: 0.20
             maximumValue: 1.00
             stepSize: 0.05
-            presets: SettingsService.dockTransparent ? [
+            presets: Theme.glass ? [
                 { label: "20%", value: 0.20 },
                 { label: "35% (Default)", value: 0.35 },
                 { label: "50%", value: 0.50 },
@@ -266,7 +253,7 @@ SettingsCategory {
                 { label: "Solid", value: 1.00 }
             ]
             onValueModified: function(val) {
-                SettingsService.setSetting(SettingsService.dockTransparent ? "dockGlassOpacity" : "dockOpacity", val);
+                SettingsService.setSetting(Theme.glass ? "dockGlassOpacity" : "dockOpacity", val);
             }
         }
     }

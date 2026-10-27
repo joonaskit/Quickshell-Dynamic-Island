@@ -25,6 +25,24 @@ SettingsCategory {
             }
         }
 
+        SettingSegmented {
+            title: "Style"
+            keywords: "glass frosted blur transparent translucent solid"
+            description: Theme.glass && !Theme.blurAvailable
+                ? "Frosted glass for the island, dock and launcher. Blurring the desktop behind it needs Quickshell 0.3 or later"
+                : "Frosted glass for the island, dock and launcher, on either appearance. KDE apps follow the appearance only"
+            iconName: "contrast"
+            iconColor: Theme.accentCyan
+            currentValue: SettingsService.shellStyle
+            options: [
+                { label: "Solid", value: "solid" },
+                { label: "Glass", value: "glass" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("shellStyle", val);
+            }
+        }
+
         SettingDivider {}
 
         SettingSwatches {
@@ -58,7 +76,7 @@ SettingsCategory {
             title: "KDE Window Background"
             description: Theme.isLight
                 ? "For the dark appearance only"
-                : "Gray is easier on the eyes in large windows. The island and top bar stay black"
+                : "Gray is easier on the eyes in large windows. The island and top bar keep their own look"
             iconName: "contrast"
             iconColor: Theme.accentIndigo
             isSubOption: true

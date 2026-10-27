@@ -11,7 +11,7 @@ Item {
 
     readonly property var device: KdeConnectService.device
     readonly property bool ready: device !== null && device.reachable
-    readonly property color kcColor: Theme.accentGreen
+    readonly property color kcColor: Theme.accentGreenStrong
 
     implicitWidth: embedded ? (parent ? parent.width : Theme.px(340)) : Theme.px(320)
     implicitHeight: mainCard.height
@@ -78,7 +78,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -100,7 +100,7 @@ Item {
                     Layout.preferredWidth: Theme.px(38)
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
-                    color: root.ready ? Qt.rgba(48/255, 209/255, 88/255, 0.22) : Theme.cardBackgroundHover
+                    color: root.ready ? Qt.rgba(48/255, 209/255, 88/255, 0.22) : Theme.cardSurfaceHover
                     Behavior on color { ColorAnimation { duration: 180 } }
 
                     SvgIcon {

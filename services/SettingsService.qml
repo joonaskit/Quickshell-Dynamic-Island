@@ -21,6 +21,9 @@ Singleton {
     property string fontDisplayFamily: ""
     // "dark" or "light"
     property string colorScheme: "dark"
+    // "solid" or "glass": the look of the island, the dock and the launcher on either
+    // scheme (Theme.glass). KDE apps follow colorScheme only
+    property string shellStyle: "solid"
     // Name of an entry in Theme.accentChoices
     property string accentColor: "blue"
     // Apply the shell's colours to KDE apps and titlebars as a colour scheme (KdeThemeService). Off by default
@@ -58,7 +61,6 @@ Singleton {
     property bool dockShowDownloads: true
     property bool dockShowTrash: true
     property bool dockShowBorder: false
-    property bool dockTransparent: false
     // Name of an entry in Theme.dockTintChoices
     property string dockTint: "cool"
     property real dockTintStrength: 0.08
@@ -253,6 +255,9 @@ Singleton {
         if (typeof data.fontDisplayFamily === "string") root.fontDisplayFamily = data.fontDisplayFamily.trim().slice(0, 100);
 
         if (data.colorScheme === "dark" || data.colorScheme === "light") root.colorScheme = data.colorScheme;
+        // Older configs had a glass look for the dock only (dockTransparent)
+        if (data.shellStyle === "solid" || data.shellStyle === "glass") root.shellStyle = data.shellStyle;
+        else if (data.dockTransparent) root.shellStyle = "glass";
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
         if (data.kdeColorScheme !== undefined) root.kdeColorScheme = !!data.kdeColorScheme;
         if (data.kdeColorBase === "gray" || data.kdeColorBase === "black") root.kdeColorBase = data.kdeColorBase;
@@ -282,7 +287,6 @@ Singleton {
         if (data.dockShowDownloads !== undefined) root.dockShowDownloads = !!data.dockShowDownloads;
         if (data.dockShowTrash !== undefined) root.dockShowTrash = !!data.dockShowTrash;
         if (data.dockShowBorder !== undefined) root.dockShowBorder = !!data.dockShowBorder;
-        if (data.dockTransparent !== undefined) root.dockTransparent = !!data.dockTransparent;
         if (data.dockTint !== undefined && Theme.dockTintChoices.some(c => c.name === data.dockTint)) root.dockTint = data.dockTint;
         if (data.dockTintStrength !== undefined && !isNaN(data.dockTintStrength)) root.dockTintStrength = Math.max(0.02, Math.min(0.20, parseFloat(data.dockTintStrength)));
         if (data.dockOpacity !== undefined && !isNaN(data.dockOpacity)) root.dockOpacity = Math.max(0.20, Math.min(1.0, parseFloat(data.dockOpacity)));
@@ -400,6 +404,7 @@ Singleton {
         Theme.fontFamilyChoice = root.fontFamily;
         Theme.fontDisplayChoice = root.fontDisplayFamily;
         Theme.scheme = root.colorScheme;
+        Theme.style = root.shellStyle;
         Theme.cornerStyle = root.cornerStyle;
         Theme.pillStyle = root.pillStyle;
         Theme.accentName = root.accentColor;
@@ -414,7 +419,6 @@ Singleton {
         Theme.dockAutoHideFromWindows = root.dockAutoHideFromWindows;
         Theme.dockAutoHideAlways = root.dockAutoHideAlways;
         Theme.dockShowBorder = root.dockShowBorder;
-        Theme.dockTransparent = root.dockTransparent;
         Theme.dockTintName = root.dockTint;
         Theme.dockTintStrength = root.dockTintStrength;
         Theme.dockOpacity = root.dockOpacity;
@@ -521,6 +525,7 @@ Singleton {
         root.fontFamily = "";
         root.fontDisplayFamily = "";
         root.colorScheme = "dark";
+        root.shellStyle = "solid";
         root.accentColor = "blue";
         root.kdeColorScheme = false;
         root.kdeColorBase = "gray";
@@ -547,7 +552,6 @@ Singleton {
         root.dockShowDownloads = true;
         root.dockShowTrash = true;
         root.dockShowBorder = false;
-        root.dockTransparent = false;
         root.dockTint = "cool";
         root.dockTintStrength = 0.08;
         root.dockOpacity = 0.85;
@@ -651,6 +655,7 @@ Singleton {
             "fontFamily": root.fontFamily,
             "fontDisplayFamily": root.fontDisplayFamily,
             "colorScheme": root.colorScheme,
+            "shellStyle": root.shellStyle,
             "accentColor": root.accentColor,
             "kdeColorScheme": root.kdeColorScheme,
             "kdeColorBase": root.kdeColorBase,
@@ -677,7 +682,6 @@ Singleton {
             "dockShowDownloads": root.dockShowDownloads,
             "dockShowTrash": root.dockShowTrash,
             "dockShowBorder": root.dockShowBorder,
-            "dockTransparent": root.dockTransparent,
             "dockTint": root.dockTint,
             "dockTintStrength": root.dockTintStrength,
             "dockOpacity": root.dockOpacity,

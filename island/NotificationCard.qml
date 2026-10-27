@@ -24,7 +24,7 @@ Rectangle {
     Layout.fillWidth: true
     Layout.preferredHeight: cardLayout.implicitHeight + Theme.px(14)
     radius: Theme.cornerPx(10)
-    color: cardMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.04)
+    color: cardMouse.containsMouse ? Theme.cardSurfaceHover : Theme.overlay(0.04)
     border.width: 1
     border.color: Theme.overlay(0.06)
 

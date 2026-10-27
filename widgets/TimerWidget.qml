@@ -76,7 +76,7 @@ Item {
             SvgIcon {
                 name: "clock"
                 size: Theme.px(13)
-                color: Theme.accentOrange
+                color: Theme.accentOrangeStrong
             }
 
             Text {
@@ -133,7 +133,7 @@ Item {
                     required property int modelData
                     label: modelData + "m"
                     filled: root.selectedMinutes === modelData
-                    accent: Theme.accentOrange
+                    accent: Theme.accentOrangeStrong
                     onClicked: root.selectedMinutes = modelData
                 }
             }
@@ -155,7 +155,7 @@ Item {
                 label: TimerService.timerRunning ? "Pause" : (TimerService.timerPaused ? "Resume" : (TimerService.timerFinished ? "Restart" : "Start"))
                 iconName: TimerService.timerRunning ? "pause" : "play"
                 filled: true
-                accent: Theme.accentOrange
+                accent: Theme.accentOrangeStrong
                 onClicked: {
                     if (TimerService.timerActive) TimerService.toggleTimer();
                     else TimerService.startTimer(root.selectedMinutes * 60000);

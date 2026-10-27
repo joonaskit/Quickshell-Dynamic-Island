@@ -27,10 +27,8 @@ Item {
     // join, so its base corner is rounded.
     property real farFillet: fitsOnDock ? filletSize : 0
     property real farOverhang: 0
-    // Opacity of the body; it fades to the exact dock colour at the base. Kept
-    // well above a see-through dock so the content stays readable, and follows
-    // the dock when the dock is more opaque than that.
-    property real tintAlpha: Math.max(Theme.dockAlpha, Theme.dockTransparent ? 0.9 : 0.97)
+    // Opacity of the body; it fades to the exact dock colour at the base
+    property real tintAlpha: Theme.dockPopupAlpha
     readonly property color tintColor: Qt.rgba(Theme.dockBackground.r, Theme.dockBackground.g, Theme.dockBackground.b, tintAlpha)
 
     anchors.centerIn: parent
@@ -127,6 +125,92 @@ Item {
             startX: 0
             startY: 0
             PathSvg { path: bgHolder.outline }
+        }
+    }
+
+    // The glass light, as GlassSurface draws it on the dock: a sheen from the edge
+    // away from the dock, and a rim with a softer band inside it. Above the fillets
+    // the outline is a rectangle rounded at the top, so the rim and band are rings of
+    // those, faded out before the base, where the popup joins the dock.
+    readonly property real glassInset: Theme.dockShowBorder ? 1 : 0
+    readonly property real rimIn: glassInset + 1
+    readonly property real bandIn: rimIn + Theme.px(3)
+    readonly property real glassFade: h > 0 ? Math.max(0.05, (h - Math.max(nearF, farF, farR + farJoin) - filletSize) / h) : 1
+
+    function insetRadius(by) {
+        return Math.max(0, r - by);
+    }
+
+    Shape {
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+        visible: Theme.glass
+
+        ShapePath {
+            strokeColor: "transparent"
+            fillGradient: LinearGradient {
+                x1: 0; y1: 0
+                x2: 0; y2: bgHolder.h
+                GradientStop { position: 0.0; color: Theme.glassSheen }
+                GradientStop { position: 0.45; color: "transparent" }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+            startX: 0
+            startY: 0
+            PathSvg { path: bgHolder.outline }
+        }
+
+        ShapePath {
+            strokeColor: "transparent"
+            fillRule: ShapePath.OddEvenFill
+            fillGradient: LinearGradient {
+                x1: 0; y1: 0
+                x2: 0; y2: bgHolder.h
+                GradientStop { position: 0.0; color: Theme.glassRimTop }
+                GradientStop { position: Math.min(0.5, bgHolder.glassFade * 0.6); color: Theme.glassRimSide }
+                GradientStop { position: bgHolder.glassFade; color: "transparent" }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+            PathRectangle {
+                x: bgHolder.glassInset; y: bgHolder.glassInset
+                width: Math.max(0, bgHolder.w - 2 * bgHolder.glassInset)
+                height: Math.max(0, bgHolder.h - bgHolder.glassInset)
+                topLeftRadius: bgHolder.insetRadius(bgHolder.glassInset)
+                topRightRadius: bgHolder.insetRadius(bgHolder.glassInset)
+            }
+            PathRectangle {
+                x: bgHolder.rimIn; y: bgHolder.rimIn
+                width: Math.max(0, bgHolder.w - 2 * bgHolder.rimIn)
+                height: Math.max(0, bgHolder.h - bgHolder.rimIn)
+                topLeftRadius: bgHolder.insetRadius(bgHolder.rimIn)
+                topRightRadius: bgHolder.insetRadius(bgHolder.rimIn)
+            }
+        }
+
+        ShapePath {
+            strokeColor: "transparent"
+            fillRule: ShapePath.OddEvenFill
+            fillGradient: LinearGradient {
+                x1: 0; y1: 0
+                x2: 0; y2: bgHolder.h
+                GradientStop { position: 0.0; color: Theme.glassBandTop }
+                GradientStop { position: Math.min(0.5, bgHolder.glassFade * 0.6); color: "transparent" }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+            PathRectangle {
+                x: bgHolder.rimIn; y: bgHolder.rimIn
+                width: Math.max(0, bgHolder.w - 2 * bgHolder.rimIn)
+                height: Math.max(0, bgHolder.h - bgHolder.rimIn)
+                topLeftRadius: bgHolder.insetRadius(bgHolder.rimIn)
+                topRightRadius: bgHolder.insetRadius(bgHolder.rimIn)
+            }
+            PathRectangle {
+                x: bgHolder.bandIn; y: bgHolder.bandIn
+                width: Math.max(0, bgHolder.w - 2 * bgHolder.bandIn)
+                height: Math.max(0, bgHolder.h - bgHolder.bandIn)
+                topLeftRadius: bgHolder.insetRadius(bgHolder.bandIn)
+                topRightRadius: bgHolder.insetRadius(bgHolder.bandIn)
+            }
         }
     }
 }

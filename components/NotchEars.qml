@@ -11,6 +11,8 @@ Item {
     property Rectangle body: null
     property bool active: Theme.notchStyle
     property color color: body ? body.color : Theme.islandBackground
+    // Draw the glass hairline along the curves (see GlassSurface.flushTop)
+    property bool outlined: Theme.glass
 
     readonly property real size: body ? Math.max(0, Math.min(Theme.notchEar, body.height / 2)) : 0
 
@@ -43,6 +45,26 @@ Item {
             startY: 0
             PathLine { x: root.width - root.size; y: 0 }
             PathLine { x: root.width - root.size; y: root.size }
+            PathArc { x: root.width; y: 0; radiusX: root.size; radiusY: root.size; direction: PathArc.Clockwise }
+        }
+
+        // On glass, the hairline along each curve, carrying on from the one that
+        // GlassSurface draws down the body's sides
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: root.outlined ? Theme.glassHairline : "transparent"
+            strokeWidth: 1
+            startX: root.size
+            startY: root.size
+            PathArc { x: 0; y: 0; radiusX: root.size; radiusY: root.size; direction: PathArc.Counterclockwise }
+        }
+
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: root.outlined ? Theme.glassHairline : "transparent"
+            strokeWidth: 1
+            startX: root.width - root.size
+            startY: root.size
             PathArc { x: root.width; y: 0; radiusX: root.size; radiusY: root.size; direction: PathArc.Clockwise }
         }
     }

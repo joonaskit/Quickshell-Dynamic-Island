@@ -31,6 +31,8 @@ Item {
     }
 
     property alias hitBox: clusterBackground
+    // The notch ears, for the window's blur
+    property alias ears: notchEars
 
     function toggleMenu() {
         root.menuOpen = !root.menuOpen;
@@ -110,6 +112,7 @@ Item {
     }
 
     NotchEars {
+        id: notchEars
         body: clusterBackground
         active: Theme.notchStyle && !root.isTopBarMode
     }
@@ -133,9 +136,10 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.menuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
-        border.width: 0
-        border.color: "transparent"
+        color: (root.isTopBarMode && !root.menuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : (root.menuOpen ? Theme.menuSurface : Theme.islandSurface)
+        // The hairline on glass, none on dark. With notch ears GlassSurface draws it instead.
+        border.width: (Theme.glass && !root.isTopBarMode && !notchEars.active) ? 1 : 0
+        border.color: Theme.glass ? Theme.islandBorder : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }
@@ -168,6 +172,11 @@ Item {
         }
         Behavior on bottomRightRadius {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+
+        GlassSurface {
+            body: clusterBackground
+            flushTop: notchEars.active
         }
 
         // Top Header Area (always visible, interactive pill header)
@@ -329,7 +338,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop && !root.isWindowMaximized
                     iconName: "maximize"
-                    iconColor: Theme.accentGreen
+                    iconColor: Theme.accentGreenStrong
                     label: "Maximize"
                     onClicked: {
                         WindowService.maximizeWindow(root.activeWindowId || root.activeAppId);
@@ -340,7 +349,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop && root.isWindowMaximized
                     iconName: "unmaximize"
-                    iconColor: Theme.accentYellow
+                    iconColor: Theme.accentYellowStrong
                     label: "Unmaximize"
                     onClicked: {
                         WindowService.unmaximizeWindow(root.activeWindowId || root.activeAppId);
@@ -362,7 +371,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop
                     iconName: "pin"
-                    iconColor: Theme.accentOrange
+                    iconColor: Theme.accentOrangeStrong
                     label: "Always on Top"
                     onClicked: {
                         WindowService.toggleKeepAbove(root.activeWindowId || root.activeAppId);
@@ -465,7 +474,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop
                     iconName: "plus"
-                    iconColor: Theme.accentGreen
+                    iconColor: Theme.accentGreenStrong
                     label: "New Window"
                     onClicked: {
                         WindowService.launchNewWindow(root.activeAppId);
@@ -506,7 +515,7 @@ Item {
                 MenuItem {
                     visible: root.isDesktop
                     iconName: "terminal"
-                    iconColor: Theme.accentCyan
+                    iconColor: Theme.accentCyanStrong
                     label: "Terminal"
                     onClicked: {
                         WindowService.openTerminal();
@@ -528,7 +537,7 @@ Item {
                 MenuItem {
                     visible: root.isDesktop
                     iconName: "settings"
-                    iconColor: Theme.accentOrange
+                    iconColor: Theme.accentOrangeStrong
                     label: "System Settings"
                     onClicked: {
                         WindowService.openSettings();
@@ -539,7 +548,7 @@ Item {
                 MenuItem {
                     visible: root.isDesktop
                     iconName: "lock"
-                    iconColor: Theme.accentYellow
+                    iconColor: Theme.accentYellowStrong
                     label: "Lock Screen"
                     onClicked: {
                         WindowService.lockScreen();

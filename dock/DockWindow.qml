@@ -308,6 +308,20 @@ PanelWindow {
         }
     }
 
+    // Frosted glass behind the dock and its popups on the light scheme
+    WindowBlur {
+        target: window
+        items: [
+            dockBar.capsule,
+            dockBar.flyoutBlur(dockBar.contextMenuHitBox, 14),
+            dockBar.flyoutBlur(dockBar.appPickerHitBox, Theme.corner(18)),
+            dockBar.flyoutBlur(dockBar.trashMenuHitBox, Theme.corner(12)),
+            dockBar.flyoutBlur(dockBar.launcherMenuHitBox, Theme.corner(12)),
+            dockBar.flyoutBlur(dockBar.downloadsStackHitBox, 14),
+            dockBar.flyoutBlur(dockBar.windowPickerHitBox, 14)
+        ]
+    }
+
     // Floating Dock Bar Capsule
     // Floating Dock Bar Capsule & Popups
     DockBar {

@@ -31,7 +31,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true

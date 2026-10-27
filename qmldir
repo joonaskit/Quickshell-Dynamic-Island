@@ -111,6 +111,8 @@ TopLeftAppCluster 1.0 island/TopLeftAppCluster.qml
 VirtualDesktopsPill 1.0 island/VirtualDesktopsPill.qml
 HiddenElementGlow 1.0 components/HiddenElementGlow.qml
 NotchEars 1.0 components/NotchEars.qml
+GlassSurface 1.0 components/GlassSurface.qml
+WindowBlur 1.0 components/WindowBlur.qml
 TabSeamGlow 1.0 components/TabSeamGlow.qml
 DockWindowPicker 1.0 dock/DockWindowPicker.qml
 DockDownloadsStack 1.0 dock/DockDownloadsStack.qml

@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -53,7 +53,7 @@ Item {
                     Layout.preferredWidth: Theme.px(38)
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
-                    color: !MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.cardBackgroundHover
+                    color: !MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.cardSurfaceHover
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }

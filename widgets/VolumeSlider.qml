@@ -61,7 +61,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 height: Theme.px(18)
                 radius: Theme.px(9)
-                color: Theme.sliderTrack
+                color: Theme.controlTrack
                 clip: true
 
                 // Volume Fill

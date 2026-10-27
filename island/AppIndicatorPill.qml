@@ -439,7 +439,7 @@ Item {
         bottomRightRadius: root.targetBottomRadius
 
         // Frosted like the virtual desktops while compact; solid once the menu opens, for reading
-        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : (root.contextMenuOpen ? Theme.islandBackground : Theme.pillFrosted)
+        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : (root.contextMenuOpen ? Theme.menuSurface : Theme.pillFrosted)
         border.width: root.isTopBarMode ? 0 : 1
         border.color: root.contextMenuOpen ? Theme.islandBorder : Theme.pillFrostedBorder
 
@@ -472,6 +472,10 @@ Item {
         }
         Behavior on bottomRightRadius {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+
+        GlassSurface {
+            body: pillBackground
         }
 
         // =====================================================================

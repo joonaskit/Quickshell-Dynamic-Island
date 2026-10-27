@@ -8,7 +8,7 @@ Item {
     readonly property bool isTimer: TimerService.pillMode === "timer"
     readonly property bool finished: root.isTimer && TimerService.timerFinished
     readonly property bool paused: root.isTimer && TimerService.timerPaused
-    readonly property color accent: root.finished ? Theme.accentRed : (root.isTimer ? Theme.accentOrange : Theme.accentBlue)
+    readonly property color accent: root.finished ? Theme.accentRed : (root.isTimer ? Theme.accentOrangeStrong : Theme.accentBlue)
 
     implicitHeight: Theme.compactHeight
     implicitWidth: Theme.px(150)

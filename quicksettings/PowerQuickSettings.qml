@@ -45,7 +45,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -76,7 +76,7 @@ Item {
                         anchors.centerIn: parent
                         name: !root.isPresent ? "nuclear" : (root.isCharging ? "bolt" : "battery")
                         size: Theme.px(20)
-                        color: !root.isPresent ? Theme.accentYellowStrong : (root.isCharging ? Theme.accentGreen : Theme.textPrimary)
+                        color: !root.isPresent ? Theme.accentYellowStrong : (root.isCharging ? Theme.accentGreenStrong : Theme.textPrimary)
                     }
                 }
 
@@ -101,7 +101,7 @@ Item {
                             font.family: Theme.fontDisplay
                             font.pixelSize: Theme.fontPx(15)
                             font.weight: Font.Bold
-                            color: root.isCharging ? Theme.accentGreen : Theme.textPrimary
+                            color: root.isCharging ? Theme.accentGreenStrong : Theme.textPrimary
                             visible: root.isPresent
                         }
                     }
@@ -152,7 +152,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
-                    color: lockMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
+                    color: lockMouse.containsMouse ? Theme.cardSurfaceHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -200,7 +200,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
-                    color: sleepMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
+                    color: sleepMouse.containsMouse ? Theme.cardSurfaceHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -248,7 +248,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
-                    color: restartMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
+                    color: restartMouse.containsMouse ? Theme.cardSurfaceHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -265,7 +265,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "restart"
                                 size: Theme.px(14)
-                                color: Theme.accentOrange
+                                color: Theme.accentOrangeStrong
                             }
                         }
 
@@ -296,7 +296,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Theme.px(64)
                     radius: Theme.corner(12)
-                    color: shutdownMouse.containsMouse ? Theme.cardBackgroundHover : Theme.overlay(0.05)
+                    color: shutdownMouse.containsMouse ? Theme.cardSurfaceHover : Theme.overlay(0.05)
 
                     ColumnLayout {
                         anchors.centerIn: parent
@@ -352,7 +352,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.px(28)
                 radius: Theme.corner(8)
-                color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
+                color: settingsMouse.containsMouse ? Theme.cardSurfaceHover : "transparent"
 
                 RowLayout {
                     anchors.fill: parent

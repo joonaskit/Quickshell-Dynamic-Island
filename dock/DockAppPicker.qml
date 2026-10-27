@@ -9,6 +9,8 @@ Item {
     id: root
 
     property bool isOpen: false
+    // The centred launcher's body, for the window's blur
+    property alias body: centeredBody
     property string searchText: ""
     // The search as typed. searchText is lower-cased for matching apps.
     property string rawSearch: ""
@@ -475,18 +477,23 @@ Item {
         farFillet: geo.farFillet
         farOverhang: geo.farOverhang
         cornerRadius: Theme.corner(18)
-        tintAlpha: Theme.dockTransparent ? 0.94 : 0.97
+        tintAlpha: (Theme.glass && Theme.blurAvailable) ? Theme.dockPopupAlpha : (Theme.glass ? 0.94 : 0.97)
     }
 
     // Free-standing body when centred, in the island's colours so it reads as the
     // pill stretching down
     Rectangle {
+        id: centeredBody
         visible: root.centered
         anchors.fill: parent
         radius: Math.min(height / 2, root.originRadius + (Theme.corner(18) - root.originRadius) * Math.min(1, root.popProgress))
-        color: Theme.islandBackground
-        border.color: Theme.overlay(0.1)
+        color: Theme.menuSurface
+        border.color: Theme.glass ? Theme.islandBorder : Theme.overlay(0.1)
         border.width: 1
+
+        GlassSurface {
+            body: centeredBody
+        }
     }
 
     // Content is clipped to the body so it is revealed as the launcher grows
@@ -578,7 +585,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 name: root.isGrid ? "list" : "grid"
                                 size: 12
-                                color: Theme.accentCyan
+                                color: Theme.accentCyanStrong
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -619,7 +626,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 name: "settings"
                                 size: 11
-                                color: Theme.accentOrange
+                                color: Theme.accentOrangeStrong
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -659,7 +666,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 name: "bolt"
                                 size: 11
-                                color: Theme.accent
+                                color: Theme.accentText
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -667,7 +674,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 11
                                 font.weight: Font.Medium
-                                color: Theme.accent
+                                color: Theme.accentText
                             }
                         }
 
@@ -1290,7 +1297,7 @@ Item {
                                         anchors.centerIn: parent
                                         name: "settings"
                                         size: root.isCompact ? 10 : 11
-                                        color: editBtnMouse.containsMouse ? Theme.accentOrange : Theme.textSecondary
+                                        color: editBtnMouse.containsMouse ? Theme.accentOrangeStrong : Theme.textSecondary
                                     }
 
                                     MouseArea {
@@ -1394,7 +1401,7 @@ Item {
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily
                             font.pixelSize: 10
-                            color: (FileSearchService.error !== "" || !FileSearchService.available) ? Theme.accentOrange : Theme.textSecondary
+                            color: (FileSearchService.error !== "" || !FileSearchService.available) ? Theme.accentOrangeStrong : Theme.textSecondary
                         }
 
                         ListView {

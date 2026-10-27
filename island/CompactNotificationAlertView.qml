@@ -27,7 +27,7 @@ Item {
                 anchors.centerIn: parent
                 name: "bell"
                 size: Theme.px(13)
-                color: Theme.accentOrange
+                color: Theme.accentOrangeStrong
             }
         }
 
@@ -45,7 +45,7 @@ Item {
                     font.family: Theme.fontDisplay
                     font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.Bold
-                    color: Theme.accentOrange
+                    color: Theme.accentOrangeStrong
                     elide: Text.ElideRight
                 }
 

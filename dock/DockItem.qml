@@ -188,7 +188,7 @@ Item {
             width: Math.max(18, badgeText.implicitWidth + 8)
             radius: 9
             color: Theme.accentRed
-            border.color: Theme.cardBackground
+            border.color: Theme.raisedSurface
             border.width: 1.5
             visible: opacity > 0.01
             opacity: root.unreadNotifCount > 0 ? 1.0 : 0.0
@@ -305,7 +305,7 @@ Item {
             width: tooltipText.implicitWidth + 16
             height: 24
             radius: Theme.corner(6)
-            color: Theme.cardBackground
+            color: Theme.raisedSurface
             border.color: Theme.overlay(0.18)
             border.width: 1
 

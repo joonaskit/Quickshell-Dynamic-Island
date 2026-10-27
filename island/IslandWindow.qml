@@ -752,6 +752,25 @@ PanelWindow {
         }
     }
 
+    // Frosted glass behind the pills and their menus on the light scheme
+    WindowBlur {
+        target: window
+        items: [
+            topBarWings.bar,
+            islandPill.hitBox,
+            islandPill.ears,
+            statusCluster.hitBox,
+            statusCluster.ears,
+            appCluster.hitBox,
+            appCluster.ears,
+            appIndicatorPill.hitBox,
+            virtualDesktopsPill.hitBox,
+            virtualDesktopsPill.ears,
+            virtualDesktopsPill.menuBody,
+            notifBubble.body
+        ]
+    }
+
     // IPC interface to allow controlling the island from terminal or KDE Plasma shortcuts
     // E.g.: `quickshell ipc call island toggle`
     IpcHandler {

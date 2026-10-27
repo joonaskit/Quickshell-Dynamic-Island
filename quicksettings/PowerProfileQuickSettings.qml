@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -66,7 +66,7 @@ Item {
                         size: Theme.px(20)
                         color: {
                             if (PowerProfileService.activeProfile === "performance") return Theme.accentRed;
-                            if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreen;
+                            if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreenStrong;
                             return Theme.accentBlue;
                         }
                     }
@@ -130,7 +130,7 @@ Item {
                         SvgIcon {
                             name: "leaf"
                             size: Theme.px(16)
-                            color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreen : Theme.textTertiary
+                            color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreenStrong : Theme.textTertiary
                             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                         }
 
@@ -143,7 +143,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(12)
                                 font.weight: Font.DemiBold
-                                color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreen : Theme.textPrimary
+                                color: PowerProfileService.activeProfile === "power-saver" ? Theme.accentGreenStrong : Theme.textPrimary
                                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                             }
                             Text {
@@ -157,7 +157,7 @@ Item {
                         SvgIcon {
                             name: "check"
                             size: Theme.px(14)
-                            color: Theme.accentGreen
+                            color: Theme.accentGreenStrong
                             opacity: PowerProfileService.activeProfile === "power-saver" ? 1.0 : 0.0
                             scale: PowerProfileService.activeProfile === "power-saver" ? 1.0 : 0.5
                             Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }

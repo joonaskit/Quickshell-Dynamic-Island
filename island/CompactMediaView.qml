@@ -25,7 +25,7 @@ Item {
             Layout.preferredHeight: Theme.px(22)
             Layout.alignment: Qt.AlignVCenter
             radius: Theme.cornerPx(5)
-            color: Theme.cardBackground
+            color: Theme.cardSurface
             clip: true
 
             Image {
@@ -40,7 +40,7 @@ Item {
                 anchors.centerIn: parent
                 name: "music"
                 size: Theme.px(13)
-                color: Theme.accentOrange
+                color: Theme.accentOrangeStrong
                 visible: root.artUrl === "" || parent.children[0].status !== Image.Ready
             }
         }
