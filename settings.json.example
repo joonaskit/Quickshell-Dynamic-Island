@@ -7,6 +7,8 @@
   "accentColor": "blue",
   "kdeColorScheme": false,
   "kdeColorBase": "gray",
+  "screenMode": "primary",
+  "screenName": "",
   "pillStyle": "floating",
   "tuckPills": true,
   "frostedStatusIcons": false,

@@ -72,6 +72,46 @@ SettingsCategory {
         }
     }
 
+    // Screens
+    SettingsSection {
+        title: "SCREENS"
+        titlePixelSize: Theme.fontPx(10)
+
+        SettingSegmented {
+            title: "Show On"
+            description: "The main screen is the one set as main in KDE System Settings. The island, dock and other windows follow it"
+            iconName: "window"
+            iconColor: Theme.accentGreen
+            currentValue: SettingsService.screenMode
+            options: [
+                { label: "Main Screen", value: "primary" },
+                { label: "All Screens", value: "all" },
+                { label: "Choose", value: "named" }
+            ]
+            onSelected: function(val) {
+                if (val === "named" && SettingsService.screenName === "" && ScreenService.primaryScreen)
+                    SettingsService.setSetting("screenName", ScreenService.primaryScreen.name);
+                SettingsService.setSetting("screenMode", val);
+            }
+        }
+
+        SettingDivider { visible: !SettingsSearch.active && SettingsService.screenMode === "named" }
+
+        SettingSegmented {
+            title: "Screen"
+            description: "If it is not connected, the main screen is used"
+            iconName: "window"
+            iconColor: Theme.accentGreen
+            isSubOption: true
+            visible: matchesSearch && SettingsService.screenMode === "named"
+            currentValue: SettingsService.screenName
+            options: ScreenService.screens.map(s => ({ label: s.name, value: s.name }))
+            onSelected: function(val) {
+                SettingsService.setSetting("screenName", val);
+            }
+        }
+    }
+
     // Shape
     SettingsSection {
         title: "SHAPE"

@@ -11,7 +11,7 @@ PanelWindow {
     id: window
 
     // With no anchors a layer surface sits in the middle of its screen
-    screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    screen: ScreenService.primaryScreen
 
     color: "transparent"
     implicitWidth: Theme.px(680)

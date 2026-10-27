@@ -26,6 +26,9 @@ Singleton {
     property bool kdeColorScheme: false
     // What KDE windows are built on in the dark scheme: "gray" (the surface, as Filehouse) or "black"
     property string kdeColorBase: "gray"
+    // Which screens show the shell: "primary" (the main display in KDE), "all", or "named" (screenName)
+    property string screenMode: "primary"
+    property string screenName: ""
     // Name of an entry in Theme.cornerChoices
     property string cornerStyle: "default"
     // "floating" or "notch": whether the island's pills hang below the top edge or hug it
@@ -244,6 +247,9 @@ Singleton {
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
         if (data.kdeColorScheme !== undefined) root.kdeColorScheme = !!data.kdeColorScheme;
         if (data.kdeColorBase === "gray" || data.kdeColorBase === "black") root.kdeColorBase = data.kdeColorBase;
+
+        if (data.screenMode === "primary" || data.screenMode === "all" || data.screenMode === "named") root.screenMode = data.screenMode;
+        if (typeof data.screenName === "string") root.screenName = data.screenName.trim().slice(0, 100);
 
         if (data.cornerStyle === "breeze") data.cornerStyle = "kde";
         if (data.cornerStyle !== undefined && Theme.cornerChoices.some(c => c.name === data.cornerStyle)) root.cornerStyle = data.cornerStyle;
@@ -484,6 +490,8 @@ Singleton {
         root.accentColor = "blue";
         root.kdeColorScheme = false;
         root.kdeColorBase = "gray";
+        root.screenMode = "primary";
+        root.screenName = "";
         root.cornerStyle = "default";
         root.pillStyle = "floating";
         root.tuckPills = true;
@@ -608,6 +616,8 @@ Singleton {
             "accentColor": root.accentColor,
             "kdeColorScheme": root.kdeColorScheme,
             "kdeColorBase": root.kdeColorBase,
+            "screenMode": root.screenMode,
+            "screenName": root.screenName,
             "cornerStyle": root.cornerStyle,
             "pillStyle": root.pillStyle,
             "tuckPills": root.tuckPills,

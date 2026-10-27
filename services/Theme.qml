@@ -257,7 +257,6 @@ Singleton {
     property bool morphToTopBarWhenMaximized: true
     property bool reserveSpaceWhenMaximized: true
     property int topBarHeight: px(baseTopBarHeight)
-    property bool allScreens: false
     property int autoCollapseTimeout: 6000
 
     // Dock Styling & Dimensions

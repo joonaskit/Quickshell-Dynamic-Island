@@ -123,6 +123,27 @@
       }
     },
     {
+      "id": "kscreen-doctor",
+      "name": "kscreen-doctor",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "kscreen-doctor"
+        ]
+      },
+      "features": [
+        "Showing the shell on the main display set in System Settings"
+      ],
+      "packages": {
+        "arch": "libkscreen",
+        "fedora": "libkscreen-qt6",
+        "opensuse": "libKF6Screen8",
+        "debian": "kscreen"
+      },
+      "note": "Without it the first screen is used as the main one"
+    },
+    {
       "id": "qdbus",
       "name": "qdbus-qt6",
       "severity": "recommended",
