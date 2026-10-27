@@ -9,13 +9,14 @@ SettingsCategory {
         id: button
 
         property string text: ""
+        property bool busy: false
         signal clicked()
 
         Layout.preferredHeight: 26
         Layout.preferredWidth: buttonLabel.implicitWidth + 24
         radius: 13
-        color: buttonMouse.containsMouse && !BackupService.busy ? Theme.accentTint(0.3) : Theme.overlay(0.08)
-        opacity: BackupService.busy ? 0.4 : 1.0
+        color: buttonMouse.containsMouse && !button.busy ? Theme.accentTint(0.3) : Theme.overlay(0.08)
+        opacity: button.busy ? 0.4 : 1.0
         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
         Text {
@@ -32,8 +33,8 @@ SettingsCategory {
             id: buttonMouse
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape: BackupService.busy ? Qt.ArrowCursor : Qt.PointingHandCursor
-            onClicked: if (!BackupService.busy) button.clicked()
+            cursorShape: button.busy ? Qt.ArrowCursor : Qt.PointingHandCursor
+            onClicked: if (!button.busy) button.clicked()
         }
     }
 
@@ -111,6 +112,99 @@ SettingsCategory {
                         onClicked: SettingsService.resetDefaults()
                     }
                 }
+            }
+        }
+    }
+
+    SettingsSection {
+        key: "updates"
+        title: "UPDATES"
+        subtitle: "Check for a newer version of the shell"
+
+        SettingSegmented {
+            title: "Update channel"
+            description: SettingsService.updateChannel === "stable" ? "New releases only" : "Every new commit on main, before it is released"
+            iconName: "download"
+            keywords: "stable beta release version upgrade"
+            options: [
+                { "label": "Stable", "value": "stable" },
+                { "label": "Beta", "value": "beta" }
+            ]
+            currentValue: SettingsService.updateChannel
+            onSelected: function(val) { SettingsService.setSetting("updateChannel", val); }
+        }
+
+        ColumnLayout {
+            id: updateActions
+
+            readonly property bool matchesSearch: SettingsSearch.matches("Check for updates", "update version upgrade restart")
+            readonly property var commits: UpdateService.result && UpdateService.result.state === "available" && UpdateService.result.channel === "beta" ? UpdateService.result.commits : []
+
+            Layout.fillWidth: true
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            Layout.topMargin: 4
+            Layout.bottomMargin: 10
+            visible: matchesSearch
+            spacing: 8
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                ActionButton {
+                    text: "Check for updates"
+                    busy: UpdateService.busy
+                    onClicked: UpdateService.check()
+                }
+
+                ActionButton {
+                    visible: UpdateService.canUpdate
+                    text: "Update"
+                    onClicked: UpdateService.update()
+                }
+
+                ActionButton {
+                    visible: UpdateService.restartNeeded
+                    text: "Restart the shell"
+                    onClicked: UpdateService.restart()
+                }
+
+                Item { Layout.fillWidth: true }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: UpdateService.summary
+                wrapMode: Text.Wrap
+                font.family: Theme.fontFamily
+                font.pixelSize: 10
+                color: UpdateService.isError ? Theme.accentRed : Theme.textSecondary
+            }
+
+            Repeater {
+                model: updateActions.commits
+
+                delegate: Text {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 8
+                    text: "• " + modelData
+                    elide: Text.ElideRight
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 10
+                    color: Theme.textTertiary
+                }
+            }
+
+            Text {
+                visible: updateActions.commits.length > 0 && UpdateService.result.behind > updateActions.commits.length
+                Layout.fillWidth: true
+                Layout.leftMargin: 8
+                text: "and " + (UpdateService.result ? UpdateService.result.behind - updateActions.commits.length : 0) + " more"
+                font.family: Theme.fontFamily
+                font.pixelSize: 10
+                color: Theme.textTertiary
             }
         }
     }
@@ -219,11 +313,13 @@ SettingsCategory {
 
                 ActionButton {
                     text: BackupService.pickerAvailable ? "Export…" : "Export"
+                    busy: BackupService.busy
                     onClicked: BackupService.pickerAvailable ? BackupService.pick("export") : BackupService.run("export", pathInput.text)
                 }
 
                 ActionButton {
                     text: BackupService.pickerAvailable ? "Import…" : "Import"
+                    busy: BackupService.busy
                     onClicked: BackupService.pickerAvailable ? BackupService.pick("import") : BackupService.run("import", pathInput.text)
                 }
 

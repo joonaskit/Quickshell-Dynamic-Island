@@ -146,6 +146,9 @@ Singleton {
     // App ids (lowercase) whose copies are never recorded
     property var clipboardIgnoredApps: []
 
+    // What "Check for updates" looks for: "stable" (new releases) or "beta" (new commits on main)
+    property string updateChannel: "stable"
+
     // The onboarding version the user has finished or closed; 0 means the welcome guide has
     // not been shown. A settings.json from before onboarding existed counts as done
     readonly property int onboardingCurrent: 1
@@ -383,6 +386,7 @@ Singleton {
         if (Array.isArray(data.clipboardIgnoredApps)) {
             root.clipboardIgnoredApps = data.clipboardIgnoredApps.map(a => String(a).toLowerCase());
         }
+        if (data.updateChannel === "stable" || data.updateChannel === "beta") root.updateChannel = data.updateChannel;
 
         // Sync with Theme singleton
         root.syncToTheme();
@@ -617,6 +621,7 @@ Singleton {
         root.clipboardMaxItems = 50;
         root.clipboardSensitiveExpiry = 60;
         root.clipboardIgnoredApps = [];
+        root.updateChannel = "stable";
 
         root.syncToTheme();
         root.settingsChanged();
@@ -741,7 +746,8 @@ Singleton {
             "launcherFileSearchRoot": root.launcherFileSearchRoot,
             "clipboardMaxItems": root.clipboardMaxItems,
             "clipboardSensitiveExpiry": root.clipboardSensitiveExpiry,
-            "clipboardIgnoredApps": root.clipboardIgnoredApps
+            "clipboardIgnoredApps": root.clipboardIgnoredApps,
+            "updateChannel": root.updateChannel
         };
         let jsonStr = JSON.stringify(data, null, 2);
         saveProc.command = ["python3", "-c", "import sys, os; p=sys.argv[1]; t=p+'.tmp'; open(t, 'w').write(sys.argv[2]); os.replace(t, p)", root.settingsFilePath, jsonStr];

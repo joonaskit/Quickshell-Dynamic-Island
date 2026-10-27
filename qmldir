@@ -23,6 +23,7 @@ singleton SettingsService 1.0 services/SettingsService.qml
 singleton ScreenService 1.0 services/ScreenService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
 singleton BackupService 1.0 services/BackupService.qml
+singleton UpdateService 1.0 services/UpdateService.qml
 singleton DepsService 1.0 services/DepsService.qml
 singleton HelperService 1.0 services/HelperService.qml
 singleton FileSearchService 1.0 services/FileSearchService.qml
