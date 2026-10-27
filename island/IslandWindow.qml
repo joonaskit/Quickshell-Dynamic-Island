@@ -23,8 +23,8 @@ PanelWindow {
     implicitHeight: (window.screen && window.screen.height > 0) ? Math.min(window.screen.height - 40, 1150) : 1000
 
     // Dynamic exclusive zone: when maximized, reserve the top bar space so the maximized window sits under it!
-    // When floating, reserve 0 space so windows can move freely.
-    exclusiveZone: (window.isMaximized && Theme.reserveSpaceWhenMaximized && !window.hasFullscreenApp) ? Theme.topBarHeight : 0
+    // When floating, reserve 0 space so windows can move freely. An auto-hidden bar reserves nothing.
+    exclusiveZone: (window.isMaximized && Theme.reserveSpaceWhenMaximized && !SettingsService.autoHideTopBar && !window.hasFullscreenApp) ? Theme.topBarHeight : 0
     aboveWindows: true
 
     // Top layer sits above regular/maximized windows but below fullscreen windows
@@ -76,8 +76,8 @@ PanelWindow {
         return false;
     }
 
-    // Show full bar whenever any window is maximized or tiled/split
-    readonly property bool isMaximized: ((WindowService.isMaximized && isThisScreenActive) || hasTiledWindow) && Theme.morphToTopBarWhenMaximized && !window.hasFullscreenApp
+    // Show full bar whenever any window is maximized or tiled/split, or always with alwaysTopBar
+    readonly property bool isMaximized: (SettingsService.alwaysTopBar || (((WindowService.isMaximized && isThisScreenActive) || hasTiledWindow) && Theme.morphToTopBarWhenMaximized)) && !window.hasFullscreenApp
 
     // Friendly application name for the active window
     readonly property string activeAppTitle: isThisScreenActive ? WindowService.activeAppTitle : ""
@@ -95,6 +95,51 @@ PanelWindow {
         }
     }
 
+    // Auto-hide of the whole bar: it slides up off screen until the pointer rests at the top
+    // edge. Open popups and the expanded island keep it down.
+    property bool barRevealed: false
+    readonly property bool barHidden: SettingsService.autoHideTopBar && !window.barRevealed && !window.hasDismissablePopup && !islandPill.isOpen
+    // With the bar down, the pills that auto-hide on their own come down with it
+    readonly property bool barDown: SettingsService.autoHideTopBar && !window.barHidden
+    readonly property real barHideOffset: window.barHidden ? Theme.topMargin + Theme.compactHeight + Theme.px(24) : 0
+
+    Timer {
+        id: barDwellTimer
+        interval: 220
+        onTriggered: window.barRevealed = true
+    }
+
+    Timer {
+        id: barUnhoverTimer
+        interval: 750
+        onTriggered: window.barRevealed = false
+    }
+
+    // Watches the top edge while the bar is hidden and the bar's height while it is down. Above
+    // the pills, whose own hover areas would take the event; it only watches, clicks pass.
+    Item {
+        id: barHoverArea
+        z: 500
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: window.barHidden ? Math.max(8, Theme.px(8)) : Theme.topBarHeight + Theme.topMargin
+
+        HoverHandler {
+            enabled: SettingsService.autoHideTopBar && !window.hasFullscreenApp
+            blocking: false
+            onHoveredChanged: {
+                if (hovered) {
+                    barUnhoverTimer.stop();
+                    if (!window.barRevealed) barDwellTimer.start();
+                } else {
+                    barDwellTimer.stop();
+                    barUnhoverTimer.start();
+                }
+            }
+        }
+    }
+
     // Top bar hitbox for input masking in top-bar mode
     Item {
         id: topBarHitBox
@@ -102,7 +147,7 @@ PanelWindow {
         anchors.right: parent.right
         anchors.top: parent.top
         height: Theme.topBarHeight
-        visible: window.isMaximized && !window.hasFullscreenApp
+        visible: window.isMaximized && !window.hasFullscreenApp && !window.barHidden
 
         MouseArea {
             anchors.fill: parent
@@ -137,7 +182,11 @@ PanelWindow {
     // When hidden by fullscreen, mask is empty so 100% of clicks pass through.
     mask: Region {
         Region {
-            item: (!window.hasFullscreenApp && window.isMaximized) ? topBarHitBox : null
+            item: (!window.hasFullscreenApp && window.isMaximized && !window.barHidden) ? topBarHitBox : null
+        }
+        // The edge strip that reveals a hidden bar
+        Region {
+            item: (!window.hasFullscreenApp && window.barHidden) ? barHoverArea : null
         }
         // The tab hover areas, so the gap beside a slid-out tab still counts as over it
         Region {
@@ -293,16 +342,16 @@ PanelWindow {
 
     // Resting top of the pills: flush in the top bar, one pixel above the screen in notch
     // style (so the body's top border is off screen), else hanging below the edge
-    readonly property real pillTopY: window.isMaximized ? 0 : (Theme.notchStyle ? -1 : Theme.topMargin)
+    readonly property real pillTopY: (window.isMaximized ? 0 : (Theme.notchStyle ? -1 : Theme.topMargin)) - window.barHideOffset
 
     // Target Y coordinates for smooth gliding
-    readonly property bool appClusterShouldHide: SettingsService.autoHideWindowControls && !window.topLeftRevealed && !appCluster.menuOpen
+    readonly property bool appClusterShouldHide: SettingsService.autoHideWindowControls && !window.barDown && !window.topLeftRevealed && !appCluster.menuOpen
     readonly property real appClusterTargetY: {
         if (appClusterShouldHide) return -appCluster.height - 18;
         return window.pillTopY;
     }
 
-    readonly property bool virtualDesktopsShouldHide: SettingsService.autoHideVirtualDesktops && !window.topLeftRevealed && !virtualDesktopsPill.menuOpen
+    readonly property bool virtualDesktopsShouldHide: SettingsService.autoHideVirtualDesktops && !window.barDown && !window.topLeftRevealed && !virtualDesktopsPill.menuOpen
     readonly property real virtualDesktopsTargetY: {
         if (virtualDesktopsShouldHide) return -virtualDesktopsPill.height - 18;
         return window.pillTopY;
@@ -343,7 +392,7 @@ PanelWindow {
         }
     }
 
-    readonly property bool appIndicatorShouldHide: SettingsService.autoHideAppTrayPill && !window.appIndicatorRevealed && !appIndicatorPill.contextMenuOpen
+    readonly property bool appIndicatorShouldHide: SettingsService.autoHideAppTrayPill && !window.barDown && !window.appIndicatorRevealed && !appIndicatorPill.contextMenuOpen
     readonly property real appIndicatorTargetY: {
         if (appIndicatorShouldHide) return -Math.max(appIndicatorPill.height, Theme.compactHeight) - 24;
         return window.pillTopY;
@@ -428,12 +477,20 @@ PanelWindow {
     // Top Bar Wings (expands left and right when maximized)
     TopBarWings {
         id: topBarWings
+        anchors.topMargin: -window.barHideOffset
         isMaximized: window.isMaximized && !window.hasFullscreenApp
         activeAppTitle: window.activeAppTitle
         currentDate: islandPill.currentDate
         displayBattery: UPower.displayDevice
         compactCenterWidth: islandPill.compactWidth
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
+
+        Behavior on anchors.topMargin {
+            NumberAnimation {
+                duration: Theme.animDuration
+                easing.type: Easing.OutCubic
+            }
+        }
 
         Behavior on opacity {
             NumberAnimation { duration: Theme.animDurationFast }

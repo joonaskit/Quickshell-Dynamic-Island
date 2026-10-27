@@ -19,6 +19,8 @@
   "showMediaWhenPlaying": true,
   "morphToTopBarWhenMaximized": true,
   "reserveSpaceWhenMaximized": true,
+  "alwaysTopBar": false,
+  "autoHideTopBar": false,
   "hideOnFullscreen": true,
   "autoCollapseTimeout": 3000,
   "dockAutoHideOnFullscreen": true,

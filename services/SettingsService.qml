@@ -44,6 +44,8 @@ Singleton {
     property bool showMediaWhenPlaying: true
     property bool morphToTopBarWhenMaximized: true
     property bool reserveSpaceWhenMaximized: true
+    property bool alwaysTopBar: false
+    property bool autoHideTopBar: false
     property bool hideOnFullscreen: true
     property int autoCollapseTimeout: 6000
 
@@ -263,6 +265,8 @@ Singleton {
         if (data.showMediaWhenPlaying !== undefined) root.showMediaWhenPlaying = !!data.showMediaWhenPlaying;
         if (data.morphToTopBarWhenMaximized !== undefined) root.morphToTopBarWhenMaximized = !!data.morphToTopBarWhenMaximized;
         if (data.reserveSpaceWhenMaximized !== undefined) root.reserveSpaceWhenMaximized = !!data.reserveSpaceWhenMaximized;
+        if (data.alwaysTopBar !== undefined) root.alwaysTopBar = !!data.alwaysTopBar;
+        if (data.autoHideTopBar !== undefined) root.autoHideTopBar = !!data.autoHideTopBar;
         if (data.hideOnFullscreen !== undefined) root.hideOnFullscreen = !!data.hideOnFullscreen;
         if (data.dockAutoHideOnFullscreen !== undefined) root.dockAutoHideOnFullscreen = !!data.dockAutoHideOnFullscreen;
         if (data.dockAutoHideFromWindows !== undefined) root.dockAutoHideFromWindows = !!data.dockAutoHideFromWindows;
@@ -502,6 +506,8 @@ Singleton {
         root.showMediaWhenPlaying = true;
         root.morphToTopBarWhenMaximized = true;
         root.reserveSpaceWhenMaximized = true;
+        root.alwaysTopBar = false;
+        root.autoHideTopBar = false;
         root.hideOnFullscreen = true;
         root.autoCollapseTimeout = 6000;
         root.dockAutoHideOnFullscreen = true;
@@ -628,6 +634,8 @@ Singleton {
             "showMediaWhenPlaying": root.showMediaWhenPlaying,
             "morphToTopBarWhenMaximized": root.morphToTopBarWhenMaximized,
             "reserveSpaceWhenMaximized": root.reserveSpaceWhenMaximized,
+            "alwaysTopBar": root.alwaysTopBar,
+            "autoHideTopBar": root.autoHideTopBar,
             "hideOnFullscreen": root.hideOnFullscreen,
             "autoCollapseTimeout": root.autoCollapseTimeout,
             "dockAutoHideOnFullscreen": root.dockAutoHideOnFullscreen,
