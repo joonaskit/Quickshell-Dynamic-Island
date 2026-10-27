@@ -19,6 +19,7 @@
   "showMediaWhenPlaying": true,
   "morphToTopBarWhenMaximized": true,
   "reserveSpaceWhenMaximized": true,
+  "reserveSpaceWithoutBar": false,
   "alwaysTopBar": false,
   "autoHideTopBar": false,
   "hideOnFullscreen": true,

@@ -45,6 +45,7 @@ Singleton {
     property bool showMediaWhenPlaying: true
     property bool morphToTopBarWhenMaximized: true
     property bool reserveSpaceWhenMaximized: true
+    property bool reserveSpaceWithoutBar: false
     property bool alwaysTopBar: false
     property bool autoHideTopBar: false
     property bool hideOnFullscreen: true
@@ -268,6 +269,7 @@ Singleton {
         if (data.showMediaWhenPlaying !== undefined) root.showMediaWhenPlaying = !!data.showMediaWhenPlaying;
         if (data.morphToTopBarWhenMaximized !== undefined) root.morphToTopBarWhenMaximized = !!data.morphToTopBarWhenMaximized;
         if (data.reserveSpaceWhenMaximized !== undefined) root.reserveSpaceWhenMaximized = !!data.reserveSpaceWhenMaximized;
+        if (data.reserveSpaceWithoutBar !== undefined) root.reserveSpaceWithoutBar = !!data.reserveSpaceWithoutBar;
         if (data.alwaysTopBar !== undefined) root.alwaysTopBar = !!data.alwaysTopBar;
         if (data.autoHideTopBar !== undefined) root.autoHideTopBar = !!data.autoHideTopBar;
         if (data.hideOnFullscreen !== undefined) root.hideOnFullscreen = !!data.hideOnFullscreen;
@@ -530,6 +532,7 @@ Singleton {
         root.showMediaWhenPlaying = true;
         root.morphToTopBarWhenMaximized = true;
         root.reserveSpaceWhenMaximized = true;
+        root.reserveSpaceWithoutBar = false;
         root.alwaysTopBar = false;
         root.autoHideTopBar = false;
         root.hideOnFullscreen = true;
@@ -658,6 +661,7 @@ Singleton {
             "showMediaWhenPlaying": root.showMediaWhenPlaying,
             "morphToTopBarWhenMaximized": root.morphToTopBarWhenMaximized,
             "reserveSpaceWhenMaximized": root.reserveSpaceWhenMaximized,
+            "reserveSpaceWithoutBar": root.reserveSpaceWithoutBar,
             "alwaysTopBar": root.alwaysTopBar,
             "autoHideTopBar": root.autoHideTopBar,
             "hideOnFullscreen": root.hideOnFullscreen,

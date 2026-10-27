@@ -23,8 +23,15 @@ PanelWindow {
     implicitHeight: (window.screen && window.screen.height > 0) ? Math.min(window.screen.height - 40, 1150) : 1000
 
     // Dynamic exclusive zone: when maximized, reserve the top bar space so the maximized window sits under it!
-    // When floating, reserve 0 space so windows can move freely. An auto-hidden bar reserves nothing.
-    exclusiveZone: (window.isMaximized && Theme.reserveSpaceWhenMaximized && !SettingsService.autoHideTopBar && !window.hasFullscreenApp) ? Theme.topBarHeight : 0
+    // When floating, reserve 0 space so windows can move freely, or with reserveSpaceWithoutBar a fixed gap
+    // below the pills. An auto-hidden bar reserves nothing.
+    exclusiveZone: {
+        if (SettingsService.autoHideTopBar || window.hasFullscreenApp) return 0;
+        if (window.isMaximized) return Theme.reserveSpaceWhenMaximized ? Theme.topBarHeight : 0;
+        return SettingsService.reserveSpaceWithoutBar ? window.floatingGap : 0;
+    }
+    // Space the floating pills take from the top edge
+    readonly property int floatingGap: (Theme.notchStyle ? 0 : Theme.topMargin) + Theme.compactHeight
     aboveWindows: true
 
     // Top layer sits above regular/maximized windows but below fullscreen windows
@@ -67,9 +74,10 @@ PanelWindow {
             if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) wy += scrY;
             if (scrX > 0 && wx < scrX && (wx + ww) <= scrW) wx += scrX;
 
-            // A tile sits below the top bar once it reserves space, so allow for that height
-            // too, or the bar would flip the window between the two positions
-            let touchesTop = (wy <= (scrY + Theme.topBarHeight + 8));
+            // A tile sits below the top bar or the floating gap once they reserve space, so allow
+            // for that height too, or the bar would flip the window between the two positions
+            let reserved = SettingsService.reserveSpaceWithoutBar ? Math.max(Theme.topBarHeight, window.floatingGap) : Theme.topBarHeight;
+            let touchesTop = (wy <= (scrY + reserved + 8));
             let reachesBottom = ((wy + wh) >= (scrY + scrH - 80));
             let isSplitWidth = (ww >= (scrW * 0.25) && ww <= (scrW * 0.85));
 

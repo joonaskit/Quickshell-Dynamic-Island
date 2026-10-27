@@ -27,4 +27,6 @@ With `tuckPills` on, the app tray and the virtual desktops sit half behind the s
 
 `island/IslandWindow.qml` flattens the pills into the full-width bar (`isMaximized`) when a window is maximized or tiled, or always with `alwaysTopBar`, which suits tiling layouts. Fullscreen still hides everything.
 
+The window's `exclusiveZone` reserves `Theme.topBarHeight` while the full bar shows (`reserveSpaceWhenMaximized`). While it does not, `reserveSpaceWithoutBar` reserves `floatingGap`, the height of the floating pills, so tiled windows start below them. `hasTiledWindow` counts a window that starts below either reserved height as touching the top, so reserving space never flips the bar on and off.
+
 With `autoHideTopBar` the whole bar slides up (`barHidden`, `barHideOffset` in `pillTopY`) and reserves no space. `barHoverArea` is a thin strip along the top edge while hidden; resting the pointer there for a moment brings the bar back, and it goes again shortly after the pointer leaves. Open menus and the expanded island keep it down. While it is down, pills with their own auto-hide (window controls, virtual desktops, app tray) are shown too (`barDown`).

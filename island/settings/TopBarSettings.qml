@@ -119,6 +119,21 @@ SettingsCategory {
         SettingDivider {}
 
         SettingToggle {
+            title: "Keep Windows Below the Island"
+            keywords: "reserve space exclusive zone overlap gap margin tiling tiled floating"
+            description: "Reserve a gap under the pills while the full-width bar is off, so tiled windows never sit under them"
+            iconName: "maximize"
+            iconColor: Theme.accentCyan
+            enabled: SettingsService.topBarMode !== "always" && !SettingsService.autoHideTopBar
+            checked: SettingsService.reserveSpaceWithoutBar
+            onToggled: function(val) {
+                SettingsService.setSetting("reserveSpaceWithoutBar", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
             title: "Auto-Hide"
             keywords: "top bar hide reveal panel edge"
             description: "Slide everything off screen until the pointer rests at the top edge"
