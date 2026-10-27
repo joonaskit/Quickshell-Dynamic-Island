@@ -67,7 +67,9 @@ PanelWindow {
             if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) wy += scrY;
             if (scrX > 0 && wx < scrX && (wx + ww) <= scrW) wx += scrX;
 
-            let touchesTop = (wy <= (scrY + 8));
+            // A tile sits below the top bar once it reserves space, so allow for that height
+            // too, or the bar would flip the window between the two positions
+            let touchesTop = (wy <= (scrY + Theme.topBarHeight + 8));
             let reachesBottom = ((wy + wh) >= (scrY + scrH - 80));
             let isSplitWidth = (ww >= (scrW * 0.25) && ww <= (scrW * 0.85));
 
