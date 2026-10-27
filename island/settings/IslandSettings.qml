@@ -4,10 +4,118 @@ import QtQuick.Layouts
 
 SettingsCategory {
 
-    // Expanded Island Cards Customization
+    // What the compact island shows besides the clock
     SettingsSection {
+        key: "compact"
+        title: "COMPACT ISLAND"
+        subtitle: "What the island shows while closed"
+
+        SettingToggle {
+            title: "Media Playing"
+            keywords: "music song player compact pill"
+            description: "The playing song or video"
+            iconName: "music"
+            iconColor: Theme.accentRed
+            checked: SettingsService.showMediaWhenPlaying
+            onToggled: function(val) {
+                SettingsService.setSetting("showMediaWhenPlaying", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Timer in Island"
+            keywords: "stopwatch countdown compact pill"
+            description: "A running timer or stopwatch"
+            iconName: "clock"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.showTimerInPill
+            onToggled: function(val) {
+                SettingsService.setSetting("showTimerInPill", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "App Activities in Island"
+            keywords: "progress compact pill"
+            description: "Progress from other apps, such as file copies"
+            iconName: "download"
+            iconColor: Theme.accentGreen
+            checked: SettingsService.showActivitiesInPill
+            onToggled: function(val) {
+                SettingsService.setSetting("showActivitiesInPill", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            readonly property bool shown: SettingsService.showActivitiesInPill || SettingsService.isWidgetEnabled("activities")
+            title: "Show File Copy Progress"
+            keywords: "kio dolphin move copy progress"
+            description: shown ? "Copies and moves from Dolphin and other KDE apps, in place of their own progress window"
+                               : "Turn on App Activities, in the island or as a card, to use this"
+            iconName: "download"
+            iconColor: Theme.accentGreen
+            isSubOption: true
+            enabled: shown
+            checked: SettingsService.kioJobActivities
+            onToggled: function(val) {
+                SettingsService.setSetting("kioJobActivities", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Volume & Brightness Level"
+            keywords: "osd indicator popup"
+            description: "A level bar when they are changed with the shell's shortcuts"
+            iconName: "volume-high"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.showOsd
+            onToggled: function(val) {
+                SettingsService.setSetting("showOsd", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Desktop Switch"
+            keywords: "virtual desktop osd indicator workspace"
+            description: "The new virtual desktop for a moment after a switch"
+            iconName: "desktop"
+            iconColor: Theme.accentPurple
+            checked: SettingsService.showDesktopOsd
+            onToggled: function(val) {
+                SettingsService.setSetting("showDesktopOsd", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Notification Bubble"
+            keywords: "detached circle unread"
+            description: "A small circle beside the island while there are unread notifications"
+            iconName: "bell"
+            iconColor: Theme.accentOrange
+            checked: SettingsService.showDetachedNotifBubble
+            onToggled: function(val) {
+                SettingsService.setSetting("showDetachedNotifBubble", val);
+            }
+        }
+    }
+
+    // Cards of the expanded island
+    SettingsSection {
+        key: "cards"
         title: "EXPANDED ISLAND CARDS"
-        subtitle: "Choose and order the cards shown when expanded"
+        subtitle: "Top to bottom"
 
         // One row per registered widget, in display order: cards, then controls
         Repeater {
@@ -56,173 +164,13 @@ SettingsCategory {
                 }
             }
         }
-    }
-
-    // Island Behavior & Timing
-    SettingsSection {
-        title: "ISLAND BEHAVIOR & TIMING"
-        subtitle: "Morphing, full-screen & auto-collapse"
-
-        // 1. Show Media When Playing
-        SettingToggle {
-            title: "Show Media Playing in Compact Pill"
-            description: "Morphs compact pill into media status when music or audio is playing"
-            iconName: "music"
-            iconColor: Theme.accentRed
-            checked: SettingsService.showMediaWhenPlaying
-            onToggled: function(val) {
-                SettingsService.setSetting("showMediaWhenPlaying", val);
-            }
-        }
 
         SettingDivider {}
 
-        SettingToggle {
-            title: "Timer in Island"
-            description: "Show a running timer or stopwatch in the compact island"
-            iconName: "clock"
-            iconColor: Theme.accentOrange
-            checked: SettingsService.showTimerInPill
-            onToggled: function(val) {
-                SettingsService.setSetting("showTimerInPill", val);
-            }
-        }
-
-        SettingDivider {}
-
-        SettingToggle {
-            title: "App Activities in Island"
-            description: "Show progress from other apps, such as file copies, in the compact island"
-            iconName: "download"
-            iconColor: Theme.accentGreen
-            checked: SettingsService.showActivitiesInPill
-            onToggled: function(val) {
-                SettingsService.setSetting("showActivitiesInPill", val);
-            }
-        }
-
-        SettingDivider {}
-
-        SettingToggle {
-            readonly property bool shown: SettingsService.showActivitiesInPill || SettingsService.isWidgetEnabled("activities")
-            title: "Show File Copy Progress"
-            description: shown ? "Copies and moves from Dolphin and other KDE apps, in place of their own progress window"
-                               : "Turn on App Activities, in the island or as a card, to use this"
-            iconName: "download"
-            iconColor: Theme.accentGreen
-            isSubOption: true
-            enabled: shown
-            checked: SettingsService.kioJobActivities
-            onToggled: function(val) {
-                SettingsService.setSetting("kioJobActivities", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2. Morph to Top Bar When Maximized
-        SettingToggle {
-            title: "Morph to Top Bar When Windows Maximized"
-            description: "Liquidly flattens the island into a full-width GNOME-style top bar"
-            iconName: "window"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.morphToTopBarWhenMaximized
-            onToggled: function(val) {
-                SettingsService.setSetting("morphToTopBarWhenMaximized", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2b. Reserve Space When Maximized Sub-Toggle
-        SettingToggle {
-            title: "Reserve Top Bar Space When Maximized"
-            description: "Reserves screen space so maximized windows sit underneath the top bar"
-            iconName: "maximize"
-            iconColor: Theme.accentCyan
-            isSubOption: true
-            enabled: SettingsService.morphToTopBarWhenMaximized || SettingsService.alwaysTopBar
-            checked: SettingsService.reserveSpaceWhenMaximized
-            onToggled: function(val) {
-                SettingsService.setSetting("reserveSpaceWhenMaximized", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2c. Always Top Bar (tiling window managers)
-        SettingToggle {
-            title: "Always Show as Top Bar"
-            description: "Keeps the full-width top bar whatever the windows do, for tiled layouts"
-            iconName: "window"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.alwaysTopBar
-            onToggled: function(val) {
-                SettingsService.setSetting("alwaysTopBar", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2d. Auto-hide the whole bar
-        SettingToggle {
-            title: "Auto-Hide Top Bar"
-            description: "Slides the whole bar off screen until the pointer rests at the top edge. Frees the reserved space"
-            iconName: "desktop"
-            iconColor: Theme.accentCyan
-            checked: SettingsService.autoHideTopBar
-            onToggled: function(val) {
-                SettingsService.setSetting("autoHideTopBar", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 3. Auto-Hide Island on Fullscreen
-        SettingToggle {
-            title: "Auto-Hide Island on Fullscreen"
-            description: "Collapses and completely hides the Island when games or fullscreen apps are active"
-            iconName: "desktop"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.hideOnFullscreen
-            onToggled: function(val) {
-                SettingsService.setSetting("hideOnFullscreen", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // Volume / brightness OSD
-        SettingToggle {
-            title: "Volume & Brightness OSD"
-            description: "Show a level indicator in the island when changed with the system IPC shortcuts"
-            iconName: "volume-high"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showOsd
-            onToggled: function(val) {
-                SettingsService.setSetting("showOsd", val);
-            }
-        }
-
-        SettingDivider {}
-
-        SettingToggle {
-            title: "Show Desktop Switch Indicator"
-            description: "Show the current virtual desktop in the island for a moment after a switch"
-            iconName: "desktop"
-            iconColor: Theme.accentPurple
-            checked: SettingsService.showDesktopOsd
-            onToggled: function(val) {
-                SettingsService.setSetting("showDesktopOsd", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 4. Auto-Collapse Timeout Segmented Picker
         SettingSegmented {
-            title: "Auto-Collapse Inactivity Timeout"
-            description: "Duration before expanded island automatically collapses when mouse is idle"
+            title: "Collapse After"
+            keywords: "auto collapse timeout close expanded island"
+            description: "How long the expanded island stays open without the pointer over it"
             iconName: "clock"
             iconColor: Theme.accentPurple
             currentValue: SettingsService.autoCollapseTimeout
@@ -234,6 +182,38 @@ SettingsCategory {
             ]
             onSelected: function(val) {
                 SettingsService.setSetting("autoCollapseTimeout", val);
+            }
+        }
+    }
+
+    // Clock
+    SettingsSection {
+        key: "clock"
+        title: "CLOCK"
+
+        SettingToggle {
+            title: "24-Hour Time"
+            keywords: "clock format am pm"
+            description: "Show 14:00 instead of 2:00 PM"
+            iconName: "clock"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.use24Hour
+            onToggled: function(val) {
+                SettingsService.setSetting("use24Hour", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Seconds in Expanded Island"
+            keywords: "clock seconds"
+            description: "Show seconds next to the time when the island is open"
+            iconName: "clock"
+            iconColor: Theme.accentPurple
+            checked: SettingsService.showSeconds
+            onToggled: function(val) {
+                SettingsService.setSetting("showSeconds", val);
             }
         }
     }

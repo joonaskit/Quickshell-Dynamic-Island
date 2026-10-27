@@ -7,6 +7,8 @@ Rectangle {
     id: toggleRow
     property string title: ""
     property string description: ""
+    // Shown in place of the description, in orange, for example a missing tool
+    property string warning: ""
     property string iconName: ""
     property color iconColor: Theme.accentBlue
     property color iconBadgeColor: Qt.rgba(iconColor.r, iconColor.g, iconColor.b, 0.18)
@@ -14,11 +16,13 @@ Rectangle {
     property bool isSubOption: false
     signal toggled(bool val)
 
-    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
+    // Other words this row is found by in the search, not shown
+    property string keywords: ""
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description, keywords)
 
     Layout.fillWidth: true
     visible: matchesSearch
-    implicitHeight: descText.text !== "" ? 52 : 42
+    implicitHeight: descText.visible ? 52 : 42
     color: rowMouse.containsMouse && enabled ? Theme.overlay(0.04) : "transparent"
     radius: Theme.corner(10)
     opacity: enabled ? 1.0 : 0.4
@@ -80,10 +84,10 @@ Rectangle {
 
             Text {
                 id: descText
-                text: toggleRow.description
+                text: toggleRow.warning !== "" ? toggleRow.warning : toggleRow.description
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
-                color: Theme.textSecondary
+                color: toggleRow.warning !== "" ? Theme.accentOrange : Theme.textSecondary
                 visible: text !== ""
                 elide: Text.ElideRight
                 Layout.fillWidth: true

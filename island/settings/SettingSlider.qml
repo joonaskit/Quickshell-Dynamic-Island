@@ -23,7 +23,9 @@ Rectangle {
 
     signal valueModified(real newValue)
 
-    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
+    // Other words this row is found by in the search, not shown
+    property string keywords: ""
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description, keywords)
 
     readonly property real fraction: Math.max(0.0, Math.min(1.0, (value - minimumValue) / (maximumValue - minimumValue)))
 

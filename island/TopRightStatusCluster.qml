@@ -1377,6 +1377,39 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: root.closeAllMenus()
             }
+
+            // Opens the settings at the status icons, or the optional icons for theirs
+            Rectangle {
+                anchors.right: parent.right
+                anchors.rightMargin: Theme.px(12)
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: -Theme.px(4)
+                width: Theme.px(22)
+                height: Theme.px(16)
+                radius: height / 2
+                color: iconSettingsMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
+
+                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+
+                SvgIcon {
+                    anchors.centerIn: parent
+                    name: "settings"
+                    size: Theme.px(11)
+                    color: iconSettingsMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35)
+                }
+
+                MouseArea {
+                    id: iconSettingsMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        let optional = root.hueMenuOpen || root.nightMenuOpen || root.kdeMenuOpen || root.gameMenuOpen;
+                        root.closeAllMenus();
+                        SettingsService.requestOpenSettings("Top bar", optional ? "optionalIcons" : "statusIcons");
+                    }
+                }
+            }
         }
     }
 }

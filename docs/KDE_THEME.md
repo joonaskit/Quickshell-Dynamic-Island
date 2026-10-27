@@ -1,6 +1,6 @@
 # KDE colour scheme
 
-The **Apply to KDE Apps** setting (Settings → Display → Colors) makes KDE apps and window titlebars use the shell's colours. It is off by default. Turning it off restores the scheme that was active before.
+The **Apply to KDE Apps** setting (Settings → Appearance → Colors) makes KDE apps and window titlebars use the shell's colours. It is off by default. Turning it off restores the scheme that was active before.
 
 ## Decision
 

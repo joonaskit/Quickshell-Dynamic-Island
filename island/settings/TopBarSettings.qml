@@ -3,316 +3,214 @@ import QtQuick
 import QtQuick.Layouts
 
 SettingsCategory {
+    id: page
 
-    // Window & Workspace Pills (Top Left)
+    // Status icon row: a toggle, or for an icon that shows only when needed a choice,
+    // with move buttons. Moves stay within the icon's group
+    component StatusIconRow: ColumnLayout {
+        id: iconRow
+        required property var modelData
+        required property int index
+        readonly property bool hasPin: !!modelData.pinKey
+        readonly property bool matchesSearch: iconToggle.matchesSearch
+
+        Layout.fillWidth: true
+        visible: matchesSearch
+        spacing: 0
+
+        SettingDivider {
+            visible: iconRow.index > 0 && !SettingsSearch.active
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 0
+
+            SettingToggle {
+                id: iconToggle
+                visible: matchesSearch && !iconRow.hasPin
+                title: iconRow.modelData.title
+                description: iconRow.modelData.description
+                warning: DepsService.iconProblem(iconRow.modelData.id)
+                iconName: iconRow.modelData.icon
+                iconColor: iconRow.modelData.iconColor
+                checked: SettingsService[iconRow.modelData.settingKey]
+                onToggled: function(val) {
+                    SettingsService.setSetting(iconRow.modelData.settingKey, val);
+                }
+            }
+
+            SettingChoice {
+                visible: matchesSearch && iconRow.hasPin
+                title: iconRow.modelData.title
+                description: iconRow.modelData.description
+                warning: DepsService.iconProblem(iconRow.modelData.id)
+                iconName: iconRow.modelData.icon
+                iconColor: iconRow.modelData.iconColor
+                options: [
+                    { "label": "Off", "value": "off" },
+                    { "label": "When Needed", "value": "on" },
+                    { "label": "Always", "value": "sub" }
+                ]
+                currentValue: iconRow.hasPin ? SettingsService.pairValue(iconRow.modelData.settingKey, iconRow.modelData.pinKey) : "off"
+                onSelected: function(val) {
+                    SettingsService.setPair(iconRow.modelData.settingKey, iconRow.modelData.pinKey, val);
+                }
+            }
+
+            SettingMoveButtons {
+                visible: !SettingsSearch.active
+                Layout.rightMargin: 10
+                canMoveUp: SettingsService.canMoveStatusIcon(iconRow.modelData.id, -1)
+                canMoveDown: SettingsService.canMoveStatusIcon(iconRow.modelData.id, 1)
+                onMoved: function(delta) {
+                    SettingsService.moveStatusIcon(iconRow.modelData.id, delta);
+                }
+            }
+        }
+    }
+
+    readonly property var pillOptions: [
+        { "label": "Off", "value": "off" },
+        { "label": "Show", "value": "on" },
+        { "label": "Auto-Hide", "value": "sub" }
+    ]
+
+    TopBarDiagram {}
+
+    // When the pills flatten into the full-width bar, and hiding it
     SettingsSection {
-        title: "WINDOW & WORKSPACE PILLS"
-        subtitle: "Top Left Corner"
+        key: "topBar"
+        title: "TOP BAR"
 
-        // 1. Window Controls Main Toggle
-        SettingToggle {
-            title: "Window Controls Pill"
-            description: "Display active application name, window title, and window actions menu"
+        SettingSegmented {
+            title: "Full-Width Bar"
+            keywords: "panel morph maximized maximize tiling tiled gnome always top bar mode"
+            description: "When the pills join into one bar along the top edge. Always suits tiling layouts"
             iconName: "window"
             iconColor: Theme.accentBlue
-            checked: SettingsService.showWindowControls
-            onToggled: function(val) {
-                SettingsService.setSetting("showWindowControls", val);
+            currentValue: SettingsService.topBarMode
+            options: [
+                { "label": "Never", "value": "island" },
+                { "label": "With Maximized Windows", "value": "maximized" },
+                { "label": "Always", "value": "always" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setTopBarMode(val);
             }
         }
 
         SettingDivider {}
 
-        // 1b. Auto-Hide Window Controls Sub-Toggle
         SettingToggle {
-            title: "Auto-Hide Window Controls"
-            description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
-            iconName: "chevron-up"
-            iconColor: Theme.accentBlue
+            title: "Keep Windows Below the Bar"
+            keywords: "reserve space exclusive zone overlap maximized"
+            description: "Reserve the bar's height so maximized windows start under it"
+            iconName: "maximize"
+            iconColor: Theme.accentCyan
             isSubOption: true
-            enabled: SettingsService.showWindowControls
-            checked: SettingsService.autoHideWindowControls
+            enabled: SettingsService.topBarMode !== "island" && !SettingsService.autoHideTopBar
+            checked: SettingsService.reserveSpaceWhenMaximized
             onToggled: function(val) {
-                SettingsService.setSetting("autoHideWindowControls", val);
+                SettingsService.setSetting("reserveSpaceWhenMaximized", val);
             }
         }
 
         SettingDivider {}
 
-        // 2. Virtual Desktops Main Toggle
         SettingToggle {
-            title: "Virtual Desktops Pill"
-            description: "Display workspace switcher dots, desktop numbers, and quick workspace actions"
+            title: "Auto-Hide"
+            keywords: "top bar hide reveal panel edge"
+            description: "Slide everything off screen until the pointer rests at the top edge"
+            iconName: "chevron-up"
+            iconColor: Theme.accentCyan
+            checked: SettingsService.autoHideTopBar
+            onToggled: function(val) {
+                SettingsService.setSetting("autoHideTopBar", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
+            title: "Hide in Fullscreen"
+            keywords: "games video fullscreen top bar"
+            description: "Hide the island and pills while a game or video is fullscreen"
+            iconName: "desktop"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.hideOnFullscreen
+            onToggled: function(val) {
+                SettingsService.setSetting("hideOnFullscreen", val);
+            }
+        }
+    }
+
+    // Window controls and virtual desktops on the left, the app tray on the right
+    SettingsSection {
+        key: "pills"
+        title: "SIDE PILLS"
+        subtitle: "Auto-hide pills show when the pointer rests at the top edge"
+
+        SettingChoice {
+            title: "Window Controls"
+            keywords: "pill autohide title app name menu close minimize"
+            description: "Active app, window title and window actions"
+            iconName: "window"
+            iconColor: Theme.accentBlue
+            options: page.pillOptions
+            currentValue: SettingsService.pairValue("showWindowControls", "autoHideWindowControls")
+            onSelected: function(val) {
+                SettingsService.setPair("showWindowControls", "autoHideWindowControls", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingChoice {
+            title: "Virtual Desktops"
+            keywords: "pill autohide workspaces switcher"
+            description: "Desktop switcher and desktop actions"
             iconName: "desktop"
             iconColor: Theme.accentPurple
-            checked: SettingsService.showVirtualDesktops
-            onToggled: function(val) {
-                SettingsService.setSetting("showVirtualDesktops", val);
+            options: page.pillOptions
+            currentValue: SettingsService.pairValue("showVirtualDesktops", "autoHideVirtualDesktops")
+            onSelected: function(val) {
+                SettingsService.setPair("showVirtualDesktops", "autoHideVirtualDesktops", val);
             }
         }
 
         SettingDivider {}
 
-        // 2b. Auto-Hide Virtual Desktops Sub-Toggle
-        SettingToggle {
-            title: "Auto-Hide Virtual Desktops"
-            description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
-            iconName: "chevron-up"
-            iconColor: Theme.accentPurple
-            isSubOption: true
-            enabled: SettingsService.showVirtualDesktops
-            checked: SettingsService.autoHideVirtualDesktops
-            onToggled: function(val) {
-                SettingsService.setSetting("autoHideVirtualDesktops", val);
-            }
-        }
-    }
-
-    // Top Right Status Bar Icons
-    SettingsSection {
-        title: "STATUS BAR ICONS"
-        subtitle: "Top Right Cluster"
-
-        // 1. Caffeine
-        SettingToggle {
-            title: "Caffeine"
-            description: "Keep awake icon to prevent screen sleep and dimming"
-            iconName: "coffee"
-            iconColor: Theme.accentOrange
-            checked: SettingsService.showCaffeineIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showCaffeineIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // Do Not Disturb
-        SettingToggle {
-            title: "Do Not Disturb"
-            description: "Quick toggle that silences notification banners; they still go to history"
-            iconName: "bell-off"
-            iconColor: Theme.accentPurple
-            checked: SettingsService.showDndIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showDndIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2. Wi-Fi
-        SettingToggle {
-            title: "Wi-Fi & Network"
-            description: "Network connectivity status & quick Wi-Fi selection menu"
-            iconName: "wifi"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showWifiIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showWifiIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 3. Bluetooth
-        SettingToggle {
-            title: "Bluetooth"
-            description: "Bluetooth power state and quick paired devices list"
-            iconName: "bluetooth"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showBluetoothIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showBluetoothIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 4. Microphone
-        SettingToggle {
-            title: "Microphone"
-            description: "Input mute toggle & microphone volume control"
-            iconName: "mic"
-            iconColor: Theme.accentRed
-            checked: SettingsService.showMicIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showMicIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 5. Clipboard History
-        SettingToggle {
-            title: "Clipboard History"
-            description: "Quick clipboard search and copy history manager"
-            iconName: "clipboard"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showClipboardIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showClipboardIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 6. Performance Profiles
-        SettingToggle {
-            title: "Performance Profiles"
-            description: "Switch power profile between Power Saver, Balanced, and Performance"
-            iconName: "gauge"
-            iconColor: Theme.accentGreen
-            checked: SettingsService.showProfileIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showProfileIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 7. Hardware Monitor
-        SettingToggle {
-            title: "Hardware Monitor"
-            description: "Live CPU percentage & system resource statistics"
-            iconName: "cpu"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.showHardwareIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showHardwareIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 8. Power menu and battery
-        SettingToggle {
-            title: "Power Menu and Battery"
-            description: "Battery level, or a power icon without a battery. Hiding it also hides shut down and restart"
-            iconName: "battery"
-            iconColor: Theme.accentGreen
-            checked: SettingsService.showBatteryIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showBatteryIcon", val);
-            }
-        }
-    }
-
-    // Dynamic Icons & Pinning
-    SettingsSection {
-        title: "DYNAMIC ICONS & PINNING"
-        subtitle: "Auto-show or keep pinned"
-
-        // 1. USB Devices Main Toggle
-        SettingToggle {
-            title: "USB & External Drives"
-            description: "Automatically shows when external drives or USB sticks are connected"
-            iconName: "usb"
-            iconColor: Theme.accentGreen
-            checked: SettingsService.showUsbIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showUsbIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 1b. Pin USB Toggle
-        SettingToggle {
-            title: "Always Show USB Icon (Pin)"
-            description: "Keep USB icon permanently visible even when no drives are plugged in"
-            iconName: "pin"
-            iconColor: Theme.accentGreen
-            isSubOption: true
-            enabled: SettingsService.showUsbIcon
-            checked: SettingsService.pinUsbIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("pinUsbIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2. Notifications Main Toggle
-        SettingToggle {
-            title: "Notification Bell"
-            description: "Automatically shows when unread or active notifications exist"
-            iconName: "bell"
-            iconColor: Theme.accentOrange
-            checked: SettingsService.showNotificationIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("showNotificationIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2b. Pin Notification Toggle
-        SettingToggle {
-            title: "Always Show Notification Bell (Pin)"
-            description: "Keep bell permanently visible even when there are no unread notifications"
-            iconName: "pin"
-            iconColor: Theme.accentOrange
-            isSubOption: true
-            enabled: SettingsService.showNotificationIcon
-            checked: SettingsService.pinNotificationIcon
-            onToggled: function(val) {
-                SettingsService.setSetting("pinNotificationIcon", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 3. Background Apps Tray Pill Main Toggle
-        SettingToggle {
-            title: "Background Apps Tray Pill"
-            description: "Display persistent background application indicators and tray icons capsule"
+        SettingChoice {
+            title: "App Tray"
+            keywords: "pill autohide system tray background apps indicators"
+            description: "Tray icons of apps running in the background"
             iconName: "desktop"
             iconColor: Theme.accentIndigo
-            checked: SettingsService.showAppTrayPill
-            onToggled: function(val) {
-                SettingsService.setSetting("showAppTrayPill", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 3b. Auto-Hide Tray Pill Sub-Toggle
-        SettingToggle {
-            title: "Auto-Hide Tray Pill"
-            description: "Glides upwards off-screen and reveals when holding mouse at top edge for a moment"
-            iconName: "chevron-up"
-            iconColor: Theme.accentIndigo
-            isSubOption: true
-            enabled: SettingsService.showAppTrayPill
-            checked: SettingsService.autoHideAppTrayPill
-            onToggled: function(val) {
-                SettingsService.setSetting("autoHideAppTrayPill", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 4. Detached Notification Bubble Toggle
-        SettingToggle {
-            title: "Detached Notification Bubble"
-            description: "Secondary floating island circle displaying unread notification alerts"
-            iconName: "bell"
-            iconColor: Theme.accentOrange
-            checked: SettingsService.showDetachedNotifBubble
-            onToggled: function(val) {
-                SettingsService.setSetting("showDetachedNotifBubble", val);
+            options: page.pillOptions
+            currentValue: SettingsService.pairValue("showAppTrayPill", "autoHideAppTrayPill")
+            onSelected: function(val) {
+                SettingsService.setPair("showAppTrayPill", "autoHideAppTrayPill", val);
             }
         }
     }
 
-    // Status bar icon order
+    // Status icons on the right, in display order
     SettingsSection {
-        title: "STATUS BAR ICON ORDER"
-        subtitle: "Left to right, optional widgets first"
+        key: "statusIcons"
+        title: "STATUS ICONS"
+        subtitle: "Left to right"
+
+        Repeater {
+            model: SettingsService.orderedStatusIcons.filter(i => i.group === "system")
+            delegate: StatusIconRow {}
+        }
+
+        SettingDivider {}
 
         SettingToggle {
             title: "Hide Icons With Missing Tools"
+            keywords: "status icons dependencies not installed dimmed"
             description: "Icons whose tools are not installed are dimmed. Turn on to hide them instead"
             iconName: "alert"
             iconColor: Theme.accentOrange
@@ -321,43 +219,17 @@ SettingsCategory {
                 SettingsService.setSetting("hideUnavailableIcons", val);
             }
         }
+    }
 
-        SettingDivider {
-            visible: !SettingsSearch.active
-        }
+    // Optional icons, off until turned on; drawn before the status icons
+    SettingsSection {
+        key: "optionalIcons"
+        title: "OPTIONAL ICONS"
+        subtitle: "Shown left of the status icons"
 
-        // One row per registered icon, in display order: widgets, then system icons
         Repeater {
-            model: SettingsService.orderedStatusIcons.filter(i => i.group === "widgets").concat(SettingsService.orderedStatusIcons.filter(i => i.group === "system"))
-
-            delegate: ColumnLayout {
-                id: iconRow
-                required property var modelData
-                required property int index
-                readonly property bool matchesSearch: orderRow.matchesSearch
-
-                Layout.fillWidth: true
-                visible: matchesSearch
-                spacing: 0
-
-                SettingDivider {
-                    visible: iconRow.index > 0 && !SettingsSearch.active
-                }
-
-                SettingOrderRow {
-                    id: orderRow
-                    title: iconRow.modelData.title
-                    iconName: iconRow.modelData.icon
-                    iconColor: iconRow.modelData.iconColor
-                    active: SettingsService[iconRow.modelData.settingKey]
-                    note: DepsService.iconProblem(iconRow.modelData.id)
-                    canMoveUp: SettingsService.canMoveStatusIcon(iconRow.modelData.id, -1)
-                    canMoveDown: SettingsService.canMoveStatusIcon(iconRow.modelData.id, 1)
-                    onMoved: function(delta) {
-                        SettingsService.moveStatusIcon(iconRow.modelData.id, delta);
-                    }
-                }
-            }
+            model: SettingsService.orderedStatusIcons.filter(i => i.group === "widgets")
+            delegate: StatusIconRow {}
         }
     }
 }

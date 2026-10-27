@@ -5,11 +5,13 @@ SettingsCategory {
 
     // Colors
     SettingsSection {
+        key: "colors"
         title: "COLORS"
         titlePixelSize: Theme.fontPx(10)
 
         SettingSegmented {
             title: "Appearance"
+            keywords: "dark light mode theme"
             description: "Light is experimental"
             iconName: "contrast"
             iconColor: Theme.accentIndigo
@@ -74,6 +76,7 @@ SettingsCategory {
 
     // Screens
     SettingsSection {
+        key: "screens"
         title: "SCREENS"
         titlePixelSize: Theme.fontPx(10)
 
@@ -114,11 +117,13 @@ SettingsCategory {
 
     // Shape
     SettingsSection {
+        key: "shape"
         title: "SHAPE"
         titlePixelSize: Theme.fontPx(10)
 
         SettingSegmented {
             title: "Corner Roundness"
+            keywords: "radius rounded corners"
             description: "How rounded cards, buttons, popups and the dock are. KDE follows the corner radius of your KDE style, currently " + Math.round(Theme.kdeCornerRadius) + "px. Pills and circles stay round"
             iconName: "sliders"
             iconColor: Theme.accentOrange
@@ -132,11 +137,13 @@ SettingsCategory {
 
     // Pill style
     SettingsSection {
+        key: "pills"
         title: "PILLS"
         titlePixelSize: Theme.fontPx(10)
 
         SettingSegmented {
             title: "Pill Style"
+            keywords: "notch floating top bar macbook"
             description: "Floating pills hang below the top edge. Notch pills hug it with a flat top and soft curves into the screen edge, like the MacBook notch"
             iconName: "window"
             iconColor: Theme.accentCyan
@@ -154,10 +161,12 @@ SettingsCategory {
 
         SettingToggle {
             title: "Tuck Side Pills"
-            description: "Notch style only: the app tray slides half behind the status icons and the virtual desktops half behind the window controls, like tabs in a folder. They slide out when the pointer is over them"
+            keywords: "notch tabs folder"
+            description: "The app tray and virtual desktops sit half behind their neighbours and slide out under the pointer. Notch style only"
             iconName: "pin"
             iconColor: Theme.accentPurple
             isSubOption: true
+            enabled: SettingsService.pillStyle === "notch"
             checked: SettingsService.tuckPills
             onToggled: function(val) { SettingsService.setSetting("tuckPills", val); }
         }
@@ -166,6 +175,7 @@ SettingsCategory {
 
         SettingToggle {
             title: "Frosted Status Icons"
+            keywords: "glass blur transparent"
             description: "Give the status icons the see-through frosted look of the app tray and virtual desktops instead of solid. Their menus stay solid"
             iconName: "sliders"
             iconColor: Theme.accentBlue
@@ -176,6 +186,7 @@ SettingsCategory {
 
     // Display & Scaling (DPI)
     SettingsSection {
+        key: "scaling"
         title: "DISPLAY & SCALING (DPI)"
         subtitle: "Interface & Font Sizing"
         titlePixelSize: Theme.fontPx(10)
@@ -229,6 +240,7 @@ SettingsCategory {
 
     // Fonts
     SettingsSection {
+        key: "fonts"
         title: "FONTS"
         titlePixelSize: Theme.fontPx(10)
 
@@ -255,37 +267,6 @@ SettingsCategory {
             defaultLabel: "Same as interface font"
             onSelected: function(val) {
                 SettingsService.setSetting("fontDisplayFamily", val);
-            }
-        }
-    }
-
-    // Clock & Time Settings
-    SettingsSection {
-        title: "DATE & CLOCK"
-
-        // 1. 24-Hour Time Format
-        SettingToggle {
-            title: "24-Hour Time Format"
-            description: "Display clock in 24-hour mode instead of 12-hour AM/PM"
-            iconName: "clock"
-            iconColor: Theme.accentBlue
-            checked: SettingsService.use24Hour
-            onToggled: function(val) {
-                SettingsService.setSetting("use24Hour", val);
-            }
-        }
-
-        SettingDivider {}
-
-        // 2. Show Seconds
-        SettingToggle {
-            title: "Show Seconds in Expanded View"
-            description: "Display live seconds counter next to the time"
-            iconName: "clock"
-            iconColor: Theme.accentPurple
-            checked: SettingsService.showSeconds
-            onToggled: function(val) {
-                SettingsService.setSetting("showSeconds", val);
             }
         }
     }

@@ -48,6 +48,7 @@ ACTIONS = [
     ("island.collapse", "Island", "Collapse island", "island", "collapse", ()),
     ("island.caffeine", "Island", "Toggle caffeine", "island", "toggleCaffeine", ()),
     ("system.dnd", "Island", "Toggle do not disturb", "system", "toggleDnd", ()),
+    ("settings.toggle", "Island", "Toggle settings window", "settings", "toggle", ()),
     ("system.volumeUp", "Volume and brightness", "Volume up", "system", "volumeUp", ()),
     ("system.volumeDown", "Volume and brightness", "Volume down", "system", "volumeDown", ()),
     ("system.mute", "Volume and brightness", "Toggle mute", "system", "toggleMute", ()),

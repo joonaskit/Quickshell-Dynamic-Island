@@ -16,7 +16,9 @@ Rectangle {
     property string currentValue: ""
     signal selected(string val)
 
-    readonly property bool matchesSearch: SettingsSearch.matches(title, description)
+    // Other words this row is found by in the search, not shown
+    property string keywords: ""
+    readonly property bool matchesSearch: SettingsSearch.matches(title, description, keywords)
 
     Layout.fillWidth: true
     visible: matchesSearch

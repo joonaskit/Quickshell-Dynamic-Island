@@ -1,6 +1,6 @@
 # Expanded-view widgets
 
-The widgets in the expanded island (calendar, timer, media, audio and display controls) live in `widgets/`. `widgets/WidgetRegistry.qml` lists them in their default display order. `island/ExpandedView.qml` builds itself from that list, and the "Expanded island cards" settings page generates one row per entry, with a toggle and move up/down buttons.
+The widgets in the expanded island (calendar, timer, media, audio and display controls) live in `widgets/`. `widgets/WidgetRegistry.qml` lists them in their default display order. `island/ExpandedView.qml` builds itself from that list, and the "Expanded island cards" section of the Island settings generates one row per entry, with a toggle and move up/down buttons.
 
 ## Adding a widget
 

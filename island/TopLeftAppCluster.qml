@@ -546,6 +546,16 @@ Item {
                         root.closeMenu();
                     }
                 }
+
+                MenuItem {
+                    iconName: "sliders"
+                    label: "Top Bar Settings…"
+                    textColor: Theme.textSecondary
+                    onClicked: {
+                        root.closeMenu();
+                        SettingsService.requestOpenSettings("Top bar", "pills");
+                    }
+                }
             }
         }
 

@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import "settingsMigration.js" as SettingsMigration
 import "launcherExtras.js" as LauncherExtras
+import "settingChoices.js" as SettingChoices
 
 Singleton {
     id: root
@@ -185,11 +186,13 @@ Singleton {
     // Opens the settings window on a tab (a name from SettingsWindow.tabs, e.g.
     // "Launcher"), or on the last one when no tab is given. Lets other windows, such
     // as the dock, link to a settings page.
-    signal openSettingsRequested(string tab)
+    signal openSettingsRequested(string tab, string section)
 
-    function requestOpenSettings(tab) {
+    // Opens the settings window, on a tab by its name if given, scrolled to the
+    // SettingsSection with that `key` if given
+    function requestOpenSettings(tab, section) {
         root.windowOpen = true;
-        root.openSettingsRequested(tab || "");
+        root.openSettingsRequested(tab || "", section || "");
     }
 
     // Set by reloadFromDisk: the next load starts from the defaults, so keys the file lacks do not keep their old values
@@ -427,6 +430,27 @@ Singleton {
 
     function toggleSetting(key) {
         root.setSetting(key, !root[key]);
+    }
+
+    // A setting and its sub-setting (show and auto-hide, show and keep shown) as one
+    // choice for the settings window: "off", "on" or "sub"
+    function pairValue(key, subKey) {
+        return SettingChoices.pairValue(root[key], root[subKey]);
+    }
+
+    function setPair(key, subKey, value) {
+        let s = SettingChoices.pairSettings(value);
+        root.setSetting(key, s.on);
+        if (s.sub !== null) root.setSetting(subKey, s.sub);
+    }
+
+    // When the full-width top bar shows: "island", "maximized" or "always"
+    readonly property string topBarMode: SettingChoices.topBarMode(root.morphToTopBarWhenMaximized, root.alwaysTopBar)
+
+    function setTopBarMode(mode) {
+        let s = SettingChoices.topBarSettings(mode);
+        root.setSetting("morphToTopBarWhenMaximized", s.morphToTopBarWhenMaximized);
+        root.setSetting("alwaysTopBar", s.alwaysTopBar);
     }
 
     function isWidgetEnabled(id) {

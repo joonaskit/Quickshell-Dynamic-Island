@@ -24,4 +24,23 @@ A setting that belongs to one machine (a credential, a device id) also goes in `
 
 `settings/SettingsWindow.qml` is a floating panel styled like the clipboard window, one per screen, shown on the active one. The pages and their controls are in `island/settings/`.
 
-Open it with `SettingsService.requestOpenSettings(tab)`. Its open state and position are `SettingsService.windowOpen`, `windowX` and `windowY`.
+Open it with `SettingsService.requestOpenSettings(tab, section)`, or `quickshell ipc call settings open <tab> <section>`. `tab` is a name from the window's tab list and `section` the `key` of a `SettingsSection` on it; the window scrolls to that section and outlines it for a moment. Either can be empty. Its open state and position are `SettingsService.windowOpen`, `windowX` and `windowY`.
+
+Menus link to the settings that change them: the window controls and virtual desktops menus open Top bar at `pills`, and the gear under a status icon popup opens `statusIcons` or `optionalIcons`. Give a new section a `key` when something should link to it.
+
+## Search
+
+The search box shows every row whose title, description or `keywords` holds all the typed words, in any order, ignoring case and hyphens (`services/settingsSearch.js`, tested by `tests/tst_settingsSearch.qml`). Each page's matches come under its name. Give a row `keywords` for other words people may search with: what the feature used to be called, or what other desktops call it.
+
+## Pages
+
+- **Appearance**: colours, screens, corners, pill style, scale and fonts.
+- **Top bar**: a sketch of the bar whose parts link to their sections (`TopBarDiagram.qml`), when the full-width bar shows and hiding it, the side pills, the status icons and the optional icons.
+- **Island**: what the compact island shows, the expanded island cards and the clock.
+- **Dock**, **Launcher**, **Shortcuts** and **About**.
+
+Put a setting on the page for the part of the screen it changes.
+
+## Choices over several keys
+
+A setting with a sub-setting that only applies while it is on (show and auto-hide, show and keep shown) is one `SettingChoice` row, not a toggle and a sub-toggle. `SettingsService.pairValue(key, subKey)` reads the pair as `"off"`, `"on"` or `"sub"`, and `setPair` saves it. The top bar mode is the same over `morphToTopBarWhenMaximized` and `alwaysTopBar` (`topBarMode`, `setTopBarMode`). The keys stay separate in `settings.json`. The mapping is in `services/settingChoices.js`, tested by `tests/tst_settingChoices.qml`.
