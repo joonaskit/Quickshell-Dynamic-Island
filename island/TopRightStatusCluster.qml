@@ -1020,16 +1020,39 @@ Item {
         }
     }
 
+    // Open in top-bar mode, the cluster grows out of the bar (BarHang)
+    BarHang {
+        id: hang
+        body: clusterBackground
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.anyMenuOpen
+        barEdge: root.barEdge
+    }
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+    // The ears' blur would be square, which below the bar shows as a clear patch beside
+    // the body, so hanging from the bar they go without
+    readonly property var earsBlur: hang.hangs ? null : notchEars
+
     NotchEars {
         id: notchEars
         body: clusterBackground
-        active: Theme.notchStyle && !root.isTopBarMode
+        active: (Theme.notchStyle && !root.isTopBarMode) || hang.hangs
+        inset: hang.hangs ? hang.barDepth : 0
+        color: hang.hangs ? hang.barFill : clusterBackground.color
+        // Hanging from the bar, no outline: it reads as part of the bar
+        outlined: Theme.glass && !hang.hangs
     }
 
     // Morphed Cluster Background capsule: Exactly matches the Island physics and styling
     Rectangle {
         id: clusterBackground
         anchors.top: parent.top
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
         anchors.right: parent.right
         width: root.targetWidth
         height: root.targetHeight
@@ -1087,6 +1110,8 @@ Item {
         GlassSurface {
             body: clusterBackground
             flushTop: notchEars.active
+            flushInset: notchEars.inset
+            hairline: !hang.hangs
         }
 
         // Top Header Bar containing the notification & status buttons

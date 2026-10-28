@@ -153,6 +153,8 @@ Behavior on height { NumberAnimation { duration: Theme.animDuration; easing.type
 ```
 Trigger: `isMaximized`. Lines: 52–84.
 
+While a top pill is open over the bar (`BarHang.hangs`), the bar's lower edge is masked (`MultiEffect`, `gaps`) under its body, following the body as it grows and shrinks. The body is clear over the bar and fades in below it, and `NotchEars` with an `inset` of the bar's height curve its sides into the bar's lower edge.
+
 ---
 
 ## Pattern B — Opacity Crossfade (content inside open popup)

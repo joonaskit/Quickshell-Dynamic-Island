@@ -493,6 +493,7 @@ PanelWindow {
         currentDate: islandPill.currentDate
         displayBattery: UPower.displayDevice
         compactCenterWidth: islandPill.compactWidth
+        gaps: [islandPill.barGap, statusCluster.barGap, appCluster.barGap, appIndicatorPill.barGap].filter(g => g)
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
 
         Behavior on anchors.topMargin {
@@ -514,6 +515,7 @@ PanelWindow {
         anchors.leftMargin: 16
         y: window.appClusterTargetY
         isTopBarMode: window.isMaximized
+        barEdge: topBarWings.edgeDepth
         hasFullscreenApp: window.hasFullscreenApp
         activeAppTitle: window.activeAppTitle
         activeAppId: WindowService.activeAppId
@@ -581,6 +583,7 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         y: window.pillTopY
         isTopBarMode: window.isMaximized
+        barEdge: topBarWings.edgeDepth
         hasFullscreenApp: window.hasFullscreenApp
 
         opacity: (!window.hasFullscreenApp) ? 1.0 : 0.0
@@ -627,6 +630,7 @@ PanelWindow {
         anchors.rightMargin: window.appTabTucked ? -Math.round(appIndicatorPill.width * 0.5) : 8
         y: window.appIndicatorTargetY
         isTopBarMode: window.isMaximized
+        barEdge: topBarWings.edgeDepth
         hasFullscreenApp: window.hasFullscreenApp
         isIslandExpanded: islandPill.isOpen
 
@@ -726,6 +730,7 @@ PanelWindow {
         anchors.rightMargin: 16
         y: window.pillTopY
         isTopBarMode: window.isMaximized
+        barEdge: topBarWings.edgeDepth
         hasFullscreenApp: window.hasFullscreenApp
         currentDate: islandPill.currentDate
 
@@ -758,11 +763,11 @@ PanelWindow {
         items: [
             topBarWings.bar,
             islandPill.hitBox,
-            islandPill.ears,
+            islandPill.earsBlur,
             statusCluster.hitBox,
-            statusCluster.ears,
+            statusCluster.earsBlur,
             appCluster.hitBox,
-            appCluster.ears,
+            appCluster.earsBlur,
             appIndicatorPill.hitBox,
             virtualDesktopsPill.hitBox,
             virtualDesktopsPill.ears,

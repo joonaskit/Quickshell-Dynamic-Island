@@ -13,11 +13,14 @@ Item {
     property color color: body ? body.color : Theme.islandBackground
     // Draw the glass hairline along the curves (see GlassSurface.flushTop)
     property bool outlined: Theme.glass
+    // How far down the body's sides the edge they flare into is: 0 for the screen
+    // edge, the bar's height for a body hanging from the top bar
+    property real inset: 0
 
-    readonly property real size: body ? Math.max(0, Math.min(Theme.notchEar, body.height / 2)) : 0
+    readonly property real size: body ? Math.max(0, Math.min(Theme.notchEar, (body.height - inset) / 2)) : 0
 
     x: body ? body.x - size : 0
-    y: body ? body.y : 0
+    y: body ? body.y + inset : 0
     width: body ? body.width + 2 * size : 0
     height: size
     visible: active && size > 0.5 && (body ? body.opacity > 0.01 : false)

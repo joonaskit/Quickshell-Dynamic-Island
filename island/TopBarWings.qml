@@ -1,5 +1,6 @@
 import ".."
 import QtQuick
+import QtQuick.Effects
 import Quickshell.Services.UPower
 
 Item {
@@ -12,6 +13,31 @@ Item {
     property real compactCenterWidth: Theme.compactWidthClock
     // The bar's body, for the window's blur
     property alias bar: barBackground
+    // The bodies hanging from the bar (BarHang.gap: { x, width } in the window, which this
+    // fills). The bar leaves out its lower edge under each, so they carry on from the bar
+    // without a line across.
+    property var gaps: []
+    // The lower edge that is kept: the bar's width less the gaps, as { x, width }
+    readonly property var edgeSegments: {
+        let holes = gaps.map(g => ({ x: g.x - barBackground.x, width: g.width })).sort((a, b) => a.x - b.x);
+        let segments = [];
+        let from = 0;
+        for (let hole of holes) {
+            if (hole.x > from) segments.push({ x: from, width: hole.x - from });
+            from = Math.max(from, hole.x + hole.width);
+        }
+        if (from < barBackground.width) segments.push({ x: from, width: barBackground.width - from });
+        return segments;
+    }
+    // How tall that lower edge is: the glass rim and the band inside it, with room for
+    // their antialiasing. Its top is on a whole device pixel, where the island's fill
+    // starts too, so no pixel is half covered by both and shows as a seam.
+    readonly property real edgeDepth: {
+        let dpr = Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1;
+        let bottom = Theme.topBarHeight + 1;
+        let top = Math.floor((bottom - barGlass.rimWidth - barGlass.bandWidth - Theme.px(2)) * dpr) / dpr;
+        return bottom - top;
+    }
 
     Behavior on compactCenterWidth {
         NumberAnimation {
@@ -57,6 +83,19 @@ Item {
         color: Theme.islandSurface
         clip: true
 
+        layer.enabled: root.gaps.length > 0
+        // Kept where the mask is opaque. The default thresholds leave smoothstep with equal
+        // edges, which is undefined, and a spread from 0 keeps alpha 0 too: so a ramp round
+        // 0.5, and the upper cut above 1
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: gapMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 0.2
+            maskThresholdMax: 1.0
+            maskSpreadAtMax: 0.5
+        }
+
         onWidthChanged: {
             if (root.retracting && width <= root.compactCenterWidth + 2) root.retracting = false;
         }
@@ -96,6 +135,7 @@ Item {
         }
 
         GlassSurface {
+            id: barGlass
             body: barBackground
         }
 
@@ -112,6 +152,36 @@ Item {
 
             Behavior on opacity {
                 NumberAnimation { duration: 180 }
+            }
+        }
+    }
+
+    // What of the bar to keep: all of it but the lower edge under the gaps
+    Item {
+        id: gapMask
+        x: barBackground.x
+        y: barBackground.y
+        width: barBackground.width
+        height: barBackground.height
+        visible: false
+        layer.enabled: root.gaps.length > 0
+
+        Rectangle {
+            width: parent.width
+            height: Math.max(0, parent.height - root.edgeDepth)
+            color: "white"
+        }
+
+        Repeater {
+            model: root.edgeSegments
+
+            Rectangle {
+                required property var modelData
+                x: modelData.x
+                y: Math.max(0, gapMask.height - root.edgeDepth)
+                width: modelData.width
+                height: Math.min(gapMask.height, root.edgeDepth)
+                color: "white"
             }
         }
     }

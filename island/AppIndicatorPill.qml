@@ -419,10 +419,36 @@ Item {
         }
     }
 
+    // Open in top-bar mode, the tray grows out of the bar (BarHang)
+    BarHang {
+        id: hang
+        body: pillBackground
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.contextMenuOpen
+        barEdge: root.barEdge
+    }
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+
+    // Only while hanging from the bar: the tray has no notch style of its own
+    NotchEars {
+        id: notchEars
+        body: pillBackground
+        active: hang.hangs
+        inset: hang.barDepth
+        color: hang.barFill
+        outlined: false
+    }
+
     // Morphed Capsule Background: Exactly matches TopRightStatusCluster and IslandPill physics
     Rectangle {
         id: pillBackground
         anchors.top: parent.top
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
         anchors.right: parent.right
         width: root.targetWidth
         height: root.targetHeight
@@ -476,6 +502,9 @@ Item {
 
         GlassSurface {
             body: pillBackground
+            flushTop: notchEars.active
+            flushInset: notchEars.inset
+            hairline: !hang.hangs
         }
 
         // =====================================================================

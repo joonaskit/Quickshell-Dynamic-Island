@@ -97,9 +97,27 @@ Item {
         return Theme.compactHeight;
     }
 
+    // Open in top-bar mode, the island grows out of the bar (BarHang)
+    BarHang {
+        id: hang
+        body: pillBody
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.isOpen
+        barEdge: root.barEdge
+    }
+    readonly property alias hangsFromBar: hang.hangs
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+    // The ears' blur would be square, which below the bar shows as a clear patch beside
+    // the island, so hanging from the bar they go without
+    readonly property var earsBlur: hang.hangs ? null : notchEars
+
     // Corner radii: morphs to 0 in top-bar mode, rounded when floating
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode && !root.isOpen) return 0;
+        if (root.isTopBarMode) return 0;
         if (Theme.notchStyle) return 0;
         return root.isOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
@@ -191,7 +209,11 @@ Item {
     NotchEars {
         id: notchEars
         body: pillBody
-        active: Theme.notchStyle && !root.isTopBarMode
+        active: (Theme.notchStyle && !root.isTopBarMode) || root.hangsFromBar
+        inset: root.hangsFromBar ? hang.barDepth : 0
+        color: root.hangsFromBar ? hang.barFill : pillBody.color
+        // Hanging from the bar, no outline: it reads as part of the bar
+        outlined: Theme.glass && !root.hangsFromBar
     }
 
     // Island Body
@@ -211,6 +233,8 @@ Item {
         // Glass is clear while compact in the top bar, which draws the glass behind it
         color: (Theme.glass && root.isTopBarMode && !root.isOpen) ? "transparent" : (root.isOpen ? Theme.menuSurface : Theme.islandSurface)
         clip: true
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
 
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }
@@ -261,6 +285,8 @@ Item {
         GlassSurface {
             body: pillBody
             flushTop: notchEars.active
+            flushInset: notchEars.inset
+            hairline: !root.hangsFromBar
         }
 
         // Compact Clock View

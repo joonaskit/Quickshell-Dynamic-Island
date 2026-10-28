@@ -15,6 +15,10 @@ Item {
     // body then has no border, and this draws the hairline instead, clear where the
     // ears join the sides, so the outline runs on round the ears without a seam.
     property bool flushTop: false
+    // With flushTop, how far down the sides the ears are (NotchEars.inset)
+    property real flushInset: 0
+    // With flushTop, draw the hairline down the sides
+    property bool hairline: true
 
     // Inside the body's own border, which on glass is the dark hairline
     readonly property real inset: body ? body.border.width : 0
@@ -23,7 +27,7 @@ Item {
     readonly property real bandWidth: Theme.px(3)
     // Where the hairline and rim start down the sides: below the ears, which are as
     // tall as NotchEars makes them
-    readonly property real topClear: flushTop ? Math.min(Theme.notchEar, height / 2) : 0
+    readonly property real topClear: flushTop ? flushInset + Math.max(0, Math.min(Theme.notchEar, (height - flushInset) / 2)) : 0
     readonly property real clearStop: height > 0 ? Math.min(0.99, topClear / height) : 0
 
     anchors.fill: parent
@@ -71,8 +75,8 @@ Item {
                 x2: 0; y2: root.height
                 GradientStop { position: 0.0; color: "transparent" }
                 GradientStop { position: root.clearStop; color: "transparent" }
-                GradientStop { position: root.clearStop + 0.001; color: root.flushTop ? Theme.glassHairline : "transparent" }
-                GradientStop { position: 1.0; color: root.flushTop ? Theme.glassHairline : "transparent" }
+                GradientStop { position: root.clearStop + 0.001; color: root.flushTop && root.hairline ? Theme.glassHairline : "transparent" }
+                GradientStop { position: 1.0; color: root.flushTop && root.hairline ? Theme.glassHairline : "transparent" }
             }
             PathRectangle {
                 x: 0; y: 0
@@ -133,7 +137,8 @@ Item {
             fillGradient: LinearGradient {
                 x1: 0; y1: 0
                 x2: 0; y2: root.height
-                GradientStop { position: 0.0; color: Theme.glassBandTop }
+                // Hanging from a bar (flushInset), the top is the bar's, which draws its own
+                GradientStop { position: 0.0; color: root.flushTop && root.flushInset > 0 ? "transparent" : Theme.glassBandTop }
                 GradientStop { position: 0.5; color: "transparent" }
                 GradientStop { position: 1.0; color: Theme.glassBandBottom }
             }
