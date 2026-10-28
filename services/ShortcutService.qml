@@ -14,6 +14,8 @@ Singleton {
     property var keysById: ({})
     // Why the last change was refused; empty when it worked
     property string error: ""
+    // { id, code } when the last change was refused because another shortcut has the key
+    property var conflict: null
 
     property var queue: []
     property string groupSignature: ""
@@ -25,6 +27,11 @@ Singleton {
     // `code` is Qt's key code: the key plus the modifier bits
     function setShortcut(id, code) {
         run(["set", id, String(code)]);
+    }
+
+    // Takes the key from the shortcut that has it, as System Settings does
+    function forceShortcut(id, code) {
+        run(["set", id, String(code), "--force"]);
     }
 
     function clearShortcut(id) {
@@ -48,9 +55,11 @@ Singleton {
             data = JSON.parse(text);
         } catch (e) {
             error = "Could not read the shortcuts from KDE";
+            conflict = null;
             return;
         }
         error = data.error || "";
+        conflict = data.conflict || null;
 
         let keys = {};
         let order = [];

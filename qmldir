@@ -80,6 +80,7 @@ SettingsWindow 1.0 settings/SettingsWindow.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml
 SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingMoveButtons 1.0 island/settings/SettingMoveButtons.qml
+SettingButton 1.0 island/settings/SettingButton.qml
 SettingChoice 1.0 island/settings/SettingChoice.qml
 SettingSegmented 1.0 island/settings/SettingSegmented.qml
 SettingSlider 1.0 island/settings/SettingSlider.qml
