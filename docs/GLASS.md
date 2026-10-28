@@ -19,7 +19,7 @@ The dock used to have a glass look of its own (`dockTransparent`). The style rep
 - **Notch style.** A pill that hangs from the top edge has notch ears (`NotchEars`) beside it, separate shapes in the body's fill. On glass the body then draws no border: `GlassSurface` with `flushTop` draws the hairline itself, starting below the ears, and the ears draw it along their curves, so one outline runs from the screen edge round the ears and down the body. The rim and sheen also leave the top out, where the ears join. The ears are in the blur too; their blur is square, so the small corner outside each curve is blurred without fill.
 - **Blur.** `components/WindowBlur.qml` blurs the desktop behind a window's pills and popups. Give it the window as `target` and the bodies as `items`, once. An entry is a Rectangle, which lends its corner radii, or `{ item, topLeftRadius, ... }` for an item without them: `DockBar.flyoutBlur` builds those for the dock's popups, rounded on the corners away from the dock.
 
-`islandBackground`, `cardBackground` and the slider and switch tracks stay opaque in both styles, paper toned on light: `theme.json`, the KDE colour scheme and the standalone windows (settings, clipboard, welcome guide) use them.
+`islandBackground`, `cardBackground` and the slider and switch tracks stay opaque in both styles, paper toned on light: `theme.json`, the KDE colour scheme and the welcome guide use them. The settings and clipboard windows are glass as a test: their card takes `menuSurface`, the hairline, `GlassSurface` and a `WindowBlur`, and the settings switches use `controlTrackOff`.
 
 ### How the blur follows the pills
 

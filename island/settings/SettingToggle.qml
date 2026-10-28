@@ -99,7 +99,7 @@ Rectangle {
             Layout.preferredWidth: 44
             Layout.preferredHeight: 24
             radius: 12
-            color: toggleRow.checked ? Theme.accentGreen : Theme.switchTrackOff
+            color: toggleRow.checked ? Theme.accentGreen : Theme.controlTrackOff
 
             Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
