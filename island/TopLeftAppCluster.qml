@@ -63,7 +63,7 @@ Item {
 
     readonly property real targetHeight: {
         if (!root.menuOpen) return compactHeight;
-        if (root.isTopBarMode) return compactHeight + 1 + menuContentHeight + Theme.px(22);
+        if (root.isTopBarMode) return compactHeight + 1 + menuContentHeight + Theme.px(22) + (hang.bubbleOpen ? hang.bubbleGap : 0);
         return Theme.px(42) + menuContentHeight + Theme.px(22);
     }
 
@@ -126,16 +126,18 @@ Item {
     readonly property var barGap: hang.gap
     // The ears' blur would be square, which below the bar shows as a clear patch beside
     // the body, so hanging from the bar they go without
-    readonly property var earsBlur: hang.hangs ? null : notchEars
+    readonly property var earsBlur: hang.joined ? null : notchEars
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : clusterBackground
 
     NotchEars {
         id: notchEars
         body: clusterBackground
-        active: (Theme.notchStyle && !root.isTopBarMode) || hang.hangs
-        inset: hang.hangs ? hang.barDepth : 0
-        color: hang.hangs ? hang.barFill : clusterBackground.color
+        active: (Theme.notchStyle && !root.isTopBarMode) || hang.joined
+        inset: hang.joined ? hang.barDepth : 0
+        color: hang.joined ? hang.barFill : clusterBackground.color
         // Hanging from the bar, no outline: it reads as part of the bar
-        outlined: Theme.glass && !hang.hangs
+        outlined: Theme.glass && !hang.joined
     }
 
     // Morphed Background capsule: seamlessly connects to top bar when maximized, or acts as pill when floating
@@ -197,11 +199,18 @@ Item {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
 
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
         GlassSurface {
             body: clusterBackground
             flushTop: notchEars.active
             flushInset: notchEars.inset
-            hairline: !hang.hangs
+            hairline: !hang.joined
+            active: Theme.glass && !hang.bubble
         }
 
         // Top Header Area (always visible, interactive pill header)
@@ -290,7 +299,8 @@ Item {
             anchors.rightMargin: 10
             height: 1
             color: Theme.overlay(0.08)
-            opacity: root.menuOpen ? 1.0 : 0.0
+            // Detached, the card's edge parts the menu from the bar instead
+            opacity: root.menuOpen && !hang.bubble ? 1.0 : 0.0
             visible: opacity > 0.01
 
             Behavior on opacity {
@@ -302,10 +312,12 @@ Item {
         Item {
             id: menuContainer
             anchors.top: divider.bottom
+            // Detached, below the gap to the card's top
+            anchors.topMargin: (hang.bubble ? hang.bubbleGap : 0) + menuGap
+            readonly property real menuGap: 4
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: grabberArea.top
-            anchors.topMargin: 4
             clip: true
             opacity: root.menuOpen ? 1.0 : 0.0
             visible: opacity > 0.01

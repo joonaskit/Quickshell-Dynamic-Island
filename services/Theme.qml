@@ -79,6 +79,10 @@ Singleton {
     // The island's body and its open menus: glass in the glass style, else opaque
     readonly property color islandSurface: glass ? glassFill : islandBackground
     readonly property color menuSurface: glass ? glassFillStrong : islandBackground
+    // A test: on glass, the top bar's and the dock's menus open as separate cards a gap
+    // away, not joined to the bar or the dock (BarHang, DockFlyoutGeometry)
+    readonly property bool detachedMenus: glass
+    readonly property real detachedMenuGap: px(8)
     readonly property color islandShadow: Qt.rgba(0, 0, 0, 0)
 
     // Inner card backgrounds & subtle highlights

@@ -125,9 +125,10 @@ Item {
     }
 
     // A popup's entry for WindowBlur: rounded on the corners away from the dock, square
-    // where its base sits on the dock
+    // where its base sits on the dock; rounded all round when detached from it
     function flyoutBlur(item, radius) {
-        let away = { "bottom": ["topLeftRadius", "topRightRadius"], "left": ["topRightRadius", "bottomRightRadius"], "right": ["topLeftRadius", "bottomLeftRadius"] }[root.dockPosition] || [];
+        let all = ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"];
+        let away = Theme.detachedMenus ? all : ({ "bottom": ["topLeftRadius", "topRightRadius"], "left": ["topRightRadius", "bottomRightRadius"], "right": ["topLeftRadius", "bottomLeftRadius"] }[root.dockPosition] || []);
         let entry = { "item": item };
         for (const corner of away) entry[corner] = radius;
         return entry;
@@ -256,9 +257,10 @@ Item {
     // The launcher and the trash menu continue an end of the dock in a straight
     // line, so the dock straightens its corner under them as they open. Start is
     // the launcher's end (left, or top for a vertical dock).
-    readonly property real startCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
+    // Detached from the dock (Theme.detachedMenus), they leave its corners round.
+    readonly property real startCornerRadius: Theme.detachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
     // The launcher also straightens the end corner when it is wide enough to reach it
-    readonly property real endCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
+    readonly property real endCornerRadius: Theme.detachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
 
     // Dock capsule background
     Rectangle {

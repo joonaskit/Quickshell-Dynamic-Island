@@ -762,13 +762,13 @@ PanelWindow {
         target: window
         items: [
             topBarWings.bar,
-            islandPill.hitBox,
+            islandPill.blurBody,
             islandPill.earsBlur,
-            statusCluster.hitBox,
+            statusCluster.blurBody,
             statusCluster.earsBlur,
-            appCluster.hitBox,
+            appCluster.blurBody,
             appCluster.earsBlur,
-            appIndicatorPill.hitBox,
+            appIndicatorPill.blurBody,
             virtualDesktopsPill.hitBox,
             virtualDesktopsPill.ears,
             virtualDesktopsPill.menuBody,

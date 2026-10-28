@@ -14,6 +14,9 @@ Item {
     // Fillets are dropped when the popup overhangs the dock's straight edge
     property bool fitsOnDock: true
     property real filletSize: 12
+    // A plain rounded card a gap away from the dock (Theme.detachedMenus), drawn by
+    // `card` below instead of the outline that flares into the dock
+    property bool detached: Theme.detachedMenus
     property real cornerRadius: 14
     // One side continues an end of the dock in a straight line. Start is left, or
     // top for a vertical dock. The dock straightens its corner under that side as
@@ -119,6 +122,7 @@ Item {
     Shape {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
+        visible: !bgHolder.detached
 
         ShapePath {
             // More opaque than the dock for readability, fading to the exact dock
@@ -186,7 +190,7 @@ Item {
         id: hairlineEffect
         anchors.fill: hairline
         source: hairline
-        visible: Theme.glass && !Theme.dockShowBorder
+        visible: Theme.glass && !Theme.dockShowBorder && !bgHolder.detached
         maskEnabled: true
         maskSource: hairlineMask
         maskSpreadAtMin: 1.0
@@ -195,7 +199,7 @@ Item {
     Shape {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
-        visible: Theme.glass
+        visible: Theme.glass && !bgHolder.detached
 
         ShapePath {
             strokeColor: "transparent"
@@ -224,6 +228,21 @@ Item {
                 topLeftRadius: bgHolder.insetRadius(2)
                 topRightRadius: bgHolder.insetRadius(2)
             }
+        }
+    }
+
+    // Detached: the card, with the glass of the status bar menus all round
+    Rectangle {
+        id: card
+        anchors.fill: parent
+        visible: bgHolder.detached
+        radius: bgHolder.r
+        color: bgHolder.tintColor
+        border.width: 1
+        border.color: Theme.dockShowBorder ? Theme.dockBorder : Theme.glassHairline
+
+        GlassSurface {
+            body: card
         }
     }
 }

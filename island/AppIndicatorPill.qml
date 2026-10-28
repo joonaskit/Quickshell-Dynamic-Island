@@ -44,7 +44,7 @@ Item {
 
     readonly property real compactHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
     readonly property real expandedHeight: Theme.px(40) + menuContent.implicitHeight + Theme.px(14)
-    readonly property real targetHeight: root.contextMenuOpen ? expandedHeight : compactHeight
+    readonly property real targetHeight: (root.contextMenuOpen ? expandedHeight : compactHeight) + (hang.bubbleOpen ? hang.bubbleTop : 0)
 
     readonly property real targetTopRadius: {
         if (root.isTopBarMode || Theme.notchStyle) return 0;
@@ -432,12 +432,14 @@ Item {
     property real barEdge: 0
     // Where the body is cut into the bar, for TopBarWings.gaps
     readonly property var barGap: hang.gap
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : pillBackground
 
     // Only while hanging from the bar: the tray has no notch style of its own
     NotchEars {
         id: notchEars
         body: pillBackground
-        active: hang.hangs
+        active: hang.joined
         inset: hang.barDepth
         color: hang.barFill
         outlined: false
@@ -500,11 +502,18 @@ Item {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
 
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
         GlassSurface {
             body: pillBackground
             flushTop: notchEars.active
             flushInset: notchEars.inset
-            hairline: !hang.hangs
+            hairline: !hang.joined
+            active: Theme.glass && !hang.bubble
         }
 
         // =====================================================================
@@ -627,6 +636,8 @@ Item {
         Item {
             id: morphedMenuArea
             anchors.fill: parent
+            // Detached, below the bar on the card
+            anchors.topMargin: hang.bubble ? hang.bubbleTop : 0
             visible: opacity > 0.01
             opacity: root.contextMenuOpen ? 1.0 : 0.0
 

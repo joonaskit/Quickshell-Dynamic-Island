@@ -114,6 +114,7 @@ HiddenElementGlow 1.0 components/HiddenElementGlow.qml
 NotchEars 1.0 components/NotchEars.qml
 GlassSurface 1.0 components/GlassSurface.qml
 BarHang 1.0 components/BarHang.qml
+BarBubble 1.0 components/BarBubble.qml
 WindowBlur 1.0 components/WindowBlur.qml
 TabSeamGlow 1.0 components/TabSeamGlow.qml
 DockWindowPicker 1.0 dock/DockWindowPicker.qml

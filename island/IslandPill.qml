@@ -106,14 +106,16 @@ Item {
         open: root.isOpen
         barEdge: root.barEdge
     }
-    readonly property alias hangsFromBar: hang.hangs
+    readonly property alias hangsFromBar: hang.joined
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : pillBody
     // How tall the bar's lower edge is (TopBarWings.edgeDepth)
     property real barEdge: 0
     // Where the body is cut into the bar, for TopBarWings.gaps
     readonly property var barGap: hang.gap
     // The ears' blur would be square, which below the bar shows as a clear patch beside
     // the island, so hanging from the bar they go without
-    readonly property var earsBlur: hang.hangs ? null : notchEars
+    readonly property var earsBlur: hang.joined ? null : notchEars
 
     // Corner radii: morphs to 0 in top-bar mode, rounded when floating
     readonly property real targetTopRadius: {
@@ -223,7 +225,7 @@ Item {
         anchors.topMargin: (root.isTopBarMode && root.isOpen) ? -1 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.targetWidth
-        height: root.targetHeight + ((root.isTopBarMode && root.isOpen) ? 1 : 0)
+        height: root.targetHeight + ((root.isTopBarMode && root.isOpen) ? 1 : 0) + (hang.bubbleOpen ? hang.bubbleTop : 0)
 
         topLeftRadius: root.targetTopRadius
         topRightRadius: root.targetTopRadius
@@ -282,11 +284,18 @@ Item {
             ColorAnimation { duration: 180 }
         }
 
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
         GlassSurface {
             body: pillBody
             flushTop: notchEars.active
             flushInset: notchEars.inset
             hairline: !root.hangsFromBar
+            active: Theme.glass && !hang.bubble
         }
 
         // Compact Clock View
@@ -402,6 +411,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
+            anchors.topMargin: hang.bubble ? hang.bubbleTop : 0
             currentTime: root.currentDate
             player: root.activePlayer
             displayBattery: UPower.displayDevice
@@ -429,6 +439,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
+            anchors.topMargin: hang.bubble ? hang.bubbleTop : 0
             notification: root.openedNotification
 
             opacity: root.isNotificationOpen ? 1.0 : 0.0
