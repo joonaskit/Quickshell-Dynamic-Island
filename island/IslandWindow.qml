@@ -369,7 +369,7 @@ PanelWindow {
 
     // Auto-hide reveal state for app indicator pill
     property bool appIndicatorRevealed: false
-    readonly property bool isAppIndicatorHovered: appIndicatorEdgeHoverHandler.hovered || appIndicatorPill.isPillHovered
+    readonly property bool isAppIndicatorHovered: appIndicatorEdgeHoverHandler.hovered || appIndicatorPill.pointerOver || appTabHover.hovered
 
     onIsAppIndicatorHoveredChanged: {
         if (isAppIndicatorHovered) {
