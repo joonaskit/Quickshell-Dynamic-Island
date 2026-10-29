@@ -7,8 +7,8 @@ Item {
 
     property real volume: AudioService.volume
     property bool isMuted: AudioService.isMuted
-    // wpctl is not installed: the slider and the volume keys cannot change anything
-    readonly property bool unavailable: DepsService.noneUsable(["wpctl"])
+    // PipeWire reports no output device: the slider and the volume keys cannot change anything
+    readonly property bool unavailable: AudioService.sink === null
 
     implicitHeight: Theme.px(34)
     implicitWidth: parent ? parent.width : Theme.px(370)
@@ -93,8 +93,6 @@ Item {
                 }
 
                 onPressed: function(mouse) {
-                    releaseTimer.stop();
-                    AudioService.isChanging = true;
                     updateVolume(mouse.x);
                 }
 
@@ -104,21 +102,9 @@ Item {
                     }
                 }
 
-                onReleased: {
-                    releaseTimer.restart();
-                }
-
                 onWheel: function(wheel) {
                     let step = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
                     AudioService.setVolume(root.volume + step);
-                }
-            }
-
-            Timer {
-                id: releaseTimer
-                interval: 250
-                onTriggered: {
-                    AudioService.isChanging = false;
                 }
             }
         }
@@ -127,7 +113,7 @@ Item {
         Text {
             id: percentText
             Layout.preferredWidth: root.unavailable ? Theme.px(100) : Theme.px(38)
-            text: root.unavailable ? "Needs wpctl" : root.isMuted ? "Mute" : Math.round(root.volume * 100) + "%"
+            text: root.unavailable ? "No output" : root.isMuted ? "Mute" : Math.round(root.volume * 100) + "%"
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontPx(11)
             font.weight: Font.DemiBold

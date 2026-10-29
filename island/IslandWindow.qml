@@ -133,7 +133,7 @@ PanelWindow {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: window.barHidden ? Math.max(8, Theme.px(8)) : Theme.topBarHeight + Theme.topMargin
+        height: window.barHidden ? Math.max(8, Theme.px(8)) : Math.max(Theme.topBarHeight + Theme.topMargin, window.floatingGap)
 
         HoverHandler {
             enabled: SettingsService.autoHideTopBar && !window.hasFullscreenApp
@@ -187,6 +187,18 @@ PanelWindow {
         }
     }
 
+    // A mask region on a pill's hitBox, placed by hand. A Region that follows an item updates
+    // only when the item itself moves, not when its pill slides (the bar coming down, a pill
+    // auto-hiding), so it would stay where the pill was. A null box drops out.
+    component PillRegion: Region {
+        property Item pill: null
+        property Item box: null
+        x: box ? Math.floor(pill.x + box.x) : 0
+        y: box ? Math.floor(pill.y + box.y) : 0
+        width: box ? Math.ceil(box.width) : 0
+        height: box ? Math.ceil(box.height) : 0
+    }
+
     // Click-through mask: ONLY the pill and its expanded state capture mouse input!
     // In top-bar mode, the full-width top bar also captures clicks.
     // When hidden by fullscreen, mask is empty so 100% of clicks pass through.
@@ -205,11 +217,13 @@ PanelWindow {
         Region {
             item: (window.tabsEnabled && SettingsService.showVirtualDesktops && virtualDesktopsPill.visible && !window.virtualDesktopsShouldHide) ? desktopsTabHoverArea : null
         }
-        Region {
-            item: (!window.hasFullscreenApp) ? islandPill.hitBox : null
+        PillRegion {
+            pill: islandPill
+            box: (!window.hasFullscreenApp) ? islandPill.hitBox : null
         }
-        Region {
-            item: (!window.hasFullscreenApp && (!window.isMaximized || statusCluster.anyMenuOpen)) ? statusCluster.hitBox : null
+        PillRegion {
+            pill: statusCluster
+            box: (!window.hasFullscreenApp && (!window.isMaximized || statusCluster.anyMenuOpen)) ? statusCluster.hitBox : null
         }
         Region {
             item: (!window.hasFullscreenApp && topLeftEdgeTrigger.visible) ? topLeftEdgeTrigger : null
@@ -217,11 +231,13 @@ PanelWindow {
         Region {
             item: (!window.hasFullscreenApp && appIndicatorEdgeTrigger.visible) ? appIndicatorEdgeTrigger : null
         }
-        Region {
-            item: (!window.hasFullscreenApp && SettingsService.showWindowControls && appCluster.visible && !window.appClusterShouldHide && (!window.isMaximized || appCluster.menuOpen)) ? appCluster.hitBox : null
+        PillRegion {
+            pill: appCluster
+            box: (!window.hasFullscreenApp && SettingsService.showWindowControls && appCluster.visible && !window.appClusterShouldHide && (!window.isMaximized || appCluster.menuOpen)) ? appCluster.hitBox : null
         }
-        Region {
-            item: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops && virtualDesktopsPill.visible && virtualDesktopsPill.desktopCount > 0 && !window.virtualDesktopsShouldHide) ? virtualDesktopsPill.hitBox : null
+        PillRegion {
+            pill: virtualDesktopsPill
+            box: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops && virtualDesktopsPill.visible && virtualDesktopsPill.desktopCount > 0 && !window.virtualDesktopsShouldHide) ? virtualDesktopsPill.hitBox : null
         }
         Region {
             item: (!window.hasFullscreenApp && virtualDesktopsPill.menuOpen) ? virtualDesktopsPill.menuHitBox : null
@@ -232,8 +248,9 @@ PanelWindow {
         Region {
             item: (!window.hasFullscreenApp && SettingsService.showDetachedNotifBubble && notifBubble.visible) ? notifBubble : null
         }
-        Region {
-            item: (!window.hasFullscreenApp && SettingsService.showAppTrayPill && appIndicatorPill.visible && (appIndicatorPill.appCount > 0 || appIndicatorPill.contextMenuOpen) && !window.appIndicatorShouldHide) ? appIndicatorPill.hitBox : null
+        PillRegion {
+            pill: appIndicatorPill
+            box: (!window.hasFullscreenApp && SettingsService.showAppTrayPill && appIndicatorPill.visible && (appIndicatorPill.appCount > 0 || appIndicatorPill.contextMenuOpen) && !window.appIndicatorShouldHide) ? appIndicatorPill.hitBox : null
         }
     }
 
@@ -369,7 +386,7 @@ PanelWindow {
 
     // Auto-hide reveal state for app indicator pill
     property bool appIndicatorRevealed: false
-    readonly property bool isAppIndicatorHovered: appIndicatorEdgeHoverHandler.hovered || appIndicatorPill.isPillHovered
+    readonly property bool isAppIndicatorHovered: appIndicatorEdgeHoverHandler.hovered || appIndicatorPill.pointerOver || appTabHover.hovered
 
     onIsAppIndicatorHoveredChanged: {
         if (isAppIndicatorHovered) {
@@ -545,6 +562,7 @@ PanelWindow {
         id: virtualDesktopsPill
         x: (SettingsService.showWindowControls && appCluster.visible) ? (appCluster.x + appCluster.width + (window.desktopsTabTucked ? -Math.round(virtualDesktopsPill.width * 0.5) : 8)) : 16
         y: window.virtualDesktopsTargetY
+        isSlidOut: !window.virtualDesktopsShouldHide && !window.barHidden
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
         opacity: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops) ? 1.0 : 0.0

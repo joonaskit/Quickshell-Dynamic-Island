@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Mpris
+import Qt.labs.folderlistmodel
 import "windowMatching.js" as WindowMatching
 
 Singleton {
@@ -62,8 +63,8 @@ Singleton {
     // Cache of running state mapped by app key: { running: bool, focused: bool, count: int }
     property var runningStateMap: ({})
 
-    // Trash state
-    property int trashCount: 0
+    // Trash state: items in the trash folder, kept up to date by the folder watch below
+    readonly property int trashCount: trashModel.count
 
     // Full list of installed apps for App Picker
     property var installedApps: []
@@ -101,7 +102,6 @@ Singleton {
         loadPinnedApps();
         updateInstalledApps();
         updateRunningApps();
-        checkTrash();
     }
 
     // Debounce timer for updating installed apps when desktop entries finish scanning
@@ -122,57 +122,34 @@ Singleton {
         }
     }
 
-    // Timer for keeping state updated
-    Timer {
-        id: refreshTimer
-        interval: 1000
-        repeat: true
-        running: true
-        onTriggered: {
-            root.updateRunningApps();
-        }
-    }
-
-    // Trash monitor timer
-    Timer {
-        interval: 5000
-        repeat: true
-        running: true
-        onTriggered: {
-            root.checkTrash();
-        }
+    // Window changes reach the dock from both window sources, often several for one change
+    // (a focus switch is a new active toplevel, a new active app and a new window list), so
+    // they are gathered into one update
+    function scheduleRunningUpdate() {
+        Qt.callLater(root.updateRunningApps);
     }
 
     Connections {
         target: ToplevelManager.toplevels ? ToplevelManager.toplevels : null
         function onValuesChanged() {
-            root.updateRunningApps();
+            root.scheduleRunningUpdate();
         }
     }
 
     Connections {
         target: ToplevelManager
         function onActiveToplevelChanged() {
-            root.updateRunningApps();
+            root.scheduleRunningUpdate();
         }
     }
 
-    // Process to check trash count
-    Process {
-        id: trashProc
-        command: ["sh", "-c", "ls -1 ~/.local/share/Trash/files 2>/dev/null | wc -l"]
-        stdout: SplitParser {
-            onRead: function(line) {
-                let n = parseInt(line.trim());
-                if (!isNaN(n)) root.trashCount = n;
-            }
-        }
-    }
-
-    function checkTrash() {
-        if (!trashProc.running) {
-            trashProc.running = true;
-        }
+    FolderListModel {
+        id: trashModel
+        folder: "file://" + Quickshell.env("HOME") + "/.local/share/Trash/files"
+        showDirs: true
+        showHidden: true
+        showDotAndDotDot: false
+        showOnlyReadable: false
     }
 
     function openTrash() {
@@ -185,14 +162,6 @@ Singleton {
 
     function emptyTrash() {
         Quickshell.execDetached(["sh", "-c", "rm -rf ~/.local/share/Trash/files/* ~/.local/share/Trash/info/*"]);
-        checkTrashTimer.start();
-    }
-
-    Timer {
-        id: checkTrashTimer
-        interval: 400
-        repeat: false
-        onTriggered: root.checkTrash()
     }
 
     function openLaunchpad() {
@@ -487,10 +456,10 @@ Singleton {
     Connections {
         target: WindowService
         function onWindowListChanged() {
-            root.updateRunningApps();
+            root.scheduleRunningUpdate();
         }
         function onActiveAppIdChanged() {
-            root.updateRunningApps();
+            root.scheduleRunningUpdate();
         }
     }
 
@@ -538,9 +507,10 @@ Singleton {
         return list;
     }
 
-    // Match windows to an app definition (logic in windowMatching.js)
-    function findToplevels(app) {
-        let wins = getMergedWindows();
+    // Match windows to an app definition (logic in windowMatching.js). `windows` is the
+    // merged window list when the caller already has it
+    function findToplevels(app, windows) {
+        let wins = windows || getMergedWindows();
         if (wins.length === 0) return [];
         let entry = findDesktopEntry(app.desktopFile || app.id || "");
         return WindowMatching.matchWindows(app, wins, (entry && entry.startupClass) || "");
@@ -873,7 +843,7 @@ Singleton {
         // Track pinned apps status and index their open windows
         for (let i = 0; i < root.pinnedApps.length; i++) {
             let app = root.pinnedApps[i];
-            let matchingWins = findToplevels(app);
+            let matchingWins = findToplevels(app, wins);
             let count = matchingWins.length;
             let focused = matchingWins.some(function(w) { return w.activated; });
             newMap[app.id] = { running: count > 0, focused: focused, count: count };
@@ -948,7 +918,7 @@ Singleton {
         let unpinnedList = [];
         for (let k in unpinnedMap) {
             let item = unpinnedMap[k];
-            let matchingWins = findToplevels(item);
+            let matchingWins = findToplevels(item, wins);
             let count = matchingWins.length;
             let focused = matchingWins.some(function(w) { return w.activated; });
             newMap[item.id] = { running: count > 0, focused: focused, count: count };
@@ -958,9 +928,18 @@ Singleton {
             unpinnedList.push(item);
         }
 
-        root.runningStateMap = newMap;
-        root.runningUnpinnedApps = unpinnedList;
-        root.stateUpdated();
+        // Only on a change: a new map re-evaluates every dock item's state, and a new list
+        // rebuilds the running apps' delegates
+        let changed = false;
+        if (JSON.stringify(newMap) !== JSON.stringify(root.runningStateMap)) {
+            root.runningStateMap = newMap;
+            changed = true;
+        }
+        if (JSON.stringify(unpinnedList) !== JSON.stringify(root.runningUnpinnedApps)) {
+            root.runningUnpinnedApps = unpinnedList;
+            changed = true;
+        }
+        if (changed) root.stateUpdated();
     }
 
     function guessCategory(name, generic, comment) {

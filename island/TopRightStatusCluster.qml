@@ -137,9 +137,6 @@ Item {
         let next = !root.bluetoothMenuOpen;
         root.closeAllMenus();
         root.bluetoothMenuOpen = next;
-        if (root.bluetoothMenuOpen) {
-            BluetoothService.queryBluetooth();
-        }
     }
 
     function togglePowerMenu() {
@@ -174,10 +171,6 @@ Item {
         let next = !root.micMenuOpen;
         root.closeAllMenus();
         root.micMenuOpen = next;
-        if (root.micMenuOpen) {
-            MicrophoneService.queryStatus();
-            MicrophoneService.querySources();
-        }
     }
 
     function toggleProfileMenu() {

@@ -31,6 +31,8 @@ Item {
 
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
     readonly property bool isPillHovered: pillHoverHandler.hovered && !root.contextMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
+    // Pointer over the pill in any mode, so an auto-hidden pill stays out while hovered
+    readonly property bool pointerOver: pillHoverHandler.hovered
 
     readonly property bool isEnabled: SettingsService.showAppTrayPill
     onIsEnabledChanged: {
@@ -458,7 +460,7 @@ Item {
 
         HoverHandler {
             id: pillHoverHandler
-            enabled: !root.isTopBarMode && !root.hasFullscreenApp
+            enabled: !root.hasFullscreenApp
         }
 
         topLeftRadius: root.targetTopRadius

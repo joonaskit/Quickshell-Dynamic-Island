@@ -7,6 +7,12 @@ Item {
 
     property bool isTopBarMode: false
     property bool hasFullscreenApp: false
+    // False while an auto-hide has slid the pill up off screen. A pill sliding under where the
+    // pointer last was can still get a hover, so its tooltip stays off until it is back out.
+    property bool isSlidOut: true
+    onIsSlidOutChanged: {
+        if (!isSlidOut) root.isTooltipActive = false;
+    }
 
     readonly property var desktops: WindowService.virtualDesktops
     readonly property int desktopCount: WindowService.desktopCount
@@ -105,6 +111,11 @@ Item {
         HoverHandler {
             id: pillHoverHandler
             enabled: !root.hasFullscreenApp
+            // The desktop buttons are rebuilt whenever the desktop list updates, and a button
+            // destroyed under the pointer never sends its exit, so leaving the pill clears the tip
+            onHoveredChanged: {
+                if (!hovered) root.isTooltipActive = false;
+            }
         }
 
         // Frosted glass appearance
@@ -248,7 +259,7 @@ Item {
                             }
 
                             onEntered: {
-                                if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp) return;
+                                if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp || !root.isSlidOut) return;
                                 let mapped = desktopItem.mapToItem(root, desktopItem.width / 2, 0);
                                 let dName = modelData.name || ("Desktop " + (modelData.index + 1));
                                 let winText = desktopItem.winCount > 0 ? (" • " + desktopItem.winCount + (desktopItem.winCount === 1 ? " window" : " windows")) : " (Empty)";
@@ -317,7 +328,7 @@ Item {
                     }
 
                     onEntered: {
-                        if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp) return;
+                        if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp || !root.isSlidOut) return;
                         let mapped = addDesktopBtn.mapToItem(root, addDesktopBtn.width / 2, 0);
                         root.hoveredTooltipText = "New Desktop";
                         root.hoveredTooltipTargetX = mapped.x;
@@ -345,7 +356,7 @@ Item {
         x: Math.max(0, Math.min(root.width - tooltipBg.width, root.hoveredTooltipTargetX - tooltipBg.width / 2))
         z: 300
 
-        opacity: (root.isTooltipActive && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
+        opacity: (root.isTooltipActive && root.isSlidOut && !root.menuOpen && !root.isTopBarMode && !root.hasFullscreenApp) ? 1.0 : 0.0
         visible: opacity > 0.01
 
         Behavior on opacity { NumberAnimation { duration: Theme.animDurationTooltip } }

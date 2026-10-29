@@ -1,4 +1,5 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -11,15 +12,36 @@ Singleton {
     property bool isChanging: false
     property string pendingBrightness: ""
 
-    // Polling timer to catch hardware Fn brightness keys (only active if brightness is supported)
-    Timer {
-        id: pollTimer
-        interval: 600
+    // The kernel reports every backlight change (Fn keys, KDE's slider) as a udev event, so
+    // brightness is read again only when one arrives
+    Process {
+        id: monitorProc
+        command: ["udevadm", "monitor", "--kernel", "--subsystem-match=backlight"]
         running: root.isAvailable
-        repeat: true
+
+        Component.onCompleted: HelperService.watch("backlight", "Brightness monitor", monitorProc)
+
+        onRunningChanged: {
+            if (!running && root.isAvailable) {
+                restartTimer.start();
+            }
+        }
+
+        stdout: SplitParser {
+            onRead: function(line) {
+                if (line.includes(" change ") && !root.isChanging) {
+                    root.queryBrightness();
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: restartTimer
+        interval: 2000
         onTriggered: {
-            if (!root.isChanging) {
-                root.queryBrightness();
+            if (!monitorProc.running) {
+                monitorProc.running = true;
             }
         }
     }
