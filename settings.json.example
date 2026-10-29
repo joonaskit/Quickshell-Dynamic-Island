@@ -44,6 +44,7 @@
   "showDndIcon": true,
   "dndEnabled": false,
   "caffeineEnabled": false,
+  "lowRefreshOnBattery": false,
   "showWifiIcon": true,
   "hideUnavailableIcons": false,
   "showBluetoothIcon": true,

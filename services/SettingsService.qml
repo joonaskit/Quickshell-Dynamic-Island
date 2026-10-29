@@ -79,6 +79,8 @@ Singleton {
     property bool showDndIcon: true
     property bool dndEnabled: false
     property bool caffeineEnabled: false
+    // Drop the built-in screen to 60 Hz while on battery (PowerProfileService)
+    property bool lowRefreshOnBattery: false
     property bool showWifiIcon: true
     // Hide status icons whose tools are missing, instead of showing them dimmed
     property bool hideUnavailableIcons: false
@@ -311,6 +313,7 @@ Singleton {
         if (data.showDndIcon !== undefined) root.showDndIcon = !!data.showDndIcon;
         if (data.dndEnabled !== undefined) root.dndEnabled = !!data.dndEnabled;
         if (data.caffeineEnabled !== undefined) root.caffeineEnabled = !!data.caffeineEnabled;
+        if (data.lowRefreshOnBattery !== undefined) root.lowRefreshOnBattery = !!data.lowRefreshOnBattery;
         if (data.showWifiIcon !== undefined) root.showWifiIcon = !!data.showWifiIcon;
         if (data.hideUnavailableIcons !== undefined) root.hideUnavailableIcons = !!data.hideUnavailableIcons;
         if (data.showBluetoothIcon !== undefined) root.showBluetoothIcon = !!data.showBluetoothIcon;
@@ -573,6 +576,7 @@ Singleton {
         root.showDndIcon = true;
         root.dndEnabled = false;
         root.caffeineEnabled = false;
+        root.lowRefreshOnBattery = false;
         root.showWifiIcon = true;
         root.hideUnavailableIcons = false;
         root.showBluetoothIcon = true;
@@ -704,6 +708,7 @@ Singleton {
             "showDndIcon": root.showDndIcon,
             "dndEnabled": root.dndEnabled,
             "caffeineEnabled": root.caffeineEnabled,
+            "lowRefreshOnBattery": root.lowRefreshOnBattery,
             "showWifiIcon": root.showWifiIcon,
             "hideUnavailableIcons": root.hideUnavailableIcons,
             "showBluetoothIcon": root.showBluetoothIcon,

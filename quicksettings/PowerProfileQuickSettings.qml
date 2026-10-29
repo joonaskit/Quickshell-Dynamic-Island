@@ -1,6 +1,7 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.UPower
 
 Item {
     id: root
@@ -301,6 +302,76 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: PowerProfileService.setProfile("performance")
+                    }
+                }
+            }
+
+            // 60 Hz on battery, shown on machines with a battery
+            Rectangle {
+                visible: lowRefreshRow.visible
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: Theme.overlay(0.08)
+            }
+
+            RowLayout {
+                id: lowRefreshRow
+                visible: UPower.displayDevice !== null && UPower.displayDevice.isPresent
+                Layout.fillWidth: true
+                spacing: Theme.px(10)
+
+                SvgIcon {
+                    name: "desktop"
+                    size: Theme.px(16)
+                    color: SettingsService.lowRefreshOnBattery ? Theme.accentGreenStrong : Theme.textTertiary
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+
+                    Text {
+                        text: "60 Hz on battery"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontPx(12)
+                        font.weight: Font.DemiBold
+                        color: Theme.textPrimary
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: "Lowers the built-in screen's refresh rate while unplugged"
+                        wrapMode: Text.WordWrap
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontPx(10)
+                        color: Theme.textTertiary
+                    }
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: Theme.px(64)
+                    Layout.preferredHeight: Theme.px(28)
+                    radius: Theme.px(14)
+                    color: SettingsService.lowRefreshOnBattery ? Qt.rgba(48/255, 209/255, 88/255, 0.25) : Theme.overlay(0.1)
+                    scale: lowRefreshMouse.pressed ? 0.92 : (lowRefreshMouse.containsMouse ? 1.05 : 1.0)
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: SettingsService.lowRefreshOnBattery ? "ON" : "OFF"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontPx(10)
+                        font.weight: Font.Bold
+                        color: SettingsService.lowRefreshOnBattery ? Theme.accentGreenStrong : Theme.textSecondary
+                    }
+
+                    MouseArea {
+                        id: lowRefreshMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: SettingsService.setSetting("lowRefreshOnBattery", !SettingsService.lowRefreshOnBattery)
                     }
                 }
             }
