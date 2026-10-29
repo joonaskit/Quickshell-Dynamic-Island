@@ -292,20 +292,22 @@
       }
     },
     {
-      "id": "bluetoothctl",
-      "name": "bluetoothctl (BlueZ)",
+      "id": "bluez",
+      "name": "BlueZ Bluetooth service",
       "severity": "optional",
       "check": {
-        "type": "command",
-        "anyOf": [
-          "bluetoothctl"
+        "type": "dbus",
+        "bus": "system",
+        "name": "org.bluez",
+        "units": [
+          "bluetooth.service"
         ]
       },
       "features": [
         "Bluetooth popup"
       ],
       "packages": {
-        "arch": "bluez-utils",
+        "arch": "bluez",
         "fedora": "bluez",
         "opensuse": "bluez",
         "debian": "bluez"
@@ -329,6 +331,26 @@
         "fedora": "brightnessctl",
         "opensuse": "brightnessctl",
         "debian": "brightnessctl"
+      }
+    },
+    {
+      "id": "udevadm",
+      "name": "udevadm",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "udevadm"
+        ]
+      },
+      "features": [
+        "Brightness slider following the brightness keys"
+      ],
+      "packages": {
+        "arch": "systemd",
+        "fedora": "systemd-udev",
+        "opensuse": "udev",
+        "debian": "udev"
       }
     },
     {

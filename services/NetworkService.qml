@@ -1,4 +1,5 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -10,22 +11,50 @@ Singleton {
     property bool isWifi: false
     property bool isWifiEnabled: true
     property string ssid: ""
-    property int signalBars: 3   // 1 to 4
-    property int signalPercent: 80
     property var availableNetworks: []
     property bool isScanning: false
     property string connectingSsid: ""
 
-    Timer {
-        id: pollTimer
-        interval: 3500
+    // nmcli monitor prints a line whenever NetworkManager's state changes (a connection
+    // coming up or going down, the Wi-Fi radio switched), so the status is read again
+    // only then. A burst of lines is read once
+    Process {
+        id: monitorProc
+        command: ["nmcli", "monitor"]
         running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            root.queryNetwork();
+
+        Component.onCompleted: HelperService.watch("network", "Network monitor", monitorProc)
+
+        onRunningChanged: {
+            if (!running) {
+                restartTimer.start();
+            }
+        }
+
+        stdout: SplitParser {
+            onRead: function(line) {
+                queryDelay.restart();
+            }
         }
     }
+
+    Timer {
+        id: restartTimer
+        interval: 2000
+        onTriggered: {
+            if (!monitorProc.running) {
+                monitorProc.running = true;
+            }
+        }
+    }
+
+    Timer {
+        id: queryDelay
+        interval: 300
+        onTriggered: root.queryNetwork()
+    }
+
+    Component.onCompleted: root.queryNetwork()
 
     // Query active device status & radio power
     Process {
@@ -54,32 +83,6 @@ Singleton {
                         root.isConnected = false;
                         root.isWifi = false;
                         root.ssid = "";
-                    }
-                }
-            }
-        }
-        onExited: {
-            if (root.isConnected && root.isWifi) {
-                signalProc.running = true;
-            }
-        }
-    }
-
-    // Query accurate signal strength via iw
-    Process {
-        id: signalProc
-        command: ["sh", "-c", "IFACE=$(nmcli -t -f DEVICE,TYPE dev status 2>/dev/null | grep ':wifi$' | head -n1 | cut -d: -f1); [ -n \"$IFACE\" ] && iw dev \"$IFACE\" link 2>/dev/null | grep signal | awk '{print $2}'"]
-        stdout: StdioCollector {
-            onTextChanged: {
-                if (text.length > 0) {
-                    let dbm = parseInt(text.trim());
-                    if (!isNaN(dbm)) {
-                        if (dbm >= -55) root.signalBars = 4;
-                        else if (dbm >= -65) root.signalBars = 3;
-                        else if (dbm >= -75) root.signalBars = 2;
-                        else root.signalBars = 1;
-
-                        root.signalPercent = Math.max(0, Math.min(100, Math.round(2 * (dbm + 100))));
                     }
                 }
             }

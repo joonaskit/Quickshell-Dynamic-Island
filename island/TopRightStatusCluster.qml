@@ -137,9 +137,6 @@ Item {
         let next = !root.bluetoothMenuOpen;
         root.closeAllMenus();
         root.bluetoothMenuOpen = next;
-        if (root.bluetoothMenuOpen) {
-            BluetoothService.queryBluetooth();
-        }
     }
 
     function togglePowerMenu() {

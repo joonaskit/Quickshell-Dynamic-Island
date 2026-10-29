@@ -25,9 +25,9 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - KDE Plasma on Wayland (KWin)
 - [Quickshell](https://quickshell.org). 0.3 or later blurs the desktop behind the Glass style; 0.2 draws the glass without blur (see `docs/GLASS.md`)
 - Python 3 with `dbus-python` and `PyGObject`
-- CLI tools: `nmcli`, `bluetoothctl`, `brightnessctl`, `wl-clipboard`, `udisksctl`, `lsblk`, `systemd-inhibit`, `loginctl`, `busctl`, `qdbus-qt6`, `xdg-open`, `gtk-launch`, `notify-send` (timer alerts)
+- CLI tools: `nmcli`, `brightnessctl`, `udevadm`, `wl-clipboard`, `udisksctl`, `lsblk`, `systemd-inhibit`, `loginctl`, `busctl`, `qdbus-qt6`, `xdg-open`, `gtk-launch`, `notify-send` (timer alerts)
 - Optional: `kioclient` (the dock's "Properties" entry) and `gio` (fallback for mounting USB drives)
-- UPower, for battery, and power-profiles-daemon, for power profiles
+- UPower, for battery, power-profiles-daemon, for power profiles, and BlueZ, for Bluetooth
 - PipeWire, for volume, the microphone and choosing audio devices
 
 Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
