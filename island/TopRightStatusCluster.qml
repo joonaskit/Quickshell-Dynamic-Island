@@ -174,10 +174,6 @@ Item {
         let next = !root.micMenuOpen;
         root.closeAllMenus();
         root.micMenuOpen = next;
-        if (root.micMenuOpen) {
-            MicrophoneService.queryStatus();
-            MicrophoneService.querySources();
-        }
     }
 
     function toggleProfileMenu() {

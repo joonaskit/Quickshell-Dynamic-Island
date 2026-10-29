@@ -16,7 +16,7 @@ import subprocess
 import sys
 
 # Scripts that keep running for as long as the shell does. The others
-# (audio_sinks.py list, shortcuts.py, ...) exit on their own.
+# (devices.py list, shortcuts.py, ...) exit on their own.
 LONG_RUNNING = {
     "kwin_window_tracker.py": None,
     "hardware_stats.py": None,

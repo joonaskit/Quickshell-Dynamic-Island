@@ -211,27 +211,6 @@
       }
     },
     {
-      "id": "wpctl",
-      "name": "wpctl (WirePlumber)",
-      "severity": "recommended",
-      "check": {
-        "type": "command",
-        "anyOf": [
-          "wpctl"
-        ]
-      },
-      "features": [
-        "Volume slider, volume keys and the volume OSD",
-        "Microphone volume and mute"
-      ],
-      "packages": {
-        "arch": "wireplumber",
-        "fedora": "wireplumber",
-        "opensuse": "wireplumber",
-        "debian": "wireplumber"
-      }
-    },
-    {
       "id": "nmcli",
       "name": "nmcli (NetworkManager)",
       "severity": "recommended",
@@ -310,27 +289,6 @@
         "fedora": "wl-clipboard",
         "opensuse": "wl-clipboard",
         "debian": "wl-clipboard"
-      }
-    },
-    {
-      "id": "pactl",
-      "name": "pactl",
-      "severity": "optional",
-      "check": {
-        "type": "command",
-        "anyOf": [
-          "pactl"
-        ]
-      },
-      "features": [
-        "Choosing the audio output and input device",
-        "Microphone control when wpctl is missing"
-      ],
-      "packages": {
-        "arch": "libpulse",
-        "fedora": "pulseaudio-utils",
-        "opensuse": "pulseaudio-utils",
-        "debian": "pulseaudio-utils"
       }
     },
     {

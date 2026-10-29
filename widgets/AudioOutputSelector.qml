@@ -6,8 +6,8 @@ Item {
     id: root
 
     property bool expanded: false
-    // pactl is not installed: the device list stays empty and cannot be switched
-    readonly property bool unavailable: DepsService.noneUsable(["pactl"])
+    // PipeWire reports no output device
+    readonly property bool unavailable: AudioService.sink === null
 
     implicitWidth: parent ? parent.width : Theme.px(370)
     implicitHeight: selectorColumn.implicitHeight
@@ -51,7 +51,7 @@ Item {
                 // Active Device Name
                 Text {
                     Layout.fillWidth: true
-                    text: root.unavailable ? "Needs pactl" : (AudioService.currentSinkDisplayName || "Audio Output")
+                    text: root.unavailable ? "No audio output" : (AudioService.currentSinkDisplayName || "Audio Output")
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontPx(11)
                     font.weight: Font.Medium
@@ -76,9 +76,6 @@ Item {
                 onClicked: {
                     if ((AudioService.sinks || []).length > 1) {
                         root.expanded = !root.expanded;
-                        if (root.expanded) {
-                            AudioService.querySinks();
-                        }
                     }
                 }
             }
