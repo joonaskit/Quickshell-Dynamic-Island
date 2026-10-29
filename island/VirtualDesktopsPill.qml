@@ -55,7 +55,11 @@ Item {
     implicitHeight: root.targetHeight
 
     property alias hitBox: pillBackground
+    // The notch ears, for the window's blur
+    property alias ears: notchEars
     property alias menuHitBox: menuPopover
+    // The menu's body, for the window's blur
+    property alias menuBody: menuCard
 
     visible: root.isEnabled && targetWidth > 1
     opacity: (root.isEnabled && targetWidth > 1) ? 1.0 : 0.0
@@ -81,8 +85,9 @@ Item {
     }
 
     NotchEars {
+        id: notchEars
         body: pillBackground
-        active: Theme.notchStyle && !root.isTopBarMode
+        active: Theme.notchEars && !root.isTopBarMode
     }
 
     // Pill Capsule Background
@@ -104,7 +109,8 @@ Item {
 
         // Frosted glass appearance
         color: root.isTopBarMode ? Theme.overlay(0.08) : Theme.pillFrosted
-        border.width: 1
+        // On glass with notch ears, GlassSurface draws the hairline instead
+        border.width: (Theme.glass && notchEars.active) ? 0 : 1
         border.color: root.isTopBarMode ? Theme.overlay(0.06) : Theme.pillFrostedBorder
 
         Behavior on width {
@@ -131,6 +137,12 @@ Item {
 
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }
+        }
+
+        GlassSurface {
+            body: pillBackground
+            flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
         }
 
         // Global wheel handler for fluid scroll switching between workspaces
@@ -344,7 +356,7 @@ Item {
             width: Math.min(240, tooltipText.implicitWidth + 18)
             height: 24
             radius: Theme.corner(7)
-            color: Theme.cardBackground
+            color: Theme.raisedSurface
             border.width: 1
             border.color: Theme.overlay(0.14)
 
@@ -396,9 +408,14 @@ Item {
             width: 180
             height: menuColumn.implicitHeight + 14
             radius: Theme.corner(12)
-            color: Theme.islandBackground
-            border.width: 0
+            color: Theme.menuSurface
+            border.width: Theme.glass ? 1 : 0
+            border.color: Theme.islandBorder
             clip: true
+
+            GlassSurface {
+                body: menuCard
+            }
 
             Rectangle {
                 anchors.centerIn: parent
@@ -519,7 +536,7 @@ Item {
                         SvgIcon {
                             name: "plus"
                             size: 13
-                            color: Theme.accentGreen
+                            color: Theme.accentGreenStrong
                         }
 
                         Text {

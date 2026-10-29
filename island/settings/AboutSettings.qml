@@ -3,41 +3,6 @@ import QtQuick
 import QtQuick.Layouts
 
 SettingsCategory {
-
-    // Inline components cannot see this file's ids, so they use Theme directly
-    component ActionButton: Rectangle {
-        id: button
-
-        property string text: ""
-        property bool busy: false
-        signal clicked()
-
-        Layout.preferredHeight: 26
-        Layout.preferredWidth: buttonLabel.implicitWidth + 24
-        radius: 13
-        color: buttonMouse.containsMouse && !button.busy ? Theme.accentTint(0.3) : Theme.overlay(0.08)
-        opacity: button.busy ? 0.4 : 1.0
-        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-        Text {
-            id: buttonLabel
-            anchors.centerIn: parent
-            text: button.text
-            font.family: Theme.fontFamily
-            font.pixelSize: 11
-            font.weight: Font.Medium
-            color: Theme.textPrimary
-        }
-
-        MouseArea {
-            id: buttonMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: button.busy ? Qt.ArrowCursor : Qt.PointingHandCursor
-            onClicked: if (!button.busy) button.clicked()
-        }
-    }
-
     // Persistence Information & Reset
     Rectangle {
         Layout.fillWidth: true
@@ -152,19 +117,19 @@ SettingsCategory {
                 Layout.fillWidth: true
                 spacing: 8
 
-                ActionButton {
+                SettingButton {
                     text: "Check for updates"
                     busy: UpdateService.busy
                     onClicked: UpdateService.check()
                 }
 
-                ActionButton {
+                SettingButton {
                     visible: UpdateService.canUpdate
                     text: "Update"
                     onClicked: UpdateService.update()
                 }
 
-                ActionButton {
+                SettingButton {
                     visible: UpdateService.restartNeeded
                     text: "Restart the shell"
                     onClicked: UpdateService.restart()
@@ -228,7 +193,7 @@ SettingsCategory {
                 color: Theme.textSecondary
             }
 
-            ActionButton {
+            SettingButton {
                 text: "Show the guide"
                 onClicked: OnboardingService.show()
             }
@@ -311,13 +276,13 @@ SettingsCategory {
                 Layout.fillWidth: true
                 spacing: 8
 
-                ActionButton {
+                SettingButton {
                     text: BackupService.pickerAvailable ? "Export…" : "Export"
                     busy: BackupService.busy
                     onClicked: BackupService.pickerAvailable ? BackupService.pick("export") : BackupService.run("export", pathInput.text)
                 }
 
-                ActionButton {
+                SettingButton {
                     text: BackupService.pickerAvailable ? "Import…" : "Import"
                     busy: BackupService.busy
                     onClicked: BackupService.pickerAvailable ? BackupService.pick("import") : BackupService.run("import", pathInput.text)

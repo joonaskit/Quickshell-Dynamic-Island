@@ -119,7 +119,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "music"
                                 size: 13
-                                color: Theme.accentOrange
+                                color: Theme.accentOrangeStrong
                             }
                         }
 
@@ -354,7 +354,7 @@ Item {
                         SvgIcon {
                             name: modelData.icon || "chevron-right"
                             size: 13
-                            color: actionMouse.containsMouse ? Theme.accentCyan : Theme.textSecondary
+                            color: actionMouse.containsMouse ? Theme.accentCyanStrong : Theme.textSecondary
                         }
 
                         Text {
@@ -506,7 +506,7 @@ Item {
                     SvgIcon {
                         name: "settings"
                         size: 14
-                        color: Theme.accentOrange
+                        color: Theme.accentOrangeStrong
                     }
 
                     Text {

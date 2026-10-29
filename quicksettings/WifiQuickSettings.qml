@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -53,7 +53,7 @@ Item {
                     Layout.preferredWidth: Theme.px(38)
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
-                    color: NetworkService.isWifiEnabled ? Theme.accent : Theme.cardBackgroundHover
+                    color: NetworkService.isWifiEnabled ? Theme.accent : Theme.cardSurfaceHover
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -108,7 +108,7 @@ Item {
                     Layout.preferredWidth: Theme.px(46)
                     Layout.preferredHeight: Theme.px(26)
                     radius: Theme.px(13)
-                    color: NetworkService.isWifiEnabled ? Theme.accentGreen : Theme.switchTrackOff
+                    color: NetworkService.isWifiEnabled ? Theme.accentGreen : Theme.controlTrackOff
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -170,7 +170,7 @@ Item {
                         Layout.preferredWidth: Theme.px(20)
                         Layout.preferredHeight: Theme.px(20)
                         radius: Theme.px(10)
-                        color: refreshMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
+                        color: refreshMouse.containsMouse ? Theme.cardSurfaceHover : "transparent"
 
                         SvgIcon {
                             anchors.centerIn: parent
@@ -204,7 +204,7 @@ Item {
                             width: parent.width
                             height: Theme.px(32)
                             radius: Theme.corner(8)
-                            color: itemMouse.containsMouse ? Theme.cardBackgroundHover : (modelData.inUse ? Theme.accentTint(0.12) : "transparent")
+                            color: itemMouse.containsMouse ? Theme.cardSurfaceHover : (modelData.inUse ? Theme.accentTint(0.12) : "transparent")
 
                             RowLayout {
                                 anchors.fill: parent
@@ -312,7 +312,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.px(28)
                 radius: Theme.corner(8)
-                color: settingsMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
+                color: settingsMouse.containsMouse ? Theme.cardSurfaceHover : "transparent"
 
                 RowLayout {
                     anchors.fill: parent

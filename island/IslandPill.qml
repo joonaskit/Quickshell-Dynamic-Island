@@ -38,6 +38,8 @@ Item {
 
     // Hitbox reference for window click-through mask
     property alias hitBox: pillBody
+    // The notch ears, for the window's blur
+    property alias ears: notchEars
 
     // Pill priority: timer, then activity, then media, except that a failed activity outranks all of them
     readonly property bool isShowingActivity: ActivityService.showInPill && !root.isShowingOsd
@@ -95,9 +97,29 @@ Item {
         return Theme.compactHeight;
     }
 
+    // Open in top-bar mode, the island grows out of the bar (BarHang)
+    BarHang {
+        id: hang
+        body: pillBody
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.isOpen
+        barEdge: root.barEdge
+    }
+    readonly property alias hangsFromBar: hang.joined
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : pillBody
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+    // The ears' blur would be square, which below the bar shows as a clear patch beside
+    // the island, so hanging from the bar they go without
+    readonly property var earsBlur: hang.joined ? null : notchEars
+
     // Corner radii: morphs to 0 in top-bar mode, rounded when floating
     readonly property real targetTopRadius: {
-        if (root.isTopBarMode && !root.isOpen) return 0;
+        if (root.isTopBarMode) return 0;
         if (Theme.notchStyle) return 0;
         return root.isOpen ? Theme.expandedRadius : Theme.compactRadius;
     }
@@ -187,8 +209,13 @@ Item {
     }
 
     NotchEars {
+        id: notchEars
         body: pillBody
-        active: Theme.notchStyle && !root.isTopBarMode
+        active: (Theme.notchEars && !root.isTopBarMode) || root.hangsFromBar
+        inset: root.hangsFromBar ? hang.barDepth : 0
+        color: root.hangsFromBar ? hang.barFill : pillBody.color
+        // Hanging from the bar, no outline: it reads as part of the bar
+        outlined: Theme.glass && !root.hangsFromBar
     }
 
     // Island Body
@@ -198,15 +225,22 @@ Item {
         anchors.topMargin: (root.isTopBarMode && root.isOpen) ? -1 : 0
         anchors.horizontalCenter: parent.horizontalCenter
         width: root.targetWidth
-        height: root.targetHeight + ((root.isTopBarMode && root.isOpen) ? 1 : 0)
+        height: root.targetHeight + ((root.isTopBarMode && root.isOpen) ? 1 : 0) + (hang.bubbleOpen ? hang.bubbleTop : 0)
 
         topLeftRadius: root.targetTopRadius
         topRightRadius: root.targetTopRadius
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: Theme.islandBackground
+        // Glass is clear while compact in the top bar, which draws the glass behind it
+        color: (Theme.glass && root.isTopBarMode && !root.isOpen) ? "transparent" : (root.isOpen ? Theme.menuSurface : Theme.islandSurface)
         clip: true
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
+
+        Behavior on color {
+            ColorAnimation { duration: Theme.animDurationFast }
+        }
 
         HoverHandler {
             id: pillHoverHandler
@@ -214,7 +248,8 @@ Item {
         }
 
         border.color: root.isHovered ? Theme.islandBorderHover : Theme.islandBorder
-        border.width: root.isTopBarMode ? 0 : 1
+        // On glass with notch ears, GlassSurface draws the hairline instead
+        border.width: (root.isTopBarMode || (Theme.glass && notchEars.active)) ? 0 : 1
 
         Behavior on width {
             NumberAnimation {
@@ -247,6 +282,21 @@ Item {
 
         Behavior on border.color {
             ColorAnimation { duration: 180 }
+        }
+
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
+        GlassSurface {
+            body: pillBody
+            flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
+            flushInset: notchEars.inset
+            hairline: !root.hangsFromBar
+            active: Theme.glass && !hang.bubble
         }
 
         // Compact Clock View
@@ -362,6 +412,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
+            anchors.topMargin: hang.bubble ? hang.bubbleTop : 0
             currentTime: root.currentDate
             player: root.activePlayer
             displayBattery: UPower.displayDevice
@@ -389,6 +440,7 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
+            anchors.topMargin: hang.bubble ? hang.bubbleTop : 0
             notification: root.openedNotification
 
             opacity: root.isNotificationOpen ? 1.0 : 0.0

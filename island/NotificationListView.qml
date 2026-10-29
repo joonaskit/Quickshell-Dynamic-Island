@@ -39,7 +39,7 @@ Item {
             SvgIcon {
                 name: "bell"
                 size: Theme.px(13)
-                color: Theme.accentOrange
+                color: Theme.accentOrangeStrong
             }
 
             Text {
@@ -64,7 +64,7 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontPx(10)
                     font.weight: Font.Bold
-                    color: Theme.accentOrange
+                    color: Theme.accentOrangeStrong
                 }
             }
 

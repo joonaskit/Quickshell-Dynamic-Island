@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -215,7 +215,7 @@ Item {
                         font.family: Theme.fontDisplay
                         font.pixelSize: Theme.fontPx(12)
                         font.weight: Font.Bold
-                        color: HardwareStatsService.cpuTemp > 75 ? Theme.accentRed : (HardwareStatsService.cpuTemp > 60 ? Theme.accentOrange : Theme.accentGreen)
+                        color: HardwareStatsService.cpuTemp > 75 ? Theme.accentRed : (HardwareStatsService.cpuTemp > 60 ? Theme.accentOrangeStrong : Theme.accentGreenStrong)
                     }
                 }
             }

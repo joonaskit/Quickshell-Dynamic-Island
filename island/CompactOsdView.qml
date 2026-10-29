@@ -83,7 +83,7 @@ Item {
         SvgIcon {
             name: OsdService.iconName
             size: Theme.px(16)
-            color: OsdService.isMuted ? Theme.textTertiary : (OsdService.kind === "volume" ? Theme.accentBlue : Theme.accentOrange)
+            color: OsdService.isMuted ? Theme.textTertiary : (OsdService.kind === "volume" ? Theme.accentBlue : Theme.accentOrangeStrong)
         }
 
         // Level bar

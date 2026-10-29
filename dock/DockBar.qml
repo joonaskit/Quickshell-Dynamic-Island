@@ -11,6 +11,8 @@ Item {
     property alias launcherMenuHitBox: launcherMenu
     property alias downloadsStackHitBox: downloadsStack
     property alias windowPickerHitBox: windowPicker
+    // The capsule's body, for the window's blur
+    property alias capsule: dockCapsule
 
     property alias contextMenuOpen: contextMenu.isOpen
     property alias appPickerOpen: appPicker.isOpen
@@ -120,6 +122,16 @@ Item {
             return 1.0 + (Theme.dockScaleHover - 1.0) * Math.cos((dist / 85) * (Math.PI / 2));
         }
         return 1.0;
+    }
+
+    // A popup's entry for WindowBlur: rounded on the corners away from the dock, square
+    // where its base sits on the dock; rounded all round when detached from it
+    function flyoutBlur(item, radius) {
+        let all = ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"];
+        let away = Theme.detachedMenus ? all : ({ "bottom": ["topLeftRadius", "topRightRadius"], "left": ["topRightRadius", "bottomRightRadius"], "right": ["topLeftRadius", "bottomLeftRadius"] }[root.dockPosition] || []);
+        let entry = { "item": item };
+        for (const corner of away) entry[corner] = radius;
+        return entry;
     }
 
     function closeAllPopups(except) {
@@ -245,9 +257,10 @@ Item {
     // The launcher and the trash menu continue an end of the dock in a straight
     // line, so the dock straightens its corner under them as they open. Start is
     // the launcher's end (left, or top for a vertical dock).
-    readonly property real startCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
+    // Detached from the dock (Theme.detachedMenus), they leave its corners round.
+    readonly property real startCornerRadius: Theme.detachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
     // The launcher also straightens the end corner when it is wide enough to reach it
-    readonly property real endCornerRadius: Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
+    readonly property real endCornerRadius: Theme.detachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
 
     // Dock capsule background
     Rectangle {
@@ -307,21 +320,8 @@ Item {
             ColorAnimation { duration: Theme.animDurationFast }
         }
 
-        // Frosted glass inner specular reflection & depth gradient
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            topLeftRadius: parent.topLeftRadius
-            topRightRadius: parent.topRightRadius
-            bottomRightRadius: parent.bottomRightRadius
-            bottomLeftRadius: parent.bottomLeftRadius
-            visible: Theme.dockTransparent
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.12) }
-                GradientStop { position: 0.30; color: Qt.rgba(1, 1, 1, 0.03) }
-                GradientStop { position: 0.70; color: Qt.rgba(0, 0, 0, 0.02) }
-                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.14) }
-            }
+        GlassSurface {
+            body: dockCapsule
         }
 
         // Content Container (Grid: acts as Row when horizontal, Column when vertical)
@@ -379,8 +379,8 @@ Item {
                     scale: launchpadItem.dockScale * launchpadItem.pressScale
 
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: Theme.cardBackgroundHover }
-                        GradientStop { position: 1.0; color: Theme.cardBackground }
+                        GradientStop { position: 0.0; color: Theme.cardSurfaceHover }
+                        GradientStop { position: 1.0; color: Theme.cardSurface }
                     }
                     border.color: Theme.overlay(0.16)
                     border.width: 1
@@ -422,7 +422,7 @@ Item {
                         width: launchpadTipText.implicitWidth + 16
                         height: 24
                         radius: Theme.corner(6)
-                        color: Theme.cardBackground
+                        color: Theme.raisedSurface
                         border.color: Theme.overlay(0.18)
                         border.width: 1
 
@@ -721,8 +721,8 @@ Item {
                     scale: downloadsItem.dockScale * downloadsItem.pressScale
 
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: Theme.cardBackgroundHover }
-                        GradientStop { position: 1.0; color: Theme.cardBackground }
+                        GradientStop { position: 0.0; color: Theme.cardSurfaceHover }
+                        GradientStop { position: 1.0; color: Theme.cardSurface }
                     }
                     border.color: Theme.overlay(0.16)
                     border.width: 1
@@ -754,7 +754,7 @@ Item {
                         width: downloadsTipText.implicitWidth + 16
                         height: 24
                         radius: Theme.corner(6)
-                        color: Theme.cardBackground
+                        color: Theme.raisedSurface
                         border.color: Theme.overlay(0.18)
                         border.width: 1
 
@@ -860,7 +860,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             radius: Theme.corner(11)
-                            color: Theme.cardBackgroundHover
+                            color: Theme.cardSurfaceHover
                             border.color: Theme.overlay(0.15)
                             border.width: 1
                             visible: parent.status !== Image.Ready
@@ -893,7 +893,7 @@ Item {
                         width: trashTipText.implicitWidth + 16
                         height: 24
                         radius: Theme.corner(6)
-                        color: Theme.cardBackground
+                        color: Theme.raisedSurface
                         border.color: Theme.overlay(0.18)
                         border.width: 1
 

@@ -151,13 +151,18 @@ PanelWindow {
         id: card
         anchors.fill: parent
         radius: Theme.corner(20)
-        color: Theme.cardBackground
+        // A test of the glass style on a standalone window: the menus' glass, blurred behind
+        color: Theme.glass ? Theme.menuSurface : Theme.cardBackground
         border.width: 1
-        border.color: Theme.overlay(0.1)
+        border.color: Theme.glass ? Theme.glassHairline : Theme.overlay(0.1)
         opacity: window.shown ? 1 : 0
         scale: window.shown ? 1 : 0.96
         Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
         Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+
+        GlassSurface {
+            body: card
+        }
 
         ColumnLayout {
             anchors.fill: parent
@@ -483,5 +488,10 @@ PanelWindow {
                 }
             }
         }
+    }
+
+    WindowBlur {
+        target: window
+        items: [card]
     }
 }

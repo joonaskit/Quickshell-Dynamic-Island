@@ -233,7 +233,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontPx(10)
                                 font.weight: Font.DemiBold
-                                color: (index === 0) ? Theme.accentOrange : ((index >= 6) ? Theme.textSecondary : Theme.textTertiary)
+                                color: (index === 0) ? Theme.accentOrangeStrong : ((index >= 6) ? Theme.textSecondary : Theme.textTertiary)
                             }
                         }
                     }
@@ -274,7 +274,7 @@ Item {
                                     font.pixelSize: Theme.fontPx(9)
                                     font.weight: modelData.isCurrentWeek ? Font.Bold : Font.Normal
                                     font.features: { "tnum": 1 }
-                                    color: modelData.isCurrentWeek ? Theme.accentOrange : Theme.overlay(0.3)
+                                    color: modelData.isCurrentWeek ? Theme.accentOrangeStrong : Theme.overlay(0.3)
                                 }
                             }
                         }

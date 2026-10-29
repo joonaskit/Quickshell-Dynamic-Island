@@ -9,13 +9,18 @@ Item {
     id: root
 
     property Rectangle body: null
-    property bool active: Theme.notchStyle
+    property bool active: Theme.notchEars
     property color color: body ? body.color : Theme.islandBackground
+    // Draw the glass hairline along the curves (see GlassSurface.flushTop)
+    property bool outlined: Theme.glass
+    // How far down the body's sides the edge they flare into is: 0 for the screen
+    // edge, the bar's height for a body hanging from the top bar
+    property real inset: 0
 
-    readonly property real size: body ? Math.max(0, Math.min(Theme.notchEar, body.height / 2)) : 0
+    readonly property real size: body ? Math.max(0, Math.min(Theme.notchEar, (body.height - inset) / 2)) : 0
 
     x: body ? body.x - size : 0
-    y: body ? body.y : 0
+    y: body ? body.y + inset : 0
     width: body ? body.width + 2 * size : 0
     height: size
     visible: active && size > 0.5 && (body ? body.opacity > 0.01 : false)
@@ -43,6 +48,26 @@ Item {
             startY: 0
             PathLine { x: root.width - root.size; y: 0 }
             PathLine { x: root.width - root.size; y: root.size }
+            PathArc { x: root.width; y: 0; radiusX: root.size; radiusY: root.size; direction: PathArc.Clockwise }
+        }
+
+        // On glass, the hairline along each curve, carrying on from the one that
+        // GlassSurface draws down the body's sides
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: root.outlined ? Theme.glassHairline : "transparent"
+            strokeWidth: 1
+            startX: root.size
+            startY: root.size
+            PathArc { x: 0; y: 0; radiusX: root.size; radiusY: root.size; direction: PathArc.Counterclockwise }
+        }
+
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: root.outlined ? Theme.glassHairline : "transparent"
+            strokeWidth: 1
+            startX: root.width - root.size
+            startY: root.size
             PathArc { x: root.width; y: 0; radiusX: root.size; radiusY: root.size; direction: PathArc.Clockwise }
         }
     }

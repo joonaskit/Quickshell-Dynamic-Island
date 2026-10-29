@@ -30,7 +30,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -56,7 +56,7 @@ Item {
                     color: {
                         if (DeviceService.hasMountedDevices) return Qt.rgba(48/255, 209/255, 88/255, 0.22);
                         if (DeviceService.hasDevices) return Theme.accentTint(0.22);
-                        return Theme.cardBackgroundHover;
+                        return Theme.cardSurfaceHover;
                     }
 
                     Behavior on color { ColorAnimation { duration: 180 } }
@@ -66,7 +66,7 @@ Item {
                         name: "usb"
                         size: Theme.px(20)
                         color: {
-                            if (DeviceService.hasMountedDevices) return Theme.accentGreen;
+                            if (DeviceService.hasMountedDevices) return Theme.accentGreenStrong;
                             if (DeviceService.hasDevices) return Theme.accent;
                             return Theme.textTertiary;
                         }
@@ -114,8 +114,8 @@ Item {
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontPx(11)
                         color: {
-                            if (DeviceService.operatingDevice !== "") return Theme.accentOrange;
-                            if (DeviceService.hasMountedDevices) return Theme.accentGreen;
+                            if (DeviceService.operatingDevice !== "") return Theme.accentOrangeStrong;
+                            if (DeviceService.hasMountedDevices) return Theme.accentGreenStrong;
                             if (DeviceService.hasDevices) return Theme.textSecondary;
                             return Theme.textTertiary;
                         }
@@ -129,7 +129,7 @@ Item {
                     Layout.preferredWidth: Theme.px(28)
                     Layout.preferredHeight: Theme.px(28)
                     radius: Theme.px(14)
-                    color: refreshMouse.containsMouse ? Theme.cardBackgroundHover : "transparent"
+                    color: refreshMouse.containsMouse ? Theme.cardSurfaceHover : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -244,7 +244,7 @@ Item {
                                         anchors.centerIn: parent
                                         name: modelData.isMounted ? "usb" : "harddrive"
                                         size: Theme.px(15)
-                                        color: modelData.isMounted ? Theme.accentGreen : Theme.textSecondary
+                                        color: modelData.isMounted ? Theme.accentGreenStrong : Theme.textSecondary
                                     }
                                 }
 

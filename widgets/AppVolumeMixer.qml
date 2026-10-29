@@ -161,7 +161,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 height: Theme.px(8)
                                 radius: height / 2
-                                color: Theme.sliderTrack
+                                color: Theme.controlTrack
 
                                 Rectangle {
                                     anchors.left: parent.left

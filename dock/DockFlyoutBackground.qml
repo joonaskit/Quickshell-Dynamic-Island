@@ -1,5 +1,6 @@
 import ".."
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 
 // Dock-textured body for a popup attached to the dock. Fills its parent, with
@@ -13,6 +14,9 @@ Item {
     // Fillets are dropped when the popup overhangs the dock's straight edge
     property bool fitsOnDock: true
     property real filletSize: 12
+    // A plain rounded card a gap away from the dock (Theme.detachedMenus), drawn by
+    // `card` below instead of the outline that flares into the dock
+    property bool detached: Theme.detachedMenus
     property real cornerRadius: 14
     // One side continues an end of the dock in a straight line. Start is left, or
     // top for a vertical dock. The dock straightens its corner under that side as
@@ -27,11 +31,11 @@ Item {
     // join, so its base corner is rounded.
     property real farFillet: fitsOnDock ? filletSize : 0
     property real farOverhang: 0
-    // Opacity of the body; it fades to the exact dock colour at the base. Kept
-    // well above a see-through dock so the content stays readable, and follows
-    // the dock when the dock is more opaque than that.
-    property real tintAlpha: Math.max(Theme.dockAlpha, Theme.dockTransparent ? 0.9 : 0.97)
-    readonly property color tintColor: Qt.rgba(Theme.dockBackground.r, Theme.dockBackground.g, Theme.dockBackground.b, tintAlpha)
+    // Opacity of the body; it fades to the exact dock colour at the base. On glass
+    // it is the status bar menus' glass, else the dock's colour.
+    property real tintAlpha: Theme.dockPopupAlpha
+    readonly property color tintBase: Theme.glass ? Theme.menuSurface : Theme.dockBackground
+    readonly property color tintColor: Qt.rgba(tintBase.r, tintBase.g, tintBase.b, tintAlpha)
 
     anchors.centerIn: parent
     // Centring snaps to whole pixels by default. When the popup's width and height
@@ -63,7 +67,8 @@ Item {
 
     // Outline, clockwise from the near (left) side's base. Arcs: "A rx ry 0 0 sweep x y",
     // sweep 1 = clockwise (convex corners), 0 = counterclockwise (concave joins).
-    readonly property string outline: {
+    // outlineSides stops before the base, for a border that leaves the base open.
+    readonly property string outlineSides: {
         let n = v => v.toFixed(2);
         // Mirroring flips x and reverses the direction of every arc
         let nx = v => n(mirrored ? w - v : v);
@@ -88,10 +93,17 @@ Item {
         } else {
             p += ` L ${nx(w)} ${n(h - farF)}` + arc(farF, 0, w + farF, h);
         }
+        return p;
+    }
+    readonly property string outline: {
+        let n = v => v.toFixed(2);
+        let nx = v => n(mirrored ? w - v : v);
+        let p = outlineSides;
         // Base, lying on the dock edge
         if (flush) {
             // Follow the dock's rounded corner back down to the start point
-            p += ` L ${nx(dockR)} ${n(h)}` + arc(dockR, 0, 0, h + dockR);
+            let sweep = mirrored ? 1 : 0;
+            p += ` L ${nx(dockR)} ${n(h)}` + (dockR > 0.01 ? ` A ${n(dockR)} ${n(dockR)} 0 0 ${sweep} ${nx(0)} ${n(h + dockR)}` : ` L ${nx(0)} ${n(h + dockR)}`);
         } else {
             p += ` L ${nx(-nearF)} ${n(h)}`;
         }
@@ -110,6 +122,7 @@ Item {
     Shape {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
+        visible: !bgHolder.detached
 
         ShapePath {
             // More opaque than the dock for readability, fading to the exact dock
@@ -127,6 +140,109 @@ Item {
             startX: 0
             startY: 0
             PathSvg { path: bgHolder.outline }
+        }
+    }
+
+    // On glass, the border of the island's expanded pill: its hairline round the
+    // outline, and inside it the rim of GlassSurface, bright along the top and dim
+    // down the sides. Both fade out before the base, where the popup joins the dock.
+    // A dock border, when shown, takes the hairline's place.
+    readonly property real fadeStart: Math.max(0, h - filletSize * 2.5)
+    readonly property real fadeEnd: Math.max(fadeStart + 1, h - filletSize * 0.5)
+    readonly property real rimFade: h > 0 ? Math.max(0.05, Math.min(fadeStart, h - Math.max(nearF, farF, farR + farJoin) - filletSize) / h) : 1
+
+    function insetRadius(by) {
+        return Math.max(0, r - by);
+    }
+
+    Shape {
+        id: hairline
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+        visible: false
+        layer.enabled: hairlineEffect.visible
+
+        ShapePath {
+            fillColor: "transparent"
+            strokeColor: Theme.glassHairline
+            strokeWidth: 1
+            capStyle: ShapePath.FlatCap
+            startX: 0
+            startY: 0
+            PathSvg { path: bgHolder.outlineSides }
+        }
+    }
+
+    Rectangle {
+        id: hairlineMask
+        anchors.fill: parent
+        visible: false
+        layer.enabled: hairlineEffect.visible
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "white" }
+            GradientStop { position: bgHolder.h > 0 ? bgHolder.fadeStart / bgHolder.h : 0; color: "white" }
+            GradientStop { position: bgHolder.h > 0 ? Math.min(1, bgHolder.fadeEnd / bgHolder.h) : 1; color: "transparent" }
+            GradientStop { position: 1.0; color: "transparent" }
+        }
+    }
+
+    MultiEffect {
+        id: hairlineEffect
+        anchors.fill: hairline
+        source: hairline
+        visible: Theme.glass && !Theme.dockShowBorder && !bgHolder.detached
+        maskEnabled: true
+        maskSource: hairlineMask
+        maskSpreadAtMin: 1.0
+    }
+
+    Shape {
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
+        visible: Theme.glass && !bgHolder.detached
+
+        ShapePath {
+            strokeColor: "transparent"
+            fillRule: ShapePath.OddEvenFill
+            fillGradient: LinearGradient {
+                x1: 0; y1: 0
+                x2: 0; y2: bgHolder.h
+                GradientStop { position: 0.0; color: Theme.glassRimTop }
+                GradientStop { position: Math.min(0.5, bgHolder.rimFade * 0.6); color: Theme.glassRimSide }
+                GradientStop { position: bgHolder.rimFade; color: "transparent" }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+            PathRectangle {
+                x: 1; y: 1
+                width: Math.max(0, bgHolder.w - 2)
+                height: Math.max(0, bgHolder.h - 1)
+                topLeftRadius: bgHolder.insetRadius(1)
+                topRightRadius: bgHolder.insetRadius(1)
+            }
+            // Ends a pixel above the outer one: with a shared bottom edge the
+            // CurveRenderer fills the whole ring instead of its outline
+            PathRectangle {
+                x: 2; y: 2
+                width: Math.max(0, bgHolder.w - 4)
+                height: Math.max(0, bgHolder.h - 3)
+                topLeftRadius: bgHolder.insetRadius(2)
+                topRightRadius: bgHolder.insetRadius(2)
+            }
+        }
+    }
+
+    // Detached: the card, with the glass of the status bar menus all round
+    Rectangle {
+        id: card
+        anchors.fill: parent
+        visible: bgHolder.detached
+        radius: bgHolder.r
+        color: bgHolder.tintColor
+        border.width: 1
+        border.color: Theme.dockShowBorder ? Theme.dockBorder : Theme.glassHairline
+
+        GlassSurface {
+            body: card
         }
     }
 }

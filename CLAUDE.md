@@ -29,6 +29,7 @@ Read the doc for an area before changing it:
 - File copy progress from KIO apps: `docs/KIO_JOBS.md`
 - Config export and import: `docs/CONFIG_EXPORT.md`
 - KDE colour scheme: `docs/KDE_THEME.md`
+- Glass style (frosted glass on light or dark), window blur: `docs/GLASS.md`
 - `theme.json` for companion apps: `docs/THEME.md`
 - Expanded-view widgets: `docs/WIDGETS.md`
 - Animations: `docs/ANIMATION_CATALOGUE.md`

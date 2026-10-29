@@ -29,7 +29,7 @@ Item {
                 anchors.centerIn: parent
                 name: root.brightness < 0.5 ? "brightness-low" : "brightness-high"
                 size: Theme.px(16)
-                color: Theme.accentOrange
+                color: Theme.accentOrangeStrong
             }
         }
 
@@ -46,7 +46,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 height: Theme.px(18)
                 radius: Theme.px(9)
-                color: Theme.sliderTrack
+                color: Theme.controlTrack
                 clip: true
 
                 // Brightness Fill

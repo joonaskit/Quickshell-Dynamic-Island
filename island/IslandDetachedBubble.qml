@@ -26,6 +26,8 @@ Item {
     }
 
     property bool isExpanded: false
+    // The bubble's body, for the window's blur
+    property alias body: bubbleBody
     property bool isTopBarMode: false
 
     readonly property bool shouldShow: SettingsService.showDetachedNotifBubble && NotificationService.unreadCount > 0 && !isExpanded && !isTopBarMode
@@ -63,7 +65,7 @@ Item {
         id: bubbleBody
         anchors.fill: parent
         radius: width / 2
-        color: Theme.islandBackground
+        color: Theme.islandSurface
         border.width: 1
         border.color: Theme.islandBorder
 
@@ -72,11 +74,15 @@ Item {
             NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic }
         }
 
+        GlassSurface {
+            body: bubbleBody
+        }
+
         SvgIcon {
             anchors.centerIn: parent
             name: SettingsService.dndEnabled ? "bell-off" : "bell"
             size: Theme.px(15)
-            color: SettingsService.dndEnabled ? Theme.textTertiary : Theme.accentOrange
+            color: SettingsService.dndEnabled ? Theme.textTertiary : Theme.accentOrangeStrong
         }
 
         // Unread Badge Badge in Top Right

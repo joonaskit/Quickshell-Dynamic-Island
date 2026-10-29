@@ -80,6 +80,7 @@ SettingsWindow 1.0 settings/SettingsWindow.qml
 SettingsSection 1.0 island/settings/SettingsSection.qml
 SettingToggle 1.0 island/settings/SettingToggle.qml
 SettingMoveButtons 1.0 island/settings/SettingMoveButtons.qml
+SettingButton 1.0 island/settings/SettingButton.qml
 SettingChoice 1.0 island/settings/SettingChoice.qml
 SettingSegmented 1.0 island/settings/SettingSegmented.qml
 SettingSlider 1.0 island/settings/SettingSlider.qml
@@ -111,6 +112,10 @@ TopLeftAppCluster 1.0 island/TopLeftAppCluster.qml
 VirtualDesktopsPill 1.0 island/VirtualDesktopsPill.qml
 HiddenElementGlow 1.0 components/HiddenElementGlow.qml
 NotchEars 1.0 components/NotchEars.qml
+GlassSurface 1.0 components/GlassSurface.qml
+BarHang 1.0 components/BarHang.qml
+BarBubble 1.0 components/BarBubble.qml
+WindowBlur 1.0 components/WindowBlur.qml
 TabSeamGlow 1.0 components/TabSeamGlow.qml
 DockWindowPicker 1.0 dock/DockWindowPicker.qml
 DockDownloadsStack 1.0 dock/DockDownloadsStack.qml

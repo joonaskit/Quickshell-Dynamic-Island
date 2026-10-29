@@ -25,6 +25,70 @@ SettingsCategory {
             }
         }
 
+        SettingSegmented {
+            title: "Style"
+            keywords: "glass frosted blur transparent translucent solid"
+            description: Theme.glass && !Theme.blurAvailable
+                ? "Frosted glass for the island, dock and launcher. Blurring the desktop behind it needs Quickshell 0.3 or later"
+                : "Frosted glass for the island, dock and launcher, on either appearance. KDE apps follow the appearance only"
+            iconName: "contrast"
+            iconColor: Theme.accentCyan
+            currentValue: SettingsService.shellStyle
+            options: [
+                { label: "Solid", value: "solid" },
+                { label: "Glass", value: "glass" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("shellStyle", val);
+            }
+        }
+
+        SettingSlider {
+            title: "Glass Opacity"
+            keywords: "transparency translucent see-through island pills"
+            description: Theme.glass ? "The island and its pills. The dock has its own, in Dock" : "For the Glass style"
+            iconName: "contrast"
+            iconColor: Theme.accentCyan
+            enabled: Theme.glass
+            opacity: enabled ? 1.0 : 0.4
+            value: SettingsService.glassOpacity
+            minimumValue: 0.30
+            maximumValue: 1.00
+            stepSize: 0.05
+            presets: [
+                { label: "40%", value: 0.40 },
+                { label: "60% (Default)", value: 0.60 },
+                { label: "80%", value: 0.80 },
+                { label: "Solid", value: 1.00 }
+            ]
+            onValueModified: function(val) {
+                SettingsService.setSetting("glassOpacity", val);
+            }
+        }
+
+        SettingSlider {
+            title: "Menu Opacity"
+            keywords: "transparency translucent see-through popups launcher"
+            description: Theme.glass ? "Menus, popups, the expanded island and the launcher" : "For the Glass style"
+            iconName: "contrast"
+            iconColor: Theme.accentCyan
+            enabled: Theme.glass
+            opacity: enabled ? 1.0 : 0.4
+            value: SettingsService.glassMenuOpacity
+            minimumValue: 0.30
+            maximumValue: 1.00
+            stepSize: 0.05
+            presets: [
+                { label: "60%", value: 0.60 },
+                { label: "80% (Default)", value: 0.80 },
+                { label: "90%", value: 0.90 },
+                { label: "Solid", value: 1.00 }
+            ]
+            onValueModified: function(val) {
+                SettingsService.setSetting("glassMenuOpacity", val);
+            }
+        }
+
         SettingDivider {}
 
         SettingSwatches {
@@ -58,7 +122,7 @@ SettingsCategory {
             title: "KDE Window Background"
             description: Theme.isLight
                 ? "For the dark appearance only"
-                : "Gray is easier on the eyes in large windows. The island and top bar stay black"
+                : "Gray is easier on the eyes in large windows. The island and top bar keep their own look"
             iconName: "contrast"
             iconColor: Theme.accentIndigo
             isSubOption: true

@@ -157,7 +157,7 @@ Item {
             width: 32
             height: 18
             radius: 9
-            color: toggleRow.checked ? Theme.accentGreen : Theme.switchTrackOff
+            color: toggleRow.checked ? Theme.accentGreen : Theme.controlTrackOff
 
             Behavior on color { ColorAnimation { duration: 120 } }
 

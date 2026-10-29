@@ -60,7 +60,7 @@ Item {
             Layout.preferredWidth: Theme.px(48)
             Layout.preferredHeight: Theme.px(48)
             radius: Theme.cornerPx(10)
-            color: Theme.cardBackground
+            color: Theme.cardSurface
             border.color: Theme.overlay(0.1)
             border.width: 1
             clip: true
@@ -77,7 +77,7 @@ Item {
                 anchors.centerIn: parent
                 name: "music"
                 size: Theme.px(22)
-                color: Theme.accentOrange
+                color: Theme.accentOrangeStrong
                 visible: root.artUrl === "" || parent.children[0].status !== Image.Ready
             }
         }
@@ -209,7 +209,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.px(5)
             radius: Theme.px(2.5)
-            color: Theme.sliderTrack
+            color: Theme.controlTrack
 
             // Fill Bar
             Rectangle {

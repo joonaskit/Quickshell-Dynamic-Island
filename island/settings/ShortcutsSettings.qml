@@ -8,18 +8,29 @@ SettingsCategory {
         if (visible) ShortcutService.refresh();
     }
 
-    Text {
+    RowLayout {
         Layout.fillWidth: true
         Layout.leftMargin: 4
         Layout.rightMargin: 4
         visible: !SettingsSearch.active
-        wrapMode: Text.WordWrap
-        text: ShortcutService.error !== ""
-            ? ShortcutService.error
-            : "Click a box and press the keys you want. Shortcuts are saved in KDE's settings and also appear in System Settings under Shortcuts."
-        font.family: Theme.fontFamily
-        font.pixelSize: 10
-        color: ShortcutService.error !== "" ? Theme.accentRed : Theme.textSecondary
+        spacing: 8
+
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: ShortcutService.error !== ""
+                ? ShortcutService.error
+                : "Click a box and press the keys you want. Shortcuts are saved in KDE's settings and also appear in System Settings under Shortcuts."
+            font.family: Theme.fontFamily
+            font.pixelSize: 10
+            color: ShortcutService.error !== "" ? Theme.accentRed : Theme.textSecondary
+        }
+
+        SettingButton {
+            visible: ShortcutService.conflict !== null
+            text: "Use anyway"
+            onClicked: ShortcutService.forceShortcut(ShortcutService.conflict.id, ShortcutService.conflict.code)
+        }
     }
 
     Repeater {

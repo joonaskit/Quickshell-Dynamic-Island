@@ -3,11 +3,13 @@
 
 Usage:
   shortcuts.py list
-  shortcuts.py set <action-id> <qt-key-code>
+  shortcuts.py set <action-id> <qt-key-code> [--force]
   shortcuts.py clear <action-id>
 
 Every command prints JSON: {"actions": [...]} plus an "error" string when the
-requested change did not happen. A key code is Qt's own integer encoding, the
+requested change did not happen, and a "conflict" object ({id, code}) when the
+key belongs to another shortcut. --force takes the key away from that shortcut
+first, as System Settings does. A key code is Qt's own integer encoding, the
 key plus modifier bits (Meta 0x10000000, Alt 0x08000000, Ctrl 0x04000000,
 Shift 0x02000000), which is what QML key events give.
 
@@ -181,6 +183,30 @@ def parse_exec(line):
     return None
 
 
+def same_dir(path, shell_dir):
+    path = os.path.realpath(os.path.expanduser(path))
+    if os.path.isfile(path):
+        path = os.path.dirname(path)
+    return path == os.path.realpath(shell_dir)
+
+
+def runs_this_shell(line):
+    """Whether an Exec line reaches this copy of the shell, not another install or checkout."""
+    try:
+        tokens = shlex.split(line)
+    except ValueError:
+        return False
+    if not tokens:
+        return False
+    shell_dir = os.path.dirname(run_sh_path())
+    if os.path.basename(tokens[0]) == "run.sh":
+        return os.path.dirname(tokens[0]) != "" and same_dir(os.path.dirname(tokens[0]), shell_dir)
+    for flag, value in zip(tokens, tokens[1:], strict=False):
+        if flag in ("-p", "--path"):
+            return same_dir(value, shell_dir)
+    return False
+
+
 def read_desktop(path):
     """The [Desktop Entry] keys of a file as a dict, or {} if it cannot be read."""
     parser = configparser.RawConfigParser(strict=False, interpolation=None)
@@ -219,7 +245,11 @@ def write_managed_file(action):
 
 
 def adoptable_files():
-    """Hand-made command shortcuts that run one of our commands: {action id: [file names]}."""
+    """Hand-made command shortcuts that run one of our commands: {action id: [file names]}.
+
+    Only those that reach this copy count: one left over from another install keeps
+    calling that install, so this shell writes its own instead.
+    """
     by_command = {(a[3], a[4], *a[5]): a[0] for a in ACTIONS}
     found = {}
     try:
@@ -233,7 +263,7 @@ def adoptable_files():
         if entry.get("X-KDE-GlobalAccel-CommandShortcut", "").lower() != "true":
             continue
         command = parse_exec(entry.get("Exec", ""))
-        if command in by_command:
+        if command in by_command and runs_this_shell(entry.get("Exec", "")):
             found.setdefault(by_command[command], []).append(name)
     return found
 
@@ -291,12 +321,22 @@ def read_code(name, friendly):
     return 0
 
 
-def key_owner(code, own_name):
-    """'<component>: <action>' of another shortcut that uses this key, or None."""
-    for info in (accel("getGlobalShortcutsByKey", "i", str(code)) or [[]])[0]:
-        if info[2] != own_name:
-            return "%s: %s" % (info[3], info[1])
-    return None
+def key_owners(code, own_name):
+    """The shortcut infos of other actions that use this key."""
+    infos = (accel("getGlobalShortcutsByKey", "i", str(code)) or [[]])[0]
+    return [info for info in infos if info[2] != own_name]
+
+
+def owner_text(info):
+    return "%s: %s" % (info[3], info[1])
+
+
+def release_key(info, code):
+    """Take a key away from another component's action, leaving its other keys."""
+    component = info[2] if info[4] in ("", "default") else "%s|%s" % (info[2], info[4])
+    keys = [str(k) for k in info[6] if k and k != code]
+    call_args = ["4", component, info[0], info[3], info[1], str(len(keys)), *keys]
+    accel("setForeignShortcut", "asai", *call_args)
 
 
 def set_keys(name, friendly, code):
@@ -323,7 +363,7 @@ def friendly_name(file_name, action):
     return read_desktop(os.path.join(applications_dir(), file_name)).get("Name") or "Quickshell: " + action[2]
 
 
-def list_actions(error=None):
+def list_actions(error=None, conflict=None):
     adopted = adoptable_files()
     actions = []
     for action in ACTIONS:
@@ -347,10 +387,13 @@ def list_actions(error=None):
     out = {"actions": actions}
     if error:
         out["error"] = error
+    if conflict:
+        out["conflict"] = conflict
     return out
 
 
-def set_action(action_id, code):
+def set_action(action_id, code, force=False):
+    """None when it worked, else (error, conflicting) where conflicting means --force could help."""
     action = ACTIONS_BY_ID[action_id]
     name = backing_file(action_id, adoptable_files())
     if not name:
@@ -358,12 +401,14 @@ def set_action(action_id, code):
         write_managed_file(action)
     friendly = friendly_name(name, action)
     if code:
-        owner = key_owner(code, name)
-        if owner:
-            return "%s is already used by %s" % (key_text(code), owner)
+        owners = key_owners(code, name)
+        if owners and not force:
+            return "%s is already used by %s" % (key_text(code), owner_text(owners[0])), True
+        for info in owners:
+            release_key(info, code)
     register(name, friendly)
     if code and set_keys(name, friendly, code) != code:
-        return "KDE did not accept %s" % key_text(code)
+        return "KDE did not accept %s" % key_text(code), False
     if not code:
         set_keys(name, friendly, 0)
         if name == managed_name(action_id):
@@ -380,21 +425,25 @@ def set_action(action_id, code):
 def main(argv):
     if argv[1:] == ["list"]:
         result = list_actions()
-    elif len(argv) in (3, 4) and argv[1] in ("set", "clear") and argv[2] in ACTIONS_BY_ID:
+    elif (argv[1:2] == ["clear"] and len(argv) == 3 or argv[1:2] == ["set"] and len(argv) in (4, 5)
+          and argv[4:] in ([], ["--force"])) and argv[2] in ACTIONS_BY_ID:
         try:
             code = int(argv[3]) if argv[1] == "set" else 0
-        except (ValueError, IndexError):
+        except ValueError:
             code = -1
+        conflict = None
         if argv[1] == "set" and (code < 0 or not valid_code(code)):
             error = "That key cannot be used on its own"
         else:
             try:
-                error = set_action(argv[2], code)
+                error, conflicting = set_action(argv[2], code, argv[4:] == ["--force"]) or (None, False)
             except DBusError as e:
-                error = "Could not reach KDE's shortcut service: %s" % e
-        result = list_actions(error)
+                error, conflicting = "Could not reach KDE's shortcut service: %s" % e, False
+            if conflicting:
+                conflict = {"id": argv[2], "code": code}
+        result = list_actions(error, conflict)
     else:
-        print("Usage: shortcuts.py list | set <action-id> <qt-key-code> | clear <action-id>", file=sys.stderr)
+        print("Usage: shortcuts.py list | set <action-id> <qt-key-code> [--force] | clear <action-id>", file=sys.stderr)
         return 2
     print(json.dumps(result))
     return 0

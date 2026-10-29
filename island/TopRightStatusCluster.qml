@@ -28,6 +28,8 @@ Item {
     z: root.anyMenuOpen ? 200 : 1
 
     property alias hitBox: clusterBackground
+    // The notch ears, for the window's blur
+    property alias ears: notchEars
     property alias wifiQuickSettingsHitBox: wifiQuickSettings
     property alias bluetoothQuickSettingsHitBox: bluetoothQuickSettings
     property alias powerQuickSettingsHitBox: powerQuickSettings
@@ -335,7 +337,7 @@ Item {
                 name: "moon"
                 size: root.iconSize
                 color: {
-                    if (root.nightMenuOpen || NightLightService.running) return Theme.accentOrange;
+                    if (root.nightMenuOpen || NightLightService.running) return Theme.accentOrangeStrong;
                     return nightMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -375,7 +377,7 @@ Item {
                 name: "bulb"
                 size: root.iconSize
                 color: {
-                    if (root.hueMenuOpen || HueService.anyOn) return Theme.accentOrange;
+                    if (root.hueMenuOpen || HueService.anyOn) return Theme.accentOrangeStrong;
                     return hueMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -415,7 +417,7 @@ Item {
                 name: "gamepad"
                 size: root.iconSize
                 color: {
-                    if (root.gameMenuOpen || GameModeService.active) return Theme.accentGreen;
+                    if (root.gameMenuOpen || GameModeService.active) return Theme.accentGreenStrong;
                     return gameMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -455,7 +457,7 @@ Item {
                 name: "phone"
                 size: root.iconSize
                 color: {
-                    if (root.kdeMenuOpen || KdeConnectService.anyReachable) return Theme.accentGreen;
+                    if (root.kdeMenuOpen || KdeConnectService.anyReachable) return Theme.accentGreenStrong;
                     return kdeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -490,7 +492,7 @@ Item {
                 anchors.centerIn: parent
                 name: "coffee"
                 size: root.iconSize
-                color: CaffeineService.isActive ? Theme.accentOrange : (coffeeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38))
+                color: CaffeineService.isActive ? Theme.accentOrangeStrong : (coffeeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38))
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
             }
 
@@ -721,9 +723,9 @@ Item {
                 }
                 size: root.iconSize
                 color: {
-                    if (root.profileMenuOpen) return Theme.accentGreen;
+                    if (root.profileMenuOpen) return Theme.accentGreenStrong;
                     if (PowerProfileService.activeProfile === "performance") return Theme.accentRed;
-                    if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreen;
+                    if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreenStrong;
                     return profileMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.45);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -760,7 +762,7 @@ Item {
                 size: root.iconSize
                 color: {
                     if (root.hardwareMenuOpen) return Theme.accent;
-                    if (HardwareStatsService.cpuPercent > 50) return Theme.accentOrange;
+                    if (HardwareStatsService.cpuPercent > 50) return Theme.accentOrangeStrong;
                     return hardwareMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.45);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -802,7 +804,7 @@ Item {
                 size: root.iconSize
                 color: {
                     if (root.devicesMenuOpen) return Theme.accent;
-                    if (DeviceService.hasMountedDevices) return Theme.accentGreen;
+                    if (DeviceService.hasMountedDevices) return Theme.accentGreenStrong;
                     if (DeviceService.hasDevices) return Theme.accent;
                     return devicesMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                 }
@@ -852,8 +854,8 @@ Item {
                 name: "bell"
                 size: root.iconSize
                 color: {
-                    if (root.notificationMenuOpen) return Theme.accentOrange;
-                    if (NotificationService.unreadCount > 0) return Theme.accentOrange;
+                    if (root.notificationMenuOpen) return Theme.accentOrangeStrong;
+                    if (NotificationService.unreadCount > 0) return Theme.accentOrangeStrong;
                     return notifMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
                 }
                 Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
@@ -948,7 +950,7 @@ Item {
 
     readonly property real targetHeight: {
         if (!root.anyMenuOpen) return compactHeight;
-        if (root.isTopBarMode) return compactHeight + 1 + root.activeMenuHeight + Theme.px(20);
+        if (root.isTopBarMode) return compactHeight + 1 + root.activeMenuHeight + Theme.px(20) + (hang.bubbleOpen ? hang.bubbleGap : 0);
         return Theme.compactHeight + root.activeMenuHeight + Theme.px(20);
     }
 
@@ -1002,7 +1004,7 @@ Item {
         x: Math.max(0, Math.min(root.width - width, anchorPoint.x - width / 2))
         y: anchorPoint.y + Theme.px(6)
         radius: Theme.cornerPx(8)
-        color: Theme.cardBackground
+        color: Theme.raisedSurface
         border.width: 1
         border.color: Theme.overlay(0.12)
 
@@ -1018,15 +1020,41 @@ Item {
         }
     }
 
-    NotchEars {
+    // Open in top-bar mode, the cluster grows out of the bar (BarHang)
+    BarHang {
+        id: hang
         body: clusterBackground
-        active: Theme.notchStyle && !root.isTopBarMode
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.anyMenuOpen
+        barEdge: root.barEdge
+    }
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+    // The ears' blur would be square, which below the bar shows as a clear patch beside
+    // the body, so hanging from the bar they go without
+    readonly property var earsBlur: hang.joined ? null : notchEars
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : clusterBackground
+
+    NotchEars {
+        id: notchEars
+        body: clusterBackground
+        active: (Theme.notchEars && !root.isTopBarMode) || hang.joined
+        inset: hang.joined ? hang.barDepth : 0
+        color: hang.joined ? hang.barFill : clusterBackground.color
+        // Hanging from the bar, no outline: it reads as part of the bar
+        outlined: Theme.glass && !hang.joined
     }
 
     // Morphed Cluster Background capsule: Exactly matches the Island physics and styling
     Rectangle {
         id: clusterBackground
         anchors.top: parent.top
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
         anchors.right: parent.right
         width: root.targetWidth
         height: root.targetHeight
@@ -1045,8 +1073,9 @@ Item {
 
         // Solid, or frosted like the side pills while compact (frostedStatusIcons); a menu is always solid, for reading
         readonly property bool frosted: SettingsService.frostedStatusIcons && !root.anyMenuOpen
-        color: (root.isTopBarMode && !root.anyMenuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : (frosted ? Theme.pillFrosted : Theme.islandBackground)
-        border.width: root.isTopBarMode ? 0 : 1
+        color: (root.isTopBarMode && !root.anyMenuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : (frosted ? Theme.pillFrosted : (root.anyMenuOpen ? Theme.menuSurface : Theme.islandSurface))
+        // On glass with notch ears, GlassSurface draws the hairline instead
+        border.width: (root.isTopBarMode || (Theme.glass && notchEars.active)) ? 0 : 1
         border.color: frosted ? Theme.pillFrostedBorder : Theme.islandBorder
 
         Behavior on color {
@@ -1078,6 +1107,21 @@ Item {
         }
         Behavior on bottomRightRadius {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
+        GlassSurface {
+            body: clusterBackground
+            flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
+            flushInset: notchEars.inset
+            hairline: !hang.joined
+            active: Theme.glass && !hang.bubble
         }
 
         // Top Header Bar containing the notification & status buttons
@@ -1155,7 +1199,8 @@ Item {
             anchors.right: parent.right
             height: 1
             color: Theme.overlay(0.08)
-            opacity: root.anyMenuOpen ? 1.0 : 0.0
+            // Detached, the card's edge parts the menu from the bar instead
+            opacity: root.anyMenuOpen && !hang.bubble ? 1.0 : 0.0
             visible: opacity > 0.01
 
             Behavior on opacity {
@@ -1167,6 +1212,9 @@ Item {
         Item {
             id: menuContainer
             anchors.top: divider.bottom
+            // Detached, below the gap to the card's top
+            anchors.topMargin: (hang.bubble ? hang.bubbleGap : 0) + menuGap
+            readonly property real menuGap: 0
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: grabberArea.top

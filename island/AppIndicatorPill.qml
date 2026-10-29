@@ -44,7 +44,7 @@ Item {
 
     readonly property real compactHeight: root.isTopBarMode ? (Theme.topBarHeight + 1) : Theme.compactHeight
     readonly property real expandedHeight: Theme.px(40) + menuContent.implicitHeight + Theme.px(14)
-    readonly property real targetHeight: root.contextMenuOpen ? expandedHeight : compactHeight
+    readonly property real targetHeight: (root.contextMenuOpen ? expandedHeight : compactHeight) + (hang.bubbleOpen ? hang.bubbleTop : 0)
 
     readonly property real targetTopRadius: {
         if (root.isTopBarMode || Theme.notchStyle) return 0;
@@ -419,10 +419,38 @@ Item {
         }
     }
 
+    // Open in top-bar mode, the tray grows out of the bar (BarHang)
+    BarHang {
+        id: hang
+        body: pillBackground
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.contextMenuOpen
+        barEdge: root.barEdge
+    }
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : pillBackground
+
+    // Only while hanging from the bar: the tray has no notch style of its own
+    NotchEars {
+        id: notchEars
+        body: pillBackground
+        active: hang.joined
+        inset: hang.barDepth
+        color: hang.barFill
+        outlined: false
+    }
+
     // Morphed Capsule Background: Exactly matches TopRightStatusCluster and IslandPill physics
     Rectangle {
         id: pillBackground
         anchors.top: parent.top
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
         anchors.right: parent.right
         width: root.targetWidth
         height: root.targetHeight
@@ -439,7 +467,7 @@ Item {
         bottomRightRadius: root.targetBottomRadius
 
         // Frosted like the virtual desktops while compact; solid once the menu opens, for reading
-        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : (root.contextMenuOpen ? Theme.islandBackground : Theme.pillFrosted)
+        color: (root.isTopBarMode && !root.contextMenuOpen && pillBackground.height <= root.compactHeight + 1) ? "transparent" : (root.contextMenuOpen ? Theme.menuSurface : Theme.pillFrosted)
         border.width: root.isTopBarMode ? 0 : 1
         border.color: root.contextMenuOpen ? Theme.islandBorder : Theme.pillFrostedBorder
 
@@ -472,6 +500,21 @@ Item {
         }
         Behavior on bottomRightRadius {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
+        GlassSurface {
+            body: pillBackground
+            flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
+            flushInset: notchEars.inset
+            hairline: !hang.joined
+            active: Theme.glass && !hang.bubble
         }
 
         // =====================================================================
@@ -594,6 +637,8 @@ Item {
         Item {
             id: morphedMenuArea
             anchors.fill: parent
+            // Detached, below the bar on the card
+            anchors.topMargin: hang.bubble ? hang.bubbleTop : 0
             visible: opacity > 0.01
             opacity: root.contextMenuOpen ? 1.0 : 0.0
 

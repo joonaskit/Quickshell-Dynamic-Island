@@ -31,6 +31,8 @@ Item {
     }
 
     property alias hitBox: clusterBackground
+    // The notch ears, for the window's blur
+    property alias ears: notchEars
 
     function toggleMenu() {
         root.menuOpen = !root.menuOpen;
@@ -61,7 +63,7 @@ Item {
 
     readonly property real targetHeight: {
         if (!root.menuOpen) return compactHeight;
-        if (root.isTopBarMode) return compactHeight + 1 + menuContentHeight + Theme.px(22);
+        if (root.isTopBarMode) return compactHeight + 1 + menuContentHeight + Theme.px(22) + (hang.bubbleOpen ? hang.bubbleGap : 0);
         return Theme.px(42) + menuContentHeight + Theme.px(22);
     }
 
@@ -109,15 +111,41 @@ Item {
         }
     }
 
-    NotchEars {
+    // Open in top-bar mode, the cluster grows out of the bar (BarHang)
+    BarHang {
+        id: hang
         body: clusterBackground
-        active: Theme.notchStyle && !root.isTopBarMode
+        pill: root
+        topBarMode: root.isTopBarMode
+        open: root.menuOpen
+        barEdge: root.barEdge
+    }
+    // How tall the bar's lower edge is (TopBarWings.edgeDepth)
+    property real barEdge: 0
+    // Where the body is cut into the bar, for TopBarWings.gaps
+    readonly property var barGap: hang.gap
+    // The ears' blur would be square, which below the bar shows as a clear patch beside
+    // the body, so hanging from the bar they go without
+    readonly property var earsBlur: hang.joined ? null : notchEars
+    // The window's blur: the card while detached, else the body
+    readonly property Item blurBody: hang.bubble ? bubbleCard : clusterBackground
+
+    NotchEars {
+        id: notchEars
+        body: clusterBackground
+        active: (Theme.notchEars && !root.isTopBarMode) || hang.joined
+        inset: hang.joined ? hang.barDepth : 0
+        color: hang.joined ? hang.barFill : clusterBackground.color
+        // Hanging from the bar, no outline: it reads as part of the bar
+        outlined: Theme.glass && !hang.joined
     }
 
     // Morphed Background capsule: seamlessly connects to top bar when maximized, or acts as pill when floating
     Rectangle {
         id: clusterBackground
         anchors.top: parent.top
+        // Hanging from the bar, clear over it, so the bar shows through as one strip
+        gradient: hang.fill
         anchors.left: parent.left
         width: root.targetWidth
         height: root.targetHeight
@@ -133,9 +161,10 @@ Item {
         bottomLeftRadius: root.targetBottomRadius
         bottomRightRadius: root.targetBottomRadius
 
-        color: (root.isTopBarMode && !root.menuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : Theme.islandBackground
-        border.width: 0
-        border.color: "transparent"
+        color: (root.isTopBarMode && !root.menuOpen && clusterBackground.height <= root.compactHeight + 1) ? "transparent" : (root.menuOpen ? Theme.menuSurface : Theme.islandSurface)
+        // The hairline on glass, none on dark. With notch ears GlassSurface draws it instead.
+        border.width: (Theme.glass && !root.isTopBarMode && !notchEars.active) ? 1 : 0
+        border.color: Theme.glass ? Theme.islandBorder : "transparent"
 
         Behavior on color {
             ColorAnimation { duration: Theme.animDurationFast }
@@ -168,6 +197,21 @@ Item {
         }
         Behavior on bottomRightRadius {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
+        }
+
+        // Detached on glass: the menu's card below the bar (BarHang.bubble)
+        BarBubble {
+            id: bubbleCard
+            hang: hang
+        }
+
+        GlassSurface {
+            body: clusterBackground
+            flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
+            flushInset: notchEars.inset
+            hairline: !hang.joined
+            active: Theme.glass && !hang.bubble
         }
 
         // Top Header Area (always visible, interactive pill header)
@@ -256,7 +300,8 @@ Item {
             anchors.rightMargin: 10
             height: 1
             color: Theme.overlay(0.08)
-            opacity: root.menuOpen ? 1.0 : 0.0
+            // Detached, the card's edge parts the menu from the bar instead
+            opacity: root.menuOpen && !hang.bubble ? 1.0 : 0.0
             visible: opacity > 0.01
 
             Behavior on opacity {
@@ -268,10 +313,12 @@ Item {
         Item {
             id: menuContainer
             anchors.top: divider.bottom
+            // Detached, below the gap to the card's top
+            anchors.topMargin: (hang.bubble ? hang.bubbleGap : 0) + menuGap
+            readonly property real menuGap: 4
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: grabberArea.top
-            anchors.topMargin: 4
             clip: true
             opacity: root.menuOpen ? 1.0 : 0.0
             visible: opacity > 0.01
@@ -329,7 +376,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop && !root.isWindowMaximized
                     iconName: "maximize"
-                    iconColor: Theme.accentGreen
+                    iconColor: Theme.accentGreenStrong
                     label: "Maximize"
                     onClicked: {
                         WindowService.maximizeWindow(root.activeWindowId || root.activeAppId);
@@ -340,7 +387,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop && root.isWindowMaximized
                     iconName: "unmaximize"
-                    iconColor: Theme.accentYellow
+                    iconColor: Theme.accentYellowStrong
                     label: "Unmaximize"
                     onClicked: {
                         WindowService.unmaximizeWindow(root.activeWindowId || root.activeAppId);
@@ -362,7 +409,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop
                     iconName: "pin"
-                    iconColor: Theme.accentOrange
+                    iconColor: Theme.accentOrangeStrong
                     label: "Always on Top"
                     onClicked: {
                         WindowService.toggleKeepAbove(root.activeWindowId || root.activeAppId);
@@ -465,7 +512,7 @@ Item {
                 MenuItem {
                     visible: !root.isDesktop
                     iconName: "plus"
-                    iconColor: Theme.accentGreen
+                    iconColor: Theme.accentGreenStrong
                     label: "New Window"
                     onClicked: {
                         WindowService.launchNewWindow(root.activeAppId);
@@ -506,7 +553,7 @@ Item {
                 MenuItem {
                     visible: root.isDesktop
                     iconName: "terminal"
-                    iconColor: Theme.accentCyan
+                    iconColor: Theme.accentCyanStrong
                     label: "Terminal"
                     onClicked: {
                         WindowService.openTerminal();
@@ -528,7 +575,7 @@ Item {
                 MenuItem {
                     visible: root.isDesktop
                     iconName: "settings"
-                    iconColor: Theme.accentOrange
+                    iconColor: Theme.accentOrangeStrong
                     label: "System Settings"
                     onClicked: {
                         WindowService.openSettings();
@@ -539,7 +586,7 @@ Item {
                 MenuItem {
                     visible: root.isDesktop
                     iconName: "lock"
-                    iconColor: Theme.accentYellow
+                    iconColor: Theme.accentYellowStrong
                     label: "Lock Screen"
                     onClicked: {
                         WindowService.lockScreen();

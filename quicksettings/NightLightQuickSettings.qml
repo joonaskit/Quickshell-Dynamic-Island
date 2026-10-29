@@ -9,7 +9,7 @@ Item {
 
     property bool embedded: false
 
-    readonly property color nightColor: Theme.accentOrange
+    readonly property color nightColor: Theme.accentOrangeStrong
     implicitWidth: embedded ? (parent ? parent.width : Theme.px(340)) : Theme.px(320)
     implicitHeight: mainCard.height
 
@@ -29,7 +29,7 @@ Item {
         width: root.embedded ? (root.parent ? root.parent.width : root.width) : root.implicitWidth
         height: contentColumn.implicitHeight + (root.embedded ? Theme.px(14) : Theme.px(28))
         radius: root.embedded ? 0 : Theme.px(18)
-        color: root.embedded ? "transparent" : Theme.cardBackground
+        color: root.embedded ? "transparent" : Theme.cardSurface
         border.width: root.embedded ? 0 : 1
         border.color: Theme.overlay(0.12)
         clip: true
@@ -51,7 +51,7 @@ Item {
                     Layout.preferredWidth: Theme.px(38)
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
-                    color: NightLightService.running ? Qt.rgba(255/255, 159/255, 10/255, 0.22) : Theme.cardBackgroundHover
+                    color: NightLightService.running ? Qt.rgba(255/255, 159/255, 10/255, 0.22) : Theme.cardSurfaceHover
                     Behavior on color { ColorAnimation { duration: 180 } }
 
                     SvgIcon {
