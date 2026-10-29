@@ -9,7 +9,7 @@ Item {
     id: root
 
     property Rectangle body: null
-    property bool active: Theme.notchStyle
+    property bool active: Theme.notchEars
     property color color: body ? body.color : Theme.islandBackground
     // Draw the glass hairline along the curves (see GlassSurface.flushTop)
     property bool outlined: Theme.glass

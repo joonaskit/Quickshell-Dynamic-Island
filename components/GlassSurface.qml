@@ -19,6 +19,8 @@ Item {
     property real flushInset: 0
     // With flushTop, draw the hairline down the sides
     property bool hairline: true
+    // The body's flat top meets the top edge (notch style), so no rim or band along it
+    property bool flatTop: false
 
     // Inside the body's own border, which on glass is the dark hairline
     readonly property real inset: body ? body.border.width : 0
@@ -99,15 +101,15 @@ Item {
         }
 
         // Lit from above; when flush with the top edge there is no top edge to light,
-        // so it starts below the ears
+        // so it starts below the ears, or fades in down the sides
         ShapePath {
             strokeColor: "transparent"
             fillRule: ShapePath.OddEvenFill
             fillGradient: LinearGradient {
                 x1: 0; y1: 0
                 x2: 0; y2: root.height
-                GradientStop { position: 0.0; color: root.flushTop ? "transparent" : Theme.glassRimTop }
-                GradientStop { position: root.clearStop; color: root.flushTop ? "transparent" : Theme.glassRimTop }
+                GradientStop { position: 0.0; color: root.flushTop || root.flatTop ? "transparent" : Theme.glassRimTop }
+                GradientStop { position: root.clearStop; color: root.flushTop || root.flatTop ? "transparent" : Theme.glassRimTop }
                 GradientStop { position: Math.max(0.5, root.clearStop + 0.01); color: Theme.glassRimSide }
                 GradientStop { position: 1.0; color: Theme.glassRimBottom }
             }
@@ -137,8 +139,9 @@ Item {
             fillGradient: LinearGradient {
                 x1: 0; y1: 0
                 x2: 0; y2: root.height
-                // Hanging from a bar (flushInset), the top is the bar's, which draws its own
-                GradientStop { position: 0.0; color: root.flushTop && root.flushInset > 0 ? "transparent" : Theme.glassBandTop }
+                // Hanging from a bar (flushInset), the top is the bar's, which draws its own.
+                // A flat top against the screen edge has none either.
+                GradientStop { position: 0.0; color: (root.flushTop && root.flushInset > 0) || root.flatTop ? "transparent" : Theme.glassBandTop }
                 GradientStop { position: 0.5; color: "transparent" }
                 GradientStop { position: 1.0; color: Theme.glassBandBottom }
             }

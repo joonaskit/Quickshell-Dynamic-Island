@@ -279,6 +279,8 @@ Singleton {
     // screen edge. The maximised top bar is unaffected.
     property string pillStyle: "floating"
     readonly property bool notchStyle: pillStyle === "notch"
+    // The ears are left out on glass, where the pills just meet the edge
+    readonly property bool notchEars: notchStyle && !glass
     property int notchEar: px(10)
     // Bottom corners of a compact pill in notch style
     property int notchRadius: px(14)

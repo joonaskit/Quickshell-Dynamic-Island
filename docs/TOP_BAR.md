@@ -17,7 +17,7 @@ The `pillStyle` setting (`Theme.notchStyle`) makes the top pills hug the screen 
 
 - Rests at `IslandWindow.pillTopY`.
 - Returns a flat top radius and `Theme.notchRadius` at the bottom.
-- Places a `NotchEars` (`components/`) next to its body, which clips, to draw the curves into the edge.
+- Places a `NotchEars` (`components/`) next to its body, which clips, to draw the curves into the edge. It is active with `Theme.notchEars`, which is off on glass, so the pill there just has a flat top.
 
 ## Tucked pills
 

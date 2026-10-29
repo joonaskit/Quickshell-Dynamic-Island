@@ -87,7 +87,7 @@ Item {
     NotchEars {
         id: notchEars
         body: pillBackground
-        active: Theme.notchStyle && !root.isTopBarMode
+        active: Theme.notchEars && !root.isTopBarMode
     }
 
     // Pill Capsule Background
@@ -142,6 +142,7 @@ Item {
         GlassSurface {
             body: pillBackground
             flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
         }
 
         // Global wheel handler for fluid scroll switching between workspaces

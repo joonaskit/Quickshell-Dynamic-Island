@@ -211,7 +211,7 @@ Item {
     NotchEars {
         id: notchEars
         body: pillBody
-        active: (Theme.notchStyle && !root.isTopBarMode) || root.hangsFromBar
+        active: (Theme.notchEars && !root.isTopBarMode) || root.hangsFromBar
         inset: root.hangsFromBar ? hang.barDepth : 0
         color: root.hangsFromBar ? hang.barFill : pillBody.color
         // Hanging from the bar, no outline: it reads as part of the bar
@@ -293,6 +293,7 @@ Item {
         GlassSurface {
             body: pillBody
             flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
             flushInset: notchEars.inset
             hairline: !root.hangsFromBar
             active: Theme.glass && !hang.bubble

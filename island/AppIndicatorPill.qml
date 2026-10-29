@@ -511,6 +511,7 @@ Item {
         GlassSurface {
             body: pillBackground
             flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
             flushInset: notchEars.inset
             hairline: !hang.joined
             active: Theme.glass && !hang.bubble

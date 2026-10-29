@@ -1042,7 +1042,7 @@ Item {
     NotchEars {
         id: notchEars
         body: clusterBackground
-        active: (Theme.notchStyle && !root.isTopBarMode) || hang.joined
+        active: (Theme.notchEars && !root.isTopBarMode) || hang.joined
         inset: hang.joined ? hang.barDepth : 0
         color: hang.joined ? hang.barFill : clusterBackground.color
         // Hanging from the bar, no outline: it reads as part of the bar
@@ -1118,6 +1118,7 @@ Item {
         GlassSurface {
             body: clusterBackground
             flushTop: notchEars.active
+            flatTop: Theme.notchStyle && !root.isTopBarMode
             flushInset: notchEars.inset
             hairline: !hang.joined
             active: Theme.glass && !hang.bubble
