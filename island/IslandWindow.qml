@@ -562,6 +562,7 @@ PanelWindow {
         id: virtualDesktopsPill
         x: (SettingsService.showWindowControls && appCluster.visible) ? (appCluster.x + appCluster.width + (window.desktopsTabTucked ? -Math.round(virtualDesktopsPill.width * 0.5) : 8)) : 16
         y: window.virtualDesktopsTargetY
+        isSlidOut: !window.virtualDesktopsShouldHide && !window.barHidden
         isTopBarMode: window.isMaximized
         hasFullscreenApp: window.hasFullscreenApp
         opacity: (!window.hasFullscreenApp && SettingsService.showVirtualDesktops) ? 1.0 : 0.0
