@@ -348,30 +348,35 @@ Item {
                     }
                 }
 
+                // Toggle switch
                 Rectangle {
-                    Layout.preferredWidth: Theme.px(64)
-                    Layout.preferredHeight: Theme.px(28)
-                    radius: Theme.px(14)
-                    color: SettingsService.lowRefreshOnBattery ? Qt.rgba(48/255, 209/255, 88/255, 0.25) : Theme.overlay(0.1)
-                    scale: lowRefreshMouse.pressed ? 0.92 : (lowRefreshMouse.containsMouse ? 1.05 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Layout.preferredWidth: Theme.px(46)
+                    Layout.preferredHeight: Theme.px(26)
+                    radius: Theme.px(13)
+                    color: SettingsService.lowRefreshOnBattery ? Theme.accentGreen : Theme.controlTrackOff
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: SettingsService.lowRefreshOnBattery ? "ON" : "OFF"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontPx(10)
-                        font.weight: Font.Bold
-                        color: SettingsService.lowRefreshOnBattery ? Theme.accentGreenStrong : Theme.textSecondary
+                    Behavior on color {
+                        ColorAnimation { duration: 180 }
+                    }
+
+                    // Sliding Knob
+                    Rectangle {
+                        y: Theme.px(2)
+                        x: SettingsService.lowRefreshOnBattery ? Theme.px(22) : Theme.px(2)
+                        width: Theme.px(22)
+                        height: Theme.px(22)
+                        radius: Theme.px(11)
+                        color: Theme.sliderHandle
+
+                        Behavior on x {
+                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                        }
                     }
 
                     MouseArea {
-                        id: lowRefreshMouse
                         anchors.fill: parent
-                        hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: SettingsService.setSetting("lowRefreshOnBattery", !SettingsService.lowRefreshOnBattery)
+                        onClicked: SettingsService.toggleSetting("lowRefreshOnBattery")
                     }
                 }
             }
