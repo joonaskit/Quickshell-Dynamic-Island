@@ -21,6 +21,9 @@ Singleton {
     property bool upowerSettled: false
     readonly property bool refreshReady: upowerSettled && rememberedRead && SettingsService.isLoaded
     onRefreshReadyChanged: root.updateRefreshRate()
+    // Why the setting cannot work here, or "" when it can
+    readonly property string lowRefreshProblem: DepsService.problem(["kscreen-doctor"])
+    readonly property bool lowRefreshAvailable: lowRefreshProblem === ""
 
     // Process to query active profile
     Process {
@@ -93,7 +96,7 @@ Singleton {
     }
 
     function updateRefreshRate() {
-        if (!root.refreshReady) return;
+        if (!root.refreshReady || !root.lowRefreshAvailable) return;
         if (!SettingsService.lowRefreshOnBattery && Object.keys(root.rememberedRates).length === 0) return;
         if (displayProc.running) root.refreshPending = true;
         else displayProc.running = true;

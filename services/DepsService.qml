@@ -40,8 +40,13 @@ Singleton {
     // One line for the settings list: what is missing and how to install it
     function iconProblem(id) {
         let entry = StatusIconRegistry.byId(id);
-        if (!entry || !root.noneUsable(entry.requires)) return "";
-        return root.missingOf(entry.requires).map(d => d.status === "not-running" ? d.name + " is installed but not running" : d.name + " is not installed" + (d.package ? " (package: " + d.package + ")" : "")).join(", or ");
+        return entry ? root.problem(entry.requires) : "";
+    }
+
+    // What is missing from the alternatives in `ids` and how to install it, or "" when one is usable
+    function problem(ids) {
+        if (!root.noneUsable(ids)) return "";
+        return root.missingOf(ids).map(d => d.status === "not-running" ? d.name + " is installed but not running" : d.name + " is not installed" + (d.package ? " (package: " + d.package + ")" : "")).join(", or ");
     }
 
     Component.onCompleted: root.runCheck()
