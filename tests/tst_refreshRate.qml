@@ -95,6 +95,36 @@ TestCase {
         compare(RefreshRate.plan([], false, memory).remembered, memory);
     }
 
+    function test_planRelowersAfterLateBatteryAnswer() {
+        // A check before UPower answers sees AC and raises the panel, then the queued check sees battery
+        let memory = { "eDP-1": { "from": 120, "to": 60 } };
+        let raised = RefreshRate.plan([panel("2")], false, memory);
+        compare(raised.changes, [{ "name": "eDP-1", "modeId": "1" }]);
+        let p = RefreshRate.plan([panel("1")], true, raised.remembered);
+        compare(p.changes, [{ "name": "eDP-1", "modeId": "2" }]);
+        compare(p.remembered, memory);
+    }
+
+    function test_nearestMode() {
+        compare(RefreshRate.nearestMode([mode("1", 1, 1, 120), mode("2", 1, 1, 59.88)], 60).id, "2");
+        compare(RefreshRate.nearestMode([mode("1", 1, 1, 61), mode("2", 1, 1, 59)], 60).id, "1");
+        compare(RefreshRate.nearestMode([], 60), null);
+    }
+
+    function test_shouldCheckWaitsUntilReady() {
+        compare(RefreshRate.shouldCheck(false, true, true, {}), false);
+        compare(RefreshRate.shouldCheck(true, true, true, {}), true);
+    }
+
+    function test_shouldCheckNeedsKscreenDoctor() {
+        compare(RefreshRate.shouldCheck(true, false, true, {}), false);
+    }
+
+    function test_shouldCheckRestoresAfterSettingIsOff() {
+        compare(RefreshRate.shouldCheck(true, true, false, {}), false);
+        compare(RefreshRate.shouldCheck(true, true, false, { "eDP-1": { "from": 120, "to": 60 } }), true);
+    }
+
     function test_parseRemembered() {
         compare(RefreshRate.parseRemembered('{"eDP-1":{"from":120,"to":60}}'), { "eDP-1": { "from": 120, "to": 60 } });
         compare(RefreshRate.parseRemembered('{"eDP-1":"1","eDP-2":{"from":120}}'), {});
