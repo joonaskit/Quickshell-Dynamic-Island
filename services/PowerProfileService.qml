@@ -12,9 +12,19 @@ Singleton {
     property string activeProfile: "balanced"
     readonly property var profiles: ["power-saver", "balanced", "performance"]
 
-    // 60 Hz on battery: the modes the built-in panels had before they were lowered, by output name
-    property var rememberedModes: ({})
+    // 60 Hz on battery: the rates of the lowered built-in panels by output name, as { from, to }. Kept in a
+    // state file, so a restart on battery does not forget what to go back to
+    property var rememberedRates: ({})
     property bool refreshPending: false
+    property bool rememberedLoaded: false
+    // UPower.onBattery reads false until D-Bus answers, so a check before then would raise a lowered panel.
+    // If it answers later than the timer below, the panel goes up and back down once
+    property bool upowerSettled: false
+    readonly property bool refreshReady: upowerSettled && rememberedLoaded && SettingsService.isLoaded
+    onRefreshReadyChanged: root.updateRefreshRate()
+    // Why the setting cannot work here, or "" when it can
+    readonly property string lowRefreshProblem: DepsService.problem(["kscreen-doctor"])
+    readonly property bool lowRefreshAvailable: lowRefreshProblem === ""
 
     // Process to query active profile
     Process {
@@ -80,10 +90,41 @@ Singleton {
         function onLowRefreshOnBatteryChanged() { root.updateRefreshRate(); }
     }
 
+    Timer {
+        interval: 1000
+        running: true
+        onTriggered: root.upowerSettled = true
+    }
+
     function updateRefreshRate() {
-        if (!SettingsService.lowRefreshOnBattery && Object.keys(root.rememberedModes).length === 0) return;
-        if (displayProc.running) root.refreshPending = true;
+        if (!RefreshRate.shouldCheck(root.refreshReady, root.lowRefreshAvailable, SettingsService.lowRefreshOnBattery, root.rememberedRates)) return;
+        if (displayProc.running || applyProc.running) root.refreshPending = true;
         else displayProc.running = true;
+    }
+
+    function runPendingRefresh() {
+        if (!root.refreshPending || displayProc.running || applyProc.running) return;
+        root.refreshPending = false;
+        displayProc.running = true;
+    }
+
+    // Written before the mode changes, so a crash in between cannot lose the rate to go back to
+    function setRememberedRates(rates) {
+        if (JSON.stringify(rates) === JSON.stringify(root.rememberedRates)) return;
+        root.rememberedRates = rates;
+        rememberedFile.setText(JSON.stringify(rates));
+    }
+
+    FileView {
+        id: rememberedFile
+        path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/quickshell-island/refresh-rate.json"
+        blockWrites: true
+        printErrors: false
+        onLoaded: {
+            root.rememberedRates = RefreshRate.parseRemembered(text());
+            root.rememberedLoaded = true;
+        }
+        onLoadFailed: root.rememberedLoaded = true
     }
 
     Process {
@@ -98,15 +139,19 @@ Singleton {
                     return;
                 }
                 let lower = SettingsService.lowRefreshOnBattery && UPower.onBattery;
-                let plan = RefreshRate.plan(outputs, lower, root.rememberedModes);
-                root.rememberedModes = plan.remembered;
-                if (plan.changes.length > 0) Quickshell.execDetached(["kscreen-doctor"].concat(RefreshRate.commandArgs(plan.changes)));
+                let plan = RefreshRate.plan(outputs, lower, root.rememberedRates);
+                root.setRememberedRates(plan.remembered);
+                if (plan.changes.length === 0) return;
+                applyProc.command = ["kscreen-doctor"].concat(RefreshRate.commandArgs(plan.changes));
+                applyProc.running = true;
             }
         }
-        onExited: {
-            if (!root.refreshPending) return;
-            root.refreshPending = false;
-            running = true;
-        }
+        onExited: root.runPendingRefresh()
+    }
+
+    // A check waits for this, as one that reads a panel mid-switch would plan from the old rate
+    Process {
+        id: applyProc
+        onExited: root.runPendingRefresh()
     }
 }

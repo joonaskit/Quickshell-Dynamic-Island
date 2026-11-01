@@ -316,14 +316,18 @@ Item {
 
             RowLayout {
                 id: lowRefreshRow
+                // Unavailable shows as off, leaving the saved setting for when kscreen-doctor is installed
+                readonly property bool isOn: SettingsService.lowRefreshOnBattery && PowerProfileService.lowRefreshAvailable
                 visible: UPower.displayDevice !== null && UPower.displayDevice.isPresent
+                enabled: PowerProfileService.lowRefreshAvailable
+                opacity: enabled ? 1.0 : 0.4
                 Layout.fillWidth: true
                 spacing: Theme.px(10)
 
                 SvgIcon {
                     name: "desktop"
                     size: Theme.px(16)
-                    color: SettingsService.lowRefreshOnBattery ? Theme.accentGreenStrong : Theme.textTertiary
+                    color: lowRefreshRow.isOn ? Theme.accentGreenStrong : Theme.textTertiary
                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
                 }
 
@@ -340,7 +344,7 @@ Item {
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Lowers the built-in screen's refresh rate while unplugged"
+                        text: PowerProfileService.lowRefreshProblem || "Lowers the built-in screen's refresh rate while unplugged"
                         wrapMode: Text.WordWrap
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontPx(10)
@@ -353,7 +357,7 @@ Item {
                     Layout.preferredWidth: Theme.px(46)
                     Layout.preferredHeight: Theme.px(26)
                     radius: Theme.px(13)
-                    color: SettingsService.lowRefreshOnBattery ? Theme.accentGreen : Theme.controlTrackOff
+                    color: lowRefreshRow.isOn ? Theme.accentGreen : Theme.controlTrackOff
 
                     Behavior on color {
                         ColorAnimation { duration: 180 }
@@ -362,7 +366,7 @@ Item {
                     // Sliding Knob
                     Rectangle {
                         y: Theme.px(2)
-                        x: SettingsService.lowRefreshOnBattery ? Theme.px(22) : Theme.px(2)
+                        x: lowRefreshRow.isOn ? Theme.px(22) : Theme.px(2)
                         width: Theme.px(22)
                         height: Theme.px(22)
                         radius: Theme.px(11)
