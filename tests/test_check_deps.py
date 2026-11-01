@@ -1,8 +1,11 @@
 """Tests for scripts/check_deps.py with a fake system, and for deps.json itself. Run with ./test.sh."""
 import json
 import os
+import socket
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
@@ -11,12 +14,13 @@ import check_deps  # noqa: E402
 
 
 class FakeProbe:
-    def __init__(self, commands=(), modules=(), session="wayland", names=None, units=()):
+    def __init__(self, commands=(), modules=(), session="wayland", names=None, units=(), sockets=()):
         self.commands = set(commands)
         self.modules = set(modules)
         self.session = session
         self.names = names or {}
         self.units = set(units)
+        self.sockets = set(sockets)
 
     def has_command(self, name):
         return name in self.commands
@@ -32,6 +36,9 @@ class FakeProbe:
 
     def has_unit(self, unit, bus):
         return (bus, unit) in self.units
+
+    def has_socket(self, name):
+        return name in self.sockets
 
 
 def dep(check, severity="optional", packages=None, dep_id="x"):
@@ -80,9 +87,45 @@ class CheckStatusTest(unittest.TestCase):
         self.assertEqual(check_deps.check_status(check, FakeProbe(commands=["kdeconnectd"])), "not-running")
         self.assertEqual(check_deps.check_status(check, FakeProbe()), "missing")
 
+    def test_socket_listening(self):
+        check = {"type": "socket", "name": "pipewire-0", "commands": ["pipewire"]}
+        self.assertEqual(check_deps.check_status(check, FakeProbe(sockets=["pipewire-0"])), "found")
+
+    def test_socket_installed_command_is_not_running(self):
+        check = {"type": "socket", "name": "pipewire-0", "commands": ["pipewire"]}
+        self.assertEqual(check_deps.check_status(check, FakeProbe(commands=["pipewire"])), "not-running")
+        self.assertEqual(check_deps.check_status(check, FakeProbe()), "missing")
+
     def test_unknown_type_is_an_error(self):
         with self.assertRaises(ValueError):
             check_deps.check_status({"type": "magic"}, FakeProbe())
+
+
+class ProbeSocketTest(unittest.TestCase):
+    def setUp(self):
+        runtime_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(runtime_dir.cleanup)
+        self.path = os.path.join(runtime_dir.name, "pipewire-0")
+        env = mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": runtime_dir.name})
+        env.start()
+        self.addCleanup(env.stop)
+
+    def bind(self):
+        sock = socket.socket(socket.AF_UNIX)
+        self.addCleanup(sock.close)
+        sock.bind(self.path)
+        return sock
+
+    def test_listening(self):
+        self.bind().listen()
+        self.assertTrue(check_deps.Probe().has_socket("pipewire-0"))
+
+    def test_no_file(self):
+        self.assertFalse(check_deps.Probe().has_socket("pipewire-0"))
+
+    def test_file_with_nothing_listening(self):
+        self.bind()
+        self.assertFalse(check_deps.Probe().has_socket("pipewire-0"))
 
 
 class DetectDistroTest(unittest.TestCase):

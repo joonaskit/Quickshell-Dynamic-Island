@@ -18,6 +18,6 @@ Try a D-Bus helper on a private bus first, with `./run.sh --sandbox`.
 
 ## Dependencies
 
-`deps.json` lists every external tool, Python module and D-Bus service the shell uses, with the features each one supports and its package name per distro. Add an entry when a feature starts using a new one.
+`deps.json` lists every external tool, Python module, D-Bus service and socket service the shell uses, with the features each one supports and its package name per distro. Add an entry when a feature starts using a new one.
 
 `scripts/check_deps.py` (`./run.sh --check`, and the welcome guide's system check) checks them, tested by `tests/test_check_deps.py`.

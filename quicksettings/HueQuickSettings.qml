@@ -192,8 +192,8 @@ Item {
 
                     Text {
                         text: {
-                            if (!HueService.paired) return "Not connected to a bridge";
                             if (HueService.error !== "") return HueService.error;
+                            if (!HueService.paired) return "Not connected to a bridge";
                             if (!HueService.connected) return "Connecting...";
                             if (root.light) return root.light.name;
                             return "No lights found";

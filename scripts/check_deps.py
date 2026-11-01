@@ -6,7 +6,7 @@ Usage:
   check_deps.py --json    the same result as JSON, for the shell and scripts
 
 Each dependency is "found", "missing" or "not-running" (a service that is
-installed but not on the bus). The exit code is 1 only when a required
+installed but not on the bus or its socket). The exit code is 1 only when a required
 dependency is not found, and 2 when deps.json cannot be read.
 
 Uses the standard library only, so it runs before dbus-python and PyGObject
@@ -16,6 +16,7 @@ import importlib.util
 import json
 import os
 import shutil
+import socket
 import subprocess
 import sys
 
@@ -68,6 +69,17 @@ class Probe:
         args = ["systemctl", "cat", unit] if bus == "system" else ["systemctl", "--user", "cat", unit]
         return _run(args, output=False)
 
+    def has_socket(self, name):
+        """Something is listening on this socket in $XDG_RUNTIME_DIR. A file left by a crash does not count."""
+        path = os.path.join(os.environ.get("XDG_RUNTIME_DIR", ""), name)
+        with socket.socket(socket.AF_UNIX) as sock:
+            sock.settimeout(1)
+            try:
+                sock.connect(path)
+            except OSError:
+                return False
+        return True
+
 
 def _run(args, output=True):
     try:
@@ -97,6 +109,10 @@ def check_status(check, probe):
         installed = any(probe.has_unit(u, bus) for u in check.get("units", [])) \
             or any(probe.has_command(c) for c in check.get("commands", []))
         return NOT_RUNNING if installed else MISSING
+    if kind == "socket":
+        if probe.has_socket(check["name"]):
+            return FOUND
+        return NOT_RUNNING if any(probe.has_command(c) for c in check.get("commands", [])) else MISSING
     raise ValueError(f"unknown check type: {kind}")
 
 
