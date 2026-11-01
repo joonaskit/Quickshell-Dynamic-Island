@@ -13,30 +13,11 @@ Singleton {
     property real ramTotalGb: 0.0
     property int cpuTemp: 0
 
-    // Process restart timer
-    Timer {
-        id: restartTimer
-        interval: 2000
-        repeat: false
-        onTriggered: {
-            if (!statsProc.running) {
-                statsProc.running = true;
-            }
-        }
-    }
-
-    Process {
+    HelperProcess {
         id: statsProc
+        helperId: "hardware"
+        helperName: "Hardware stats"
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/hardware_stats.py"]
-        running: true
-
-        Component.onCompleted: HelperService.watch("hardware", "Hardware stats", statsProc)
-
-        onRunningChanged: {
-            if (!running) {
-                restartTimer.start();
-            }
-        }
 
         stdout: SplitParser {
             onRead: function(line) {

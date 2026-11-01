@@ -239,27 +239,12 @@ Singleton {
         return list;
     }
 
-    Timer {
-        id: restartTimer
-        interval: 1000
-        repeat: false
-        onTriggered: {
-            trackerProc.running = true;
-        }
-    }
-
-    Process {
+    HelperProcess {
         id: trackerProc
+        helperId: "windows"
+        helperName: "Window tracker"
+        restartDelay: 1000
         command: ["python3", Quickshell.shellDir + "/scripts/kwin_window_tracker.py"]
-        running: true
-
-        Component.onCompleted: HelperService.watch("windows", "Window tracker", trackerProc)
-
-        onRunningChanged: {
-            if (!running) {
-                restartTimer.start();
-            }
-        }
 
         stdout: SplitParser {
             onRead: function(line) {

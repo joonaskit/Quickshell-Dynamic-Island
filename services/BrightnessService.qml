@@ -14,34 +14,18 @@ Singleton {
 
     // The kernel reports every backlight change (Fn keys, KDE's slider) as a udev event, so
     // brightness is read again only when one arrives
-    Process {
+    HelperProcess {
         id: monitorProc
+        helperId: "backlight"
+        helperName: "Brightness monitor"
+        wanted: root.isAvailable
         command: ["udevadm", "monitor", "--kernel", "--subsystem-match=backlight"]
-        running: root.isAvailable
-
-        Component.onCompleted: HelperService.watch("backlight", "Brightness monitor", monitorProc)
-
-        onRunningChanged: {
-            if (!running && root.isAvailable) {
-                restartTimer.start();
-            }
-        }
 
         stdout: SplitParser {
             onRead: function(line) {
                 if (line.includes(" change ") && !root.isChanging) {
                     root.queryBrightness();
                 }
-            }
-        }
-    }
-
-    Timer {
-        id: restartTimer
-        interval: 2000
-        onTriggered: {
-            if (!monitorProc.running) {
-                monitorProc.running = true;
             }
         }
     }

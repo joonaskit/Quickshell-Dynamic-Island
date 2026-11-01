@@ -67,28 +67,18 @@ Singleton {
         }
     }
 
-    Process {
+    HelperProcess {
         id: bridge
+        helperId: "activities"
+        helperName: "Activities bridge"
+        restartDelay: 1000
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/activities_bridge.py"]
-        running: true
-        Component.onCompleted: HelperService.watch("activities", "Activities bridge", bridge)
         stdinEnabled: true
-
-        property real startedAt: 0
-        property int quickExits: 0
 
         onRunningChanged: {
             root.bridgeRunning = running;
-            if (running) {
-                startedAt = Date.now();
-                return;
-            }
             // The bridge's state is gone with it
-            root.activities = [];
-            // Back off when it keeps dying right away, for example without python-dbus
-            quickExits = (Date.now() - startedAt < 5000) ? quickExits + 1 : 0;
-            restartTimer.interval = Math.min(30000, 1000 * Math.pow(2, Math.min(quickExits, 5)));
-            restartTimer.start();
+            if (!running) root.activities = [];
         }
 
         stdout: SplitParser {
@@ -98,11 +88,5 @@ Singleton {
         stderr: SplitParser {
             onRead: function(line) { console.warn("[ActivityService]", line); }
         }
-    }
-
-    Timer {
-        id: restartTimer
-        repeat: false
-        onTriggered: bridge.running = true
     }
 }
