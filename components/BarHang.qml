@@ -31,8 +31,9 @@ Item {
     // One strip with the bar, or a card below it (BarBubble)
     readonly property bool joined: hangs && !detached
     readonly property bool bubble: hangs && detached
-    // While open as a card: the pill moves its menu down below the card's top, and adds
-    // that much to its height
+    // While open as a card: the pill moves its menu down onto the card, and adds that much
+    // to its height. False as soon as it starts closing, while `bubble` lasts through the
+    // shrink
     readonly property bool bubbleOpen: topBarMode && detached && open
     // Where the card starts, measured from the top of the body
     readonly property real bubbleTop: barDepth + bubbleGap
