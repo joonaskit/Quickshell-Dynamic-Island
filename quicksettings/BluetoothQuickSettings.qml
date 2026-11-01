@@ -105,39 +105,9 @@ Item {
                     }
                 }
 
-                // Toggle switch
-                Rectangle {
-                    Layout.preferredWidth: Theme.px(46)
-                    Layout.preferredHeight: Theme.px(26)
-                    radius: Theme.px(13)
-                    color: BluetoothService.isEnabled ? Theme.accentGreen : Theme.controlTrackOff
-
-                    Behavior on color {
-                        ColorAnimation { duration: 180 }
-                    }
-
-                    // Sliding Knob
-                    Rectangle {
-                        id: toggleKnob
-                        y: Theme.px(2)
-                        x: BluetoothService.isEnabled ? Theme.px(22) : Theme.px(2)
-                        width: Theme.px(22)
-                        height: Theme.px(22)
-                        radius: Theme.px(11)
-                        color: Theme.sliderHandle
-
-                        Behavior on x {
-                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            BluetoothService.togglePower();
-                        }
-                    }
+                ToggleSwitch {
+                    checked: BluetoothService.isEnabled
+                    onClicked: BluetoothService.togglePower()
                 }
             }
 

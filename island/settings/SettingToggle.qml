@@ -94,27 +94,12 @@ Rectangle {
             }
         }
 
-        // Toggle switch
-        Rectangle {
-            Layout.preferredWidth: 44
-            Layout.preferredHeight: 24
-            radius: 12
-            color: toggleRow.checked ? Theme.accentGreen : Theme.controlTrackOff
-
-            Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-            Rectangle {
-                y: 2
-                x: toggleRow.checked ? 22 : 2
-                width: 20
-                height: 20
-                radius: 10
-                color: Theme.sliderHandle
-
-                Behavior on x {
-                    NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic }
-                }
-            }
+        ToggleSwitch {
+            trackWidth: 44
+            trackHeight: 24
+            knobInset: 2
+            interactive: false
+            checked: toggleRow.checked
         }
     }
 }
