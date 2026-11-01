@@ -34,37 +34,61 @@ function batteryMode(output) {
     return String(best.id);
 }
 
-// The id of the mode to go back to on AC, or "" to stay. The remembered mode wins while it is at the
-// current size. Without one (the shell restarted on battery), a panel at 60 Hz goes to its fastest mode.
-function acMode(output, rememberedId) {
+// Rates are compared loosely, as panels report values like 59.88
+function sameRate(a, b) {
+    return Math.abs(a - b) < 1;
+}
+
+// The id of the mode to go back to on AC, or "" to stay. `entry` is the panel's { from, to } rates. A panel
+// no longer at `to` was changed by hand, and one without an entry was never lowered: both stay as they are.
+function acMode(output, entry) {
     let cur = findMode(output, output.currentModeId);
-    if (!cur) return "";
-    let remembered = rememberedId ? findMode(output, rememberedId) : null;
-    if (remembered && sameSize(remembered, cur)) return remembered.id === cur.id ? "" : String(remembered.id);
-    if (Math.round(cur.refreshRate) > BATTERY_HZ) return "";
-    let fastest = cur;
+    if (!cur || !entry || !sameRate(cur.refreshRate, entry.to)) return "";
+    let best = cur;
     let modes = output.modes || [];
     for (let i = 0; i < modes.length; i++) {
-        if (sameSize(modes[i], cur) && modes[i].refreshRate > fastest.refreshRate) fastest = modes[i];
+        let m = modes[i];
+        if (sameSize(m, cur) && Math.abs(m.refreshRate - entry.from) < Math.abs(best.refreshRate - entry.from)) best = m;
     }
-    return fastest === cur ? "" : String(fastest.id);
+    return best === cur ? "" : String(best.id);
 }
 
 // Which built-in panels to switch and to which mode. Returns { changes: [{ name, modeId }], remembered },
-// where remembered maps each lowered panel's name to the mode it had before.
+// where remembered maps each lowered panel's name to { from, to }, the rates before and after. Entries of
+// panels skipped here are kept, so a panel that is off for now (lid closed) is still restored later.
 function plan(outputs, lower, remembered) {
     let changes = [];
-    let kept = {};
+    let kept = Object.assign({}, remembered);
     for (let i = 0; i < outputs.length; i++) {
         let o = outputs[i];
         if (o.type !== PANEL || !o.enabled || !o.connected) continue;
-        let id = lower ? batteryMode(o) : acMode(o, remembered[o.name]);
+        let entry = remembered[o.name];
+        let id = lower ? batteryMode(o) : acMode(o, entry);
         if (id) changes.push({ "name": o.name, "modeId": id });
-        if (!lower) continue;
-        if (remembered[o.name]) kept[o.name] = remembered[o.name];
-        else if (id) kept[o.name] = String(o.currentModeId);
+        if (!lower) {
+            delete kept[o.name];
+        } else if (id) {
+            let from = entry ? entry.from : findMode(o, o.currentModeId).refreshRate;
+            kept[o.name] = { "from": from, "to": findMode(o, id).refreshRate };
+        }
     }
     return { "changes": changes, "remembered": kept };
+}
+
+// The remembered rates from the state file's text, leaving out anything malformed
+function parseRemembered(text) {
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (e) {
+        return {};
+    }
+    let kept = {};
+    for (let name in data || {}) {
+        let entry = data[name];
+        if (entry && typeof entry.from === "number" && typeof entry.to === "number") kept[name] = entry;
+    }
+    return kept;
 }
 
 // Arguments for kscreen-doctor that apply the changes

@@ -12,8 +12,9 @@ Singleton {
     property string activeProfile: "balanced"
     readonly property var profiles: ["power-saver", "balanced", "performance"]
 
-    // 60 Hz on battery: the modes the built-in panels had before they were lowered, by output name
-    property var rememberedModes: ({})
+    // 60 Hz on battery: the rates of the lowered built-in panels by output name, as { from, to }. Kept in a
+    // state file, so a restart on battery does not forget what to go back to
+    property var rememberedRates: ({})
     property bool refreshPending: false
 
     // Process to query active profile
@@ -81,9 +82,24 @@ Singleton {
     }
 
     function updateRefreshRate() {
-        if (!SettingsService.lowRefreshOnBattery && Object.keys(root.rememberedModes).length === 0) return;
+        if (!SettingsService.lowRefreshOnBattery && Object.keys(root.rememberedRates).length === 0) return;
         if (displayProc.running) root.refreshPending = true;
         else displayProc.running = true;
+    }
+
+    // Written before the mode changes, so a crash in between cannot lose the rate to go back to
+    function setRememberedRates(rates) {
+        if (JSON.stringify(rates) === JSON.stringify(root.rememberedRates)) return;
+        root.rememberedRates = rates;
+        rememberedFile.setText(JSON.stringify(rates));
+    }
+
+    FileView {
+        id: rememberedFile
+        path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/quickshell-island/refresh-rate.json"
+        blockWrites: true
+        printErrors: false
+        onLoaded: root.rememberedRates = RefreshRate.parseRemembered(text())
     }
 
     Process {
@@ -98,8 +114,8 @@ Singleton {
                     return;
                 }
                 let lower = SettingsService.lowRefreshOnBattery && UPower.onBattery;
-                let plan = RefreshRate.plan(outputs, lower, root.rememberedModes);
-                root.rememberedModes = plan.remembered;
+                let plan = RefreshRate.plan(outputs, lower, root.rememberedRates);
+                root.setRememberedRates(plan.remembered);
                 if (plan.changes.length > 0) Quickshell.execDetached(["kscreen-doctor"].concat(RefreshRate.commandArgs(plan.changes)));
             }
         }
