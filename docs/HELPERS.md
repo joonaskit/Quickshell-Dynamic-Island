@@ -10,7 +10,7 @@ Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*
 
 ## Adding a long-running helper
 
-1. Register its `Process` with `HelperService.watch(id, name, proc)` in the service that starts it. `HelperService` lists them in the Health section of the About page (`island/settings/HealthSection.qml`).
+1. Start it with a `HelperProcess` (`components/HelperProcess.qml`) in the service that owns it, giving its `helperId`, `helperName`, a `restartDelay` if the default doesn't suit, and `wanted` if it only runs some of the time. It restarts the helper when it exits, backs off if it keeps dying right away (`services/restartDelay.js`), and registers with `HelperService.watch`. `HelperService` lists them in the Health section of the About page (`island/settings/HealthSection.qml`).
 2. Add the script to `LONG_RUNNING` in `scripts/helper_health.py` (tested by `tests/test_helper_health.py`), which finds leftover helpers from an earlier run.
 3. Add every tool, Python module or D-Bus service it needs to `deps.json` (see below).
 

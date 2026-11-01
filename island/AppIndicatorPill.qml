@@ -435,7 +435,7 @@ Item {
     // Where the body is cut into the bar, for TopBarWings.gaps
     readonly property var barGap: hang.gap
     // The window's blur: the card while detached, else the body
-    readonly property Item blurBody: hang.bubble ? bubbleCard : pillBackground
+    readonly property Item blurBody: hang.bubble ? surface.card : pillBackground
 
     // Only while hanging from the bar: the tray has no notch style of its own
     NotchEars {
@@ -504,19 +504,10 @@ Item {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
 
-        // Detached on glass: the menu's card below the bar (BarHang.bubble)
-        BarBubble {
-            id: bubbleCard
+        PillSurface {
+            id: surface
             hang: hang
-        }
-
-        GlassSurface {
-            body: pillBackground
-            flushTop: notchEars.active
-            flatTop: Theme.notchStyle && !root.isTopBarMode
-            flushInset: notchEars.inset
-            hairline: !hang.joined
-            active: Theme.glass && !hang.bubble
+            ears: notchEars
         }
 
         // =====================================================================

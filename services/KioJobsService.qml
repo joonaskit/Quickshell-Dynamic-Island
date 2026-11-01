@@ -18,14 +18,7 @@ Singleton {
     // "active", "waiting" (another program shows KIO's jobs), or "" when not running
     property string state: ""
 
-    onWantedChanged: root.apply()
     onStateChanged: HelperService.setStatus("kiojobs", { note: root.state === "waiting" ? "Waiting, another program shows file progress" : "" })
-
-    function apply() {
-        HelperService.setStatus("kiojobs", { off: !root.wanted });
-        if (!root.wanted) restartTimer.stop();
-        helperProc.running = root.wanted;
-    }
 
     function handleLine(line) {
         let t = line.trim();
@@ -38,29 +31,14 @@ Singleton {
         }
     }
 
-    Process {
+    HelperProcess {
         id: helperProc
+        helperId: "kiojobs"
+        helperName: "File progress"
+        restartDelay: 1000
+        wanted: root.wanted
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/kio_jobs.py"]
-        Component.onCompleted: {
-            HelperService.watch("kiojobs", "File progress", helperProc);
-            root.apply();
-        }
-
-        property real startedAt: 0
-        property int quickExits: 0
-
-        onRunningChanged: {
-            if (running) {
-                startedAt = Date.now();
-                return;
-            }
-            root.state = "";
-            if (!root.wanted) return;
-            // Back off when it keeps dying right away, for example without python-dbus
-            quickExits = (Date.now() - startedAt < 5000) ? quickExits + 1 : 0;
-            restartTimer.interval = Math.min(30000, 1000 * Math.pow(2, Math.min(quickExits, 5)));
-            restartTimer.start();
-        }
+        onRunningChanged: if (!running) root.state = ""
 
         stdout: SplitParser {
             onRead: function(line) { root.handleLine(line); }
@@ -69,11 +47,5 @@ Singleton {
         stderr: SplitParser {
             onRead: function(line) { console.warn("[KioJobsService]", line); }
         }
-    }
-
-    Timer {
-        id: restartTimer
-        repeat: false
-        onTriggered: if (root.wanted) helperProc.running = true
     }
 }

@@ -1,5 +1,6 @@
 import ".."
 import QtQuick
+import "colorMath.js" as ColorMath
 
 // Lets a top pill's body grow out of the full-width top bar while it is open, as one strip
 // with the bar (docs/TOP_BAR.md). Put it in the pill, point `body` at the body and set
@@ -30,8 +31,9 @@ Item {
     // One strip with the bar, or a card below it (BarBubble)
     readonly property bool joined: hangs && !detached
     readonly property bool bubble: hangs && detached
-    // While open as a card: the pill moves its menu down below the card's top, and adds
-    // that much to its height
+    // While open as a card: the pill moves its menu down onto the card, and adds that much
+    // to its height. False as soon as it starts closing, while `bubble` lasts through the
+    // shrink
     readonly property bool bubbleOpen: topBarMode && detached && open
     // Where the card starts, measured from the top of the body
     readonly property real bubbleTop: barDepth + bubbleGap
@@ -51,7 +53,7 @@ Item {
     // pixel short of, so they overlap instead of leaving a light line
     readonly property real fillTop: barDepth - barEdge - 1 / (Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1)
     // The bar's fill at its lower edge: on glass, with the faint sheen GlassSurface puts there
-    readonly property color barFill: Theme.glass ? over(Theme.glassSheenLow, Theme.islandSurface) : Theme.islandSurface
+    readonly property color barFill: Theme.glass ? ColorMath.over(Theme.glassSheenLow, Theme.islandSurface) : Theme.islandSurface
     // Where the body is in the window, for TopBarWings.gaps (null while not hanging)
     readonly property var gap: joined && pill ? ({ x: pill.x + body.x, width: body.width }) : null
 
@@ -70,13 +72,5 @@ Item {
 
     function stop(depth) {
         return body && body.height > 0 ? Math.max(0, Math.min(1, depth / body.height)) : 0;
-    }
-
-    // `top` drawn over `bottom`, both translucent
-    function over(top, bottom) {
-        let a = top.a + bottom.a * (1 - top.a);
-        if (a <= 0) return Qt.rgba(0, 0, 0, 0);
-        let mix = (t, b) => (t * top.a + b * bottom.a * (1 - top.a)) / a;
-        return Qt.rgba(mix(top.r, bottom.r), mix(top.g, bottom.g), mix(top.b, bottom.b), a);
     }
 }

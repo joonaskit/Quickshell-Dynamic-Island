@@ -12,7 +12,7 @@ Singleton {
     id: root
 
     // One entry per helper: { id, name, running, starts, crashes, lastExit, off, note }.
-    // off is a helper the user turned off, note a word on how a running one is doing
+    // off is a helper that isn't wanted right now, note a word on how a running one is doing
     property var entries: []
     // Helpers running that this shell did not start: [{ pid, script }]
     property var stale: []

@@ -18,32 +18,15 @@ Singleton {
     // nmcli monitor prints a line whenever NetworkManager's state changes (a connection
     // coming up or going down, the Wi-Fi radio switched), so the status is read again
     // only then. A burst of lines is read once
-    Process {
+    HelperProcess {
         id: monitorProc
+        helperId: "network"
+        helperName: "Network monitor"
         command: ["nmcli", "monitor"]
-        running: true
-
-        Component.onCompleted: HelperService.watch("network", "Network monitor", monitorProc)
-
-        onRunningChanged: {
-            if (!running) {
-                restartTimer.start();
-            }
-        }
 
         stdout: SplitParser {
             onRead: function(line) {
                 queryDelay.restart();
-            }
-        }
-    }
-
-    Timer {
-        id: restartTimer
-        interval: 2000
-        onTriggered: {
-            if (!monitorProc.running) {
-                monitorProc.running = true;
             }
         }
     }
