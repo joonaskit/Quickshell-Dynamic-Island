@@ -133,7 +133,8 @@
         ]
       },
       "features": [
-        "Showing the shell on the main display set in System Settings"
+        "Showing the shell on the main display set in System Settings",
+        "60 Hz on battery"
       ],
       "packages": {
         "arch": "libkscreen",
@@ -208,6 +209,51 @@
         "fedora": "systemd",
         "opensuse": "systemd",
         "debian": "systemd"
+      }
+    },
+    {
+      "id": "pipewire",
+      "name": "PipeWire",
+      "severity": "recommended",
+      "check": {
+        "type": "socket",
+        "name": "pipewire-0",
+        "commands": [
+          "pipewire"
+        ]
+      },
+      "features": [
+        "Volume slider, volume keys and the volume OSD",
+        "Microphone volume and mute",
+        "Choosing the audio output and input device",
+        "Per-app volume mixer"
+      ],
+      "packages": {
+        "arch": "pipewire",
+        "fedora": "pipewire",
+        "opensuse": "pipewire",
+        "debian": "pipewire"
+      },
+      "note": "PulseAudio alone isn't supported. Switch the session to PipeWire"
+    },
+    {
+      "id": "wireplumber",
+      "name": "WirePlumber",
+      "severity": "recommended",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "wireplumber"
+        ]
+      },
+      "features": [
+        "Finding the default audio devices"
+      ],
+      "packages": {
+        "arch": "wireplumber",
+        "fedora": "wireplumber",
+        "opensuse": "wireplumber",
+        "debian": "wireplumber"
       }
     },
     {
@@ -529,7 +575,8 @@
         ]
       },
       "features": [
-        "Battery indicator"
+        "Battery indicator",
+        "60 Hz on battery"
       ],
       "packages": {
         "arch": "upower",
