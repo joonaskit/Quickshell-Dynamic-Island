@@ -16,6 +16,11 @@ Singleton {
     // state file, so a restart on battery does not forget what to go back to
     property var rememberedRates: ({})
     property bool refreshPending: false
+    property bool rememberedRead: false
+    // UPower.onBattery reads false until D-Bus answers, so a check before then would raise a lowered panel
+    property bool upowerSettled: false
+    readonly property bool refreshReady: upowerSettled && rememberedRead && SettingsService.isLoaded
+    onRefreshReadyChanged: root.updateRefreshRate()
 
     // Process to query active profile
     Process {
@@ -81,7 +86,14 @@ Singleton {
         function onLowRefreshOnBatteryChanged() { root.updateRefreshRate(); }
     }
 
+    Timer {
+        interval: 1000
+        running: true
+        onTriggered: root.upowerSettled = true
+    }
+
     function updateRefreshRate() {
+        if (!root.refreshReady) return;
         if (!SettingsService.lowRefreshOnBattery && Object.keys(root.rememberedRates).length === 0) return;
         if (displayProc.running) root.refreshPending = true;
         else displayProc.running = true;
@@ -99,7 +111,11 @@ Singleton {
         path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/quickshell-island/refresh-rate.json"
         blockWrites: true
         printErrors: false
-        onLoaded: root.rememberedRates = RefreshRate.parseRemembered(text())
+        onLoaded: {
+            root.rememberedRates = RefreshRate.parseRemembered(text());
+            root.rememberedRead = true;
+        }
+        onLoadFailed: root.rememberedRead = true
     }
 
     Process {
