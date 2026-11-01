@@ -306,7 +306,7 @@ Item {
             anchors.top: divider.bottom
             // Detached, below the gap to the card's top
             anchors.topMargin: (hang.bubble ? hang.bubbleGap : 0) + menuGap
-            readonly property real menuGap: 4
+            readonly property real menuGap: Theme.px(4)
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: grabberArea.top

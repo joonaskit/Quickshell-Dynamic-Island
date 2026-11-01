@@ -56,7 +56,7 @@ Item {
                     color: NetworkService.isWifiEnabled ? Theme.accent : Theme.cardSurfaceHover
 
                     Behavior on color {
-                        ColorAnimation { duration: 180 }
+                        ColorAnimation { duration: Theme.animDurationFast }
                     }
 
                     SvgIcon {

@@ -11,6 +11,7 @@ Singleton {
 
     property string activeProfile: "balanced"
     readonly property var profiles: ["power-saver", "balanced", "performance"]
+    readonly property bool hasBattery: UPower.displayDevice !== null && UPower.displayDevice.isPresent
 
     // 60 Hz on battery: the rates of the lowered built-in panels by output name, as { from, to }. Kept in a
     // state file, so a restart on battery does not forget what to go back to

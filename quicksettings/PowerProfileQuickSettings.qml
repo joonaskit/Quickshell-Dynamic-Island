@@ -1,7 +1,6 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Services.UPower
 
 Item {
     id: root
@@ -59,7 +58,7 @@ Item {
                         return Qt.rgba(10/255, 132/255, 255/255, 0.22);
                     }
 
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -318,7 +317,7 @@ Item {
                 id: lowRefreshRow
                 // Unavailable shows as off, leaving the saved setting for when kscreen-doctor is installed
                 readonly property bool isOn: SettingsService.lowRefreshOnBattery && PowerProfileService.lowRefreshAvailable
-                visible: UPower.displayDevice !== null && UPower.displayDevice.isPresent
+                visible: PowerProfileService.hasBattery
                 enabled: PowerProfileService.lowRefreshAvailable
                 opacity: enabled ? 1.0 : 0.4
                 Layout.fillWidth: true
