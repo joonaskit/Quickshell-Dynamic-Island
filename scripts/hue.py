@@ -9,7 +9,7 @@ shows up in the process list. The bridge address comes from HUE_BRIDGE.
 Commands (output is JSON lines on stdout):
   discover                    ask discovery.meethue.com for bridges on this network
   locate                      find which of those bridges accepts the saved key
-  pair                       create an application key (press the bridge link button first)
+  pair                        create an application key (press the bridge link button first)
   lights                      print the lights once
   stream                      print the lights now and again after every change
   set <id> [--on|--off] [--brightness 0-100] [--mirek N]
