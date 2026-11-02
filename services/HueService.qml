@@ -93,6 +93,8 @@ Singleton {
                         root.error = "";
                     } else if (msg.error) {
                         root.error = msg.error;
+                        // A live stream dropping is normal; never reaching the bridge is not
+                        if (msg.unreachable && !root.connected) root.relocate();
                     }
                 } catch (e) {}
             }
@@ -103,6 +105,35 @@ Singleton {
         id: restartTimer
         interval: 5000
         onTriggered: root.streamAllowed = true
+    }
+
+    // The router can move the bridge while the key stays valid, so look for it at
+    // its new address. The stream retries every 5 s and discovery.meethue.com
+    // limits requests, so the search runs once per wait.
+    function relocate() {
+        if (relocateProc.running || relocateWait.running) return;
+        relocateWait.start();
+        relocateProc.running = true;
+    }
+
+    Timer {
+        id: relocateWait
+        interval: 15 * 60 * 1000
+    }
+
+    // The stream keeps showing the problem, so a failed search stays quiet
+    Process {
+        id: relocateProc
+        command: ["python3", root.script, "locate"]
+        environment: root.env
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    let msg = JSON.parse(text.trim());
+                    if (msg.bridge) root.setBridge(msg.bridge);
+                } catch (e) {}
+            }
+        }
     }
 
     // Slider writes go out at most every 80 ms so dragging does not flood the bridge

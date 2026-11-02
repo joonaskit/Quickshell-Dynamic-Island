@@ -1,7 +1,12 @@
 """Tests for the pure helpers in scripts/hue.py. Run with ./test.sh."""
+import contextlib
+import io
+import json
 import os
 import sys
 import unittest
+import urllib.error
+from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
 
@@ -69,6 +74,44 @@ class ParsePairResponseTest(unittest.TestCase):
 
     def test_garbage(self):
         self.assertEqual(hue.parse_pair_response({})[0], None)
+
+
+class FindBridgeTest(unittest.TestCase):
+    def test_skips_addresses_that_do_not_accept_the_key(self):
+        def fetch(address, _key):
+            if address == "10.0.0.1":
+                raise urllib.error.HTTPError(address, 403, "forbidden", {}, None)
+            if address == "10.0.0.2":
+                raise urllib.error.URLError("timed out")
+
+        addresses = ["10.0.0.1", "10.0.0.2", "10.0.0.3"]
+        self.assertEqual(hue.find_bridge(addresses, "k", fetch), "10.0.0.3")
+
+    def test_no_match(self):
+        def fetch(_address, _key):
+            raise OSError("no route")
+
+        self.assertIsNone(hue.find_bridge(["10.0.0.1"], "k", fetch))
+        self.assertIsNone(hue.find_bridge([], "k", fetch))
+
+
+class ErrorReportTest(unittest.TestCase):
+    def run_lights(self, failure):
+        out = io.StringIO()
+        with mock.patch.object(hue, "request", side_effect=failure), \
+                mock.patch.object(sys, "argv", ["hue.py", "lights"]), \
+                mock.patch.dict(os.environ, {"HUE_BRIDGE": "10.0.0.1", "HUE_KEY": "k"}), \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(hue.main(), 1)
+        return json.loads(out.getvalue())
+
+    def test_connection_failure_is_marked_unreachable(self):
+        self.assertTrue(self.run_lights(urllib.error.URLError("timed out"))["unreachable"])
+        self.assertTrue(self.run_lights(TimeoutError("timed out"))["unreachable"])
+
+    def test_a_bridge_that_answers_is_not_unreachable(self):
+        report = self.run_lights(urllib.error.HTTPError("u", 403, "forbidden", {}, None))
+        self.assertEqual(report, {"error": "bridge answered 403"})
 
 
 if __name__ == "__main__":
