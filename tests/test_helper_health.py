@@ -60,7 +60,7 @@ class FindHelpersTest(unittest.TestCase):
             for pid, raw in {
                 "10": cmdline("python3", SCRIPTS + "/hardware_stats.py"),
                 "11": cmdline("python3", SCRIPTS + "/hardware_stats.py"),
-                "12": cmdline("python3", SCRIPTS + "/audio_sinks.py", "list"),
+                "12": cmdline("python3", SCRIPTS + "/devices.py", "list"),
                 "13": cmdline("bash"),
             }.items():
                 os.makedirs(os.path.join(root, pid))

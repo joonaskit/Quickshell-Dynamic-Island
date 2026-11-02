@@ -4,7 +4,7 @@ The Python scripts in `scripts/` that feed data to the services, and how the she
 
 ## The scripts
 
-Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*.py`, `downloads_tracker.py`, `clipboard_tracker.py`, `shortcuts.py`, `activities_bridge.py` and `kio_jobs.py`. Some run once per request, others for as long as the shell does; `LONG_RUNNING` in `scripts/helper_health.py` names the second kind.
+Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `downloads_tracker.py`, `clipboard_tracker.py`, `shortcuts.py`, `activities_bridge.py` and `kio_jobs.py`. Some run once per request, others for as long as the shell does; `LONG_RUNNING` in `scripts/helper_health.py` names the second kind.
 
 `scripts/kwin_script.js` runs inside KWin. `kwin_window_tracker.py` loads it from its own directory.
 

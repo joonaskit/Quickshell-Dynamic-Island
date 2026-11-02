@@ -182,8 +182,7 @@ Singleton {
     readonly property color sliderFill: isLight ? "#221f1a" : "#ffffff"
     readonly property color sliderHandle: "#ffffff"
     readonly property color switchTrackOff: isLight ? "#d3c9b9" : "#39393d"
-    // The two above on glass: neutral tints that let the glass through. The settings
-    // window, which is not glass, keeps them.
+    // The two above on glass: neutral tints that let the glass through.
     readonly property color controlTrack: glass ? overlayNeutral(isLight ? 0.1 : 0.16) : sliderTrack
     readonly property color controlTrackOff: glass ? overlayNeutral(isLight ? 0.13 : 0.2) : switchTrackOff
 

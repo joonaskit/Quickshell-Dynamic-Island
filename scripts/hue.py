@@ -8,6 +8,7 @@ shows up in the process list. The bridge address comes from HUE_BRIDGE.
 
 Commands (output is JSON lines on stdout):
   discover                    ask discovery.meethue.com for bridges on this network
+  locate                      find which of those bridges accepts the saved key
   pair                        create an application key (press the bridge link button first)
   lights                      print the lights once
   stream                      print the lights now and again after every change
@@ -96,9 +97,29 @@ def get_lights(bridge, key):
     return [normalize_light(light) for light in data.get("data", [])]
 
 
-def cmd_discover(_args):
+def discover_bridges():
     data = request("GET", "https://discovery.meethue.com", context=ssl.create_default_context())
-    emit({"bridges": [b["internalipaddress"] for b in data if "internalipaddress" in b]})
+    return [b["internalipaddress"] for b in data if "internalipaddress" in b]
+
+
+def find_bridge(addresses, key, fetch=get_lights):
+    """Return the first address that accepts the key: the bridge it was made on."""
+    for address in addresses:
+        try:
+            fetch(address, key)
+            return address
+        except (urllib.error.URLError, OSError, ValueError):
+            continue
+    return None
+
+
+def cmd_discover(_args):
+    emit({"bridges": discover_bridges()})
+
+
+def cmd_locate(args):
+    bridge = find_bridge(discover_bridges(), args.key)
+    emit({"bridge": bridge} if bridge else {"error": "bridge not found"})
 
 
 def cmd_pair(args):
@@ -149,6 +170,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("discover").set_defaults(func=cmd_discover)
+    sub.add_parser("locate").set_defaults(func=cmd_locate)
     sub.add_parser("pair").set_defaults(func=cmd_pair)
     sub.add_parser("lights").set_defaults(func=cmd_lights)
     sub.add_parser("stream").set_defaults(func=cmd_stream)
@@ -166,7 +188,7 @@ def main():
     if args.command != "discover" and not args.bridge:
         emit({"error": "no bridge address"})
         return 1
-    if args.command in ("lights", "stream", "set") and not args.key:
+    if args.command in ("locate", "lights", "stream", "set") and not args.key:
         emit({"error": "not paired"})
         return 1
 
@@ -175,8 +197,11 @@ def main():
     except urllib.error.HTTPError as exc:
         emit({"error": f"bridge answered {exc.code}"})
         return 1
-    except (urllib.error.URLError, OSError, ValueError) as exc:
-        emit({"error": str(getattr(exc, "reason", exc))})
+    except (urllib.error.URLError, OSError) as exc:
+        emit({"error": str(getattr(exc, "reason", exc)), "unreachable": True})
+        return 1
+    except ValueError as exc:
+        emit({"error": str(exc)})
         return 1
     return 0
 
