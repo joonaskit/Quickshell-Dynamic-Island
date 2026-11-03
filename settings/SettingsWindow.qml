@@ -46,13 +46,13 @@ PanelWindow {
     readonly property bool shown: SettingsService.windowOpen && isThisScreenActive
     visible: shown || card.opacity > 0.01
 
-    readonly property var tabs: ["Appearance", "Top bar", "Island", "Dock", "Launcher", "Shortcuts", "About"]
+    readonly property var tabs: ["Appearance", "Top bar", "Island", "Dock", "Launcher", "Power", "Shortcuts", "About"]
     property int currentTab: 0
 
     readonly property bool hasSearchResults: appearanceSettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
-                                             || dockSettings.hasMatches || launcherSettings.hasMatches || shortcutsSettings.hasMatches
+                                             || dockSettings.hasMatches || launcherSettings.hasMatches || powerSettings.hasMatches || shortcutsSettings.hasMatches
 
-    readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, shortcutsSettings, aboutSettings]
+    readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, powerSettings, shortcutsSettings, aboutSettings]
     // Section key to scroll to once the requested tab is laid out
     property string pendingSection: ""
 
@@ -430,15 +430,20 @@ PanelWindow {
                                 title: window.tabs[4]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 4
                             }
-                            ShortcutsSettings {
-                                id: shortcutsSettings
+                            PowerSettings {
+                                id: powerSettings
                                 title: window.tabs[5]
                                 visible: SettingsSearch.active ? hasMatches : window.currentTab === 5
                             }
+                            ShortcutsSettings {
+                                id: shortcutsSettings
+                                title: window.tabs[6]
+                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 6
+                            }
                             AboutSettings {
                                 id: aboutSettings
-                                title: window.tabs[6]
-                                visible: !SettingsSearch.active && window.currentTab === 6
+                                title: window.tabs[7]
+                                visible: !SettingsSearch.active && window.currentTab === 7
                             }
 
                             // Empty search result
