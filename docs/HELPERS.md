@@ -12,6 +12,7 @@ Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*
 
 1. Register its `Process` with `HelperService.watch(id, name, proc)` in the service that starts it. `HelperService` lists them in the Health section of the About page (`island/settings/HealthSection.qml`).
 2. Add the script to `LONG_RUNNING` in `scripts/helper_health.py` (tested by `tests/test_helper_health.py`), which finds leftover helpers from an earlier run.
+   Step 2 is for scripts under `scripts/`. A plain command run through `Process` (`udevadm monitor` in `BrightnessService`, `nmcli monitor` in `NetworkService`) is left out on purpose: its command line is not ours, so a scan would match the same command run by hand or by another program, and `--kill` would end it. These monitors also end on their own once the shell is gone: they only write when something changes, and the first write to the closed pipe kills them. Until then a leftover is idle and harmless. Still do step 1 for them, so the Health section shows whether they are running.
 3. Add every tool, Python module or D-Bus service it needs to `deps.json` (see below).
 
 Try a D-Bus helper on a private bus first, with `./run.sh --sandbox`.
