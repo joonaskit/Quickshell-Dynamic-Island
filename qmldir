@@ -94,6 +94,7 @@ TopBarDiagram 1.0 island/settings/TopBarDiagram.qml
 IslandSettings 1.0 island/settings/IslandSettings.qml
 DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
+PowerSettings 1.0 island/settings/PowerSettings.qml
 ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
 HealthSection 1.0 island/settings/HealthSection.qml
