@@ -143,9 +143,17 @@ Singleton {
         }
     }
 
+    // The folder model may not notice a folder that did not exist when it started watching,
+    // so create the trash folders first and only then point the model at them.
+    Process {
+        id: trashDirProc
+        running: true
+        command: ["mkdir", "-p", Quickshell.env("HOME") + "/.local/share/Trash/files", Quickshell.env("HOME") + "/.local/share/Trash/info"]
+        onExited: trashModel.folder = "file://" + Quickshell.env("HOME") + "/.local/share/Trash/files"
+    }
+
     FolderListModel {
         id: trashModel
-        folder: "file://" + Quickshell.env("HOME") + "/.local/share/Trash/files"
         showDirs: true
         showHidden: true
         showDotAndDotDot: false
