@@ -197,8 +197,9 @@ Singleton {
                     let msg = JSON.parse(text.trim());
                     if (msg.bridges) {
                         root.foundBridges = msg.bridges;
-                        // The router can move the bridge, so a saved address it no longer has is stale
-                        if (msg.bridges.length > 0 && !msg.bridges.includes(SettingsService.hueBridgeIp)) {
+                        // The router can move the bridge, so a saved address it no longer has is stale.
+                        // With several bridges there is no telling which is meant, so the user picks.
+                        if (msg.bridges.length === 1 && !msg.bridges.includes(SettingsService.hueBridgeIp)) {
                             root.setBridge(msg.bridges[0]);
                         }
                     } else if (msg.error) {
