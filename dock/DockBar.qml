@@ -128,7 +128,7 @@ Item {
     // where its base sits on the dock; rounded all round when detached from it
     function flyoutBlur(item, radius) {
         let all = ["topLeftRadius", "topRightRadius", "bottomLeftRadius", "bottomRightRadius"];
-        let away = Theme.detachedMenus ? all : ({ "bottom": ["topLeftRadius", "topRightRadius"], "left": ["topRightRadius", "bottomRightRadius"], "right": ["topLeftRadius", "bottomLeftRadius"] }[root.dockPosition] || []);
+        let away = Theme.dockDetachedMenus ? all : ({ "bottom": ["topLeftRadius", "topRightRadius"], "left": ["topRightRadius", "bottomRightRadius"], "right": ["topLeftRadius", "bottomLeftRadius"] }[root.dockPosition] || []);
         let entry = { "item": item };
         for (const corner of away) entry[corner] = radius;
         return entry;
@@ -257,10 +257,10 @@ Item {
     // The launcher and the trash menu continue an end of the dock in a straight
     // line, so the dock straightens its corner under them as they open. Start is
     // the launcher's end (left, or top for a vertical dock).
-    // Detached from the dock (Theme.detachedMenus), they leave its corners round.
-    readonly property real startCornerRadius: Theme.detachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
+    // Detached from the dock (Theme.dockDetachedMenus), they leave its corners round.
+    readonly property real startCornerRadius: Theme.dockDetachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(appPicker.openProgress, launcherMenu.openProgress) * 3)))
     // The launcher also straightens the end corner when it is wide enough to reach it
-    readonly property real endCornerRadius: Theme.detachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
+    readonly property real endCornerRadius: Theme.dockDetachedMenus ? Theme.dockRadius : Theme.dockRadius * (1 - Math.max(0, Math.min(1, Math.max(trashGeo.progress, appPicker.dockEndProgress) * 3)))
 
     // Dock capsule background
     Rectangle {
@@ -322,6 +322,7 @@ Item {
 
         GlassSurface {
             body: dockCapsule
+            active: Theme.dockGlass
         }
 
         // Content Container (Grid: acts as Row when horizontal, Column when vertical)
@@ -379,8 +380,8 @@ Item {
                     scale: launchpadItem.dockScale * launchpadItem.pressScale
 
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: Theme.cardSurfaceHover }
-                        GradientStop { position: 1.0; color: Theme.cardSurface }
+                        GradientStop { position: 0.0; color: Theme.dockCardSurfaceHover }
+                        GradientStop { position: 1.0; color: Theme.dockCardSurface }
                     }
                     border.color: Theme.overlay(0.16)
                     border.width: 1
@@ -422,7 +423,7 @@ Item {
                         width: launchpadTipText.implicitWidth + 16
                         height: 24
                         radius: Theme.corner(6)
-                        color: Theme.raisedSurface
+                        color: Theme.dockRaisedSurface
                         border.color: Theme.overlay(0.18)
                         border.width: 1
 
@@ -721,8 +722,8 @@ Item {
                     scale: downloadsItem.dockScale * downloadsItem.pressScale
 
                     gradient: Gradient {
-                        GradientStop { position: 0.0; color: Theme.cardSurfaceHover }
-                        GradientStop { position: 1.0; color: Theme.cardSurface }
+                        GradientStop { position: 0.0; color: Theme.dockCardSurfaceHover }
+                        GradientStop { position: 1.0; color: Theme.dockCardSurface }
                     }
                     border.color: Theme.overlay(0.16)
                     border.width: 1
@@ -754,7 +755,7 @@ Item {
                         width: downloadsTipText.implicitWidth + 16
                         height: 24
                         radius: Theme.corner(6)
-                        color: Theme.raisedSurface
+                        color: Theme.dockRaisedSurface
                         border.color: Theme.overlay(0.18)
                         border.width: 1
 
@@ -860,7 +861,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             radius: Theme.corner(11)
-                            color: Theme.cardSurfaceHover
+                            color: Theme.dockCardSurfaceHover
                             border.color: Theme.overlay(0.15)
                             border.width: 1
                             visible: parent.status !== Image.Ready
@@ -869,7 +870,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "close"
                                 size: 20
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                             }
                         }
                     }
@@ -893,7 +894,7 @@ Item {
                         width: trashTipText.implicitWidth + 16
                         height: 24
                         radius: Theme.corner(6)
-                        color: Theme.raisedSurface
+                        color: Theme.dockRaisedSurface
                         border.color: Theme.overlay(0.18)
                         border.width: 1
 

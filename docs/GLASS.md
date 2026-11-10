@@ -6,6 +6,8 @@ The style is `Theme.style`, and `Theme.glass` is true in the glass style. The ap
 
 Two sliders below the style set how see-through the glass is: **Glass Opacity** (`glassOpacity`, 60%) for the island and its pills, and **Menu Opacity** (`glassMenuOpacity`, 80%) for the menus, the expanded island, the launcher and the dock's popups. They are `Theme.glassOpacity` and `glassMenuOpacity`, and the alpha of `glassFill` and `glassFillStrong`. The dock itself has its own slider in the Dock settings.
 
+The dock and the launcher can take their own style: **Dock Style** in the Dock settings (`dockStyle`: `shell`, `solid` or `glass`). `shell`, the default, follows the shell style. Otherwise `Theme.dockGlass` replaces `Theme.glass` for everything in `dock/`, so the dock, its popups and the launcher can be glass under a solid island, or solid under a glass one. The `Theme.dock*` roles (`dockMenuSurface`, `dockCardSurface`, `dockCardSurfaceHover`, `dockRaisedSurface`, `dockControlTrackOff`, `dockTextSecondary`, `dockTextTertiary`, `dockAccentText`, `dockIslandBorder`, `dockDetachedMenus`) are the `menuSurface`, `cardSurface`... counterparts that follow it; code in `dock/` uses those, never the plain ones. `GlassSurface.active` and `WindowBlur.active` are set from `dockGlass` there. The opacity sliders and `glassFill` colours are shared with the shell.
+
 The dock used to have a glass look of its own (`dockTransparent`). The style replaces it: an older config with that on loads as Glass. The dock keeps its two opacities, `dockOpacity` for Solid and `dockGlassOpacity` for Glass.
 
 ## Pieces

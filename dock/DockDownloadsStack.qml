@@ -104,7 +104,7 @@ Item {
                         anchors.centerIn: parent
                         name: "rotate-cw"
                         size: 11
-                        color: Theme.textSecondary
+                        color: Theme.dockTextSecondary
                     }
 
                     MouseArea {
@@ -136,7 +136,7 @@ Item {
                     text: "No recent files"
                     font.family: Theme.fontFamily
                     font.pixelSize: 12
-                    color: Theme.textSecondary
+                    color: Theme.dockTextSecondary
                 }
             }
 
@@ -170,7 +170,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: modelData.isDir ? "folder" : "file"
                                 size: 13
-                                color: modelData.isDir ? Theme.accent : Theme.textSecondary
+                                color: modelData.isDir ? Theme.accent : Theme.dockTextSecondary
                             }
                         }
 
@@ -193,7 +193,7 @@ Item {
                                 text: modelData.size || ""
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 10
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                                 elide: Text.ElideRight
                             }
                         }

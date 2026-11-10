@@ -112,7 +112,7 @@ Item {
                             font.family: Theme.fontFamily
                             font.pixelSize: 11
                             font.weight: segOption.isSelected ? Font.DemiBold : Font.Normal
-                            color: segOption.isSelected ? Theme.accentForeground : Theme.textSecondary
+                            color: segOption.isSelected ? Theme.accentForeground : Theme.dockTextSecondary
                         }
 
                         MouseArea {
@@ -157,7 +157,7 @@ Item {
             width: 32
             height: 18
             radius: 9
-            color: toggleRow.checked ? Theme.accentGreen : Theme.controlTrackOff
+            color: toggleRow.checked ? Theme.accentGreen : Theme.dockControlTrackOff
 
             Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -208,7 +208,7 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
-                    color: Theme.textSecondary
+                    color: Theme.dockTextSecondary
                 }
             }
 
@@ -305,7 +305,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     name: "settings"
                     size: 13
-                    color: Theme.textSecondary
+                    color: Theme.dockTextSecondary
                 }
 
                 Text {

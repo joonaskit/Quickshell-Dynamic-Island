@@ -311,6 +311,7 @@ PanelWindow {
     // Frosted glass behind the dock and its popups on the light scheme
     WindowBlur {
         target: window
+        active: Theme.dockGlass && Theme.blurAvailable
         items: [
             dockBar.capsule,
             dockBar.flyoutBlur(dockBar.contextMenuHitBox, 14),

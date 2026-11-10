@@ -24,6 +24,9 @@ Singleton {
     // "solid" or "glass": the look of the island, the dock and the launcher on either
     // scheme (Theme.glass). KDE apps follow colorScheme only
     property string shellStyle: "solid"
+    // "shell" (follow shellStyle), "solid" or "glass": the look of the dock, its popups
+    // and the launcher alone (Theme.dockGlass)
+    property string dockStyle: "shell"
     // Opacity of the glass style: the island and its pills, and the menus, popups and launcher
     property real glassOpacity: 0.6
     property real glassMenuOpacity: 0.8
@@ -263,6 +266,7 @@ Singleton {
         // Older configs had a glass look for the dock only (dockTransparent)
         if (data.shellStyle === "solid" || data.shellStyle === "glass") root.shellStyle = data.shellStyle;
         else if (data.dockTransparent) root.shellStyle = "glass";
+        if (data.dockStyle === "shell" || data.dockStyle === "solid" || data.dockStyle === "glass") root.dockStyle = data.dockStyle;
         if (data.glassOpacity !== undefined && !isNaN(data.glassOpacity)) root.glassOpacity = Math.max(0.30, Math.min(1.0, parseFloat(data.glassOpacity)));
         if (data.glassMenuOpacity !== undefined && !isNaN(data.glassMenuOpacity)) root.glassMenuOpacity = Math.max(0.30, Math.min(1.0, parseFloat(data.glassMenuOpacity)));
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
@@ -413,6 +417,7 @@ Singleton {
         Theme.fontDisplayChoice = root.fontDisplayFamily;
         Theme.scheme = root.colorScheme;
         Theme.style = root.shellStyle;
+        Theme.dockStyle = root.dockStyle;
         Theme.glassOpacity = root.glassOpacity;
         Theme.glassMenuOpacity = root.glassMenuOpacity;
         Theme.cornerStyle = root.cornerStyle;
@@ -536,6 +541,7 @@ Singleton {
         root.fontDisplayFamily = "";
         root.colorScheme = "dark";
         root.shellStyle = "solid";
+        root.dockStyle = "shell";
         root.glassOpacity = 0.6;
         root.glassMenuOpacity = 0.8;
         root.accentColor = "blue";
@@ -669,6 +675,7 @@ Singleton {
             "fontDisplayFamily": root.fontDisplayFamily,
             "colorScheme": root.colorScheme,
             "shellStyle": root.shellStyle,
+            "dockStyle": root.dockStyle,
             "glassOpacity": root.glassOpacity,
             "glassMenuOpacity": root.glassMenuOpacity,
             "accentColor": root.accentColor,

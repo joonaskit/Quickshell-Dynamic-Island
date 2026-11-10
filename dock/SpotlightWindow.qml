@@ -63,6 +63,7 @@ PanelWindow {
     // Frosted glass behind the launcher on the light scheme
     WindowBlur {
         target: window
+        active: Theme.dockGlass && Theme.blurAvailable
         items: [picker.body]
     }
 
