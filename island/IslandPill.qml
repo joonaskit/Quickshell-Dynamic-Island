@@ -384,12 +384,16 @@ Item {
             enabled: !root.isOpen
             hoverEnabled: !root.isOpen && !root.isTopBarMode && !root.hasFullscreenApp
             cursorShape: Qt.PointingHandCursor
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-            onClicked: {
+            // Left click opens the category dial, right click expands the pill
+            onClicked: mouse => {
                 if (root.isAlertingNotification && !root.isShowingOsd) {
                     root.openNotification();
-                } else {
+                } else if (mouse.button === Qt.RightButton) {
                     root.expand();
+                } else {
+                    DialService.toggle();
                 }
             }
         }

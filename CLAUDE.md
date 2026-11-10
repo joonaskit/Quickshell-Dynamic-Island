@@ -33,6 +33,7 @@ Read the doc for an area before changing it:
 - `theme.json` for companion apps: `docs/THEME.md`
 - Expanded-view widgets: `docs/WIDGETS.md`
 - Animations: `docs/ANIMATION_CATALOGUE.md`
+- Category dial launcher (experimental): `docs/DIAL.md`
 
 ## Running
 

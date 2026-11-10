@@ -133,3 +133,5 @@ CompactActivityView 1.0 island/CompactActivityView.qml
 ActivitiesWidget 1.0 widgets/ActivitiesWidget.qml
 ActivityIcon 1.0 components/ActivityIcon.qml
 ActivityProgressBar 1.0 components/ActivityProgressBar.qml
+singleton DialService 1.0 dial/DialService.qml
+DialWindow 1.0 dial/DialWindow.qml

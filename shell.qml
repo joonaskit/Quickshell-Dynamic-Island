@@ -28,6 +28,15 @@ ShellRoot {
         }
     }
 
+    // Experimental category dial launcher, see dial/DialWindow.qml
+    IpcHandler {
+        target: "dial"
+
+        function toggle() {
+            DialService.toggle();
+        }
+    }
+
     IpcHandler {
         target: "onboarding"
 
@@ -198,5 +207,13 @@ ShellRoot {
             SpotlightWindow {}
         }
     }
-    
+
+    // Experimental category dial launcher
+    Variants {
+        model: ScreenService.targetScreens
+
+        delegate: Component {
+            DialWindow {}
+        }
+    }
 }
