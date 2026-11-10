@@ -148,6 +148,19 @@ PanelWindow {
             border.color: Theme.glassHairline
         }
 
+        // Thin border between the category ring and the app arc, always visible. The
+        // scrollbar below sits on it.
+        Rectangle {
+            width: Theme.px(Logic.BAR_RADIUS * 2)
+            height: width
+            x: window.cx - width / 2
+            y: window.cy - height / 2
+            radius: width / 2
+            color: "transparent"
+            border.width: 1
+            border.color: Theme.glassHairline
+        }
+
         // Arc scrollbar, shown only when the arc has more items than fit
         Canvas {
             id: bar

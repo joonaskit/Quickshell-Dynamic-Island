@@ -12,4 +12,5 @@ A disc that grows out of the clock pill: categories on an inner ring, apps on an
   - Settings come from `SettingsPagesService` (two letters or more), the same pages as the dock launcher's column.
   - Files come from `FileSearchService` (Filehouse), three letters or more, after 150 ms. They search whether or not the dock launcher's File Search setting is on, and the Files scope is empty if Filehouse is missing. The files of the last search stay on the arc until new ones arrive, and a file is only opened when its results belong to the text typed.
   - Only apps can be pinned.
-- **Not built yet:** `uiScale` polish, reduced-motion behaviour.
+- **Style:** a thin border circle separates the ring from the arc, under the scrollbar. The disc is frosted glass with window blur when the dock style is glass and blur is available, otherwise solid. Tiles are only created within six steps of the bottom slot.
+- **Not built yet:** reduced-motion behaviour, which the shell does not have either. `uiScale` at 0.80 and 1.25 still needs a check by hand.
