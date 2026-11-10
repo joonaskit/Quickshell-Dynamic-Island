@@ -1,10 +1,12 @@
 # Category dial launcher (experimental)
 
-A disc that grows out of the clock pill: categories on an inner ring, apps on an outer arc. Design reference in `desing/`. It sits beside the dock launcher, not in place of it.
+A disc centred on the clock pill that slides down from the top edge of the screen (360 ms, no overshoot; the prototype scales it out of the pill): categories on an inner ring, apps on an outer arc. Design reference in `desing/`. It sits beside the dock launcher, not in place of it.
 
 - **Open:** left-click the clock pill, or `quickshell -p <dir> ipc call dial toggle`. Right-click the pill expands it instead. An alerting notification still opens on click.
 - **Files:** `dial/dialLogic.js` (geometry, categories, lists; tested by `tests/tst_dialLogic.qml`), `dial/DialService.qml` (state), `dial/DialWindow.qml` (view, one per screen).
-- **Turn:** wheel inside 288 px of the pill centre turns the ring, outside it the arc. Left/Right move along the arc, Up/Down change category, Enter launches, Ctrl+P pins, Esc closes.
+- **Turn:** wheel inside 288 px of the pill centre turns the ring, outside it the arc. One wheel notch is one step and touchpad deltas add up (`wheelSteps`), so a fast scroll turns further. The turn takes 360 ms for one step and 40 ms more for each further step, up to 900 ms, so a long turn spins faster. Left/Right move along the arc, Up/Down change category, Enter launches, Ctrl+P pins, Esc closes.
+- **Grab:** press on the ring or the arc and drag round the pill to turn it by hand; the selection follows. Let go while moving and it spins on by a quarter second of its speed (`flickTarget`), then settles on a slot. A press that moves less than 8 px is a click. Only the rings can be grabbed, from 200 px of the centre out (the grab layer's `containmentMask`); inside that the search field and the pill take presses. The cursor is an open hand over the rings.
+- **Spinner:** each ring's turn is a `Spinner` in `DialWindow.qml`, a position in steps that glides to the selection or follows the pointer. Tiles and pills take their place, opacity and upright angle from it, not from the selection.
 - **Pins:** `dial_pinned.json` (gitignored), a list of app ids. Separate from the dock's pins.
 - **Recent and Frequent:** read from the dock launcher's `launcher_usage.json` (`DockService.usageStats`), 16 each. A dial launch is recorded there too.
 - **Launch:** goes through `WindowService.launchEntry`. Terminal apps are wrapped in `konsole -e`.
@@ -12,5 +14,5 @@ A disc that grows out of the clock pill: categories on an inner ring, apps on an
   - Settings come from `SettingsPagesService` (two letters or more), the same pages as the dock launcher's column.
   - Files come from `FileSearchService` (Filehouse), three letters or more, after 150 ms. They search whether or not the dock launcher's File Search setting is on, and the Files scope is empty if Filehouse is missing. The files of the last search stay on the arc until new ones arrive, and a file is only opened when its results belong to the text typed.
   - Only apps can be pinned.
-- **Style:** a thin border circle separates the ring from the arc, under the scrollbar. The disc is frosted glass with window blur when the dock style is glass and blur is available, otherwise solid. Tiles are only created within six steps of the bottom slot.
+- **Style:** category pills are bent along the ring, drawn as a `Shape`, with the label set one letter at a time. They are spaced by width, 10 px apart (`ringAngles`), not at the prototype's fixed 22°, so long labels do not crowd; widths are measured in bold so the spacing holds when the selection moves. Tiles and pills lighten under the pointer. The scrollbar thumb follows the arc as it turns. A thin border circle separates the ring from the arc, under the scrollbar. The disc is frosted glass with window blur when the dock style is glass and blur is available, otherwise solid. Tiles are only created within six steps of the bottom slot.
 - **Not built yet:** reduced-motion behaviour, which the shell does not have either. `uiScale` at 0.80 and 1.25 still needs a check by hand.

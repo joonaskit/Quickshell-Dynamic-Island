@@ -4,7 +4,8 @@
 // Quickshell types so it can be tested with qmltestrunner (see tests/).
 
 // Geometry at scale 1.0, in px. DialWindow multiplies every length by Theme.px().
-var RING_STEP = 22;      // degrees between category pills
+var RING_STEP = 22;      // degrees a lone category pill turns per step; pills are spaced by width
+var RING_GAP = 10;       // px between neighbouring category pills, along the ring
 var ARC_STEP = 13;       // degrees between app tiles
 var RING_RADIUS = 230;
 var ARC_RADIUS = 345;
@@ -78,12 +79,61 @@ function point(radius, degrees) {
     return { x: radius * Math.cos(r), y: radius * Math.sin(r) };
 }
 
-// 0..1 opacity of a ring pill that is `distance` steps from the selected one
-function ringOpacity(distance) {
-    return distance <= 3 ? 1 : distance === 4 ? 0.35 : 0;
+// Where each category pill sits, in degrees round the ring from the first one. Pills are
+// spaced by their widths (px), `gap` px apart, so a long label does not crowd its neighbours.
+function ringAngles(widths, radius, gap) {
+    let angles = [];
+    let at = 0;
+    widths.forEach((w, i) => {
+        if (i > 0) at += (widths[i - 1] / 2 + w / 2 + gap) / radius * 180 / Math.PI;
+        angles.push(at);
+    });
+    return angles;
 }
 
-// Scrollbar thumb as the visible window of the list, in degrees along the 30..150 track
+// Degrees per step off one end of the ring, for a turn that swings or is dragged past it
+function ringEndStep(angles, last) {
+    if (angles.length < 2) return RING_STEP;
+    return last ? angles[angles.length - 1] - angles[angles.length - 2] : angles[1] - angles[0];
+}
+
+// How far the ring is turned, in degrees, when it stands at `position` steps
+function ringAngleAt(angles, position) {
+    if (angles.length === 0) return 0;
+    let last = angles.length - 1;
+    if (position <= 0) return angles[0] + position * ringEndStep(angles, false);
+    if (position >= last) return angles[last] + (position - last) * ringEndStep(angles, true);
+    let i = Math.floor(position);
+    return angles[i] + (angles[i + 1] - angles[i]) * (position - i);
+}
+
+// The reverse: the position in steps of a ring turned by `degrees`
+function ringPositionAt(angles, degrees) {
+    if (angles.length === 0) return 0;
+    let last = angles.length - 1;
+    if (degrees <= angles[0]) return (degrees - angles[0]) / ringEndStep(angles, false);
+    if (degrees >= angles[last]) return last + (degrees - angles[last]) / ringEndStep(angles, true);
+    let i = 0;
+    while (angles[i + 1] <= degrees) i++;
+    return i + (degrees - angles[i]) / (angles[i + 1] - angles[i]);
+}
+
+// 0..1 opacity of a ring pill that is `distance` steps from the bottom slot. Whole steps
+// give the prototype's values; in between it fades, so a pill dims as the ring turns.
+function ringOpacity(distance) {
+    if (distance <= 3) return 1;
+    if (distance <= 4) return 1 - (distance - 3) * 0.65;
+    return Math.max(0, 0.35 * (5 - distance));
+}
+
+// 0..1 opacity of an app tile that is `distance` steps from the bottom slot: full within
+// VISIBLE_APPS, gone one step further
+function arcOpacity(distance) {
+    return clamp(VISIBLE_APPS + 1 - distance, 0, 1);
+}
+
+// Scrollbar thumb as the visible window of the list, in degrees along the 30..150 track.
+// `focus` may be between slots while the arc turns.
 function thumbSpan(focus, count) {
     if (count <= 0) return { from: 150, to: 30 };
     let first = Math.max(0, focus - VISIBLE_APPS);
@@ -91,9 +141,65 @@ function thumbSpan(focus, count) {
     return { from: 150 - first / count * 120, to: 150 - last / count * 120 };
 }
 
-// Wheel steps are one per 140 ms, as in the prototype; returns +1 or -1
-function wheelDirection(deltaY, deltaX) {
-    return (deltaY || deltaX) > 0 ? 1 : -1;
+// ----- Turning -----
+
+var WHEEL_NOTCH = 120;   // angleDelta of one mouse wheel notch, which turns one step
+var TURN_MS = 360;       // a turn of one step
+var TURN_MS_PER_STEP = 40;
+var TURN_MS_MAX = 900;
+var TURN_OVERSHOOT = 0.9; // Easing.OutBack overshoot of a one-step turn, about 3% past the slot
+var GRAB_RADIUS = 200;   // the rings can be grabbed from here out; inside is the search field and the pill
+var DRAG_START = 8;      // px the pointer travels before a press becomes a drag
+var DRAG_SLACK = 0.35;   // steps a ring can be dragged past its ends
+var FLICK_WINDOW = 100;  // ms of pointer movement a flick's speed is measured over
+var FLICK_GLIDE = 0.25;  // seconds of its release speed a flicked ring travels on
+
+// Whole steps in a wheel delta. What is left over is carried to the next event, so the
+// small deltas of a touchpad add up and a fast scroll turns further than a slow one.
+function wheelSteps(carry, delta) {
+    let total = carry + delta / WHEEL_NOTCH;
+    let steps = total < 0 ? Math.ceil(total) : Math.floor(total);
+    return { steps: steps, carry: total - steps };
+}
+
+// How long a turn across `distance` steps takes. Longer turns take longer but move faster.
+function turnDuration(distance) {
+    return Math.round(clamp(TURN_MS + TURN_MS_PER_STEP * (Math.abs(distance) - 1), TURN_MS, TURN_MS_MAX));
+}
+
+// Easing.OutBack overshoot of a turn across `distance` steps. A long spin settles without
+// swinging past, where 3% of the way would be most of a step.
+function turnOvershoot(distance) {
+    return TURN_OVERSHOOT / Math.max(1, Math.abs(distance));
+}
+
+// Degrees from one pointer angle to the next, the short way round (-180..180)
+function angleStep(from, to) {
+    let d = (to - from) % 360;
+    if (d > 180) d -= 360;
+    else if (d <= -180) d += 360;
+    return d;
+}
+
+// Where a dragged ring of `count` items may sit, in steps
+function dragTurn(turn, count) {
+    return clamp(turn, -DRAG_SLACK, Math.max(0, count - 1) + DRAG_SLACK);
+}
+
+// Speed of a drag at release, in steps per second. samples: [{ t: ms, turn: steps }],
+// oldest first. Zero when the pointer rested before letting go.
+function flickVelocity(samples, now) {
+    let recent = samples.filter(s => now - s.t <= FLICK_WINDOW);
+    if (recent.length < 2) return 0;
+    let first = recent[0];
+    let last = recent[recent.length - 1];
+    if (last.t === first.t) return 0;
+    return (last.turn - first.turn) / (last.t - first.t) * 1000;
+}
+
+// The slot a ring of `count` items comes to rest on when let go at `velocity`
+function flickTarget(turn, velocity, count) {
+    return clamp(Math.round(turn + velocity * FLICK_GLIDE), 0, Math.max(0, count - 1));
 }
 
 // ----- Search -----

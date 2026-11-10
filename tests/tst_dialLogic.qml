@@ -67,10 +67,127 @@ TestCase {
         compare(Math.round(p.y), 345);
     }
 
+    // With this radius one px along the ring is one degree
+    readonly property real unitRadius: 180 / Math.PI
+
+    function test_ringAnglesSpacePillsByWidth() {
+        let angles = Dial.ringAngles([20, 40, 10], unitRadius, 5);
+        compare(angles.length, 3);
+        compare(angles[0], 0);
+        fuzzyCompare(angles[1], 35, 0.0001);
+        fuzzyCompare(angles[2], 65, 0.0001);
+        compare(Dial.ringAngles([], unitRadius, 5), []);
+    }
+
+    function test_ringAngleAtFollowsThePills() {
+        let angles = [0, 35, 65];
+        compare(Dial.ringAngleAt(angles, 0), 0);
+        compare(Dial.ringAngleAt(angles, 1), 35);
+        compare(Dial.ringAngleAt(angles, 1.5), 50);
+        compare(Dial.ringAngleAt(angles, 2), 65);
+        // Past an end it carries on at the end's own step
+        compare(Dial.ringAngleAt(angles, -0.2), -7);
+        compare(Dial.ringAngleAt(angles, 2.1), 68);
+        compare(Dial.ringAngleAt([], 3), 0);
+        compare(Dial.ringAngleAt([0], 0.5), 11);
+    }
+
+    function test_ringPositionAtIsTheReverse() {
+        let angles = [0, 35, 65];
+        [-0.2, 0, 0.4, 1, 1.5, 2, 2.1].forEach(position => {
+            fuzzyCompare(Dial.ringPositionAt(angles, Dial.ringAngleAt(angles, position)), position, 0.0001);
+        });
+        compare(Dial.ringPositionAt([], 20), 0);
+    }
+
     function test_ringOpacity() {
         compare(Dial.ringOpacity(3), 1);
         compare(Dial.ringOpacity(4), 0.35);
         compare(Dial.ringOpacity(5), 0);
+        // Fades between whole steps while the ring turns
+        fuzzyCompare(Dial.ringOpacity(3.5), 0.675, 0.0001);
+        fuzzyCompare(Dial.ringOpacity(4.5), 0.175, 0.0001);
+        compare(Dial.ringOpacity(7), 0);
+    }
+
+    function test_arcOpacity() {
+        compare(Dial.arcOpacity(0), 1);
+        compare(Dial.arcOpacity(4), 1);
+        compare(Dial.arcOpacity(4.5), 0.5);
+        compare(Dial.arcOpacity(5), 0);
+        compare(Dial.arcOpacity(9), 0);
+    }
+
+    // ----- Turning -----
+
+    function test_wheelNotchIsOneStep() {
+        compare(Dial.wheelSteps(0, 120).steps, 1);
+        compare(Dial.wheelSteps(0, -120).steps, -1);
+        compare(Dial.wheelSteps(0, 360).steps, 3);
+    }
+
+    function test_wheelCarriesSmallDeltas() {
+        let a = Dial.wheelSteps(0, 50);
+        compare(a.steps, 0);
+        let b = Dial.wheelSteps(a.carry, 50);
+        compare(b.steps, 0);
+        let c = Dial.wheelSteps(b.carry, 50);
+        compare(c.steps, 1);
+        fuzzyCompare(c.carry, 0.25, 0.0001);
+        // Turning back uses up the carry first
+        compare(Dial.wheelSteps(c.carry, -50).steps, 0);
+    }
+
+    function test_wheelZeroDeltaDoesNothing() {
+        let r = Dial.wheelSteps(0, 0);
+        verify(r.steps === 0);
+        compare(r.carry, 0);
+    }
+
+    function test_turnDurationGrowsWithDistance() {
+        compare(Dial.turnDuration(0.2), 360);
+        compare(Dial.turnDuration(1), 360);
+        compare(Dial.turnDuration(6), 560);
+        compare(Dial.turnDuration(-6), 560);
+        compare(Dial.turnDuration(100), 900);
+    }
+
+    function test_turnOvershootFadesWithDistance() {
+        compare(Dial.turnOvershoot(1), 0.9);
+        compare(Dial.turnOvershoot(0.3), 0.9);
+        compare(Dial.turnOvershoot(-9), 0.1);
+    }
+
+    function test_angleStepGoesTheShortWay() {
+        compare(Dial.angleStep(10, 30), 20);
+        compare(Dial.angleStep(30, 10), -20);
+        compare(Dial.angleStep(170, -170), 20);
+        compare(Dial.angleStep(-170, 170), -20);
+    }
+
+    function test_dragTurnStopsJustPastTheEnds() {
+        compare(Dial.dragTurn(3.4, 10), 3.4);
+        compare(Dial.dragTurn(-2, 10), -0.35);
+        compare(Dial.dragTurn(20, 10), 9.35);
+        compare(Dial.dragTurn(5, 0), 0.35);
+    }
+
+    function test_flickVelocity() {
+        // Two steps in 50 ms is 40 steps a second
+        let samples = [{ "t": 880, "turn": 0 }, { "t": 950, "turn": 5 }, { "t": 1000, "turn": 7 }];
+        compare(Dial.flickVelocity(samples, 1000), 40);
+        // Older movement is left out, and a pointer that rested has no speed
+        compare(Dial.flickVelocity(samples, 1080), 0);
+        compare(Dial.flickVelocity([], 1000), 0);
+        compare(Dial.flickVelocity([{ "t": 1000, "turn": 1 }, { "t": 1000, "turn": 2 }], 1000), 0);
+    }
+
+    function test_flickTarget() {
+        compare(Dial.flickTarget(3.4, 0, 20), 3);
+        compare(Dial.flickTarget(3.4, 20, 20), 8);
+        compare(Dial.flickTarget(3.4, -40, 20), 0);
+        compare(Dial.flickTarget(3.4, 400, 20), 19);
+        compare(Dial.flickTarget(0.2, 10, 0), 0);
     }
 
     function test_thumbSpan() {
@@ -80,6 +197,9 @@ TestCase {
         let end = Dial.thumbSpan(39, 40);
         compare(end.to, 30);
         compare(Dial.thumbSpan(0, 0).from, 150);
+        // Halfway between two slots the thumb is halfway too
+        let between = Dial.thumbSpan(10.5, 40);
+        fuzzyCompare(between.from, (Dial.thumbSpan(10, 40).from + Dial.thumbSpan(11, 40).from) / 2, 0.0001);
     }
 
     // ----- Search -----

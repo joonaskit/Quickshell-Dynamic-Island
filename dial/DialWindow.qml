@@ -1,10 +1,11 @@
 import ".."
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Wayland
 import "dialLogic.js" as Logic
 
-// Experimental category dial launcher: a disc that grows out of the clock pill, with
+// Experimental category dial launcher: a disc that slides down around the clock pill, with
 // categories on an inner ring and apps on an outer arc. Toggled with
 // `qs ipc call dial toggle`. Created once per screen; DialService.open opens it on all of them.
 PanelWindow {
@@ -72,9 +73,93 @@ PanelWindow {
     // The ring's selection: a category, or a scope while searching
     readonly property int ringIndex: DialService.ringIndex
 
+    // How far a ring is turned, in steps. It glides to `index` when the selection moves,
+    // further and faster the further away that is, and follows the pointer while grabbed.
+    component Spinner: Item {
+        id: spinner
+
+        property int index: 0
+        property int count: 0
+        property real position: 0
+        property bool grabbed: false
+        // The slot at the bottom right now, which is not `index` until the ring has settled
+        readonly property int nearest: Math.round(position)
+
+        // The slot the user turned the ring to, by dragging or flicking it
+        signal turned(int slot)
+
+        function settle() {
+            let distance = Math.abs(index - position);
+            glide.stop();
+            // Hits landing under a typed search just land (see DialService.turning)
+            if (!DialService.turning || distance === 0) {
+                position = index;
+                return;
+            }
+            glide.from = position;
+            glide.to = index;
+            glide.duration = Logic.turnDuration(distance);
+            glide.easing.overshoot = Logic.turnOvershoot(distance);
+            glide.start();
+        }
+
+        function grab() {
+            glide.stop();
+            grabbed = true;
+        }
+
+        function drag(steps) {
+            position = Logic.dragTurn(position + steps, count);
+            if (nearest !== index) turned(nearest);
+        }
+
+        // Let go at `velocity` steps a second: the ring carries on to the slot that takes it to
+        function release(velocity) {
+            grabbed = false;
+            turned(Logic.flickTarget(position, velocity, count));
+            settle();
+        }
+
+        onIndexChanged: if (!grabbed) settle()
+        Component.onCompleted: position = index
+
+        NumberAnimation {
+            id: glide
+            target: spinner
+            property: "position"
+            easing.type: Easing.OutBack
+        }
+    }
+
+    // Category pills are spaced by width. Widths are of the bold label, so a pill keeps
+    // its size, and the ring its spacing, when the selection moves.
+    FontMetrics {
+        id: pillMetrics
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontPx(11)
+        font.bold: true
+    }
+    readonly property var ringWidths: DialService.ringLabels.map(text => pillMetrics.advanceWidth(text) + Theme.px(22))
+    // Degrees from the first pill to each one
+    readonly property var ringAngles: Logic.ringAngles(ringWidths, Theme.px(Logic.RING_RADIUS), Theme.px(Logic.RING_GAP))
+
+    Spinner {
+        id: ringSpin
+        index: window.ringIndex
+        count: DialService.ringLabels.length
+        onTurned: slot => DialService.setRing(slot)
+    }
+
+    Spinner {
+        id: arcSpin
+        index: window.focusIndex
+        count: window.items.length
+        onTurned: slot => DialService.setFocus(slot)
+    }
+
     // Where the tile at `index` sits in window coordinates, for the launch animation
     function tileCenter(index) {
-        let p = Logic.point(Theme.px(Logic.ARC_RADIUS), 90 - (index - window.focusIndex) * Logic.ARC_STEP);
+        let p = Logic.point(Theme.px(Logic.ARC_RADIUS), 90 - (index - arcSpin.position) * Logic.ARC_STEP);
         return { "x": window.cx + p.x, "y": window.cy + p.y };
     }
 
@@ -112,29 +197,19 @@ PanelWindow {
         items: [disc]
     }
 
-    // Everything scales out of the pill centre
+    // Everything slides down from behind the top edge of the screen
     Item {
         id: stage
-        anchors.fill: parent
+        width: parent.width
+        height: parent.height
+        // Closed, the whole disc is above the screen. Moved by y, not a transform: WindowBlur
+        // places the blur on the same frame for a move, and a frame late for a transform,
+        // which let the desktop show sharp through the disc's leading edge.
+        y: DialService.open ? 0 : -(window.cy + Theme.px(Logic.DISC_RADIUS))
         opacity: DialService.open ? 1 : 0
-        // Scale about the pill centre. Item.scale can't be used: with anchors.fill the
-        // item's origin is its corner, and the corner is where the growth would start.
-        property real grow: DialService.open ? 1 : 0.2
-        transform: Scale {
-            origin.x: window.cx
-            origin.y: window.cy
-            xScale: stage.grow
-            yScale: stage.grow
-        }
 
         Behavior on opacity { NumberAnimation { duration: 180 } }
-        Behavior on grow {
-            NumberAnimation {
-                duration: 360
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.15
-            }
-        }
+        Behavior on y { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
 
         Rectangle {
             id: disc
@@ -161,77 +236,157 @@ PanelWindow {
             border.color: Theme.glassHairline
         }
 
-        // Arc scrollbar, shown only when the arc has more items than fit
-        Canvas {
+        // Arc scrollbar, shown only when the arc has more items than fit. The thumb moves
+        // with the arc as it turns.
+        Shape {
             id: bar
-            anchors.fill: parent
+            x: window.cx
+            y: window.cy
+            preferredRendererType: Shape.CurveRenderer
             opacity: window.items.length > Logic.BAR_MIN_ITEMS ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 180 } }
 
-            readonly property var span: Logic.thumbSpan(window.focusIndex, window.items.length)
-            onSpanChanged: requestPaint()
-            onWidthChanged: requestPaint()
+            readonly property real radius: Theme.px(Logic.BAR_RADIUS)
+            readonly property var span: Logic.thumbSpan(arcSpin.position, window.items.length)
 
-            onPaint: {
-                let ctx = getContext("2d");
-                ctx.reset();
-                ctx.lineWidth = Theme.px(3);
-                ctx.lineCap = "round";
-                let r = Theme.px(Logic.BAR_RADIUS);
-                function arc(from, to, color) {
-                    ctx.strokeStyle = color;
-                    ctx.beginPath();
-                    ctx.arc(window.cx, window.cy, r, to * Math.PI / 180, from * Math.PI / 180, false);
-                    ctx.stroke();
-                }
-                arc(150, 30, Theme.overlay(0.12));
-                arc(span.from, span.to, Theme.textPrimary);
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Theme.overlay(0.12)
+                strokeWidth: Theme.px(3)
+                capStyle: ShapePath.RoundCap
+                PathAngleArc { radiusX: bar.radius; radiusY: bar.radius; startAngle: 30; sweepAngle: 120 }
+            }
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Theme.textPrimary
+                strokeWidth: Theme.px(3)
+                capStyle: ShapePath.RoundCap
+                PathAngleArc { radiusX: bar.radius; radiusY: bar.radius; startAngle: bar.span.to; sweepAngle: bar.span.from - bar.span.to }
             }
         }
 
-        // Category ring
+        // Category ring. Each pill is bent along the ring, and so is its label.
         Item {
             x: window.cx
             y: window.cy
-            rotation: window.ringIndex * Logic.RING_STEP
-            Behavior on rotation { enabled: DialService.turning; NumberAnimation { duration: 360; easing.type: Easing.OutBack; easing.overshoot: 1.3 } }
+            rotation: Logic.ringAngleAt(window.ringAngles, ringSpin.position)
 
             Repeater {
                 model: DialService.ringLabels
 
-                delegate: Rectangle {
+                delegate: Item {
                     id: pill
-                    required property var modelData
+                    required property string modelData
                     required property int index
-                    readonly property int distance: Math.abs(index - window.ringIndex)
-                    readonly property bool selected: distance === 0
-                    readonly property var p: Logic.point(Theme.px(Logic.RING_RADIUS), 90 - index * Logic.RING_STEP)
+                    readonly property bool selected: index === window.ringIndex
+                    readonly property real radius: Theme.px(Logic.RING_RADIUS)
+                    readonly property real half: Theme.px(13)
+                    // Where on the ring it sits, and the angles its two round ends are centred on
+                    // The model can be a step ahead of the widths when the labels change
+                    readonly property real length: window.ringWidths[index] || half * 2
+                    readonly property real angle: 90 - (window.ringAngles[index] || 0)
+                    readonly property real sweep: Math.max(0, length - half * 2) / radius * 180 / Math.PI
+                    readonly property real from: angle - sweep / 2
+                    readonly property real to: angle + sweep / 2
+                    readonly property var fromEnd: Logic.point(radius, from)
+                    readonly property var toEnd: Logic.point(radius, to)
 
-                    x: p.x - width / 2
-                    y: p.y - height / 2
-                    rotation: -index * Logic.RING_STEP
-                    width: label.implicitWidth + Theme.px(22)
-                    height: Theme.px(26)
-                    radius: height / 2
-                    color: selected ? Theme.accentBlue : Theme.overlay(0.12)
-                    opacity: Logic.ringOpacity(distance)
-                    enabled: distance <= 3
-                    Behavior on opacity { NumberAnimation { duration: 180 } }
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    opacity: Logic.ringOpacity(Math.abs(index - ringSpin.position))
+                    enabled: Math.abs(index - ringSpin.nearest) <= 3
 
-                    Text {
+                    TextMetrics {
                         id: label
-                        anchors.centerIn: parent
                         text: pill.modelData
-                        color: "#ffffff"
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontPx(11)
                         font.bold: pill.selected
                     }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: DialService.setRing(pill.index)
+                    // Outer edge, round end, inner edge and round end again
+                    Shape {
+                        preferredRendererType: Shape.CurveRenderer
+
+                        ShapePath {
+                            fillColor: pill.selected ? Theme.accentBlue : Theme.overlay(pillHover.hovered ? 0.2 : 0.12)
+                            strokeColor: "transparent"
+                            Behavior on fillColor { ColorAnimation { duration: 180 } }
+
+                            PathAngleArc {
+                                radiusX: pill.radius + pill.half
+                                radiusY: radiusX
+                                startAngle: pill.from
+                                sweepAngle: pill.sweep
+                            }
+                            PathAngleArc {
+                                moveToStart: false
+                                centerX: pill.toEnd.x
+                                centerY: pill.toEnd.y
+                                radiusX: pill.half
+                                radiusY: pill.half
+                                startAngle: pill.to
+                                sweepAngle: 180
+                            }
+                            PathAngleArc {
+                                moveToStart: false
+                                radiusX: pill.radius - pill.half
+                                radiusY: radiusX
+                                startAngle: pill.to
+                                sweepAngle: -pill.sweep
+                            }
+                            PathAngleArc {
+                                moveToStart: false
+                                centerX: pill.fromEnd.x
+                                centerY: pill.fromEnd.y
+                                radiusX: pill.half
+                                radiusY: pill.half
+                                startAngle: pill.from + 180
+                                sweepAngle: 180
+                            }
+                        }
+                    }
+
+                    // One letter at a time, each turned to the ring where it stands
+                    Repeater {
+                        model: pill.modelData.length
+
+                        delegate: Text {
+                            id: letter
+                            required property int index
+                            // Px from the middle of the label to the middle of this letter. The
+                            // label reads left to right, which is against the angle.
+                            readonly property real along: before.advanceWidth + implicitWidth / 2 - label.advanceWidth / 2
+                            readonly property real angle: pill.angle - along / pill.radius * 180 / Math.PI
+                            readonly property var p: Logic.point(pill.radius, angle)
+
+                            x: p.x - width / 2
+                            y: p.y - height / 2
+                            rotation: angle - 90
+                            text: pill.modelData[index]
+                            color: "#ffffff"
+                            font: label.font
+
+                            TextMetrics {
+                                id: before
+                                font: label.font
+                                text: pill.modelData.substring(0, letter.index)
+                            }
+                        }
+                    }
+
+                    // A straight box over the bent pill, close enough for clicks
+                    Item {
+                        readonly property var p: Logic.point(pill.radius, pill.angle)
+                        x: p.x - width / 2
+                        y: p.y - height / 2
+                        width: pill.length
+                        height: pill.half * 2
+                        rotation: pill.angle - 90
+
+                        HoverHandler { id: pillHover }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: DialService.setRing(pill.index)
+                        }
                     }
                 }
             }
@@ -239,10 +394,10 @@ PanelWindow {
 
         // App arc
         Item {
+            id: arc
             x: window.cx
             y: window.cy
-            rotation: window.focusIndex * Logic.ARC_STEP
-            Behavior on rotation { enabled: DialService.turning; NumberAnimation { duration: 360; easing.type: Easing.OutBack; easing.overshoot: 1.3 } }
+            rotation: arcSpin.position * Logic.ARC_STEP
 
             Repeater {
                 model: window.items.length
@@ -251,8 +406,9 @@ PanelWindow {
                     id: slot
                     required property int index
                     readonly property var app: window.items[index]
-                    readonly property int distance: Math.abs(index - window.focusIndex)
-                    readonly property bool selected: distance === 0
+                    // Steps from the bottom slot as the arc stands now, mid-turn too
+                    readonly property int distance: Math.abs(index - arcSpin.nearest)
+                    readonly property bool selected: index === window.focusIndex
                     readonly property var p: Logic.point(Theme.px(Logic.ARC_RADIUS), 90 - index * Logic.ARC_STEP)
 
                     // Above its neighbours, whose tiles overlap the pin button and took its clicks
@@ -263,17 +419,20 @@ PanelWindow {
                         active: slot.distance <= Logic.VISIBLE_APPS + 2
                         x: slot.p.x - Theme.px(42)
                         y: slot.p.y - Theme.px(42)
-                        // Kept upright: undo the arc's turn and the slot's own angle
-                        rotation: -window.focusIndex * Logic.ARC_STEP
-                        opacity: slot.distance <= Logic.VISIBLE_APPS ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 180 } }
+                        // Kept upright all through a turn: undo the arc's rotation as it is now
+                        rotation: -arc.rotation
+                        // Fades with its place on the arc. Only tiles that exist follow the turn.
+                        opacity: active ? Logic.arcOpacity(Math.abs(slot.index - arcSpin.position)) : 0
 
                         sourceComponent: Rectangle {
                             width: Theme.px(84)
                             height: Theme.px(84)
                             radius: Theme.px(14)
-                            color: slot.selected ? Qt.alpha(Theme.accentBlue, 0.24) : "transparent"
+                            color: slot.selected ? Qt.alpha(Theme.accentBlue, 0.24) : Theme.overlay(tileHover.hovered ? 0.08 : 0)
                             border.width: 1
+                            Behavior on color { ColorAnimation { duration: 120 } }
+
+                            HoverHandler { id: tileHover }
                             border.color: slot.selected ? Qt.alpha(Theme.accentBlue, 0.6) : "transparent"
 
                             Column {
@@ -351,62 +510,77 @@ PanelWindow {
         // Search field, with what the selected hit is, or the category, on the line below
         Column {
             x: window.cx - width / 2
-            y: window.cy + Theme.px(31)
+            // The text sits where the prototype has it; the box takes 4 px above it
+            y: window.cy + Theme.px(27)
             width: Theme.px(400)
             spacing: Theme.px(4)
 
-            TextInput {
-                id: input
-                width: parent.width
-                horizontalAlignment: TextInput.AlignHCenter
-                color: Theme.textPrimary
-                selectionColor: Theme.accentBlue
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontPx(20)
-                font.bold: true
-                clip: true
-                focus: true
-                onTextEdited: DialService.setQuery(text)
+            // Border round the field, narrower than the line below so it clears the ring
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Theme.px(320)
+                height: input.height + Theme.px(8)
+                radius: height / 2
+                color: "transparent"
+                border.width: 1
+                border.color: Theme.glassHairline
 
-                Connections {
-                    target: DialService
-                    function onQueryChanged() {
-                        if (input.text !== DialService.query) input.text = DialService.query;
+                TextInput {
+                    id: input
+                    anchors.centerIn: parent
+                    width: parent.width - Theme.px(32)
+                    horizontalAlignment: TextInput.AlignHCenter
+                    color: Theme.textPrimary
+                    selectionColor: Theme.accentBlue
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontPx(20)
+                    font.bold: true
+                    clip: true
+                    focus: true
+                    onTextEdited: DialService.setQuery(text)
+
+                    Connections {
+                        target: DialService
+                        function onQueryChanged() {
+                            if (input.text !== DialService.query) input.text = DialService.query;
+                        }
                     }
-                }
 
-                Text {
-                    anchors.fill: parent
-                    horizontalAlignment: Text.AlignHCenter
-                    visible: input.text === ""
-                    text: "Search apps, settings, files…"
-                    color: Theme.textSecondary
-                    font: input.font
-                }
-
-                Keys.onPressed: event => {
-                    if (!DialService.open) return;
-                    switch (event.key) {
-                    case Qt.Key_Right: DialService.setFocus(window.focusIndex + 1); break;
-                    case Qt.Key_Left: DialService.setFocus(window.focusIndex - 1); break;
-                    case Qt.Key_Down: DialService.setRing(window.ringIndex + 1); break;
-                    case Qt.Key_Up: DialService.setRing(window.ringIndex - 1); break;
-                    case Qt.Key_Return:
-                    case Qt.Key_Enter:
-                        if (window.items.length > 0) window.launchAt(window.focusIndex);
-                        break;
-                    case Qt.Key_P:
-                        if (!(event.modifiers & Qt.ControlModifier)) return;
-                        DialService.togglePin(window.items[window.focusIndex]);
-                        break;
-                    case Qt.Key_Escape:
-                        // Clears the search first, then closes
-                        if (DialService.searching) DialService.setQuery("");
-                        else DialService.close();
-                        break;
-                    default: return;
+                    Text {
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        visible: input.text === ""
+                        text: "Search"
+                        color: Theme.textSecondary
+                        font.family: Theme.fontFamily
+                        font.pixelSize: input.font.pixelSize
+                        font.weight: Font.Light
                     }
-                    event.accepted = true;
+
+                    Keys.onPressed: event => {
+                        if (!DialService.open) return;
+                        switch (event.key) {
+                        case Qt.Key_Right: DialService.setFocus(window.focusIndex + 1); break;
+                        case Qt.Key_Left: DialService.setFocus(window.focusIndex - 1); break;
+                        case Qt.Key_Down: DialService.setRing(window.ringIndex + 1); break;
+                        case Qt.Key_Up: DialService.setRing(window.ringIndex - 1); break;
+                        case Qt.Key_Return:
+                        case Qt.Key_Enter:
+                            if (window.items.length > 0) window.launchAt(window.focusIndex);
+                            break;
+                        case Qt.Key_P:
+                            if (!(event.modifiers & Qt.ControlModifier)) return;
+                            DialService.togglePin(window.items[window.focusIndex]);
+                            break;
+                        case Qt.Key_Escape:
+                            // Clears the search first, then closes
+                            if (DialService.searching) DialService.setQuery("");
+                            else DialService.close();
+                            break;
+                        default: return;
+                        }
+                        event.accepted = true;
+                    }
                 }
             }
             Text {
@@ -473,6 +647,109 @@ PanelWindow {
         Behavior on scale { enabled: flyIcon.flying; NumberAnimation { duration: 420; easing.type: Easing.InOutCubic } }
     }
 
+    // The Spinner whose ring is under a point of `hit`: the category ring inside the turn
+    // radius, the app arc outside it
+    function spinnerAt(x, y) {
+        return Math.hypot(x + hit.x - window.cx, y + hit.y - window.cy) < Theme.px(Logic.TURN_RADIUS) ? ringSpin : arcSpin;
+    }
+
+    // Wheel turns the ring or the arc, whichever the pointer is over
+    MouseArea {
+        anchors.fill: hit
+        enabled: DialService.open
+        acceptedButtons: Qt.NoButton
+
+        // Deltas not yet worth a step, and where and when they came in
+        property real carry: 0
+        property var over: null
+        property real time: 0
+
+        onWheel: wheel => {
+            if (grip.pressed) return;
+            let now = Date.now();
+            let spinner = window.spinnerAt(wheel.x, wheel.y);
+            if (spinner !== over || now - time > 400) carry = 0;
+            over = spinner;
+            time = now;
+            // Down or right is forward. A touchpad's lift-off event has no delta and turns nothing.
+            let delta = wheel.angleDelta.y !== 0 ? -wheel.angleDelta.y : -wheel.angleDelta.x;
+            let turn = Logic.wheelSteps(carry, delta);
+            carry = turn.carry;
+            if (turn.steps === 0) return;
+            if (spinner === ringSpin) DialService.setRing(window.ringIndex + turn.steps);
+            else DialService.setFocus(window.focusIndex + turn.steps);
+        }
+    }
+
+    // Grabs the ring or the arc to drag it round; a flick sends it spinning on. Clicks go
+    // through to the tile or pill below.
+    MouseArea {
+        id: grip
+        anchors.fill: hit
+        enabled: DialService.open
+        propagateComposedEvents: true
+        cursorShape: pressed && dragged ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+
+        // Only the two rings can be grabbed. The search field and the pill in the middle
+        // keep their own presses and cursor.
+        containmentMask: QtObject {
+            function contains(point: point): bool {
+                let r = Math.hypot(point.x + hit.x - window.cx, point.y + hit.y - window.cy);
+                return r >= Theme.px(Logic.GRAB_RADIUS) && r <= Theme.px(Logic.DISC_RADIUS);
+            }
+        }
+
+        // The Spinner under the press
+        property var turner: null
+        property bool dragged: false
+        property real pressX: 0
+        property real pressY: 0
+        property real lastAngle: 0
+        // Recent { t, turn } of the drag, for the speed at release
+        property var samples: []
+
+        // Steps the grabbed ring turns when the pointer goes `degrees` round the pill.
+        // The category ring's steps differ, as its pills are spaced by width.
+        function stepsFor(degrees) {
+            if (turner === arcSpin) return degrees / Logic.ARC_STEP;
+            let at = Logic.ringAngleAt(window.ringAngles, turner.position);
+            return Logic.ringPositionAt(window.ringAngles, at + degrees) - turner.position;
+        }
+
+        function letGo(velocity) {
+            if (turner !== null && dragged) turner.release(velocity);
+            turner = null;
+        }
+
+        onPressed: mouse => {
+            dragged = false;
+            turner = window.spinnerAt(mouse.x, mouse.y);
+            pressX = mouse.x;
+            pressY = mouse.y;
+        }
+
+        onPositionChanged: mouse => {
+            if (turner === null) return;
+            let angle = Math.atan2(mouse.y + hit.y - window.cy, mouse.x + hit.x - window.cx) * 180 / Math.PI;
+            let now = Date.now();
+            if (!dragged) {
+                if (Math.hypot(mouse.x - pressX, mouse.y - pressY) < Theme.px(Logic.DRAG_START)) return;
+                dragged = true;
+                turner.grab();
+                samples = [];
+            } else {
+                turner.drag(stepsFor(Logic.angleStep(lastAngle, angle)));
+            }
+            lastAngle = angle;
+            samples = samples.filter(s => now - s.t <= Logic.FLICK_WINDOW).concat([{ "t": now, "turn": turner.position }]);
+        }
+
+        onReleased: letGo(Logic.flickVelocity(samples, Date.now()))
+        onCanceled: letGo(0)
+        // A press that did not drag is a click for the tile or pill under it
+        onClicked: mouse => mouse.accepted = dragged
+    }
+
     // Clicking the pill in the middle of the disc closes it, as clicking the pill opened it
     MouseArea {
         x: window.cx - Theme.compactWidthClock / 2
@@ -482,23 +759,5 @@ PanelWindow {
         enabled: DialService.open
         cursorShape: Qt.PointingHandCursor
         onClicked: DialService.close()
-    }
-
-    // Wheel inside the turn radius turns the ring, outside it the arc
-    MouseArea {
-        anchors.fill: hit
-        enabled: DialService.open
-        acceptedButtons: Qt.NoButton
-        property real lastStep: 0
-        onWheel: wheel => {
-            let now = Date.now();
-            if (now - lastStep < 140) return;
-            lastStep = now;
-            let dx = wheel.x + hit.x - window.cx;
-            let dy = wheel.y + hit.y - window.cy;
-            let dir = Logic.wheelDirection(wheel.angleDelta.y === 0 ? 0 : -wheel.angleDelta.y, -wheel.angleDelta.x);
-            if (Math.sqrt(dx * dx + dy * dy) < Theme.px(Logic.TURN_RADIUS)) DialService.setRing(window.ringIndex + dir);
-            else DialService.setFocus(window.focusIndex + dir);
-        }
     }
 }
