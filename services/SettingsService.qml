@@ -139,6 +139,8 @@ Singleton {
     property bool launcherSpotlight: true
     // What the launcher shortcut, the dock button and the clock pill open: "classic" or "dial"
     property string launcherStyle: "classic"
+    // Status icons under the dial's search field instead of the top-right corner (test)
+    property bool dialStatusIcons: false
     // Instant answers in the launcher's search box
     property bool launcherCalculator: true
     property bool launcherConversion: true
@@ -385,6 +387,7 @@ Singleton {
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
         if (data.launcherSpotlight !== undefined) root.launcherSpotlight = !!data.launcherSpotlight;
         if (data.launcherStyle === "classic" || data.launcherStyle === "dial") root.launcherStyle = data.launcherStyle;
+        if (data.dialStatusIcons !== undefined) root.dialStatusIcons = !!data.dialStatusIcons;
         if (data.launcherCalculator !== undefined) root.launcherCalculator = !!data.launcherCalculator;
         if (data.launcherConversion !== undefined) root.launcherConversion = !!data.launcherConversion;
         if (data.launcherWebSearch !== undefined) root.launcherWebSearch = !!data.launcherWebSearch;
@@ -637,6 +640,7 @@ Singleton {
         root.launcherShowGenericNames = true;
         root.launcherSpotlight = true;
         root.launcherStyle = "classic";
+        root.dialStatusIcons = false;
         root.launcherCalculator = true;
         root.launcherConversion = true;
         root.launcherWebSearch = true;
@@ -768,6 +772,7 @@ Singleton {
             "launcherShowGenericNames": root.launcherShowGenericNames,
             "launcherSpotlight": root.launcherSpotlight,
             "launcherStyle": root.launcherStyle,
+            "dialStatusIcons": root.dialStatusIcons,
             "launcherCalculator": root.launcherCalculator,
             "launcherConversion": root.launcherConversion,
             "launcherWebSearch": root.launcherWebSearch,

@@ -49,47 +49,54 @@ Item {
     width: implicitWidth
     height: implicitHeight
 
-    // Scaling helpers
-    readonly property int buttonSize: Theme.px(26)
-    readonly property int iconSize: Theme.px(14)
-
-    // True when the user chose to hide icons whose tools are missing and this one's are
-    function dropped(id) {
-        return SettingsService.hideUnavailableIcons && DepsService.iconUnavailable(id);
+    // The icon buttons (StatusIconSet), shared with the dial
+    StatusIconSet {
+        id: iconSet
+        host: root
     }
 
-    // Hoisted service-backed visibility properties
-    readonly property bool showCaffeine: SettingsService.showCaffeineIcon && !root.dropped("caffeine")
-    readonly property bool showDnd: SettingsService.showDndIcon
-    readonly property bool showWifi: SettingsService.showWifiIcon && !root.dropped("wifi")
-    readonly property bool showBluetooth: SettingsService.showBluetoothIcon && !root.dropped("bluetooth")
-    readonly property bool showMic: SettingsService.showMicIcon && !root.dropped("mic")
-    readonly property bool showClipboard: SettingsService.showClipboardIcon && !root.dropped("clipboard")
-    readonly property bool showProfile: SettingsService.showProfileIcon && !root.dropped("profile")
-    readonly property bool showHardware: SettingsService.showHardwareIcon
-    readonly property bool showUsb: SettingsService.showUsbIcon && !root.dropped("usb") && (SettingsService.pinUsbIcon || DeviceService.hasDevices || root.devicesMenuOpen)
-    readonly property bool showHue: SettingsService.hueEnabled && !root.dropped("hue")
-    readonly property bool showNightLight: SettingsService.nightLightEnabled && !root.dropped("nightLight")
-    readonly property bool showKdeConnect: SettingsService.kdeConnectEnabled && !root.dropped("kdeConnect")
-    readonly property bool showGameMode: SettingsService.gameModeEnabled && !root.dropped("gameMode")
-    readonly property int widgetCount: (showHue ? 1 : 0) + (showNightLight ? 1 : 0) + (showKdeConnect ? 1 : 0) + (showGameMode ? 1 : 0)
-    readonly property bool showWidgets: widgetCount > 0
-    readonly property bool showNotification: SettingsService.showNotificationIcon && (SettingsService.pinNotificationIcon || NotificationService.unreadCount > 0 || NotificationService.notifications.length > 0 || root.notificationMenuOpen)
-    readonly property bool showBattery: SettingsService.showBatteryIcon && SettingsService.showBattery
+    // StatusIconSet's host interface
+    readonly property bool hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
+    readonly property string openMenu: {
+        if (root.wifiMenuOpen) return "wifi";
+        if (root.bluetoothMenuOpen) return "bluetooth";
+        if (root.powerMenuOpen) return "battery";
+        if (root.clipboardMenuOpen) return "clipboard";
+        if (root.notificationMenuOpen) return "notification";
+        if (root.micMenuOpen) return "mic";
+        if (root.profileMenuOpen) return "profile";
+        if (root.hardwareMenuOpen) return "hardware";
+        if (root.devicesMenuOpen) return "usb";
+        if (root.hueMenuOpen) return "hue";
+        if (root.nightMenuOpen) return "nightLight";
+        if (root.kdeMenuOpen) return "kdeConnect";
+        if (root.gameMenuOpen) return "gameMode";
+        return "";
+    }
 
-    // Count of currently visible icons
-    readonly property int visibleIconCount: (showCaffeine ? 1 : 0) +
-                                           (showDnd ? 1 : 0) +
-                                           (showWifi ? 1 : 0) +
-                                           (showBluetooth ? 1 : 0) +
-                                           (showMic ? 1 : 0) +
-                                           (showClipboard ? 1 : 0) +
-                                           (showProfile ? 1 : 0) +
-                                           (showHardware ? 1 : 0) +
-                                           (showUsb ? 1 : 0) +
-                                           widgetCount +
-                                           (showNotification ? 1 : 0) +
-                                           (showBattery ? 1 : 0)
+    // Opens or closes the menu of a status icon, by its StatusIconRegistry id
+    function toggleMenu(id) {
+        switch (id) {
+        case "wifi": root.toggleWifiMenu(); break;
+        case "bluetooth": root.toggleBluetoothMenu(); break;
+        case "battery": root.togglePowerMenu(); break;
+        case "clipboard": root.toggleClipboardMenu(); break;
+        case "notification": root.toggleNotificationMenu(); break;
+        case "mic": root.toggleMicMenu(); break;
+        case "profile": root.toggleProfileMenu(); break;
+        case "hardware": root.toggleHardwareMenu(); break;
+        case "usb": root.toggleDevicesMenu(); break;
+        case "hue": root.toggleHueMenu(); break;
+        case "nightLight": root.toggleNightMenu(); break;
+        case "kdeConnect": root.toggleKdeMenu(); break;
+        case "gameMode": root.toggleGameMenu(); break;
+        }
+    }
+
+    // With the icons in the dial (dialStatusIcons), the corner shows them only while a
+    // menu opened from there is open
+    readonly property bool iconsAway: SettingsService.dialStatusIcons && SettingsService.launcherStyle === "dial" && !root.anyMenuOpen
+    readonly property int visibleIconCount: root.iconsAway ? 0 : iconSet.visibleIconCount
 
     Connections {
         target: SettingsService
@@ -128,9 +135,7 @@ Item {
         let next = !root.wifiMenuOpen;
         root.closeAllMenus();
         root.wifiMenuOpen = next;
-        if (root.wifiMenuOpen) {
-            NetworkService.scanWifi();
-        }
+        if (root.wifiMenuOpen) iconSet.prepareMenu("wifi");
     }
 
     function toggleBluetoothMenu() {
@@ -156,15 +161,13 @@ Item {
         let next = !root.notificationMenuOpen;
         root.closeAllMenus();
         root.notificationMenuOpen = next;
-        if (root.notificationMenuOpen) {
-            NotificationService.markAllRead();
-        }
+        if (root.notificationMenuOpen) iconSet.prepareMenu("notification");
     }
 
     function openNotificationMenu() {
         root.closeAllMenus();
         root.notificationMenuOpen = true;
-        NotificationService.markAllRead();
+        iconSet.prepareMenu("notification");
     }
 
     function toggleMicMenu() {
@@ -177,9 +180,7 @@ Item {
         let next = !root.profileMenuOpen;
         root.closeAllMenus();
         root.profileMenuOpen = next;
-        if (root.profileMenuOpen) {
-            PowerProfileService.queryProfile();
-        }
+        if (root.profileMenuOpen) iconSet.prepareMenu("profile");
     }
 
     function toggleHardwareMenu() {
@@ -192,9 +193,7 @@ Item {
         let next = !root.devicesMenuOpen;
         root.closeAllMenus();
         root.devicesMenuOpen = next;
-        if (root.devicesMenuOpen) {
-            DeviceService.scanDevices();
-        }
+        if (root.devicesMenuOpen) iconSet.prepareMenu("usb");
     }
 
     function toggleHueMenu() {
@@ -207,710 +206,23 @@ Item {
         let next = !root.nightMenuOpen;
         root.closeAllMenus();
         root.nightMenuOpen = next;
-        if (root.nightMenuOpen) {
-            NightLightService.refresh();
-        }
+        if (root.nightMenuOpen) iconSet.prepareMenu("nightLight");
     }
 
     function toggleGameMenu() {
         let next = !root.gameMenuOpen;
         root.closeAllMenus();
         root.gameMenuOpen = next;
-        if (root.gameMenuOpen) {
-            GameModeService.refresh();
-        }
+        if (root.gameMenuOpen) iconSet.prepareMenu("gameMode");
     }
 
     function toggleKdeMenu() {
         let next = !root.kdeMenuOpen;
         root.closeAllMenus();
         root.kdeMenuOpen = next;
-        if (root.kdeMenuOpen) {
-            KdeConnectService.refresh();
-        }
+        if (root.kdeMenuOpen) iconSet.prepareMenu("kdeConnect");
     }
 
-    // Status icons come from StatusIconRegistry, in the user's order: "widgets"
-    // before the separator, "system" after it. Each id maps to its button below.
-    readonly property var widgetIcons: SettingsService.orderedStatusIcons.filter(i => i.group === "widgets")
-    readonly property var systemIcons: SettingsService.orderedStatusIcons.filter(i => i.group === "system")
-
-    readonly property var iconComponents: ({
-        "nightLight": nightButtonComponent,
-        "hue": hueButtonComponent,
-        "kdeConnect": kdeButtonComponent,
-        "gameMode": gameButtonComponent,
-        "caffeine": coffeeButtonComponent,
-        "dnd": dndButtonComponent,
-        "wifi": wifiButtonComponent,
-        "bluetooth": btButtonComponent,
-        "mic": micButtonComponent,
-        "clipboard": clipboardButtonComponent,
-        "profile": profileButtonComponent,
-        "hardware": hardwareButtonComponent,
-        "usb": devicesButtonComponent,
-        "notification": notifButtonComponent,
-        "battery": batteryButtonComponent
-    })
-
-    function isIconShown(id) {
-        switch (id) {
-        case "nightLight": return root.showNightLight;
-        case "hue": return root.showHue;
-        case "kdeConnect": return root.showKdeConnect;
-        case "gameMode": return root.showGameMode;
-        case "caffeine": return root.showCaffeine;
-        case "dnd": return root.showDnd;
-        case "wifi": return root.showWifi;
-        case "bluetooth": return root.showBluetooth;
-        case "mic": return root.showMic;
-        case "clipboard": return root.showClipboard;
-        case "profile": return root.showProfile;
-        case "hardware": return root.showHardware;
-        case "usb": return root.showUsb;
-        case "notification": return root.showNotification;
-        case "battery": return root.showBattery;
-        }
-        return false;
-    }
-
-    // One status icon: loads the button for a registry entry. The button sets
-    // its own implicit size; hidden icons take no space in the row.
-    Component {
-        id: statusIconDelegate
-
-        Loader {
-            id: iconLoader
-            required property var modelData
-            visible: root.isIconShown(modelData.id)
-            // A missing tool leaves the icon dimmed and inert (or hidden, see dropped()).
-            // The button is disabled, not the Loader, so hovering still shows the reason.
-            readonly property bool unavailable: DepsService.iconUnavailable(modelData.id)
-            sourceComponent: root.iconComponents[modelData.id]
-
-            Binding { target: iconLoader.item; property: "enabled"; value: !iconLoader.unavailable; when: iconLoader.item !== null }
-            Binding { target: iconLoader.item; property: "opacity"; value: iconLoader.unavailable ? 0.3 : 1.0; when: iconLoader.item !== null }
-
-            HoverHandler {
-                id: unavailableHover
-                enabled: iconLoader.unavailable
-                onHoveredChanged: {
-                    if (hovered) {
-                        root.unavailableTip = DepsService.iconProblem(iconLoader.modelData.id);
-                        root.unavailableTipItem = iconLoader;
-                    } else if (root.unavailableTipItem === iconLoader) {
-                        root.unavailableTipItem = null;
-                    }
-                }
-            }
-        }
-    }
-
-    // W1. Night Light Button (only when the feature is enabled in the settings)
-    Component {
-        id: nightButtonComponent
-
-        Rectangle {
-            id: nightButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: {
-                if (root.nightMenuOpen) return Qt.rgba(255/255, 159/255, 10/255, 0.25);
-                if (NightLightService.running) return Qt.rgba(255/255, 159/255, 10/255, 0.15);
-                return "transparent";
-            }
-            scale: nightMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "moon"
-                size: root.iconSize
-                color: {
-                    if (root.nightMenuOpen || NightLightService.running) return Theme.accentOrangeStrong;
-                    return nightMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: nightMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleNightMenu()
-            }
-        }
-    }
-
-    // W2. Philips Hue Button (only when the feature is enabled in the settings)
-    Component {
-        id: hueButtonComponent
-
-        Rectangle {
-            id: hueButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: {
-                if (root.hueMenuOpen) return Qt.rgba(255/255, 159/255, 10/255, 0.25);
-                if (HueService.anyOn) return Qt.rgba(255/255, 159/255, 10/255, 0.15);
-                return "transparent";
-            }
-            scale: hueMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "bulb"
-                size: root.iconSize
-                color: {
-                    if (root.hueMenuOpen || HueService.anyOn) return Theme.accentOrangeStrong;
-                    return hueMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: hueMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleHueMenu()
-            }
-        }
-    }
-
-    // W4. GameMode Button (only when the feature is enabled in the settings)
-    Component {
-        id: gameButtonComponent
-
-        Rectangle {
-            id: gameButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: {
-                if (root.gameMenuOpen) return Qt.rgba(48/255, 209/255, 88/255, 0.25);
-                if (GameModeService.active) return Qt.rgba(48/255, 209/255, 88/255, 0.15);
-                return "transparent";
-            }
-            scale: gameMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "gamepad"
-                size: root.iconSize
-                color: {
-                    if (root.gameMenuOpen || GameModeService.active) return Theme.accentGreenStrong;
-                    return gameMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: gameMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleGameMenu()
-            }
-        }
-    }
-
-    // W3. KDE Connect Button (only when the feature is enabled in the settings)
-    Component {
-        id: kdeButtonComponent
-
-        Rectangle {
-            id: kdeButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: {
-                if (root.kdeMenuOpen) return Qt.rgba(48/255, 209/255, 88/255, 0.25);
-                if (KdeConnectService.anyReachable) return Qt.rgba(48/255, 209/255, 88/255, 0.15);
-                return "transparent";
-            }
-            scale: kdeMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "phone"
-                size: root.iconSize
-                color: {
-                    if (root.kdeMenuOpen || KdeConnectService.anyReachable) return Theme.accentGreenStrong;
-                    return kdeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: kdeMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleKdeMenu()
-            }
-        }
-    }
-
-    // 0. Interactive Coffee Cup (Caffeine: prevents screen dimming and sleeping)
-    Component {
-        id: coffeeButtonComponent
-
-        Rectangle {
-            id: coffeeButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: CaffeineService.isActive ? Qt.rgba(255/255, 159/255, 10/255, 0.22) : "transparent"
-            scale: coffeeMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "coffee"
-                size: root.iconSize
-                color: CaffeineService.isActive ? Theme.accentOrangeStrong : (coffeeMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38))
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: coffeeMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: CaffeineService.toggle()
-            }
-        }
-    }
-
-    // Do Not Disturb (suppresses notification banners, history is kept)
-    Component {
-        id: dndButtonComponent
-
-        Rectangle {
-            id: dndButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : "transparent"
-            scale: dndMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "bell-off"
-                size: root.iconSize
-                color: SettingsService.dndEnabled ? Theme.accentPurple : (dndMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38))
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: dndMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: NotificationService.toggleDnd()
-            }
-        }
-    }
-
-    // 1. Interactive Wi-Fi Button
-    Component {
-        id: wifiButtonComponent
-
-        Rectangle {
-            id: wifiButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: root.wifiMenuOpen ? Theme.accentTint(0.25) : "transparent"
-            scale: wifiMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: (NetworkService.isConnected && NetworkService.isWifi) ? "wifi" : "wifi-off"
-                size: root.iconSize
-                color: {
-                    if (root.wifiMenuOpen) return Theme.accent;
-                    if (NetworkService.isConnected && NetworkService.isWifi) return Theme.textPrimary;
-                    return wifiMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: wifiMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleWifiMenu()
-            }
-        }
-    }
-
-    // 2. Interactive Bluetooth Button
-    Component {
-        id: btButtonComponent
-
-        Rectangle {
-            id: btButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: root.bluetoothMenuOpen ? Theme.accentTint(0.25) : "transparent"
-            scale: btMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "bluetooth"
-                size: root.iconSize
-                color: {
-                    if (root.bluetoothMenuOpen) return Theme.accent;
-                    if (BluetoothService.isConnected) return Theme.accent;
-                    if (BluetoothService.isEnabled) return Theme.textPrimary;
-                    return btMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: btMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleBluetoothMenu()
-            }
-        }
-    }
-
-    // 3. Interactive Microphone Button (triggers Microphone Mute & Volume)
-    Component {
-        id: micButtonComponent
-
-        Rectangle {
-            id: micButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: {
-                if (root.micMenuOpen) return Qt.rgba(255/255, 69/255, 58/255, 0.25);
-                if (!MicrophoneService.isMuted) return Qt.rgba(255/255, 69/255, 58/255, 0.15);
-                return "transparent";
-            }
-            scale: micMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: MicrophoneService.isMuted ? "mic-off" : "mic"
-                size: root.iconSize
-                color: {
-                    if (root.micMenuOpen || !MicrophoneService.isMuted) return Theme.accentRed;
-                    return micMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: micMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onClicked: function(mouse) {
-                    if (mouse.button === Qt.RightButton) {
-                        MicrophoneService.toggleMute();
-                    } else {
-                        root.toggleMicMenu();
-                    }
-                }
-            }
-        }
-    }
-
-    // 4. Interactive Clipboard Button (triggers Clipboard Menu)
-    Component {
-        id: clipboardButtonComponent
-
-        Rectangle {
-            id: clipboardButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: root.clipboardMenuOpen ? Theme.accentTint(0.25) : "transparent"
-            scale: clipboardMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "clipboard"
-                size: root.iconSize
-                color: {
-                    if (root.clipboardMenuOpen) return Theme.accent;
-                    if (ClipboardService.incognito) return Theme.accentYellowStrong;
-                    if (ClipboardService.currentText !== "" || ClipboardService.currentBinaryType !== "" || ClipboardService.currentFiles.length > 0) return Theme.textPrimary;
-                    return clipboardMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: clipboardMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleClipboardMenu()
-            }
-        }
-    }
-
-    // 5. Interactive Performance Profile Button (triggers Power Profiles Menu)
-    Component {
-        id: profileButtonComponent
-
-        Rectangle {
-            id: profileButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: root.profileMenuOpen ? Qt.rgba(48/255, 209/255, 88/255, 0.25) : "transparent"
-            scale: profileMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: {
-                    if (PowerProfileService.activeProfile === "power-saver") return "leaf";
-                    if (PowerProfileService.activeProfile === "performance") return "bolt";
-                    return "gauge";
-                }
-                size: root.iconSize
-                color: {
-                    if (root.profileMenuOpen) return Theme.accentGreenStrong;
-                    if (PowerProfileService.activeProfile === "performance") return Theme.accentRed;
-                    if (PowerProfileService.activeProfile === "power-saver") return Theme.accentGreenStrong;
-                    return profileMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.45);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: profileMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleProfileMenu()
-            }
-        }
-    }
-
-    // 6. Interactive Hardware Resource Stats Button (triggers Mini Stats Menu)
-    Component {
-        id: hardwareButtonComponent
-
-        Rectangle {
-            id: hardwareButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: root.hardwareMenuOpen ? Theme.accentTint(0.25) : "transparent"
-            scale: hardwareMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "cpu"
-                size: root.iconSize
-                color: {
-                    if (root.hardwareMenuOpen) return Theme.accent;
-                    if (HardwareStatsService.cpuPercent > 50) return Theme.accentOrangeStrong;
-                    return hardwareMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.45);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            MouseArea {
-                id: hardwareMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleHardwareMenu()
-            }
-        }
-    }
-
-    // 7. Interactive Detachable Devices Button (triggers Detachable Devices Menu)
-    Component {
-        id: devicesButtonComponent
-
-        Rectangle {
-            id: devicesButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: {
-                if (root.devicesMenuOpen) return Theme.accentTint(0.25);
-                if (DeviceService.hasMountedDevices) return Qt.rgba(48/255, 209/255, 88/255, 0.2);
-                if (DeviceService.hasDevices) return Theme.accentTint(0.15);
-                return "transparent";
-            }
-            scale: devicesMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "usb"
-                size: root.iconSize
-                color: {
-                    if (root.devicesMenuOpen) return Theme.accent;
-                    if (DeviceService.hasMountedDevices) return Theme.accentGreenStrong;
-                    if (DeviceService.hasDevices) return Theme.accent;
-                    return devicesMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            // Dot indicator badge when detachable devices are connected
-            Rectangle {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.topMargin: Theme.px(2)
-                anchors.rightMargin: Theme.px(2)
-                width: Theme.px(6)
-                height: Theme.px(6)
-                radius: Theme.px(3)
-                color: DeviceService.hasMountedDevices ? Theme.accentGreen : Theme.accent
-                visible: DeviceService.hasDevices
-            }
-
-            MouseArea {
-                id: devicesMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleDevicesMenu()
-            }
-        }
-    }
-
-    // 8. Interactive Notification Bell Button (triggers Notification Menu)
-    Component {
-        id: notifButtonComponent
-
-        Rectangle {
-            id: notifButton
-            implicitWidth: root.buttonSize
-            implicitHeight: root.buttonSize
-            radius: root.buttonSize / 2
-            color: root.notificationMenuOpen ? Qt.rgba(255/255, 159/255, 10/255, 0.25) : "transparent"
-            scale: notifMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            SvgIcon {
-                anchors.centerIn: parent
-                name: "bell"
-                size: root.iconSize
-                color: {
-                    if (root.notificationMenuOpen) return Theme.accentOrangeStrong;
-                    if (NotificationService.unreadCount > 0) return Theme.accentOrangeStrong;
-                    return notifMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.38);
-                }
-                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-            }
-
-            // Notification unread dot indicator badge
-            Rectangle {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.topMargin: Theme.px(2)
-                anchors.rightMargin: Theme.px(2)
-                width: Theme.px(7)
-                height: Theme.px(7)
-                radius: width / 2
-                color: Theme.accentRed
-                visible: NotificationService.unreadCount > 0
-            }
-
-            MouseArea {
-                id: notifMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleNotificationMenu()
-            }
-        }
-    }
-
-    // 9. Interactive Battery Button (triggers Power Menu)
-    Component {
-        id: batteryButtonComponent
-
-        Rectangle {
-            id: batteryButton
-            implicitHeight: root.buttonSize
-            implicitWidth: !batteryContent.isPresent ? root.buttonSize : (batteryContent.implicitWidth + Theme.px(8))
-            radius: root.buttonSize / 2
-            color: {
-                if (root.powerMenuOpen) return !batteryContent.isPresent ? Qt.rgba(255/255, 214/255, 10/255, 0.22) : Qt.rgba(48/255, 209/255, 88/255, 0.2);
-                return "transparent";
-            }
-            scale: batteryMouse.pressed ? 0.90 : 1.0
-
-            Behavior on color { ColorAnimation { duration: 180 } }
-            Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
-
-            BatteryIndicator {
-                id: batteryContent
-                anchors.centerIn: parent
-                showPercentage: true
-                visible: true
-            }
-
-            MouseArea {
-                id: batteryMouse
-                anchors.fill: parent
-                hoverEnabled: !root.isTopBarMode && !root.hasFullscreenApp
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.togglePowerMenu()
-            }
-        }
-    }
     // Hover state matching IslandPill: expands capsule smoothly on pill hover (disabled in full screen / top-bar mode)
     readonly property bool isClusterHovered: clusterHoverHandler.hovered && !root.anyMenuOpen && !root.isTopBarMode && !root.hasFullscreenApp
 
@@ -1161,8 +473,8 @@ Item {
 
                 // Optional widget icons, in the user's order
                 Repeater {
-                    model: root.widgetIcons
-                    delegate: statusIconDelegate
+                    model: root.iconsAway ? [] : iconSet.widgetIcons
+                    delegate: iconSet.delegate
                 }
 
                 // Separates the optional widget icons from the system icons
@@ -1171,15 +483,15 @@ Item {
                     Layout.preferredHeight: Theme.px(16)
                     radius: width / 2
                     color: Theme.overlay(0.4)
-                    visible: root.showWidgets && root.visibleIconCount > root.widgetCount
+                    visible: iconSet.showWidgets && root.visibleIconCount > iconSet.widgetCount
                     Layout.leftMargin: Theme.px(2)
                     Layout.rightMargin: Theme.px(2)
                 }
 
                 // System icons, in the user's order
                 Repeater {
-                    model: root.systemIcons
-                    delegate: statusIconDelegate
+                    model: root.iconsAway ? [] : iconSet.systemIcons
+                    delegate: iconSet.delegate
                 }
             }
         }

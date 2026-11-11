@@ -27,6 +27,22 @@ SettingsCategory {
             }
         }
 
+        SettingDivider { visible: SettingsService.launcherStyle === "dial" }
+
+        // Test: the status icons live in the dial instead of the top-right corner
+        SettingToggle {
+            visible: SettingsService.launcherStyle === "dial"
+            title: "Status Icons in Dial"
+            description: "Show the status icons under the dial's search field instead of the top-right corner. Their menus open over the dial"
+            keywords: "status icons wifi battery dial"
+            iconName: "wifi"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.dialStatusIcons
+            onToggled: function(val) {
+                SettingsService.setSetting("dialStatusIcons", val);
+            }
+        }
+
         SettingDivider {}
 
         // 1. Default View Layout (Grid vs List)

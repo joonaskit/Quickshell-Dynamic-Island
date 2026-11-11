@@ -623,6 +623,12 @@ PanelWindow {
 
                     Keys.onPressed: event => {
                         if (!window.shown) return;
+                        // A status icon's menu takes the keys from the rings; Esc closes it
+                        if (statusIcons.openMenu !== "") {
+                            if (event.key === Qt.Key_Escape) statusIcons.closeMenu();
+                            event.accepted = true;
+                            return;
+                        }
                         // While the menu is open the keys move through it
                         if (menu.isOpen) {
                             switch (event.key) {
@@ -680,6 +686,88 @@ PanelWindow {
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 text: window.metaText
+                color: Theme.textSecondary
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontPx(11)
+            }
+        }
+
+        // Status icons under the search field (dialStatusIcons, a test): the system icons,
+        // then the optional ones below a thin line. A menu icon opens its menu over the
+        // disc (statusMenu).
+        Column {
+            id: statusIcons
+            readonly property bool active: SettingsService.dialStatusIcons
+            visible: active
+            x: window.cx - width / 2
+            y: window.cy + Theme.px(96)
+            spacing: Theme.px(6)
+
+            // StatusIconSet's host interface
+            readonly property bool hoverEnabled: true
+            property string openMenu: ""
+            property string unavailableTip: ""
+            property Item unavailableTipItem: null
+            function toggleMenu(id) {
+                let was = openMenu;
+                closeMenu();
+                if (id === "" || id === was) return;
+                openMenu = id;
+                dialIconSet.prepareMenu(id);
+            }
+            function closeMenu() {
+                menu.entries = [];
+                // The Hue menu goes back to the favourite light each time it closes
+                if (openMenu === "hue") HueService.viewedId = "";
+                openMenu = "";
+                // A field in the menu may have taken the keys
+                input.forceActiveFocus();
+            }
+
+            Connections {
+                target: DialService
+                function onOpenChanged() {
+                    if (!DialService.open) statusIcons.closeMenu();
+                }
+            }
+
+            StatusIconSet {
+                id: dialIconSet
+                host: statusIcons
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Theme.px(4)
+                Repeater {
+                    model: statusIcons.active ? dialIconSet.systemIcons : []
+                    delegate: dialIconSet.delegate
+                }
+            }
+
+            // Parts the system icons from the optional ones
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Theme.px(160)
+                height: 1
+                color: Theme.glassHairline
+                visible: dialIconSet.showWidgets && dialIconSet.visibleIconCount > dialIconSet.widgetCount
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Theme.px(4)
+                Repeater {
+                    model: statusIcons.active ? dialIconSet.widgetIcons : []
+                    delegate: dialIconSet.delegate
+                }
+            }
+
+            // Names the missing tool of a dimmed icon under the pointer
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: statusIcons.unavailableTipItem !== null && statusIcons.unavailableTip !== ""
+                text: statusIcons.unavailableTip
                 color: Theme.textSecondary
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontPx(11)
@@ -852,6 +940,162 @@ PanelWindow {
         enabled: window.shown
         cursorShape: Qt.PointingHandCursor
         onClicked: DialService.close()
+    }
+
+    // While a status icon's menu is open, a press or wheel anywhere else closes the menu
+    // (not the dial) and the rings under it stay put
+    MouseArea {
+        anchors.fill: parent
+        enabled: window.shown && statusIcons.openMenu !== ""
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        onPressed: statusIcons.closeMenu()
+        onWheel: wheel => wheel.accepted = true
+    }
+
+    // A status icon's menu, a card over the disc below the pill
+    Rectangle {
+        id: statusMenu
+        readonly property bool isOpen: statusIcons.openMenu !== ""
+        // The menu last shown, kept while the card fades out
+        property string shownId: ""
+        width: Theme.px(350)
+        height: menuLoader.height + footer.height
+        x: window.cx - width / 2
+        y: window.pillTop + window.pillHeight + Theme.px(14)
+        radius: Theme.expandedRadius
+        color: Theme.menuSurface
+        border.width: 1
+        border.color: Theme.islandBorder
+        clip: true
+        opacity: isOpen ? 1 : 0
+        scale: isOpen ? 1 : 0.96
+        transformOrigin: Item.Top
+        visible: opacity > 0.01
+        enabled: isOpen
+
+        Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+        Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+
+        Connections {
+            target: statusIcons
+            function onOpenMenuChanged() {
+                if (statusIcons.openMenu !== "") statusMenu.shownId = statusIcons.openMenu;
+            }
+        }
+
+        // Swallows presses on the card's own background, so they do not reach the catcher
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+            onWheel: wheel => wheel.accepted = true
+        }
+
+        readonly property var components: ({
+            "wifi": wifiMenu,
+            "bluetooth": bluetoothMenu,
+            "battery": powerMenu,
+            "clipboard": clipboardMenu,
+            "notification": notificationMenu,
+            "mic": micMenu,
+            "profile": profileMenu,
+            "hardware": hardwareMenu,
+            "usb": deviceMenu,
+            "hue": hueMenu,
+            "nightLight": nightMenu,
+            "kdeConnect": kdeMenu,
+            "gameMode": gameMenu
+        })
+
+        Loader {
+            id: menuLoader
+            // Its height follows the menu's
+            width: parent.width
+            active: statusMenu.shownId !== "" && statusMenu.visible
+            sourceComponent: statusMenu.components[statusMenu.shownId] || null
+        }
+
+        Connections {
+            target: menuLoader.item
+            ignoreUnknownSignals: true
+            function onRequestClose() { statusIcons.closeMenu(); }
+        }
+
+        Component { id: wifiMenu; WifiQuickSettings { embedded: true } }
+        Component { id: bluetoothMenu; BluetoothQuickSettings { embedded: true } }
+        Component { id: powerMenu; PowerQuickSettings { embedded: true } }
+        Component { id: clipboardMenu; ClipboardQuickSettings { embedded: true } }
+        Component { id: micMenu; MicrophoneQuickSettings { embedded: true } }
+        Component { id: profileMenu; PowerProfileQuickSettings { embedded: true } }
+        Component { id: hardwareMenu; HardwareStatsQuickSettings { embedded: true } }
+        Component { id: deviceMenu; DeviceQuickSettings { embedded: true } }
+        Component { id: hueMenu; HueQuickSettings { embedded: true } }
+        Component { id: nightMenu; NightLightQuickSettings { embedded: true } }
+        Component { id: kdeMenu; KdeConnectQuickSettings { embedded: true } }
+        Component { id: gameMenu; GameModeQuickSettings { embedded: true } }
+        Component {
+            id: notificationMenu
+            Item {
+                implicitHeight: notificationList.implicitHeight + Theme.px(24)
+                NotificationListView {
+                    id: notificationList
+                    x: Theme.px(12)
+                    y: Theme.px(12)
+                    width: parent.width - Theme.px(24)
+                }
+            }
+        }
+
+        // Grabber to close, and a gear to the settings for these icons
+        Item {
+            id: footer
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: Theme.px(18)
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: Theme.px(36)
+                height: Theme.px(4)
+                radius: height / 2
+                color: Theme.overlay(0.25)
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: statusIcons.closeMenu()
+            }
+
+            Rectangle {
+                anchors.right: parent.right
+                anchors.rightMargin: Theme.px(12)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Theme.px(22)
+                height: Theme.px(16)
+                radius: height / 2
+                color: gearMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
+
+                SvgIcon {
+                    anchors.centerIn: parent
+                    name: "settings"
+                    size: Theme.px(11)
+                    color: gearMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35)
+                }
+
+                MouseArea {
+                    id: gearMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        let optional = ["hue", "nightLight", "kdeConnect", "gameMode"].indexOf(statusIcons.openMenu) >= 0;
+                        DialService.close();
+                        SettingsService.requestOpenSettings("Top bar", optional ? "optionalIcons" : "statusIcons");
+                    }
+                }
+            }
+        }
     }
 
     // Right-click menu of a tile, over everything else

@@ -318,7 +318,7 @@ Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubi
 
 | File | Element |
 |---|---|
-| `TopRightStatusCluster.qml` | All 10 status icon buttons |
+| `StatusIconSet.qml` | All status icon buttons |
 | `AppIndicatorPill.qml` L462–467 | App icon buttons |
 | `AppIndicatorPill.qml` L70–73 | Notification bubble body |
 | `VirtualDesktopsPill.qml` L177–185 | Desktop item cards |

@@ -9,7 +9,7 @@ The pills along the top edge: the island, the status cluster on the right, the w
 A new icon needs:
 
 - An entry in `StatusIconRegistry.qml`, with a `title` and `description` for its settings row. An icon that shows only when needed also has a `pinKey`, the setting that keeps it shown; its row is then an Off / When Needed / Always choice.
-- A button component in `island/TopRightStatusCluster.qml` under the same id, in `iconComponents` and `isIconShown`.
+- A button component in `island/StatusIconSet.qml` under the same id, in `iconComponents` and `isIconShown`. The buttons read their menu state from the set's `host` (`openMenu`, `toggleMenu(id)`), which is `TopRightStatusCluster` or the dial. An icon with a menu also needs a case in the cluster's `openMenu` and `toggleMenu`, in the dial's `statusMenu.components`, and in `StatusIconSet.prepareMenu` if it refreshes on opening.
 
 ## Pill style
 

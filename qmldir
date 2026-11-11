@@ -63,6 +63,7 @@ TopBarWings 1.0 island/TopBarWings.qml
 BatteryIndicator 1.0 components/BatteryIndicator.qml
 AppIndicatorPill 1.0 island/AppIndicatorPill.qml
 TopRightStatusCluster 1.0 island/TopRightStatusCluster.qml
+StatusIconSet 1.0 island/StatusIconSet.qml
 WifiQuickSettings 1.0 quicksettings/WifiQuickSettings.qml
 BluetoothQuickSettings 1.0 quicksettings/BluetoothQuickSettings.qml
 PowerQuickSettings 1.0 quicksettings/PowerQuickSettings.qml

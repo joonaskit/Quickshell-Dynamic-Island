@@ -102,6 +102,7 @@
   "launcherShowGenericNames": true,
   "launcherSpotlight": true,
   "launcherStyle": "classic",
+  "dialStatusIcons": false,
   "launcherCalculator": true,
   "launcherConversion": true,
   "launcherWebSearch": true,
