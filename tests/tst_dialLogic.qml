@@ -289,7 +289,9 @@ TestCase {
         compare(Dial.pageFor("battery"), "power");
         compare(Dial.pageFor("profile"), "power");
         compare(Dial.pageFor("wifi"), "wifi");
-        compare(Dial.pageFor("bluetooth"), "");
+        compare(Dial.pageFor("bluetooth"), "bluetooth");
+        compare(Dial.pageFor("hardware"), "hardware");
+        compare(Dial.pageFor("mic"), "");
     }
 
     function test_powerPageStartsOnLock() {
@@ -360,5 +362,67 @@ TestCase {
     function test_wifiStatusNamesAFailedConnect() {
         compare(Dial.wifiStatus(true, false, "", false, 0, 2, "Cafe"), "Could not connect to Cafe");
         compare(Dial.wifiStatus(true, false, "Lab", false, 0, 2, "Cafe"), "Connecting to Lab…");
+    }
+
+    readonly property var devices: [
+        { "mac": "A", "name": "Buds", "icon": "headphones", "isConnected": true, "battery": 0.55 },
+        { "mac": "B", "name": "Mouse", "icon": "bluetooth", "isConnected": false, "battery": -1 }
+    ]
+
+    function test_bluetoothItems() {
+        let items = Dial.bluetoothItems(devices, true);
+        compare(items.map(i => i.id), ["bluetoothSettings", "bt:A", "bt:B"]);
+        compare(items.map(i => i.sub), [undefined, "Connected · 55%", "Not connected"]);
+        compare(Dial.pageFocus("bluetooth", items), 1);
+        compare(Dial.bluetoothItems(devices, false).length, 1);
+    }
+
+    function test_bluetoothStatus() {
+        compare(Dial.bluetoothStatus(false, false, false, "", -1, 0), "No Bluetooth adapter found");
+        compare(Dial.bluetoothStatus(true, false, false, "", -1, 2), "Turn Bluetooth on from the ring");
+        compare(Dial.bluetoothStatus(true, true, false, "Buds", -1, 2), "Connecting to Buds…");
+        compare(Dial.bluetoothStatus(true, true, false, "", -1, 0), "No paired devices");
+        compare(Dial.bluetoothStatus(true, true, true, "", 0.55, 2), "Battery 55% · 2 paired");
+        compare(Dial.bluetoothStatus(true, true, false, "", -1, 2), "2 paired");
+    }
+
+    readonly property var programs: [
+        { "name": "code", "cpu": 1.2, "memMb": 3400 },
+        { "name": "firefox", "cpu": 9.5, "memMb": 900 },
+        { "name": "kwin_wayland", "cpu": 0.4, "memMb": 224 }
+    ]
+
+    function test_hardwareItemsSortByTheRing() {
+        compare(Dial.hardwareItems(programs, 0).map(i => i.id), ["systemMonitor", "proc:firefox", "proc:code", "proc:kwin_wayland"]);
+        compare(Dial.hardwareItems(programs, 1).map(i => i.id), ["systemMonitor", "proc:code", "proc:firefox", "proc:kwin_wayland"]);
+        compare(Dial.hardwareItems(programs, 0)[1].sub, "9.5% CPU");
+        compare(Dial.hardwareItems(programs, 1)[1].sub, "3.3 GB");
+        compare(Dial.hardwareItems(programs, 1)[3].sub, "224 MB");
+        compare(Dial.pageFocus("hardware", Dial.hardwareItems(programs, 0)), 1);
+        compare(Dial.pageFocus("hardware", Dial.hardwareItems([], 0)), 0);
+    }
+
+    function test_desktopProgramsCannotBeEnded() {
+        verify(Dial.canEnd("firefox"));
+        verify(!Dial.canEnd("kwin_wayland"));
+        verify(!Dial.canEnd("quickshell"));
+    }
+
+    function test_hardwareTone() {
+        compare(Dial.hardwareTone(0, 95), "critical");
+        compare(Dial.hardwareTone(1, 80), "high");
+        compare(Dial.hardwareTone(0, 20), "normal");
+        compare(Dial.hardwareTone(2, 80), "critical");
+        compare(Dial.hardwareTone(2, 65), "high");
+        compare(Dial.hardwareTone(2, 50), "normal");
+    }
+
+    function test_hardwareReadout() {
+        compare(Dial.hardwareTitle(0, 23, 45, 52), "23%");
+        compare(Dial.hardwareTitle(2, 23, 45, 0), "No sensor");
+        compare(Dial.hardwareStatus(0, 23, 45, 12.1, 31.2, 52), "Memory 45% · 52 °C");
+        compare(Dial.hardwareStatus(0, 23, 45, 12.1, 31.2, 0), "Memory 45%");
+        compare(Dial.hardwareStatus(1, 23, 45, 12.1, 31.2, 52), "12.1 of 31.2 GB · CPU 23%");
+        compare(Dial.hardwareStatus(2, 23, 45, 12.1, 31.2, 52), "CPU 23% · Memory 45%");
     }
 }

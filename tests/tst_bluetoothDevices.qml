@@ -33,4 +33,13 @@ TestCase {
         compare(BluetoothDevices.pairedList([]), []);
         compare(BluetoothDevices.pairedList(null), []);
     }
+
+    function test_iconAndBattery() {
+        let list = BluetoothDevices.pairedList([
+            { "address": "A", "name": "Galaxy Buds", "paired": true, "batteryAvailable": true, "battery": 0.6 },
+            { "address": "B", "name": "Keyboard", "paired": true }
+        ]);
+        compare(list.map(d => d.icon), ["headphones", "bluetooth"]);
+        compare(list.map(d => d.battery), [0.6, -1]);
+    }
 }

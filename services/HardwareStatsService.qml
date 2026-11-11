@@ -13,6 +13,37 @@ Singleton {
     property real ramTotalGb: 0.0
     property int cpuTemp: 0
 
+    // The busiest programs, as [{ name, cpu, memMb }] (scripts/top_processes.py). Only
+    // sampled while something sets watchProcesses, which the dial's hardware page does.
+    property bool watchProcesses: false
+    property var processes: []
+
+    readonly property string systemMonitorProblem: DepsService.problem(["plasma-systemmonitor"])
+
+    Process {
+        id: topProc
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/top_processes.py"]
+        running: root.watchProcesses
+        onRunningChanged: if (!running) root.processes = []
+
+        stdout: SplitParser {
+            onRead: function(line) {
+                try {
+                    root.processes = JSON.parse(line).processes || [];
+                } catch (e) {}
+            }
+        }
+    }
+
+    function openSystemMonitor() {
+        Quickshell.execDetached(["plasma-systemmonitor"]);
+    }
+
+    // Asks every process of a program to quit (SIGTERM), as named in `processes`
+    function endProgram(name) {
+        Quickshell.execDetached(["pkill", "-x", "--", name]);
+    }
+
     // Process restart timer
     Timer {
         id: restartTimer

@@ -93,6 +93,23 @@ Singleton {
         page = page === next ? "" : next;
     }
 
+    // The hardware page's ring selection (Logic.HARDWARE_RING)
+    property int hardwareMetric: 0
+
+    // Programs are only sampled while the hardware page is open
+    Binding {
+        target: HardwareStatsService
+        property: "watchProcesses"
+        value: root.open && root.page === "hardware"
+    }
+
+    // A program's tile under its app's name and icon, when a desktop entry matches it
+    function withApp(item) {
+        let entry = DesktopEntries.heuristicLookup(item.process);
+        if (!entry) return item;
+        return Object.assign({}, item, { "name": entry.name, "icon": entry.icon });
+    }
+
     // Power profiles only show when power-profiles-daemon is there
     readonly property bool profilesAvailable: !DepsService.iconUnavailable("profile")
 
@@ -118,11 +135,13 @@ Singleton {
     function actionOn(item) {
         if (item.id === "lowRefresh") return SettingsService.lowRefreshOnBattery;
         if (item.network) return item.inUse || NetworkService.connectingSsid === item.network;
+        if (item.device) return item.inUse || BluetoothService.connectingMac === item.device;
         return false;
     }
 
     function actionEnabled(item) {
         if (item.id === "lowRefresh") return PowerProfileService.lowRefreshAvailable;
+        if (item.id === "systemMonitor") return HardwareStatsService.systemMonitorProblem === "";
         return true;
     }
 
@@ -148,6 +167,10 @@ Singleton {
             else NetworkService.connectTo(item.network);
             return;
         }
+        if (item.device) {
+            BluetoothService.toggleConnection(item.device, item.inUse);
+            return;
+        }
         if (item.id === "rescan") {
             NetworkService.scanWifi();
             return;
@@ -155,6 +178,8 @@ Singleton {
         close();
         switch (item.id) {
         case "wifiSettings": NetworkService.openSettings(); break;
+        case "bluetoothSettings": BluetoothService.openSettings(); break;
+        case "systemMonitor": HardwareStatsService.openSystemMonitor(); break;
         case "settings": PowerService.openSettings(); break;
         case "lock": PowerService.lock(); break;
         case "sleep": PowerService.sleep(); break;
@@ -276,12 +301,16 @@ Singleton {
     readonly property var ringLabels: {
         if (page === "power") return profilesAvailable ? Logic.PROFILES.map(p => p.name) : ["Power"];
         if (page === "wifi") return Logic.WIFI_RING;
+        if (page === "bluetooth") return Logic.BLUETOOTH_RING;
+        if (page === "hardware") return Logic.HARDWARE_RING;
         if (searching) return Logic.scopeLabels(appHits, settingHits, fileHits);
         return Logic.CATEGORIES.map(c => c.name);
     }
     readonly property int ringIndex: {
         if (page === "power") return profilesAvailable ? Logic.profileIndex(PowerProfileService.activeProfile) : 0;
         if (page === "wifi") return NetworkService.isWifiEnabled ? 1 : 0;
+        if (page === "bluetooth") return BluetoothService.isEnabled ? 1 : 0;
+        if (page === "hardware") return hardwareMetric;
         return searching ? scope : category;
     }
     // Kind of the category shown ("pinned", "windows", "group", ...)
@@ -319,6 +348,8 @@ Singleton {
     // Launch history is the dock launcher's, so Recent and Frequent match it
     readonly property var items: {
         if (page === "power") return Logic.POWER_ACTIONS;
+        if (page === "hardware") return Logic.hardwareItems(HardwareStatsService.processes, hardwareMetric).map(i => i.process ? withApp(i) : i);
+        if (page === "bluetooth") return Logic.bluetoothItems(BluetoothService.pairedDevices, BluetoothService.isEnabled);
         if (page === "wifi") return Logic.wifiItems(NetworkService.availableNetworks, NetworkService.isWifiEnabled, NetworkService.savedSsids);
         if (searching) return Logic.arrange(Logic.scopeHits(scope, query, appHits, settingHits, fileHits));
         return Logic.itemsFor(category, apps, pinnedIds, DockService.usageStats, windowItems);
@@ -349,6 +380,10 @@ Singleton {
             if (profilesAvailable) PowerProfileService.setProfile(Logic.PROFILES[Logic.clamp(index, 0, Logic.PROFILES.length - 1)].id);
         } else if (page === "wifi") {
             if ((Logic.clamp(index, 0, 1) === 1) !== NetworkService.isWifiEnabled) NetworkService.toggleWifi();
+        } else if (page === "hardware") {
+            hardwareMetric = Logic.clamp(index, 0, Logic.HARDWARE_RING.length - 1);
+        } else if (page === "bluetooth") {
+            if ((Logic.clamp(index, 0, 1) === 1) !== BluetoothService.isEnabled) BluetoothService.togglePower();
         } else if (searching) scope = Logic.clamp(index, 0, Logic.SCOPES.length - 1);
         else setCategory(index);
     }
@@ -458,6 +493,9 @@ Singleton {
             if (item.folder) add("Open Containing Folder", "folder", () => Qt.openUrlExternally(LauncherExtras.fileUrl(item.folder)), true);
         } else if (item.kind === "setting") {
             add("Open", "settings", () => launch(item, x, y));
+        } else if (item.kind === "process") {
+            if (Logic.canEnd(item.process)) add("End " + item.name, "close", () => HardwareStatsService.endProgram(item.process));
+            if (HardwareStatsService.systemMonitorProblem === "") add("Open System Monitor", "cpu", () => HardwareStatsService.openSystemMonitor(), true);
         }
         return entries;
     }

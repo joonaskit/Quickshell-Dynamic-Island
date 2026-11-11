@@ -691,6 +691,26 @@
       }
     },
     {
+      "id": "plasma-systemmonitor",
+      "name": "Plasma System Monitor",
+      "severity": "optional",
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "plasma-systemmonitor"
+        ]
+      },
+      "features": [
+        "System Monitor tile on the dial's hardware page"
+      ],
+      "packages": {
+        "arch": "plasma-systemmonitor",
+        "fedora": "plasma-systemmonitor",
+        "opensuse": "plasma6-systemmonitor",
+        "debian": "plasma-systemmonitor"
+      }
+    },
+    {
       "id": "git",
       "name": "Git",
       "severity": "optional",

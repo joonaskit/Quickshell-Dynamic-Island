@@ -305,7 +305,7 @@ function scopeLabels(apps, settings, files) {
 // --- Status pages ---
 // A status icon's menu can be a page of the dial: its own ring, arc and readout in place
 // of the launcher's. Icons not listed here open their menu as a card over the disc.
-var PAGE_OF_ICON = { "battery": "power", "profile": "power", "wifi": "wifi" };
+var PAGE_OF_ICON = { "battery": "power", "profile": "power", "wifi": "wifi", "bluetooth": "bluetooth", "hardware": "hardware" };
 
 function pageFor(iconId) {
     return PAGE_OF_ICON[iconId] || "";
@@ -340,10 +340,11 @@ var CONFIRM_MS = 3000;   // how long a confirm action waits for its second click
 // connected network (else the strongest) on the Wi-Fi page
 function pageFocus(page, items) {
     if (page === "power") return items.findIndex(a => a.id === "lock");
-    if (page === "wifi") {
+    if (page === "hardware") return items.length > 1 ? 1 : 0;
+    if (page === "wifi" || page === "bluetooth") {
         let connected = items.findIndex(a => a.inUse);
         if (connected >= 0) return connected;
-        let first = items.findIndex(a => a.network);
+        let first = items.findIndex(a => a.network || a.device);
         return first >= 0 ? first : 0;
     }
     return 0;
@@ -415,4 +416,96 @@ function batteryStatus(present, charging, full, timeToFull, timeToEmpty) {
     }
     let left = formatDuration(timeToEmpty);
     return left !== "" ? left + " remaining" : "On battery";
+}
+
+// The Bluetooth page's ring: the adapter off or on
+var BLUETOOTH_RING = ["Bluetooth Off", "Bluetooth On"];
+
+function percent(fraction) {
+    return Math.round(fraction * 100) + "%";
+}
+
+// The Bluetooth page's arc: Settings, then the paired devices as BluetoothService lists
+// them (connected first). Choosing a device connects or disconnects it.
+function bluetoothItems(devices, enabled) {
+    let list = [{ "kind": "action", "id": "bluetoothSettings", "name": "Settings", "icon": "settings", "tint": "accentBlue" }];
+    if (!enabled) return list;
+    return list.concat(devices.map(d => ({
+        "kind": "action",
+        "id": "bt:" + d.mac,
+        "device": d.mac,
+        "inUse": !!d.isConnected,
+        "name": d.name,
+        "sub": (d.isConnected ? "Connected" : "Not connected") + (d.battery >= 0 ? " · " + percent(d.battery) : ""),
+        "icon": d.icon,
+        "tint": "accentBlue"
+    })));
+}
+
+// The line under the device name. `connecting` is the name of the device connecting.
+function bluetoothStatus(available, enabled, connected, connecting, battery, count) {
+    if (!available) return "No Bluetooth adapter found";
+    if (!enabled) return "Turn Bluetooth on from the ring";
+    if (connecting !== "") return "Connecting to " + connecting + "…";
+    if (count === 0) return "No paired devices";
+    let paired = count + " paired";
+    if (connected && battery >= 0) return "Battery " + percent(battery) + " · " + paired;
+    return paired;
+}
+
+// The hardware page's ring: which reading the middle and the gauge show, and what the
+// programs on the arc are sorted by (memory for Memory, CPU otherwise)
+var HARDWARE_RING = ["CPU", "Memory", "Temperature"];
+var HARDWARE_PROGRAMS = 8;
+
+// Programs that keep the desktop itself running. The dial does not offer to end them.
+var PROTECTED_PROGRAMS = ["systemd", "kwin_wayland", "kwin_x11", "plasmashell", "quickshell", "qs", "Xwayland",
+    "pipewire", "pipewire-pulse", "wireplumber", "dbus-daemon", "dbus-broker", "dbus-broker-lau", "sddm",
+    "startplasma-way", "ksmserver", "kded6", "polkit-kde-auth", "kwalletd6", "NetworkManager", "python3"];
+
+function canEnd(name) {
+    return PROTECTED_PROGRAMS.indexOf(name) < 0;
+}
+
+function formatMemory(mb) {
+    return mb >= 1024 ? (mb / 1024).toFixed(1) + " GB" : Math.round(mb) + " MB";
+}
+
+// The hardware page's arc: System Monitor, then the busiest programs by `metric`'s order
+function hardwareItems(programs, metric) {
+    let byMemory = metric === 1;
+    let sorted = programs.slice().sort((a, b) => byMemory ? b.memMb - a.memMb : b.cpu - a.cpu).slice(0, HARDWARE_PROGRAMS);
+    return [{ "kind": "action", "id": "systemMonitor", "name": "System Monitor", "icon": "cpu", "tint": "accentBlue" }]
+        .concat(sorted.map(p => ({
+            "kind": "process",
+            "id": "proc:" + p.name,
+            "process": p.name,
+            "name": p.name,
+            "sub": byMemory ? formatMemory(p.memMb) : p.cpu + "% CPU",
+            "icon": p.name,
+            "fallback": "application-x-executable"
+        })));
+}
+
+// How a reading is coloured: "critical", "high" or "normal". Temperature is in °C, the
+// others in percent.
+function hardwareTone(metric, value) {
+    if (metric === 2) return value > 75 ? "critical" : (value > 60 ? "high" : "normal");
+    return value >= 90 ? "critical" : (value >= 75 ? "high" : "normal");
+}
+
+// The big reading in the middle for `metric`, and the line under it with the other two
+function hardwareTitle(metric, cpu, ram, temp) {
+    if (metric === 1) return ram + "%";
+    if (metric === 2) return temp > 0 ? temp + " °C" : "No sensor";
+    return cpu + "%";
+}
+
+function hardwareStatus(metric, cpu, ram, usedGb, totalGb, temp) {
+    let heat = temp > 0 ? temp + " °C" : "";
+    let parts;
+    if (metric === 1) parts = [usedGb + " of " + totalGb + " GB", "CPU " + cpu + "%"];
+    else if (metric === 2) parts = ["CPU " + cpu + "%", "Memory " + ram + "%"];
+    else parts = ["Memory " + ram + "%", heat];
+    return parts.filter(p => p !== "").join(" · ");
 }

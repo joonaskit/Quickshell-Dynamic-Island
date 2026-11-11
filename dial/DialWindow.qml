@@ -176,6 +176,40 @@ PanelWindow {
                 "status": Logic.wifiStatus(on, net !== null, NetworkService.connectingSsid, NetworkService.isScanning, net ? net.signal : 0, NetworkService.availableNetworks.length, NetworkService.failedSsid)
             };
         }
+        if (DialService.page === "hardware") {
+            let metric = DialService.hardwareMetric;
+            let hw = HardwareStatsService;
+            let value = [hw.cpuPercent, hw.ramPercent, hw.cpuTemp][metric];
+            let tone = Logic.hardwareTone(metric, value);
+            let normal = metric === 2 ? Theme.accentGreenStrong : Theme.accentBlue;
+            let color = tone === "critical" ? Theme.accentRed : (tone === "high" ? Theme.accentOrangeStrong : normal);
+            return {
+                // Temperature fills the gauge up to 100 °C
+                "gauge": metric === 2 && value <= 0 ? -1 : Math.min(1, value / 100),
+                "color": color,
+                "title": Logic.hardwareTitle(metric, hw.cpuPercent, hw.ramPercent, hw.cpuTemp),
+                "titleColor": tone === "normal" ? Theme.textPrimary : color,
+                "titleSize": 34,
+                "status": Logic.hardwareStatus(metric, hw.cpuPercent, hw.ramPercent, hw.ramUsedGb, hw.ramTotalGb, hw.cpuTemp)
+            };
+        }
+        if (DialService.page === "bluetooth") {
+            let on = BluetoothService.isEnabled;
+            let connected = BluetoothService.connectedDevices;
+            // The first connected device that reports its battery fills the gauge
+            let powered = connected.find(d => d.battery >= 0);
+            let connecting = BluetoothService.pairedDevices.find(d => d.mac === BluetoothService.connectingMac);
+            return {
+                "gauge": on && powered ? powered.battery : -1,
+                "color": Theme.accentBlue,
+                "title": !BluetoothService.isAvailable ? "No Bluetooth"
+                    : (!on ? "Bluetooth off" : (connected.length > 0 ? connected[0].name : "Not connected")),
+                "titleColor": on && connected.length > 0 ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Logic.bluetoothStatus(BluetoothService.isAvailable, on, connected.length > 0, connecting ? connecting.name : "",
+                    powered ? powered.battery : -1, BluetoothService.pairedDevices.length)
+            };
+        }
         return { "gauge": -1, "color": Theme.textPrimary, "title": "", "titleColor": Theme.textPrimary, "titleSize": 24, "status": "" };
     }
 
@@ -247,6 +281,12 @@ PanelWindow {
 
     function launchAt(index) {
         let c = tileCenter(index);
+        // A program has nothing to launch: choosing it opens its menu (End, System Monitor)
+        if (window.items[index] && window.items[index].kind === "process") {
+            openMenu(index, c.x + Theme.px(42), c.y - Theme.px(42));
+            if (menu.isOpen) menu.move(1);
+            return;
+        }
         DialService.launch(window.items[index], c.x, c.y);
     }
 
@@ -633,7 +673,7 @@ PanelWindow {
                                     width: Theme.px(76)
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
-                                    visible: DialService.searching || slot.app.kind === "window" || (tile.isAction && !!slot.app.sub)
+                                    visible: DialService.searching || slot.app.kind === "window" || slot.app.kind === "process" || (tile.isAction && !!slot.app.sub)
                                     text: slot.app.sub
                                     color: slot.selected ? Theme.textPrimary : Theme.textSecondary
                                     font.family: Theme.fontFamily
