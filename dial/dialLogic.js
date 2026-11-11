@@ -353,8 +353,10 @@ function pageFocus(page, items) {
 var WIFI_RING = ["Wi-Fi Off", "Wi-Fi On"];
 
 // The Wi-Fi page's arc: Settings and Rescan, then the networks as NetworkService lists
-// them (connected first, then by signal). Choosing a network connects to it.
-function wifiItems(networks, enabled) {
+// them (connected first, then by signal). Choosing a network connects to it, after asking
+// for the password when it is secured and not in `saved` (SSIDs).
+function wifiItems(networks, enabled, saved) {
+    saved = saved || [];
     let list = [{ "kind": "action", "id": "wifiSettings", "name": "Settings", "icon": "settings", "tint": "accentBlue" }];
     if (!enabled) return list;
     list.push({ "kind": "action", "id": "rescan", "name": "Rescan", "icon": "refresh", "tint": "accentBlue" });
@@ -363,17 +365,25 @@ function wifiItems(networks, enabled) {
         "id": "net:" + n.ssid,
         "network": n.ssid,
         "inUse": !!n.inUse,
+        "secure": !!n.isSecure,
+        "saved": saved.indexOf(n.ssid) >= 0,
         "name": n.ssid,
-        "sub": (n.inUse ? "Connected" : n.signal + "%") + (n.isSecure ? " · Secured" : ""),
+        "sub": (n.inUse ? "Connected" : n.signal + "%") + (saved.indexOf(n.ssid) >= 0 ? " · Saved" : (n.isSecure ? " · Secured" : "")),
         "icon": "wifi",
         "tint": "accentBlue"
     })));
 }
 
-// The line under the network name
-function wifiStatus(enabled, connected, connecting, scanning, signal, count) {
+// Whether choosing a network tile asks for its password first
+function needsPassword(item) {
+    return !!item.network && item.secure && !item.saved && !item.inUse;
+}
+
+// The line under the network name. `failed` is the network the last connect failed on.
+function wifiStatus(enabled, connected, connecting, scanning, signal, count, failed) {
     if (!enabled) return "Turn Wi-Fi on from the ring";
     if (connecting !== "") return "Connecting to " + connecting + "…";
+    if (failed) return "Could not connect to " + failed;
     if (scanning && count === 0) return "Scanning…";
     let found = count + (count === 1 ? " network" : " networks");
     return connected ? "Signal " + signal + "% · " + found : found;

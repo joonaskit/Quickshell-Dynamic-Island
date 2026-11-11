@@ -84,6 +84,7 @@ Singleton {
     function togglePage(next) {
         animateTurn();
         armedAction = "";
+        passwordFor = "";
         query = "";
         // A page starts on its own slot each time (Logic.pageFocus): its lists change
         let memory = Object.assign({}, focusMemory);
@@ -94,6 +95,15 @@ Singleton {
 
     // Power profiles only show when power-profiles-daemon is there
     readonly property bool profilesAvailable: !DepsService.iconUnavailable("profile")
+
+    // The network the Wi-Fi page asks a password for, or ""
+    property string passwordFor: ""
+
+    function submitPassword(password) {
+        if (passwordFor === "" || password === "") return;
+        NetworkService.connectTo(passwordFor, password);
+        passwordFor = "";
+    }
 
     // The confirm action waiting for its second click, and how long it waits
     property string armedAction: ""
@@ -132,7 +142,10 @@ Singleton {
             return;
         }
         if (item.network) {
-            if (!item.inUse && NetworkService.connectingSsid === "") NetworkService.connectTo(item.network);
+            passwordFor = "";
+            if (item.inUse || NetworkService.connectingSsid !== "") return;
+            if (Logic.needsPassword(item)) passwordFor = item.network;
+            else NetworkService.connectTo(item.network);
             return;
         }
         if (item.id === "rescan") {
@@ -158,6 +171,7 @@ Singleton {
             scope = 0;
             page = "";
             armedAction = "";
+            passwordFor = "";
         }
     }
 
@@ -305,7 +319,7 @@ Singleton {
     // Launch history is the dock launcher's, so Recent and Frequent match it
     readonly property var items: {
         if (page === "power") return Logic.POWER_ACTIONS;
-        if (page === "wifi") return Logic.wifiItems(NetworkService.availableNetworks, NetworkService.isWifiEnabled);
+        if (page === "wifi") return Logic.wifiItems(NetworkService.availableNetworks, NetworkService.isWifiEnabled, NetworkService.savedSsids);
         if (searching) return Logic.arrange(Logic.scopeHits(scope, query, appHits, settingHits, fileHits));
         return Logic.itemsFor(category, apps, pinnedIds, DockService.usageStats, windowItems);
     }

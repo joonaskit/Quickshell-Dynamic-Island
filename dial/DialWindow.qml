@@ -169,10 +169,11 @@ PanelWindow {
             return {
                 "gauge": on && net ? net.signal / 100 : -1,
                 "color": Theme.accentBlue,
-                "title": !on ? "Wi-Fi off" : (net ? net.ssid : "Not connected"),
+                "title": DialService.passwordFor !== "" ? "Join " + DialService.passwordFor
+                    : (!on ? "Wi-Fi off" : (net ? net.ssid : "Not connected")),
                 "titleColor": on && net ? Theme.textPrimary : Theme.textSecondary,
                 "titleSize": 24,
-                "status": Logic.wifiStatus(on, net !== null, NetworkService.connectingSsid, NetworkService.isScanning, net ? net.signal : 0, NetworkService.availableNetworks.length)
+                "status": Logic.wifiStatus(on, net !== null, NetworkService.connectingSsid, NetworkService.isScanning, net ? net.signal : 0, NetworkService.availableNetworks.length, NetworkService.failedSsid)
             };
         }
         return { "gauge": -1, "color": Theme.textPrimary, "title": "", "titleColor": Theme.textPrimary, "titleSize": 24, "status": "" };
@@ -853,10 +854,66 @@ PanelWindow {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
+                visible: DialService.passwordFor === ""
                 text: window.pageView.status
                 color: Theme.textSecondary
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontPx(11)
+            }
+
+            // The Wi-Fi page's password field, for a secured network that is not saved.
+            // Enter connects, Esc cancels; either gives the keys back to the dial.
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: DialService.passwordFor !== ""
+                width: Theme.px(260)
+                height: password.height + Theme.px(8)
+                radius: height / 2
+                color: "transparent"
+                border.width: 1
+                border.color: password.activeFocus ? Qt.alpha(Theme.accentBlue, 0.7) : Theme.glassHairline
+
+                onVisibleChanged: {
+                    password.text = "";
+                    if (visible) password.forceActiveFocus();
+                    else input.forceActiveFocus();
+                }
+
+                TextInput {
+                    id: password
+                    anchors.centerIn: parent
+                    width: parent.width - Theme.px(32)
+                    horizontalAlignment: TextInput.AlignHCenter
+                    echoMode: TextInput.Password
+                    color: Theme.textPrimary
+                    selectionColor: Theme.accentBlue
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontPx(15)
+                    clip: true
+
+                    Text {
+                        anchors.fill: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        visible: password.text === ""
+                        text: "Password"
+                        color: Theme.textSecondary
+                        font.family: Theme.fontFamily
+                        font.pixelSize: password.font.pixelSize
+                        font.weight: Font.Light
+                    }
+
+                    Keys.onPressed: event => {
+                        // Hiding the field hands the keys back (onVisibleChanged)
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                            DialService.submitPassword(password.text);
+                        } else if (event.key === Qt.Key_Escape) {
+                            DialService.passwordFor = "";
+                        } else {
+                            return;
+                        }
+                        event.accepted = true;
+                    }
+                }
             }
         }
 

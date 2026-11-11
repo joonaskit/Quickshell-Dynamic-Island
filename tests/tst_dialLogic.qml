@@ -348,4 +348,17 @@ TestCase {
         compare(Dial.wifiStatus(true, true, "", false, 80, 2), "Signal 80% · 2 networks");
         compare(Dial.wifiStatus(true, false, "", false, 0, 1), "1 network");
     }
+
+    function test_savedNetworksSkipThePassword() {
+        let items = Dial.wifiItems(networks.concat([{ "ssid": "Work", "signal": 60, "isSecure": true }]), true, ["Work"]);
+        compare(items.map(i => Dial.needsPassword(i)), [false, false, false, false, false]);
+        compare(items[4].sub, "60% · Saved");
+        let fresh = Dial.wifiItems([{ "ssid": "Lab", "signal": 50, "isSecure": true }], true, []);
+        verify(Dial.needsPassword(fresh[2]));
+    }
+
+    function test_wifiStatusNamesAFailedConnect() {
+        compare(Dial.wifiStatus(true, false, "", false, 0, 2, "Cafe"), "Could not connect to Cafe");
+        compare(Dial.wifiStatus(true, false, "Lab", false, 0, 2, "Cafe"), "Connecting to Lab…");
+    }
 }
