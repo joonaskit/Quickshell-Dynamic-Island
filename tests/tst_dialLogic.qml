@@ -242,11 +242,11 @@ TestCase {
         compare(four[Dial.middle(4)].name, "a");
     }
 
-    function test_everythingPutsPrefixesFirst() {
+    function test_everythingPutsAppsFirst() {
         let apps = [{ "name": "My Kate" }];
         let settings = [{ "name": "Kate settings" }];
         let files = [{ "name": "katefile" }, { "name": "other kate" }];
-        compare(Dial.scopeHits(0, "kate", apps, settings, files).map(h => h.name), ["Kate settings", "katefile", "My Kate", "other kate"]);
+        compare(Dial.scopeHits(0, "kate", apps, settings, files).map(h => h.name), ["My Kate", "Kate settings", "katefile", "other kate"]);
         compare(Dial.scopeHits(3, "kate", apps, settings, files).length, 2);
         compare(Dial.scopeHits(2, "kate", apps, settings, files).length, 1);
     }

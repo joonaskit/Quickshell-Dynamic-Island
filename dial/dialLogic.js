@@ -244,8 +244,8 @@ function matchApps(apps, query, usage, pinnedIds) {
     return scored.map(s => s.app);
 }
 
-// The hits of one scope. Everything puts the apps, settings and files together, name
-// prefixes first and each source keeping its own order otherwise.
+// The hits of one scope. Everything lists the apps first, then settings, then files, as
+// this is mostly an app launcher; within settings and files name prefixes come first.
 function scopeHits(scope, query, apps, settings, files) {
     let q = (query || "").trim().toLowerCase();
     let list;
@@ -253,10 +253,11 @@ function scopeHits(scope, query, apps, settings, files) {
     else if (scope === 2) list = settings;
     else if (scope === 3) list = files;
     else {
-        let all = apps.concat(settings, files);
-        list = all.map((h, i) => ({ "h": h, "i": i }))
+        let rest = settings.concat(files)
+            .map((h, i) => ({ "h": h, "i": i }))
             .sort((x, y) => (nameRank(x.h.name, q) === 0 ? 0 : 1) - (nameRank(y.h.name, q) === 0 ? 0 : 1) || x.i - y.i)
             .map(x => x.h);
+        list = apps.concat(rest);
     }
     return list.slice(0, HIT_LIMIT);
 }
