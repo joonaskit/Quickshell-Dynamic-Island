@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Services.UPower
 import "dialLogic.js" as Logic
 
 // Experimental category dial launcher: a disc that slides down around the clock pill, with
@@ -130,6 +131,66 @@ PanelWindow {
         }
     }
 
+    // The battery, for the power page
+    QtObject {
+        id: battery
+        readonly property var device: UPower.displayDevice
+        readonly property bool present: device !== null && device.isPresent
+        readonly property real fraction: present ? Math.min(1, Math.max(0, device.percentage <= 1 ? device.percentage : device.percentage / 100)) : 1
+        readonly property bool charging: present && device.state === UPowerDeviceState.Charging
+        readonly property bool full: present && (device.state === UPowerDeviceState.FullyCharged || fraction >= 0.99)
+        readonly property string tone: Logic.batteryTone(fraction, charging)
+        readonly property color color: {
+            switch (tone) {
+            case "charging": return Theme.accentGreenStrong;
+            case "critical": return Theme.accentRed;
+            case "low": return Theme.accentOrangeStrong;
+            }
+            return Theme.textPrimary;
+        }
+        readonly property string status: Logic.batteryStatus(present, charging, full, present ? device.timeToFull : 0, present ? device.timeToEmpty : 0)
+    }
+
+    // What the open page shows in the middle and on the gauge. `gauge` is 0 to 1, or -1
+    // for none.
+    readonly property var connectedNetwork: NetworkService.availableNetworks.find(n => n.inUse) || null
+    readonly property var pageView: {
+        if (DialService.page === "power") return {
+            "gauge": battery.present ? battery.fraction : -1,
+            "color": battery.color,
+            "title": battery.present ? Math.round(battery.fraction * 100) + "%" : "Plugged in",
+            "titleColor": battery.present ? battery.color : Theme.textPrimary,
+            "titleSize": battery.present ? 34 : 24,
+            "status": battery.status
+        };
+        if (DialService.page === "wifi") {
+            let on = NetworkService.isWifiEnabled;
+            let net = window.connectedNetwork;
+            return {
+                "gauge": on && net ? net.signal / 100 : -1,
+                "color": Theme.accentBlue,
+                "title": !on ? "Wi-Fi off" : (net ? net.ssid : "Not connected"),
+                "titleColor": on && net ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Logic.wifiStatus(on, net !== null, NetworkService.connectingSsid, NetworkService.isScanning, net ? net.signal : 0, NetworkService.availableNetworks.length)
+            };
+        }
+        return { "gauge": -1, "color": Theme.textPrimary, "title": "", "titleColor": Theme.textPrimary, "titleSize": 24, "status": "" };
+    }
+
+    // Opening or leaving a page spins the new tiles and pills in from the side
+    Connections {
+        target: DialService
+        function onPageChanged() {
+            Qt.callLater(() => {
+                arcSpin.position = arcSpin.index - 3;
+                arcSpin.settle();
+                ringSpin.position = ringSpin.index - 2;
+                ringSpin.settle();
+            });
+        }
+    }
+
     // Category pills are spaced by width. Widths are of the bold label, so a pill keeps
     // its size, and the ring its spacing, when the selection moves.
     FontMetrics {
@@ -179,6 +240,9 @@ PanelWindow {
         if (kind === "windows") return window.items[window.focusIndex].detail;
         return DialService.ringLabels[window.ringIndex] + " · " + n + (n === 1 ? " app" : " apps");
     }
+
+    readonly property var pageKeys: [Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down, Qt.Key_Home, Qt.Key_End,
+        Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Return, Qt.Key_Enter, Qt.Key_Escape]
 
     function launchAt(index) {
         let c = tileCenter(index);
@@ -304,6 +368,40 @@ PanelWindow {
                 strokeWidth: Theme.px(3)
                 capStyle: ShapePath.RoundCap
                 PathAngleArc { radiusX: bar.radius; radiusY: bar.radius; startAngle: bar.span.to; sweepAngle: bar.span.from - bar.span.to }
+            }
+        }
+
+        // A page's gauge on the border circle, filling from the left: the battery level, or
+        // the Wi-Fi signal
+        Shape {
+            id: gauge
+            x: window.cx
+            y: window.cy
+            preferredRendererType: Shape.CurveRenderer
+            opacity: DialService.page !== "" && window.pageView.gauge >= 0 ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: 240 } }
+
+            readonly property real radius: Theme.px(Logic.BAR_RADIUS)
+            // From 165° round the bottom to 15°
+            readonly property real start: 165
+            readonly property real span: 150
+            property real level: Math.max(0, window.pageView.gauge)
+            Behavior on level { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Theme.overlay(0.12)
+                strokeWidth: Theme.px(6)
+                capStyle: ShapePath.RoundCap
+                PathAngleArc { radiusX: gauge.radius; radiusY: gauge.radius; startAngle: gauge.start; sweepAngle: -gauge.span }
+            }
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: window.pageView.color
+                strokeWidth: Theme.px(6)
+                capStyle: ShapePath.RoundCap
+                PathAngleArc { radiusX: gauge.radius; radiusY: gauge.radius; startAngle: gauge.start; sweepAngle: -gauge.span * gauge.level }
             }
         }
 
@@ -467,15 +565,25 @@ PanelWindow {
                         opacity: active ? Logic.arcOpacity(Math.abs(slot.index - arcSpin.position)) : 0
 
                         sourceComponent: Rectangle {
+                            // A page's action tile: armed waits for its second click, on is a
+                            // toggle that is on
+                            id: tile
+                            readonly property bool isAction: slot.app.kind === "action"
+                            readonly property bool armed: isAction && DialService.armedAction === slot.app.id
+                            readonly property bool on: isAction && !!slot.app.toggle && DialService.actionOn(slot.app)
+                            readonly property color tint: armed ? Theme.accentRed : Theme.accentBlue
+
                             width: Theme.px(84)
                             height: Theme.px(84)
                             radius: Theme.px(14)
-                            color: slot.selected ? Qt.alpha(Theme.accentBlue, 0.24) : Theme.overlay(tileHover.hovered ? 0.08 : 0)
+                            color: armed ? Qt.alpha(Theme.accentRed, 0.28)
+                                : slot.selected ? Qt.alpha(Theme.accentBlue, 0.24) : Theme.overlay(tileHover.hovered ? 0.08 : 0)
                             border.width: 1
+                            opacity: isAction && !DialService.actionEnabled(slot.app) ? 0.4 : 1
                             Behavior on color { ColorAnimation { duration: 120 } }
 
                             HoverHandler { id: tileHover }
-                            border.color: slot.selected ? Qt.alpha(Theme.accentBlue, 0.6) : "transparent"
+                            border.color: armed ? Qt.alpha(Theme.accentRed, 0.7) : slot.selected ? Qt.alpha(tint, 0.6) : "transparent"
 
                             Column {
                                 anchors.centerIn: parent
@@ -485,16 +593,36 @@ PanelWindow {
 
                                 Image {
                                     anchors.horizontalCenter: parent.horizontalCenter
+                                    visible: !tile.isAction
                                     width: Theme.px(40)
                                     height: width
                                     sourceSize: Qt.size(width, height)
-                                    source: Quickshell.iconPath(slot.app.icon, slot.app.fallback)
+                                    source: visible ? Quickshell.iconPath(slot.app.icon, slot.app.fallback) : ""
+                                }
+                                // An action's icon, in a disc of its colour; filled while on or armed
+                                Rectangle {
+                                    readonly property color tint: tile.armed ? Theme.accentRed : (Theme[slot.app.tint] || Theme.accentBlue)
+                                    readonly property bool filled: tile.on || tile.armed
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    visible: tile.isAction
+                                    width: Theme.px(40)
+                                    height: width
+                                    radius: width / 2
+                                    color: filled ? tint : Qt.alpha(tint, 0.2)
+                                    Behavior on color { ColorAnimation { duration: 120 } }
+
+                                    SvgIcon {
+                                        anchors.centerIn: parent
+                                        name: parent.visible ? slot.app.icon : ""
+                                        size: Theme.px(18)
+                                        color: parent.filled ? "#ffffff" : parent.tint
+                                    }
                                 }
                                 Text {
                                     width: Theme.px(76)
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
-                                    text: slot.app.name
+                                    text: tile.armed ? "Click again" : slot.app.name
                                     color: Theme.textPrimary
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontPx(10)
@@ -504,7 +632,7 @@ PanelWindow {
                                     width: Theme.px(76)
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
-                                    visible: DialService.searching || slot.app.kind === "window"
+                                    visible: DialService.searching || slot.app.kind === "window" || (tile.isAction && !!slot.app.sub)
                                     text: slot.app.sub
                                     color: slot.selected ? Theme.textPrimary : Theme.textSecondary
                                     font.family: Theme.fontFamily
@@ -571,8 +699,11 @@ PanelWindow {
             }
         }
 
-        // Search field, with what the selected hit is, or the category, on the line below
+        // Search field, with what the selected hit is, or the category, on the line below.
+        // Hidden on a page by opacity alone, so the field keeps the keys.
         Column {
+            opacity: DialService.page === "" ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 180 } }
             x: window.cx - width / 2
             // The text sits where the prototype has it; the box takes 4 px above it
             y: window.cy + Theme.px(27)
@@ -624,8 +755,13 @@ PanelWindow {
                     Keys.onPressed: event => {
                         if (!window.shown) return;
                         // A status icon's menu takes the keys from the rings; Esc closes it
-                        if (statusIcons.openMenu !== "") {
+                        if (statusIcons.cardMenu !== "") {
                             if (event.key === Qt.Key_Escape) statusIcons.closeMenu();
+                            event.accepted = true;
+                            return;
+                        }
+                        // A page has no search: only the keys that move round the dial work there
+                        if (DialService.page !== "" && window.pageKeys.indexOf(event.key) < 0) {
                             event.accepted = true;
                             return;
                         }
@@ -671,8 +807,9 @@ PanelWindow {
                             window.openFocusedMenu();
                             break;
                         case Qt.Key_Escape:
-                            // Clears the search first, then closes
-                            if (DialService.searching) DialService.setQuery("");
+                            // Back from a page, else clears the search first, then closes
+                            if (DialService.page !== "") DialService.togglePage(DialService.page);
+                            else if (DialService.searching) DialService.setQuery("");
                             else DialService.close();
                             break;
                         default: return;
@@ -692,6 +829,37 @@ PanelWindow {
             }
         }
 
+        // A page's readout, where the search field is: a title and a status line
+        Column {
+            x: window.cx - width / 2
+            y: window.cy + Theme.px(22)
+            width: Theme.px(320)
+            spacing: Theme.px(2)
+            opacity: DialService.page !== "" ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: 180 } }
+
+            Text {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                text: window.pageView.title
+                color: window.pageView.titleColor
+                font.family: Theme.fontDisplay
+                font.pixelSize: Theme.fontPx(window.pageView.titleSize)
+                font.bold: true
+            }
+            Text {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                text: window.pageView.status
+                color: Theme.textSecondary
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontPx(11)
+            }
+        }
+
         // Status icons under the search field (dialStatusIcons, a test): the system icons,
         // then the optional ones below a thin line. A menu icon opens its menu over the
         // disc (statusMenu).
@@ -705,21 +873,32 @@ PanelWindow {
 
             // StatusIconSet's host interface
             readonly property bool hoverEnabled: true
-            property string openMenu: ""
+            // An open page lights its icon (the power page the battery's)
+            readonly property string openMenu: DialService.page === "power" ? "battery" : (DialService.page || cardMenu)
             property string unavailableTip: ""
             property Item unavailableTipItem: null
+            // An icon opens its page (Logic.pageFor) or, if it has none, its menu as a card
             function toggleMenu(id) {
-                let was = openMenu;
+                let was = cardMenu;
                 closeMenu();
+                let page = Logic.pageFor(id);
+                if (page !== "") {
+                    DialService.togglePage(page);
+                    if (DialService.page !== "") dialIconSet.prepareMenu(id === "battery" ? "profile" : id);
+                    return;
+                }
                 if (id === "" || id === was) return;
-                openMenu = id;
+                cardMenu = id;
                 dialIconSet.prepareMenu(id);
             }
+
+            // The menu shown as a card over the disc (statusMenu), or ""
+            property string cardMenu: ""
             function closeMenu() {
                 menu.entries = [];
                 // The Hue menu goes back to the favourite light each time it closes
-                if (openMenu === "hue") HueService.viewedId = "";
-                openMenu = "";
+                if (cardMenu === "hue") HueService.viewedId = "";
+                cardMenu = "";
                 // A field in the menu may have taken the keys
                 input.forceActiveFocus();
             }
@@ -939,14 +1118,18 @@ PanelWindow {
         height: window.pillHeight
         enabled: window.shown
         cursorShape: Qt.PointingHandCursor
-        onClicked: DialService.close()
+        // From a page it goes back to the launcher
+        onClicked: {
+            if (DialService.page !== "") DialService.togglePage(DialService.page);
+            else DialService.close();
+        }
     }
 
     // While a status icon's menu is open, a press or wheel anywhere else closes the menu
     // (not the dial) and the rings under it stay put
     MouseArea {
         anchors.fill: parent
-        enabled: window.shown && statusIcons.openMenu !== ""
+        enabled: window.shown && statusIcons.cardMenu !== ""
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         onPressed: statusIcons.closeMenu()
         onWheel: wheel => wheel.accepted = true
@@ -955,7 +1138,7 @@ PanelWindow {
     // A status icon's menu, a card over the disc below the pill
     Rectangle {
         id: statusMenu
-        readonly property bool isOpen: statusIcons.openMenu !== ""
+        readonly property bool isOpen: statusIcons.cardMenu !== ""
         // The menu last shown, kept while the card fades out
         property string shownId: ""
         width: Theme.px(350)
@@ -979,8 +1162,8 @@ PanelWindow {
 
         Connections {
             target: statusIcons
-            function onOpenMenuChanged() {
-                if (statusIcons.openMenu !== "") statusMenu.shownId = statusIcons.openMenu;
+            function onCardMenuChanged() {
+                if (statusIcons.cardMenu !== "") statusMenu.shownId = statusIcons.cardMenu;
             }
         }
 
@@ -1089,7 +1272,7 @@ PanelWindow {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        let optional = ["hue", "nightLight", "kdeConnect", "gameMode"].indexOf(statusIcons.openMenu) >= 0;
+                        let optional = ["hue", "nightLight", "kdeConnect", "gameMode"].indexOf(statusIcons.cardMenu) >= 0;
                         DialService.close();
                         SettingsService.requestOpenSettings("Top bar", optional ? "optionalIcons" : "statusIcons");
                     }

@@ -301,3 +301,108 @@ function scopeLabels(apps, settings, files) {
     let counts = [apps.length + settings.length + files.length, apps.length, settings.length, files.length];
     return SCOPES.map((name, i) => name + " " + counts[i]);
 }
+
+// --- Status pages ---
+// A status icon's menu can be a page of the dial: its own ring, arc and readout in place
+// of the launcher's. Icons not listed here open their menu as a card over the disc.
+var PAGE_OF_ICON = { "battery": "power", "profile": "power", "wifi": "wifi" };
+
+function pageFor(iconId) {
+    return PAGE_OF_ICON[iconId] || "";
+}
+
+// Power profiles on the power page's ring, in power-profiles-daemon's names
+var PROFILES = [
+    { "id": "power-saver", "name": "Power Saver" },
+    { "id": "balanced", "name": "Balanced" },
+    { "id": "performance", "name": "Performance" }
+];
+
+function profileIndex(id) {
+    let i = PROFILES.findIndex(p => p.id === id);
+    return i >= 0 ? i : 1;
+}
+
+// The power page's arc. `confirm` actions run on a second click, `toggle` ones flip a
+// setting and leave the dial open. `tint` is a Theme colour name.
+var POWER_ACTIONS = [
+    { "kind": "action", "id": "lowRefresh", "name": "60 Hz", "sub": "On battery", "icon": "battery", "tint": "accentGreen", "toggle": true },
+    { "kind": "action", "id": "settings", "name": "Settings", "icon": "settings", "tint": "accentBlue" },
+    { "kind": "action", "id": "lock", "name": "Lock", "icon": "lock", "tint": "accentBlue" },
+    { "kind": "action", "id": "sleep", "name": "Sleep", "icon": "moon", "tint": "accentIndigo" },
+    { "kind": "action", "id": "restart", "name": "Restart", "icon": "restart", "tint": "accentOrangeStrong", "confirm": true },
+    { "kind": "action", "id": "shutdown", "name": "Shut Down", "icon": "power", "tint": "accentRed", "confirm": true }
+];
+
+var CONFIRM_MS = 3000;   // how long a confirm action waits for its second click
+
+// The arc's starting slot on a page with these `items`: Lock on the power page, the
+// connected network (else the strongest) on the Wi-Fi page
+function pageFocus(page, items) {
+    if (page === "power") return items.findIndex(a => a.id === "lock");
+    if (page === "wifi") {
+        let connected = items.findIndex(a => a.inUse);
+        if (connected >= 0) return connected;
+        let first = items.findIndex(a => a.network);
+        return first >= 0 ? first : 0;
+    }
+    return 0;
+}
+
+// The Wi-Fi page's ring: the radio off or on
+var WIFI_RING = ["Wi-Fi Off", "Wi-Fi On"];
+
+// The Wi-Fi page's arc: Settings and Rescan, then the networks as NetworkService lists
+// them (connected first, then by signal). Choosing a network connects to it.
+function wifiItems(networks, enabled) {
+    let list = [{ "kind": "action", "id": "wifiSettings", "name": "Settings", "icon": "settings", "tint": "accentBlue" }];
+    if (!enabled) return list;
+    list.push({ "kind": "action", "id": "rescan", "name": "Rescan", "icon": "refresh", "tint": "accentBlue" });
+    return list.concat(networks.map(n => ({
+        "kind": "action",
+        "id": "net:" + n.ssid,
+        "network": n.ssid,
+        "inUse": !!n.inUse,
+        "name": n.ssid,
+        "sub": (n.inUse ? "Connected" : n.signal + "%") + (n.isSecure ? " · Secured" : ""),
+        "icon": "wifi",
+        "tint": "accentBlue"
+    })));
+}
+
+// The line under the network name
+function wifiStatus(enabled, connected, connecting, scanning, signal, count) {
+    if (!enabled) return "Turn Wi-Fi on from the ring";
+    if (connecting !== "") return "Connecting to " + connecting + "…";
+    if (scanning && count === 0) return "Scanning…";
+    let found = count + (count === 1 ? " network" : " networks");
+    return connected ? "Signal " + signal + "% · " + found : found;
+}
+
+// How the battery gauge is coloured: "charging", "critical" (10% or less), "low" (20% or
+// less) or "normal"
+function batteryTone(fraction, charging) {
+    if (charging) return "charging";
+    if (fraction <= 0.10) return "critical";
+    if (fraction <= 0.20) return "low";
+    return "normal";
+}
+
+function formatDuration(seconds) {
+    if (!seconds || isNaN(seconds) || seconds <= 0) return "";
+    let hrs = Math.floor(seconds / 3600);
+    let mins = Math.floor((seconds % 3600) / 60);
+    return hrs > 0 ? hrs + "h " + mins + "m" : mins + "m";
+}
+
+// The line under the battery level
+function batteryStatus(present, charging, full, timeToFull, timeToEmpty) {
+    if (!present) return "No battery";
+    if (full) return "Fully charged";
+    if (charging) {
+        let toFull = formatDuration(timeToFull);
+        return toFull !== "" ? "Charging · " + toFull + " until full" : "Charging";
+    }
+    let left = formatDuration(timeToEmpty);
+    return left !== "" ? left + " remaining" : "On battery";
+}

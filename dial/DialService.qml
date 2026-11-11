@@ -77,12 +77,87 @@ Singleton {
         open = false;
     }
 
+    // The status page shown in place of the launcher (Logic.pageFor), or "" for the launcher
+    property string page: ""
+
+    // Opens a page, or goes back to the launcher when it is already open
+    function togglePage(next) {
+        animateTurn();
+        armedAction = "";
+        query = "";
+        // A page starts on its own slot each time (Logic.pageFocus): its lists change
+        let memory = Object.assign({}, focusMemory);
+        delete memory["page:" + next];
+        focusMemory = memory;
+        page = page === next ? "" : next;
+    }
+
+    // Power profiles only show when power-profiles-daemon is there
+    readonly property bool profilesAvailable: !DepsService.iconUnavailable("profile")
+
+    // The confirm action waiting for its second click, and how long it waits
+    property string armedAction: ""
+
+    Timer {
+        id: armTimer
+        interval: Logic.CONFIRM_MS
+        onTriggered: root.armedAction = ""
+    }
+
+    // Whether a toggle action is on
+    function actionOn(item) {
+        if (item.id === "lowRefresh") return SettingsService.lowRefreshOnBattery;
+        if (item.network) return item.inUse || NetworkService.connectingSsid === item.network;
+        return false;
+    }
+
+    function actionEnabled(item) {
+        if (item.id === "lowRefresh") return PowerProfileService.lowRefreshAvailable;
+        return true;
+    }
+
+    // Runs a page's action tile. Restart and Shut Down arm on the first click and run on
+    // the second. Toggles, networks and Rescan leave the dial open; the rest close it.
+    function runAction(item) {
+        if (!actionEnabled(item)) return;
+        if (item.confirm && armedAction !== item.id) {
+            armedAction = item.id;
+            armTimer.restart();
+            return;
+        }
+        armedAction = "";
+        armTimer.stop();
+        if (item.toggle) {
+            if (item.id === "lowRefresh") SettingsService.setSetting("lowRefreshOnBattery", !SettingsService.lowRefreshOnBattery);
+            return;
+        }
+        if (item.network) {
+            if (!item.inUse && NetworkService.connectingSsid === "") NetworkService.connectTo(item.network);
+            return;
+        }
+        if (item.id === "rescan") {
+            NetworkService.scanWifi();
+            return;
+        }
+        close();
+        switch (item.id) {
+        case "wifiSettings": NetworkService.openSettings(); break;
+        case "settings": PowerService.openSettings(); break;
+        case "lock": PowerService.lock(); break;
+        case "sleep": PowerService.sleep(); break;
+        case "restart": PowerService.restart(); break;
+        case "shutdown": PowerService.shutdown(); break;
+        }
+    }
+
     onOpenChanged: {
         if (open) {
             SettingsPagesService.load();
         } else {
             query = "";
             scope = 0;
+            page = "";
+            armedAction = "";
         }
     }
 
@@ -184,10 +259,17 @@ Singleton {
     }))
 
     // What the ring shows: the categories, or the scopes while searching
-    readonly property var ringLabels: searching
-        ? Logic.scopeLabels(appHits, settingHits, fileHits)
-        : Logic.CATEGORIES.map(c => c.name)
-    readonly property int ringIndex: searching ? scope : category
+    readonly property var ringLabels: {
+        if (page === "power") return profilesAvailable ? Logic.PROFILES.map(p => p.name) : ["Power"];
+        if (page === "wifi") return Logic.WIFI_RING;
+        if (searching) return Logic.scopeLabels(appHits, settingHits, fileHits);
+        return Logic.CATEGORIES.map(c => c.name);
+    }
+    readonly property int ringIndex: {
+        if (page === "power") return profilesAvailable ? Logic.profileIndex(PowerProfileService.activeProfile) : 0;
+        if (page === "wifi") return NetworkService.isWifiEnabled ? 1 : 0;
+        return searching ? scope : category;
+    }
     // Kind of the category shown ("pinned", "windows", "group", ...)
     readonly property string categoryKind: Logic.CATEGORIES[category].kind
 
@@ -221,17 +303,24 @@ Singleton {
     }
 
     // Launch history is the dock launcher's, so Recent and Frequent match it
-    readonly property var items: searching
-        ? Logic.arrange(Logic.scopeHits(scope, query, appHits, settingHits, fileHits))
-        : Logic.itemsFor(category, apps, pinnedIds, DockService.usageStats, windowItems)
+    readonly property var items: {
+        if (page === "power") return Logic.POWER_ACTIONS;
+        if (page === "wifi") return Logic.wifiItems(NetworkService.availableNetworks, NetworkService.isWifiEnabled);
+        if (searching) return Logic.arrange(Logic.scopeHits(scope, query, appHits, settingHits, fileHits));
+        return Logic.itemsFor(category, apps, pinnedIds, DockService.usageStats, windowItems);
+    }
 
     // Where app positions are remembered: per category, or per scope and text while searching
-    readonly property string focusKey: searching ? "?" + scope + ":" + trimmedQuery : String(category)
+    readonly property string focusKey: {
+        if (page !== "") return "page:" + page;
+        return searching ? "?" + scope + ":" + trimmedQuery : String(category);
+    }
 
     readonly property int focusIndex: {
         let remembered = focusMemory[focusKey];
         if (items.length === 0) return 0;
-        return Logic.clamp(remembered !== undefined ? remembered : Logic.middle(items.length), 0, items.length - 1);
+        let start = page !== "" ? Logic.pageFocus(page, items) : Logic.middle(items.length);
+        return Logic.clamp(remembered !== undefined ? remembered : start, 0, items.length - 1);
     }
 
     function setCategory(index) {
@@ -242,12 +331,17 @@ Singleton {
     // The ring's selection: a category, or a scope while searching
     function setRing(index) {
         animateTurn();
-        if (searching) scope = Logic.clamp(index, 0, Logic.SCOPES.length - 1);
+        if (page === "power") {
+            if (profilesAvailable) PowerProfileService.setProfile(Logic.PROFILES[Logic.clamp(index, 0, Logic.PROFILES.length - 1)].id);
+        } else if (page === "wifi") {
+            if ((Logic.clamp(index, 0, 1) === 1) !== NetworkService.isWifiEnabled) NetworkService.toggleWifi();
+        } else if (searching) scope = Logic.clamp(index, 0, Logic.SCOPES.length - 1);
         else setCategory(index);
     }
 
     function setFocus(index) {
         animateTurn();
+        armedAction = "";
         let next = Object.assign({}, focusMemory);
         next[focusKey] = Logic.clamp(index, 0, Math.max(0, items.length - 1));
         focusMemory = next;
@@ -303,7 +397,9 @@ Singleton {
     // starts anything else
     function launch(item, x, y) {
         if (!item) return;
-        if (item.kind === "window") {
+        if (item.kind === "action") {
+            runAction(item);
+        } else if (item.kind === "window") {
             DockService.activateWindow(item.window);
             close();
         } else if (isRunning(item) && switchTo(item)) {

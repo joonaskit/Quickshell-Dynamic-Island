@@ -284,4 +284,68 @@ TestCase {
     function test_scopeLabelsCount() {
         compare(Dial.scopeLabels([1, 2], [3], []), ["Everything 3", "Apps 2", "Settings 1", "Files 0"]);
     }
+
+    function test_batteryAndProfileOpenThePowerPage() {
+        compare(Dial.pageFor("battery"), "power");
+        compare(Dial.pageFor("profile"), "power");
+        compare(Dial.pageFor("wifi"), "wifi");
+        compare(Dial.pageFor("bluetooth"), "");
+    }
+
+    function test_powerPageStartsOnLock() {
+        compare(Dial.POWER_ACTIONS[Dial.pageFocus("power", Dial.POWER_ACTIONS)].id, "lock");
+    }
+
+    function test_onlyRestartAndShutDownConfirm() {
+        compare(Dial.POWER_ACTIONS.filter(a => a.confirm).map(a => a.id), ["restart", "shutdown"]);
+    }
+
+    function test_profileIndexFallsBackToBalanced() {
+        compare(Dial.profileIndex("performance"), 2);
+        compare(Dial.profileIndex("unknown"), 1);
+    }
+
+    function test_batteryTone() {
+        compare(Dial.batteryTone(0.05, true), "charging");
+        compare(Dial.batteryTone(0.10, false), "critical");
+        compare(Dial.batteryTone(0.2, false), "low");
+        compare(Dial.batteryTone(0.5, false), "normal");
+    }
+
+    function test_batteryStatus() {
+        compare(Dial.batteryStatus(false, false, false, 0, 0), "No battery");
+        compare(Dial.batteryStatus(true, true, true, 0, 0), "Fully charged");
+        compare(Dial.batteryStatus(true, true, false, 2700, 0), "Charging · 45m until full");
+        compare(Dial.batteryStatus(true, true, false, 0, 0), "Charging");
+        compare(Dial.batteryStatus(true, false, false, 0, 8040), "2h 14m remaining");
+        compare(Dial.batteryStatus(true, false, false, 0, 0), "On battery");
+    }
+
+    readonly property var networks: [
+        { "ssid": "Home", "signal": 80, "inUse": true, "isSecure": true },
+        { "ssid": "Cafe", "signal": 40, "inUse": false, "isSecure": false }
+    ]
+
+    function test_wifiItemsListNetworksAfterActions() {
+        let items = Dial.wifiItems(networks, true);
+        compare(items.map(i => i.id), ["wifiSettings", "rescan", "net:Home", "net:Cafe"]);
+        compare(items[2].sub, "Connected · Secured");
+        compare(items[3].sub, "40%");
+        compare(Dial.wifiItems(networks, false).map(i => i.id), ["wifiSettings"]);
+    }
+
+    function test_wifiPageStartsOnConnectedNetwork() {
+        compare(Dial.pageFocus("wifi", Dial.wifiItems(networks, true)), 2);
+        let free = [{ "ssid": "Cafe", "signal": 40 }, { "ssid": "Bar", "signal": 30 }];
+        compare(Dial.pageFocus("wifi", Dial.wifiItems(free, true)), 2);
+        compare(Dial.pageFocus("wifi", Dial.wifiItems([], false)), 0);
+    }
+
+    function test_wifiStatus() {
+        compare(Dial.wifiStatus(false, false, "", false, 0, 0), "Turn Wi-Fi on from the ring");
+        compare(Dial.wifiStatus(true, false, "Cafe", false, 0, 2), "Connecting to Cafe…");
+        compare(Dial.wifiStatus(true, false, "", true, 0, 0), "Scanning…");
+        compare(Dial.wifiStatus(true, true, "", false, 80, 2), "Signal 80% · 2 networks");
+        compare(Dial.wifiStatus(true, false, "", false, 0, 1), "1 network");
+    }
 }
