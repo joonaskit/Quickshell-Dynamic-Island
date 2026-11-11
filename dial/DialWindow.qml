@@ -5,6 +5,8 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.UPower
 import "dialLogic.js" as Logic
+import "dialPages.js" as Pages
+import "../services/clipboardHistory.js" as ClipboardHistory
 
 // Experimental category dial launcher: a disc that slides down around the clock pill, with
 // categories on an inner ring and apps on an outer arc. Toggled with
@@ -152,7 +154,7 @@ PanelWindow {
     }
 
     // What the open page shows in the middle and on the gauge. `gauge` is 0 to 1, or -1
-    // for none.
+    // for none. With `slider` the gauge can be dragged (DialService.setSlider).
     readonly property var connectedNetwork: NetworkService.availableNetworks.find(n => n.inUse) || null
     readonly property var pageView: {
         if (DialService.page === "power") return {
@@ -208,6 +210,99 @@ PanelWindow {
                 "titleSize": 24,
                 "status": Logic.bluetoothStatus(BluetoothService.isAvailable, on, connected.length > 0, connecting ? connecting.name : "",
                     powered ? powered.battery : -1, BluetoothService.pairedDevices.length)
+            };
+        }
+        if (DialService.page === "mic") {
+            let mic = MicrophoneService;
+            let present = mic.source !== null;
+            return {
+                "gauge": present ? mic.volume : -1,
+                "slider": present,
+                "color": mic.isMuted ? Theme.overlay(0.35) : Theme.accentRed,
+                "title": present ? Math.round(mic.volume * 100) + "%" : "No microphone",
+                "titleColor": present && !mic.isMuted ? Theme.accentRed : Theme.textSecondary,
+                "titleSize": present ? 34 : 24,
+                "status": Logic.micStatus(present, mic.isMuted, mic.defaultSource)
+            };
+        }
+        if (DialService.page === "nightLight") {
+            let night = NightLightService;
+            return {
+                "gauge": night.available ? Pages.levelOf(night.nightTemperature, night.minTemperature, night.maxTemperature) : -1,
+                "slider": night.available,
+                "color": night.switchedOn ? Theme.accentOrangeStrong : Theme.overlay(0.35),
+                "title": night.available ? night.nightTemperature + " K" : "Night Light",
+                "titleColor": night.running ? Theme.accentOrangeStrong : (night.switchedOn ? Theme.textPrimary : Theme.textSecondary),
+                "titleSize": night.available ? 34 : 24,
+                "status": Pages.nightLightStatus(night)
+            };
+        }
+        if (DialService.page === "hue") {
+            let light = HueService.selectedLight;
+            let dims = light !== null && light.hasBrightness;
+            return {
+                "gauge": dims ? light.brightness / 100 : -1,
+                "slider": dims,
+                "color": light !== null && light.on ? Theme.accentOrangeStrong : Theme.overlay(0.35),
+                "title": Pages.hueTitle(light),
+                "titleColor": light !== null && light.on ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": light !== null ? 34 : 24,
+                "status": Pages.hueStatus(HueService.error, HueService.connected, light)
+            };
+        }
+        if (DialService.page === "notification") {
+            let count = (NotificationService.notifications || []).length;
+            return {
+                "gauge": -1,
+                "color": Theme.accentPurple,
+                "title": Pages.notificationTitle(count),
+                "titleColor": count > 0 ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Pages.notificationStatus(window.items[window.focusIndex], SettingsService.dndEnabled)
+            };
+        }
+        if (DialService.page === "clipboard") {
+            let saved = ClipboardService.history.length;
+            return {
+                "gauge": -1,
+                "color": Theme.accentBlue,
+                "title": saved === 0 ? "Clipboard" : saved + (saved === 1 ? " item" : " items"),
+                "titleColor": saved > 0 ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Pages.clipboardStatus(ClipboardService, ClipboardHistory.preview(ClipboardService.currentText, 60))
+            };
+        }
+        if (DialService.page === "kdeConnect") {
+            let phone = KdeConnectService.device;
+            let reachable = phone !== null && phone.reachable;
+            return {
+                "gauge": reachable && phone.hasBattery ? phone.charge / 100 : -1,
+                "color": Theme.accentGreenStrong,
+                "title": phone !== null ? phone.name : "KDE Connect",
+                "titleColor": reachable ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Pages.kdeStatus(KdeConnectService.daemonAvailable, phone, KdeConnectService.notice)
+            };
+        }
+        if (DialService.page === "usb") {
+            return {
+                "gauge": -1,
+                "color": Theme.accentGreenStrong,
+                "title": Pages.driveTitle(DeviceService.deviceCount),
+                "titleColor": DeviceService.hasDevices ? Theme.textPrimary : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Pages.driveStatus(DeviceService.deviceCount, DeviceService.mountedCount, DeviceService.operatingDevice, DeviceService.statusMessage)
+            };
+        }
+        if (DialService.page === "gameMode") {
+            let game = GameModeService;
+            return {
+                "gauge": -1,
+                "color": Theme.accentGreenStrong,
+                "title": Pages.gameTitle(game.available, game.active),
+                "titleColor": game.available && game.active ? Theme.accentGreenStrong : Theme.textSecondary,
+                "titleSize": 24,
+                "status": Pages.gameStatus(game.available, game.games.length, game.forced)
             };
         }
         return { "gauge": -1, "color": Theme.textPrimary, "title": "", "titleColor": Theme.textPrimary, "titleSize": 24, "status": "" };
@@ -281,8 +376,8 @@ PanelWindow {
 
     function launchAt(index) {
         let c = tileCenter(index);
-        // A program has nothing to launch: choosing it opens its menu (End, System Monitor)
-        if (window.items[index] && window.items[index].kind === "process") {
+        // A program or a notification has nothing to launch: choosing it opens its menu
+        if (window.items[index] && (window.items[index].kind === "process" || window.items[index].kind === "notification")) {
             openMenu(index, c.x + Theme.px(42), c.y - Theme.px(42));
             if (menu.isOpen) menu.move(1);
             return;
@@ -412,8 +507,8 @@ PanelWindow {
             }
         }
 
-        // A page's gauge on the border circle, filling from the left: the battery level, or
-        // the Wi-Fi signal
+        // A page's gauge on the border circle, filling from the left: the battery level, the
+        // Wi-Fi signal, or the microphone's input level, which can be dragged
         Shape {
             id: gauge
             x: window.cx
@@ -428,7 +523,8 @@ PanelWindow {
             readonly property real start: 165
             readonly property real span: 150
             property real level: Math.max(0, window.pageView.gauge)
-            Behavior on level { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+            // Follows a drag on the slider at once
+            Behavior on level { enabled: !(grip.pressed && grip.sliding); NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
             ShapePath {
                 fillColor: "transparent"
@@ -444,6 +540,23 @@ PanelWindow {
                 capStyle: ShapePath.RoundCap
                 PathAngleArc { radiusX: gauge.radius; radiusY: gauge.radius; startAngle: gauge.start; sweepAngle: -gauge.span * gauge.level }
             }
+        }
+
+        // The slider's knob, at the end of the gauge's fill
+        Rectangle {
+            readonly property var at: Logic.point(gauge.radius, gauge.start - gauge.span * gauge.level)
+            width: Theme.px(14)
+            height: width
+            radius: width / 2
+            x: window.cx + at.x - width / 2
+            y: window.cy + at.y - height / 2
+            color: window.pageView.color
+            border.width: Theme.px(3)
+            border.color: Theme.dockGlass ? Theme.glassFill : Theme.islandBackground
+            opacity: window.pageView.slider ? gauge.opacity : 0
+            visible: opacity > 0
+            scale: grip.pressed && grip.sliding ? 1.3 : 1
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
         }
 
         // Category ring. Each pill is bent along the ring, and so is its label.
@@ -611,7 +724,7 @@ PanelWindow {
                             id: tile
                             readonly property bool isAction: slot.app.kind === "action"
                             readonly property bool armed: isAction && DialService.armedAction === slot.app.id
-                            readonly property bool on: isAction && !!slot.app.toggle && DialService.actionOn(slot.app)
+                            readonly property bool on: isAction && (!!slot.app.lit || (!!slot.app.toggle && DialService.actionOn(slot.app)))
                             readonly property color tint: armed ? Theme.accentRed : Theme.accentBlue
 
                             width: Theme.px(84)
@@ -673,7 +786,7 @@ PanelWindow {
                                     width: Theme.px(76)
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
-                                    visible: DialService.searching || slot.app.kind === "window" || slot.app.kind === "process" || (tile.isAction && !!slot.app.sub)
+                                    visible: DialService.searching || slot.app.kind === "window" || slot.app.kind === "process" || slot.app.kind === "notification" || (tile.isAction && !!slot.app.sub)
                                     text: slot.app.sub
                                     color: slot.selected ? Theme.textPrimary : Theme.textSecondary
                                     font.family: Theme.fontFamily
@@ -795,9 +908,9 @@ PanelWindow {
 
                     Keys.onPressed: event => {
                         if (!window.shown) return;
-                        // A status icon's menu takes the keys from the rings; Esc closes it
+                        // A sheet takes the keys from the rings; Esc closes it
                         if (statusIcons.cardMenu !== "") {
-                            if (event.key === Qt.Key_Escape) statusIcons.closeMenu();
+                            if (event.key === Qt.Key_Escape) statusIcons.dismissCard();
                             event.accepted = true;
                             return;
                         }
@@ -958,8 +1071,7 @@ PanelWindow {
         }
 
         // Status icons under the search field (dialStatusIcons, a test): the system icons,
-        // then the optional ones below a thin line. A menu icon opens its menu over the
-        // disc (statusMenu).
+        // then the optional ones below a thin line. An icon opens its page of the dial.
         Column {
             id: statusIcons
             readonly property bool active: SettingsService.dialStatusIcons
@@ -974,11 +1086,13 @@ PanelWindow {
             readonly property string openMenu: DialService.page === "power" ? "battery" : (DialService.page || cardMenu)
             property string unavailableTip: ""
             property Item unavailableTipItem: null
-            // An icon opens its page (Logic.pageFor) or, if it has none, its menu as a card
+            // An icon opens its page (Logic.pageFor), or its sheet when the page is not ready
             function toggleMenu(id) {
                 let was = cardMenu;
                 closeMenu();
                 let page = Logic.pageFor(id);
+                // Hue pairs with its bridge in its sheet
+                if (id === "hue" && !HueService.paired) page = "";
                 if (page !== "") {
                     DialService.togglePage(page);
                     if (DialService.page !== "") dialIconSet.prepareMenu(id === "battery" ? "profile" : id);
@@ -986,24 +1100,39 @@ PanelWindow {
                 }
                 if (id === "" || id === was) return;
                 cardMenu = id;
-                dialIconSet.prepareMenu(id);
             }
 
-            // The menu shown as a card over the disc (statusMenu), or ""
+            // The sheet shown over the disc (statusMenu), by its icon's id, or "". cardReturn
+            // is the page it was opened from, which closing it goes back to.
             property string cardMenu: ""
+            property string cardReturn: ""
             function closeMenu() {
                 menu.entries = [];
-                // The Hue menu goes back to the favourite light each time it closes
-                if (cardMenu === "hue") HueService.viewedId = "";
                 cardMenu = "";
+                cardReturn = "";
                 // A field in the menu may have taken the keys
                 input.forceActiveFocus();
+            }
+
+            // Closes the sheet and goes back to the page it came from
+            function dismissCard() {
+                // The Hue page is only for a paired bridge
+                let back = cardReturn === "hue" && !HueService.paired ? "" : cardReturn;
+                closeMenu();
+                if (back !== "" && DialService.page !== back) DialService.togglePage(back);
             }
 
             Connections {
                 target: DialService
                 function onOpenChanged() {
                     if (!DialService.open) statusIcons.closeMenu();
+                }
+                // A page's tile for what only the card holds (Hue's bridge, custom hours)
+                function onCardRequested(id) {
+                    let from = DialService.page;
+                    if (from !== "") DialService.togglePage(from);
+                    statusIcons.cardMenu = id;
+                    statusIcons.cardReturn = from;
                 }
             }
 
@@ -1109,7 +1238,17 @@ PanelWindow {
         return Math.hypot(x + hit.x - window.cx, y + hit.y - window.cy) < Theme.px(Logic.TURN_RADIUS) ? ringSpin : arcSpin;
     }
 
-    // Wheel turns the ring or the arc, whichever the pointer is over
+    // Whether a point of `hit` is on the open page's slider, and the level there
+    function overSlider(x, y) {
+        return !!window.pageView.slider && Logic.onGauge(x + hit.x - window.cx, y + hit.y - window.cy,
+            gauge.radius, Theme.px(Logic.SLIDER_BAND), gauge.start, gauge.span);
+    }
+
+    function sliderAt(x, y) {
+        return Logic.gaugeAt(x + hit.x - window.cx, y + hit.y - window.cy, gauge.start, gauge.span, false);
+    }
+
+    // Wheel turns the ring or the arc, whichever the pointer is over, or moves a page's slider
     MouseArea {
         anchors.fill: hit
         enabled: window.shown
@@ -1123,7 +1262,8 @@ PanelWindow {
         onWheel: wheel => {
             if (grip.pressed) return;
             let now = Date.now();
-            let spinner = window.spinnerAt(wheel.x, wheel.y);
+            let slider = window.overSlider(wheel.x, wheel.y);
+            let spinner = slider ? null : window.spinnerAt(wheel.x, wheel.y);
             if (spinner !== over || now - time > 400) carry = 0;
             over = spinner;
             time = now;
@@ -1132,7 +1272,9 @@ PanelWindow {
             let turn = Logic.wheelSteps(carry, delta);
             carry = turn.carry;
             if (turn.steps === 0) return;
-            if (spinner === ringSpin) DialService.setRing(window.ringIndex + turn.steps);
+            // Up raises the slider
+            if (slider) DialService.setSlider(Logic.clamp(window.pageView.gauge - turn.steps * (Pages.SLIDER_STEP[DialService.page] || 0.05), 0, 1));
+            else if (spinner === ringSpin) DialService.setRing(window.ringIndex + turn.steps);
             else DialService.setFocus(window.focusIndex + turn.steps);
         }
     }
@@ -1155,8 +1297,9 @@ PanelWindow {
             }
         }
 
-        // The Spinner under the press
+        // The Spinner under the press, or the page's slider (`sliding`)
         property var turner: null
+        property bool sliding: false
         property bool dragged: false
         property real pressX: 0
         property real pressY: 0
@@ -1180,12 +1323,22 @@ PanelWindow {
         onPressed: mouse => {
             menu.entries = [];
             dragged = false;
+            sliding = window.overSlider(mouse.x, mouse.y);
+            if (sliding) {
+                turner = null;
+                DialService.setSlider(window.sliderAt(mouse.x, mouse.y));
+                return;
+            }
             turner = window.spinnerAt(mouse.x, mouse.y);
             pressX = mouse.x;
             pressY = mouse.y;
         }
 
         onPositionChanged: mouse => {
+            if (sliding) {
+                DialService.setSlider(window.sliderAt(mouse.x, mouse.y));
+                return;
+            }
             if (turner === null) return;
             let angle = Math.atan2(mouse.y + hit.y - window.cy, mouse.x + hit.x - window.cx) * 180 / Math.PI;
             let now = Date.now();
@@ -1204,7 +1357,7 @@ PanelWindow {
         onReleased: letGo(Logic.flickVelocity(samples, Date.now()))
         onCanceled: letGo(0)
         // A press that did not drag is a click for the tile or pill under it
-        onClicked: mouse => mouse.accepted = dragged
+        onClicked: mouse => mouse.accepted = dragged || sliding
     }
 
     // Clicking the pill in the middle of the disc closes it, as clicking the pill opened it
@@ -1228,24 +1381,24 @@ PanelWindow {
         anchors.fill: parent
         enabled: window.shown && statusIcons.cardMenu !== ""
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-        onPressed: statusIcons.closeMenu()
+        onPressed: statusIcons.dismissCard()
         onWheel: wheel => wheel.accepted = true
     }
 
-    // A status icon's menu, a card over the disc below the pill
+    // A page's sheet (DialSheet), over the disc below the pill
     Rectangle {
         id: statusMenu
         readonly property bool isOpen: statusIcons.cardMenu !== ""
-        // The menu last shown, kept while the card fades out
+        // The sheet last shown, kept while it fades out
         property string shownId: ""
-        width: Theme.px(350)
-        height: menuLoader.height + footer.height
+        width: Theme.px(340)
+        height: sheetLoader.height
         x: window.cx - width / 2
         y: window.pillTop + window.pillHeight + Theme.px(14)
-        radius: Theme.expandedRadius
+        radius: Theme.px(26)
         color: Theme.menuSurface
         border.width: 1
-        border.color: Theme.islandBorder
+        border.color: Theme.glassHairline
         clip: true
         opacity: isOpen ? 1 : 0
         scale: isOpen ? 1 : 0.96
@@ -1264,118 +1417,41 @@ PanelWindow {
             }
         }
 
-        // Swallows presses on the card's own background, so they do not reach the catcher
+        // Swallows presses on the sheet's own background, so they do not reach the catcher
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
             onWheel: wheel => wheel.accepted = true
         }
 
+        // The sheets, by the icon whose page opens them
         readonly property var components: ({
-            "wifi": wifiMenu,
-            "bluetooth": bluetoothMenu,
-            "battery": powerMenu,
-            "clipboard": clipboardMenu,
-            "notification": notificationMenu,
-            "mic": micMenu,
-            "profile": profileMenu,
-            "hardware": hardwareMenu,
-            "usb": deviceMenu,
-            "hue": hueMenu,
-            "nightLight": nightMenu,
-            "kdeConnect": kdeMenu,
-            "gameMode": gameMenu
+            "hue": hueSheet,
+            "nightLight": nightSheet,
+            "kdeConnect": sendSheet
         })
 
         Loader {
-            id: menuLoader
-            // Its height follows the menu's
+            id: sheetLoader
+            // Its height follows the sheet's
             width: parent.width
             active: statusMenu.shownId !== "" && statusMenu.visible
             sourceComponent: statusMenu.components[statusMenu.shownId] || null
+            onLoaded: (item as DialSheet).takeFocus()
         }
 
         Connections {
-            target: menuLoader.item
-            ignoreUnknownSignals: true
-            function onRequestClose() { statusIcons.closeMenu(); }
-        }
-
-        Component { id: wifiMenu; WifiQuickSettings { embedded: true } }
-        Component { id: bluetoothMenu; BluetoothQuickSettings { embedded: true } }
-        Component { id: powerMenu; PowerQuickSettings { embedded: true } }
-        Component { id: clipboardMenu; ClipboardQuickSettings { embedded: true } }
-        Component { id: micMenu; MicrophoneQuickSettings { embedded: true } }
-        Component { id: profileMenu; PowerProfileQuickSettings { embedded: true } }
-        Component { id: hardwareMenu; HardwareStatsQuickSettings { embedded: true } }
-        Component { id: deviceMenu; DeviceQuickSettings { embedded: true } }
-        Component { id: hueMenu; HueQuickSettings { embedded: true } }
-        Component { id: nightMenu; NightLightQuickSettings { embedded: true } }
-        Component { id: kdeMenu; KdeConnectQuickSettings { embedded: true } }
-        Component { id: gameMenu; GameModeQuickSettings { embedded: true } }
-        Component {
-            id: notificationMenu
-            Item {
-                implicitHeight: notificationList.implicitHeight + Theme.px(24)
-                NotificationListView {
-                    id: notificationList
-                    x: Theme.px(12)
-                    y: Theme.px(12)
-                    width: parent.width - Theme.px(24)
-                }
+            target: sheetLoader.item
+            function onCloseRequested() { statusIcons.dismissCard(); }
+            function onPageRequested(page) {
+                statusIcons.closeMenu();
+                if (DialService.page !== page) DialService.togglePage(page);
             }
         }
 
-        // Grabber to close, and a gear to the settings for these icons
-        Item {
-            id: footer
-            anchors.bottom: parent.bottom
-            width: parent.width
-            height: Theme.px(18)
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: Theme.px(36)
-                height: Theme.px(4)
-                radius: height / 2
-                color: Theme.overlay(0.25)
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: statusIcons.closeMenu()
-            }
-
-            Rectangle {
-                anchors.right: parent.right
-                anchors.rightMargin: Theme.px(12)
-                anchors.verticalCenter: parent.verticalCenter
-                width: Theme.px(22)
-                height: Theme.px(16)
-                radius: height / 2
-                color: gearMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
-
-                SvgIcon {
-                    anchors.centerIn: parent
-                    name: "settings"
-                    size: Theme.px(11)
-                    color: gearMouse.containsMouse ? Theme.textPrimary : Theme.overlay(0.35)
-                }
-
-                MouseArea {
-                    id: gearMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        let optional = ["hue", "nightLight", "kdeConnect", "gameMode"].indexOf(statusIcons.cardMenu) >= 0;
-                        DialService.close();
-                        SettingsService.requestOpenSettings("Top bar", optional ? "optionalIcons" : "statusIcons");
-                    }
-                }
-            }
-        }
+        Component { id: hueSheet; HueBridgeSheet {} }
+        Component { id: nightSheet; NightHoursSheet {} }
+        Component { id: sendSheet; SendTextSheet {} }
     }
 
     // Right-click menu of a tile, over everything else

@@ -4,6 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "dialLogic.js" as Logic
+import "dialPages.js" as Pages
+import "../services/clipboardHistory.js" as ClipboardHistory
 import "../services/launcherExtras.js" as LauncherExtras
 
 // State of the category dial launcher (experimental, see dial/DialWindow.qml). The views
@@ -90,8 +92,32 @@ Singleton {
         let memory = Object.assign({}, focusMemory);
         delete memory["page:" + next];
         focusMemory = memory;
+        notificationApp = "";
+        clipboardFilter = 0;
         page = page === next ? "" : next;
     }
+
+    // The Hue page goes back to the favourite lamp each time it closes, as its card does
+    onPageChanged: if (page !== "hue") HueService.viewedId = ""
+
+    // The app the notification page's ring is on ("" for all), and the clipboard page's
+    // filter (index into Pages.CLIPBOARD_FILTERS)
+    property string notificationApp: ""
+    property int clipboardFilter: 0
+
+    // A tile asks for a sheet (DialSheet) by its icon's id; DialWindow shows it over the disc
+    signal cardRequested(string id)
+
+    // The clipboard history under the page's filter, in the shape Pages.clipboardItems takes
+    readonly property var clipboardEntries: page !== "clipboard" ? []
+        : ClipboardHistory.view(ClipboardService.history, "", Pages.CLIPBOARD_FILTERS[clipboardFilter]).map(e => ({
+            "id": e.id,
+            "kind": e.kind,
+            "pinned": e.pinned,
+            "sensitive": e.sensitive,
+            "label": ClipboardHistory.label(e, 40),
+            "age": ClipboardHistory.formatAge(e.time, Date.now())
+        }))
 
     // The hardware page's ring selection (Logic.HARDWARE_RING)
     property int hardwareMetric: 0
@@ -122,6 +148,62 @@ Singleton {
         passwordFor = "";
     }
 
+    // Sets the page's slider (the gauge, on pages that have one) to `level`, 0 to 1. Raising
+    // the input level unmutes the microphone, as the card's slider does.
+    function setSlider(level) {
+        if (page === "mic") {
+            MicrophoneService.setVolume(level);
+            if (level > 0 && MicrophoneService.isMuted) MicrophoneService.setMute(false);
+        } else if (page === "nightLight") {
+            // Shown at once, and saved when the slider has been still for a moment: saving
+            // reloads KWin's Night Light plugin
+            NightLightService.previewTemperature(Pages.kelvinAt(level, NightLightService.minTemperature, NightLightService.maxTemperature));
+            nightCommit.restart();
+        } else if (page === "hue") {
+            let light = HueService.selectedLight;
+            if (light) HueService.setBrightness(light.id, level * 100);
+        }
+    }
+
+    Timer {
+        id: nightCommit
+        interval: 500
+        onTriggered: NightLightService.commitTemperature(NightLightService.nightTemperature)
+    }
+
+    // Runs a tile of the dialPages.js pages. False when the tile is not one of theirs.
+    function pageAction(item) {
+        let id = item.id;
+        let light = HueService.selectedLight;
+        let phone = KdeConnectService.device;
+        if (item.nightMode) NightLightService.setMode(item.nightMode);
+        else if (id === "huePower") { if (light) HueService.toggle(light.id); }
+        else if (id === "hueFavourite") { if (light) HueService.toggleFavourite(light.id); }
+        else if (item.mirek) { if (light) HueService.setMirek(light.id, item.mirek); }
+        else if (id === "clearNotifications") {
+            if (notificationApp === "") NotificationService.clearAll();
+            else NotificationService.dismissGroup(notificationApp);
+            notificationApp = "";
+        }
+        else if (id === "dnd") NotificationService.toggleDnd();
+        else if (id === "clipboardWindow") ClipboardService.windowOpen = true;
+        else if (id === "incognito") ClipboardService.incognito = !ClipboardService.incognito;
+        else if (id === "clearClipboard") ClipboardService.clearClipboard();
+        else if (item.clip !== undefined) ClipboardService.copyEntry(item.clip);
+        else if (id === "kdePing") { if (phone) KdeConnectService.ping(phone.id); }
+        else if (id === "kdeRing") { if (phone) KdeConnectService.ring(phone.id); }
+        else if (id === "kdeClipboard") { if (phone) KdeConnectService.sendClipboard(phone.id); }
+        else if (id === "kdeFile") { if (phone) KdeConnectService.pickAndShare(phone.id); }
+        else if (id === "rescanDrives") DeviceService.scanDevices();
+        else if (item.drive) {
+            if (item.mounted) DeviceService.openDevice(item.mountpoint);
+            else DeviceService.mountDevice(item.drive);
+        }
+        else if (id.indexOf("game:") === 0) return true;
+        else return false;
+        return true;
+    }
+
     // The confirm action waiting for its second click, and how long it waits
     property string armedAction: ""
 
@@ -136,6 +218,7 @@ Singleton {
         if (item.id === "lowRefresh") return SettingsService.lowRefreshOnBattery;
         if (item.network) return item.inUse || NetworkService.connectingSsid === item.network;
         if (item.device) return item.inUse || BluetoothService.connectingMac === item.device;
+        if (item.source) return item.inUse;
         return false;
     }
 
@@ -156,6 +239,19 @@ Singleton {
         }
         armedAction = "";
         armTimer.stop();
+        if (item.card) {
+            cardRequested(item.card);
+            return;
+        }
+        if (item.section) {
+            close();
+            SettingsService.requestOpenSettings("Top bar", item.section);
+            return;
+        }
+        if (pageAction(item)) {
+            if (!item.stay) close();
+            return;
+        }
         if (item.toggle) {
             if (item.id === "lowRefresh") SettingsService.setSetting("lowRefreshOnBattery", !SettingsService.lowRefreshOnBattery);
             return;
@@ -171,6 +267,10 @@ Singleton {
             BluetoothService.toggleConnection(item.device, item.inUse);
             return;
         }
+        if (item.source) {
+            MicrophoneService.setSource(item.source);
+            return;
+        }
         if (item.id === "rescan") {
             NetworkService.scanWifi();
             return;
@@ -179,6 +279,7 @@ Singleton {
         switch (item.id) {
         case "wifiSettings": NetworkService.openSettings(); break;
         case "bluetoothSettings": BluetoothService.openSettings(); break;
+        case "audioSettings": Quickshell.execDetached(["systemsettings", "kcm_pulseaudio"]); break;
         case "systemMonitor": HardwareStatsService.openSystemMonitor(); break;
         case "settings": PowerService.openSettings(); break;
         case "lock": PowerService.lock(); break;
@@ -303,6 +404,14 @@ Singleton {
         if (page === "wifi") return Logic.WIFI_RING;
         if (page === "bluetooth") return Logic.BLUETOOTH_RING;
         if (page === "hardware") return Logic.HARDWARE_RING;
+        if (page === "mic") return Logic.MIC_RING;
+        if (page === "nightLight") return NightLightService.available ? Pages.NIGHT_RING : ["Night Light"];
+        if (page === "hue") return Pages.hueRing(HueService.lights);
+        if (page === "notification") return Pages.notificationRing(NotificationService.groups);
+        if (page === "clipboard") return Pages.CLIPBOARD_RING;
+        if (page === "kdeConnect") return Pages.kdeRing(KdeConnectService.devices);
+        if (page === "usb") return ["Drives"];
+        if (page === "gameMode") return GameModeService.available ? Pages.GAME_RING : ["GameMode"];
         if (searching) return Logic.scopeLabels(appHits, settingHits, fileHits);
         return Logic.CATEGORIES.map(c => c.name);
     }
@@ -311,6 +420,14 @@ Singleton {
         if (page === "wifi") return NetworkService.isWifiEnabled ? 1 : 0;
         if (page === "bluetooth") return BluetoothService.isEnabled ? 1 : 0;
         if (page === "hardware") return hardwareMetric;
+        if (page === "mic") return MicrophoneService.isMuted ? 0 : 1;
+        if (page === "nightLight") return NightLightService.available && NightLightService.switchedOn ? 1 : 0;
+        if (page === "hue") return Pages.hueIndex(HueService.lights, HueService.selectedLight);
+        if (page === "notification") return Pages.notificationIndex(NotificationService.groups, notificationApp);
+        if (page === "clipboard") return clipboardFilter;
+        if (page === "kdeConnect") return Pages.hueIndex(KdeConnectService.devices, KdeConnectService.device);
+        if (page === "usb") return 0;
+        if (page === "gameMode") return GameModeService.available && GameModeService.forced ? 1 : 0;
         return searching ? scope : category;
     }
     // Kind of the category shown ("pinned", "windows", "group", ...)
@@ -348,6 +465,15 @@ Singleton {
     // Launch history is the dock launcher's, so Recent and Frequent match it
     readonly property var items: {
         if (page === "power") return Logic.POWER_ACTIONS;
+        if (page === "mic") return Logic.micItems(MicrophoneService.sources);
+        if (page === "nightLight") return Pages.nightLightItems(NightLightService.available, NightLightService.shownMode,
+            NightLightService.scheduleStart, NightLightService.scheduleEnd);
+        if (page === "hue") return Pages.hueItems(HueService.selectedLight, HueService.favouriteId);
+        if (page === "notification") return Pages.notificationItems(NotificationService.notifications || [], notificationApp, SettingsService.dndEnabled);
+        if (page === "clipboard") return Pages.clipboardItems(clipboardEntries, ClipboardService.incognito, ClipboardService.history.length > 0);
+        if (page === "kdeConnect") return Pages.kdeItems(KdeConnectService.device);
+        if (page === "usb") return Pages.driveItems(DeviceService.devices, DeviceService.operatingDevice);
+        if (page === "gameMode") return Pages.gameItems(GameModeService.games);
         if (page === "hardware") return Logic.hardwareItems(HardwareStatsService.processes, hardwareMetric).map(i => i.process ? withApp(i) : i);
         if (page === "bluetooth") return Logic.bluetoothItems(BluetoothService.pairedDevices, BluetoothService.isEnabled);
         if (page === "wifi") return Logic.wifiItems(NetworkService.availableNetworks, NetworkService.isWifiEnabled, NetworkService.savedSsids);
@@ -384,8 +510,39 @@ Singleton {
             hardwareMetric = Logic.clamp(index, 0, Logic.HARDWARE_RING.length - 1);
         } else if (page === "bluetooth") {
             if ((Logic.clamp(index, 0, 1) === 1) !== BluetoothService.isEnabled) BluetoothService.togglePower();
+        } else if (page === "mic") {
+            MicrophoneService.setMute(Logic.clamp(index, 0, 1) === 0);
+        } else if (page === "nightLight") {
+            let on = Logic.clamp(index, 0, 1) === 1;
+            if (NightLightService.available && on !== NightLightService.switchedOn) NightLightService.setActive(on);
+        } else if (page === "hue") {
+            let lights = HueService.lights;
+            if (lights.length > 0) HueService.selectLight(lights[Logic.clamp(index, 0, lights.length - 1)].id);
+        } else if (page === "notification") {
+            let groups = NotificationService.groups;
+            let i = Logic.clamp(index, 0, groups.length);
+            notificationApp = i === 0 ? "" : groups[i - 1].appName;
+            dropPageFocus();
+        } else if (page === "clipboard") {
+            clipboardFilter = Logic.clamp(index, 0, Pages.CLIPBOARD_RING.length - 1);
+            dropPageFocus();
+        } else if (page === "kdeConnect") {
+            let phones = KdeConnectService.devices;
+            if (phones.length > 0) KdeConnectService.selectDevice(phones[Logic.clamp(index, 0, phones.length - 1)].id);
+        } else if (page === "gameMode") {
+            let force = Logic.clamp(index, 0, 1) === 1;
+            if (GameModeService.available && force !== GameModeService.forced) GameModeService.setForced(force);
+        } else if (page === "usb") {
+            // One pill, nothing to choose
         } else if (searching) scope = Logic.clamp(index, 0, Logic.SCOPES.length - 1);
         else setCategory(index);
+    }
+
+    // After a page's ring changes its list, the arc starts over on the list's own slot
+    function dropPageFocus() {
+        let memory = Object.assign({}, focusMemory);
+        delete memory[focusKey];
+        focusMemory = memory;
     }
 
     function setFocus(index) {
@@ -493,6 +650,21 @@ Singleton {
             if (item.folder) add("Open Containing Folder", "folder", () => Qt.openUrlExternally(LauncherExtras.fileUrl(item.folder)), true);
         } else if (item.kind === "setting") {
             add("Open", "settings", () => launch(item, x, y));
+        } else if (item.kind === "notification") {
+            add("Dismiss", "close", () => NotificationService.dismissNotification(item.notification));
+            add("Dismiss All from " + item.app, "trash", () => NotificationService.dismissGroup(item.app));
+        } else if (item.clip !== undefined) {
+            add("Copy", "copy", () => launch(item, x, y));
+            add(item.pinned ? "Unpin" : "Pin", "pin", () => ClipboardService.togglePinned(item.clip));
+            add("Remove", "trash", () => ClipboardService.removeEntry(item.clip));
+        } else if (item.drive) {
+            if (item.mounted) {
+                add("Open", "folder", () => launch(item, x, y));
+                add("Unmount", "close", () => DeviceService.unmountDevice(item.drive));
+            } else {
+                add("Mount", "plus", () => DeviceService.mountDevice(item.drive));
+            }
+            add("Eject", "power", () => DeviceService.powerOffDevice(item.parent));
         } else if (item.kind === "process") {
             if (Logic.canEnd(item.process)) add("End " + item.name, "close", () => HardwareStatsService.endProgram(item.process));
             if (HardwareStatsService.systemMonitorProblem === "") add("Open System Monitor", "cpu", () => HardwareStatsService.openSystemMonitor(), true);

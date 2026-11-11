@@ -304,8 +304,10 @@ function scopeLabels(apps, settings, files) {
 
 // --- Status pages ---
 // A status icon's menu can be a page of the dial: its own ring, arc and readout in place
-// of the launcher's. Icons not listed here open their menu as a card over the disc.
-var PAGE_OF_ICON = { "battery": "power", "profile": "power", "wifi": "wifi", "bluetooth": "bluetooth", "hardware": "hardware" };
+// of the launcher's. What a page cannot hold (a text field) goes in a sheet over the disc (dial/DialSheet.qml).
+var PAGE_OF_ICON = { "battery": "power", "profile": "power", "wifi": "wifi", "bluetooth": "bluetooth", "hardware": "hardware", "mic": "mic",
+    "nightLight": "nightLight", "hue": "hue", "notification": "notification", "clipboard": "clipboard",
+    "kdeConnect": "kdeConnect", "usb": "usb", "gameMode": "gameMode" };
 
 function pageFor(iconId) {
     return PAGE_OF_ICON[iconId] || "";
@@ -341,13 +343,14 @@ var CONFIRM_MS = 3000;   // how long a confirm action waits for its second click
 function pageFocus(page, items) {
     if (page === "power") return items.findIndex(a => a.id === "lock");
     if (page === "hardware") return items.length > 1 ? 1 : 0;
-    if (page === "wifi" || page === "bluetooth") {
+    if (page === "wifi" || page === "bluetooth" || page === "mic") {
         let connected = items.findIndex(a => a.inUse);
         if (connected >= 0) return connected;
-        let first = items.findIndex(a => a.network || a.device);
+        let first = items.findIndex(a => a.network || a.device || a.source);
         return first >= 0 ? first : 0;
     }
-    return 0;
+    // The pages of dialPages.js mark their starting tile
+    return Math.max(0, items.findIndex(a => a.start));
 }
 
 // The Wi-Fi page's ring: the radio off or on
@@ -508,4 +511,56 @@ function hardwareStatus(metric, cpu, ram, usedGb, totalGb, temp) {
     else if (metric === 2) parts = ["CPU " + cpu + "%", "Memory " + ram + "%"];
     else parts = ["Memory " + ram + "%", heat];
     return parts.filter(p => p !== "").join(" · ");
+}
+
+// The microphone page's ring: muted or live
+var MIC_RING = ["Muted", "Live"];
+var SLIDER_BAND = 16;  // how far off the gauge (px) a press still takes the slider
+
+// The microphone page's arc: Settings, then the inputs as MicrophoneService lists them.
+// Choosing one makes it the default input.
+function micItems(sources) {
+    return [{ "kind": "action", "id": "audioSettings", "name": "Settings", "icon": "settings", "tint": "accentBlue" }]
+        .concat(sources.map(s => ({
+            "kind": "action",
+            "id": "src:" + s.name,
+            "source": s.name,
+            "inUse": !!s.isDefault,
+            "name": s.displayName,
+            "sub": s.isDefault ? "In use" : "Input",
+            "icon": "mic",
+            "tint": "accentRed"
+        })));
+}
+
+// The line under the input level
+function micStatus(available, muted, device) {
+    if (!available) return "No microphone found";
+    return muted ? "Muted · " + device : device;
+}
+
+// --- Gauge slider ---
+// A page whose gauge is a slider (the microphone's level) takes presses on the gauge's
+// band. dx and dy are from the dial's centre; `radius` is the gauge's and `band` how far
+// off it a press still counts, both in the same units.
+function onGauge(dx, dy, radius, band, start, span) {
+    if (Math.abs(Math.hypot(dx, dy) - radius) > band) return false;
+    let level = gaugeAt(dx, dy, start, span, true);
+    return level >= 0;
+}
+
+// The level (0 to 1) of the gauge at a point. The gauge runs from `start` degrees (level 0)
+// back by `span` degrees (level 1), clockwise from three o'clock. Points beyond its ends
+// give the nearer end, or -1 when `strict` and more than a few degrees out.
+function gaugeAt(dx, dy, start, span, strict) {
+    let a = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+    let end = start - span;
+    let slack = strict ? 6 : 0;
+    if (a >= end && a <= start) return (start - a) / span;
+    // Past `start` the level is 0 up to the point opposite the gauge's middle, 1 after it
+    let opposite = (start - span / 2 + 180) % 360;
+    let pastStart = (a - start + 360) % 360;
+    let toOpposite = (opposite - start + 360) % 360;
+    if (pastStart <= toOpposite) return strict && pastStart > slack ? -1 : 0;
+    return strict && (end - a + 360) % 360 > slack ? -1 : 1;
 }

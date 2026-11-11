@@ -347,7 +347,9 @@ Item {
     NotchEars {
         id: notchEars
         body: clusterBackground
-        active: (Theme.notchEars && !root.isTopBarMode) || hang.joined
+        // Not with an empty body (the icons are in the dial): the two ears would meet as a
+        // black triangle in the corner
+        active: ((Theme.notchEars && !root.isTopBarMode) || hang.joined) && clusterBackground.visible
         inset: hang.joined ? hang.barDepth : 0
         color: hang.joined ? hang.barFill : clusterBackground.color
         // Hanging from the bar, no outline: it reads as part of the bar

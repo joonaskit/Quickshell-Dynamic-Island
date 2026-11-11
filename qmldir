@@ -136,4 +136,10 @@ ActivityIcon 1.0 components/ActivityIcon.qml
 ActivityProgressBar 1.0 components/ActivityProgressBar.qml
 singleton DialService 1.0 dial/DialService.qml
 DialMenu 1.0 dial/DialMenu.qml
+DialSheet 1.0 dial/DialSheet.qml
+DialField 1.0 dial/DialField.qml
+DialButton 1.0 dial/DialButton.qml
+HueBridgeSheet 1.0 dial/HueBridgeSheet.qml
+NightHoursSheet 1.0 dial/NightHoursSheet.qml
+SendTextSheet 1.0 dial/SendTextSheet.qml
 DialWindow 1.0 dial/DialWindow.qml

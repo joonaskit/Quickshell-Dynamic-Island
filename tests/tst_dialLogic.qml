@@ -291,7 +291,8 @@ TestCase {
         compare(Dial.pageFor("wifi"), "wifi");
         compare(Dial.pageFor("bluetooth"), "bluetooth");
         compare(Dial.pageFor("hardware"), "hardware");
-        compare(Dial.pageFor("mic"), "");
+        compare(Dial.pageFor("mic"), "mic");
+        compare(Dial.pageFor("dnd"), "");
     }
 
     function test_powerPageStartsOnLock() {
@@ -424,5 +425,45 @@ TestCase {
         compare(Dial.hardwareStatus(0, 23, 45, 12.1, 31.2, 0), "Memory 45%");
         compare(Dial.hardwareStatus(1, 23, 45, 12.1, 31.2, 52), "12.1 of 31.2 GB · CPU 23%");
         compare(Dial.hardwareStatus(2, 23, 45, 12.1, 31.2, 52), "CPU 23% · Memory 45%");
+    }
+
+    function test_micItems() {
+        let items = Dial.micItems([
+            { "name": "a", "displayName": "Headset", "isDefault": false },
+            { "name": "b", "displayName": "Built-in", "isDefault": true }
+        ]);
+        compare(items.length, 3);
+        compare(items[0].id, "audioSettings");
+        compare(items[1].source, "a");
+        compare(items[1].sub, "Input");
+        verify(items[2].inUse);
+        compare(items[2].sub, "In use");
+        compare(Dial.pageFocus("mic", items), 2);
+        compare(Dial.pageFocus("mic", Dial.micItems([]).concat(items.slice(1, 2))), 1);
+    }
+
+    function test_micStatus() {
+        compare(Dial.micStatus(false, false, "x"), "No microphone found");
+        compare(Dial.micStatus(true, true, "Built-in"), "Muted · Built-in");
+        compare(Dial.micStatus(true, false, "Built-in"), "Built-in");
+    }
+
+    // The gauge runs from 165° (empty, lower left) round the bottom to 15° (full, lower right)
+    function test_gaugeAt() {
+        fuzzyCompare(Dial.gaugeAt(0, 100, 165, 150, false), 0.5, 0.001);
+        fuzzyCompare(Dial.gaugeAt(-100, 26.8, 165, 150, false), 0, 0.01);
+        // Beyond the ends: the nearer end, or -1 when strict
+        compare(Dial.gaugeAt(-100, -50, 165, 150, false), 0);
+        compare(Dial.gaugeAt(100, -50, 165, 150, false), 1);
+        compare(Dial.gaugeAt(0, -100, 165, 150, true), -1);
+        // A few degrees past an end still counts when strict
+        compare(Dial.gaugeAt(100, 20, 165, 150, true), 1);
+    }
+
+    function test_onGauge() {
+        verify(Dial.onGauge(0, 285, 285, 16, 165, 150));
+        verify(Dial.onGauge(0, 270, 285, 16, 165, 150));
+        verify(!Dial.onGauge(0, 230, 285, 16, 165, 150));
+        verify(!Dial.onGauge(0, -285, 285, 16, 165, 150));
     }
 }
