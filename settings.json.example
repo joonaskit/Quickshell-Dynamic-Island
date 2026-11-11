@@ -101,6 +101,7 @@
   "launcherGridColumns": 4,
   "launcherShowGenericNames": true,
   "launcherSpotlight": true,
+  "launcherStyle": "classic",
   "launcherCalculator": true,
   "launcherConversion": true,
   "launcherWebSearch": true,

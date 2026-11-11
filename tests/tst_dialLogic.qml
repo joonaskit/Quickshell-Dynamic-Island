@@ -24,12 +24,12 @@ TestCase {
     }
 
     function test_allIsSortedIgnoringCase() {
-        compare(names(Dial.itemsFor(1, apps, [])), ["alpha editor", "Browser", "Calc", "Odd one"]);
+        compare(names(Dial.itemsFor(Dial.categoryIndex("all"), apps, [])), ["alpha editor", "Browser", "Calc", "Odd one"]);
     }
 
     function test_groupFilters() {
-        compare(names(Dial.itemsFor(4, apps, [])), ["Browser"]);
-        compare(names(Dial.itemsFor(10, apps, [])), ["alpha editor", "Calc", "Odd one"]);
+        compare(names(Dial.itemsFor(5, apps, [])), ["Browser"]);
+        compare(names(Dial.itemsFor(11, apps, [])), ["alpha editor", "Calc", "Odd one"]);
     }
 
     function test_pinnedKeepsPinOrderAndSkipsUninstalled() {
@@ -38,10 +38,10 @@ TestCase {
     }
 
     function test_recentAndFrequentUseLaunchHistory() {
-        compare(Dial.itemsFor(2, apps, [], {}), []);
+        compare(Dial.itemsFor(Dial.categoryIndex("recent"), apps, [], {}), []);
         let usage = { "a": { "count": 5, "last": 10 }, "c": { "count": 1, "last": 30 }, "b": { "count": 5, "last": 20 }, "gone": { "count": 9, "last": 99 } };
-        compare(names(Dial.itemsFor(2, apps, [], usage)), ["Calc", "Browser", "alpha editor"]);
-        compare(names(Dial.itemsFor(3, apps, [], usage)), ["Browser", "alpha editor", "Calc"]);
+        compare(names(Dial.itemsFor(Dial.categoryIndex("recent"), apps, [], usage)), ["Calc", "Browser", "alpha editor"]);
+        compare(names(Dial.itemsFor(Dial.categoryIndex("frequent"), apps, [], usage)), ["Browser", "alpha editor", "Calc"]);
     }
 
     function test_historyIsCapped() {
@@ -51,7 +51,30 @@ TestCase {
             many.push({ "id": "app" + i, "name": "App " + i, "categories": [] });
             usage["app" + i] = { "count": 1, "last": i };
         }
-        compare(Dial.itemsFor(2, many, [], usage).length, 16);
+        compare(Dial.itemsFor(Dial.categoryIndex("recent"), many, [], usage).length, 16);
+    }
+
+    function test_windowsListsTheOpenWindows() {
+        let windows = [{ "name": "Window one" }, { "name": "Window two" }];
+        compare(Dial.CATEGORIES[1].name, "Windows");
+        compare(names(Dial.itemsFor(Dial.categoryIndex("windows"), apps, [], {}, windows)), ["Window one", "Window two"]);
+        compare(Dial.itemsFor(Dial.categoryIndex("windows"), apps, []), []);
+    }
+
+    function test_categoryIndex() {
+        compare(Dial.categoryIndex("pinned"), 0);
+        compare(Dial.categoryIndex("windows"), 1);
+        compare(Dial.categoryIndex("nope"), -1);
+    }
+
+    function test_jumpTarget() {
+        compare(Dial.jumpTarget("home", 7, 20), 0);
+        compare(Dial.jumpTarget("end", 7, 20), 19);
+        compare(Dial.jumpTarget("pageUp", 7, 20), 3);
+        compare(Dial.jumpTarget("pageDown", 7, 20), 11);
+        compare(Dial.jumpTarget("pageUp", 2, 20), 0);
+        compare(Dial.jumpTarget("pageDown", 18, 20), 19);
+        compare(Dial.jumpTarget("end", 0, 0), 0);
     }
 
     function test_middle() {
@@ -231,6 +254,13 @@ TestCase {
         // A pinned app that does not match is not pulled in, and a generic-name match stays last
         compare(names(Dial.matchApps(searchApps, "kat", {}, ["x", "e"]))[3], "Writer");
         compare(names(Dial.matchApps(searchApps, "kat", {}, ["x"])).indexOf("Other"), -1);
+    }
+
+    function test_matchAppsPutsRunningFirst() {
+        // Running beats pinned and used; a running app that only matches by generic name stays last
+        let usage = { "k": { "count": 9, "last": 1 } };
+        compare(names(Dial.matchApps(searchApps, "kat", usage, ["k"], { "t": true })).slice(0, 2), ["Notepad Kate Tool", "Kate"]);
+        compare(names(Dial.matchApps(searchApps, "kat", {}, [], { "e": true }))[3], "Writer");
     }
 
     function test_arrangePutsBestInTheMiddle() {

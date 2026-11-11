@@ -137,6 +137,8 @@ Singleton {
     property bool launcherShowGenericNames: true
     // Open the launcher in the middle of the screen while the dock is hidden
     property bool launcherSpotlight: true
+    // What the launcher shortcut, the dock button and the clock pill open: "classic" or "dial"
+    property string launcherStyle: "classic"
     // Instant answers in the launcher's search box
     property bool launcherCalculator: true
     property bool launcherConversion: true
@@ -382,6 +384,7 @@ Singleton {
         }
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
         if (data.launcherSpotlight !== undefined) root.launcherSpotlight = !!data.launcherSpotlight;
+        if (data.launcherStyle === "classic" || data.launcherStyle === "dial") root.launcherStyle = data.launcherStyle;
         if (data.launcherCalculator !== undefined) root.launcherCalculator = !!data.launcherCalculator;
         if (data.launcherConversion !== undefined) root.launcherConversion = !!data.launcherConversion;
         if (data.launcherWebSearch !== undefined) root.launcherWebSearch = !!data.launcherWebSearch;
@@ -633,6 +636,7 @@ Singleton {
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
         root.launcherSpotlight = true;
+        root.launcherStyle = "classic";
         root.launcherCalculator = true;
         root.launcherConversion = true;
         root.launcherWebSearch = true;
@@ -763,6 +767,7 @@ Singleton {
             "launcherGridColumns": root.launcherGridColumns,
             "launcherShowGenericNames": root.launcherShowGenericNames,
             "launcherSpotlight": root.launcherSpotlight,
+            "launcherStyle": root.launcherStyle,
             "launcherCalculator": root.launcherCalculator,
             "launcherConversion": root.launcherConversion,
             "launcherWebSearch": root.launcherWebSearch,

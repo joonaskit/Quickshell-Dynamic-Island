@@ -46,8 +46,31 @@ Singleton {
         query = text;
     }
 
-    function toggle() {
-        open = !open;
+    // The screen the dial is open on. Only that screen's DialWindow shows it.
+    property string screenName: ""
+
+    // One of the shell's screens: `name` when the shell is on it, else the active window's,
+    // else the first
+    function screenFor(name) {
+        let screens = ScreenService.targetScreens;
+        let names = [];
+        for (let i = 0; i < screens.length; i++) names.push(screens[i].name);
+        if (names.indexOf(name) >= 0) return name;
+        if (names.indexOf(WindowService.activeScreen) >= 0) return WindowService.activeScreen;
+        return names.length > 0 ? names[0] : "";
+    }
+
+    // Opens the dial on a screen (empty: the active window's), or closes it. `kind` picks a
+    // ring entry to open on, such as "windows"; empty keeps the last one.
+    function toggle(screen, kind) {
+        if (open) {
+            close();
+            return;
+        }
+        screenName = screenFor(screen);
+        let index = kind ? Logic.categoryIndex(kind) : -1;
+        if (index >= 0) category = index;
+        open = true;
     }
 
     function close() {
@@ -87,8 +110,37 @@ Singleton {
         "entry": e
     }))
 
+    // Open windows, as the dock launcher's window switcher lists them, in the shape of an app.
+    // Only read while the dial is open.
+    readonly property var windowItems: open ? DockService.windowItems().map(w => ({
+        "id": w.id,
+        "kind": "window",
+        "name": w.name,
+        "icon": w.icon,
+        "fallback": "application-x-executable",
+        "sub": w.genericName,
+        "detail": w.genericName + " · " + w.name,
+        "window": w.window
+    })) : []
+
+    // Ids of the apps with an open window, as { appId: true }. A window counts for the app
+    // whose desktop entry the dock finds for it.
+    readonly property var runningIds: {
+        let ids = {};
+        if (!open) return ids;
+        DockService.getMergedWindows().forEach(w => {
+            let entry = w.appId ? DockService.findDesktopEntry(w.appId) : null;
+            if (entry) ids[entry.id] = true;
+        });
+        return ids;
+    }
+
+    function isRunning(item) {
+        return !!item && item.kind === "app" && !!runningIds[item.id];
+    }
+
     // Hits of each source, in the same shape as an app so the arc treats them alike
-    readonly property var appHits: Logic.matchApps(apps, query, DockService.usageStats, pinnedIds)
+    readonly property var appHits: Logic.matchApps(apps, query, DockService.usageStats, pinnedIds, runningIds)
     readonly property var settingHits: trimmedQuery.length >= Logic.SEARCH_SETTINGS_MIN
         ? SettingsPagesService.search(trimmedQuery).map(p => ({
             "id": "setting:" + p.id,
@@ -127,7 +179,8 @@ Singleton {
         "fallback": f.dir ? "folder" : "text-x-generic",
         "sub": LauncherExtras.shortFolder(f.folder, Quickshell.env("HOME") || ""),
         "detail": f.path,
-        "path": f.path
+        "path": f.path,
+        "folder": f.folder
     }))
 
     // What the ring shows: the categories, or the scopes while searching
@@ -135,6 +188,8 @@ Singleton {
         ? Logic.scopeLabels(appHits, settingHits, fileHits)
         : Logic.CATEGORIES.map(c => c.name)
     readonly property int ringIndex: searching ? scope : category
+    // Kind of the category shown ("pinned", "windows", "group", ...)
+    readonly property string categoryKind: Logic.CATEGORIES[category].kind
 
 
     // Pinned app ids in pin order. The dial keeps its own pins in dial_pinned.json (gitignored),
@@ -168,7 +223,7 @@ Singleton {
     // Launch history is the dock launcher's, so Recent and Frequent match it
     readonly property var items: searching
         ? Logic.arrange(Logic.scopeHits(scope, query, appHits, settingHits, fileHits))
-        : Logic.itemsFor(category, apps, pinnedIds, DockService.usageStats)
+        : Logic.itemsFor(category, apps, pinnedIds, DockService.usageStats, windowItems)
 
     // Where app positions are remembered: per category, or per scope and text while searching
     readonly property string focusKey: searching ? "?" + scope + ":" + trimmedQuery : String(category)
@@ -229,9 +284,77 @@ Singleton {
         onTriggered: root.launching = null
     }
 
+    // An app item in the shape DockService's window matching and actions take
+    function dockApp(item) {
+        return { "id": item.id, "desktopFile": item.id + ".desktop", "name": item.name, "command": "" };
+    }
+
+    // Brings up a window of a running app: the next one after the active window, else the
+    // first. False when no window matches after all.
+    function switchTo(item) {
+        let wins = DockService.findToplevels(dockApp(item));
+        if (wins.length === 0) return false;
+        let active = wins.findIndex(w => w.activated);
+        DockService.activateWindow(wins[active >= 0 ? (active + 1) % wins.length : 0]);
+        return true;
+    }
+
+    // Opens what a tile holds: switches to a window, or to a running app's window, and
+    // starts anything else
+    function launch(item, x, y) {
+        if (!item) return;
+        if (item.kind === "window") {
+            DockService.activateWindow(item.window);
+            close();
+        } else if (isRunning(item) && switchTo(item)) {
+            DockService.recordUse({ "id": item.id });
+            close();
+        } else {
+            start(item, x, y);
+        }
+    }
+
+    // What the tile's right-click menu offers, as [{ name, icon, run, closes }], with
+    // { separator: true } between groups. `closes` closes the dial after `run`; launches close
+    // it themselves. x and y are where the tile sits, for the launch animation.
+    function menuFor(item, x, y) {
+        if (!item) return [];
+        let entries = [];
+        let add = (name, icon, run, closes) => entries.push({ "name": name, "icon": icon, "run": run, "closes": !!closes });
+        let separate = () => {
+            if (entries.length > 0 && !entries[entries.length - 1].separator) entries.push({ "separator": true });
+        };
+        if (item.kind === "app") {
+            let running = isRunning(item);
+            if (running) {
+                add("Switch To", "window", () => launch(item, x, y));
+                add("New Window", "plus", () => start(item, x, y));
+            } else {
+                add("Open", "chevron-right", () => start(item, x, y));
+            }
+            let taken = entries.map(e => e.name.toLowerCase());
+            let actions = DockService.getActionsForApp(dockApp(item)).filter(a => taken.indexOf(a.name.toLowerCase()) < 0);
+            if (actions.length > 0) separate();
+            actions.forEach(a => add(a.name, a.icon, a.execute, true));
+            separate();
+            add(isPinned(item) ? "Unpin from Dial" : "Pin to Dial", "pin", () => togglePin(item));
+            add("Edit Application…", "settings", () => DockService.openMenuEditor(item.id + ".desktop"), true);
+            if (running) add("Quit", "close", () => DockService.quitApp(dockApp(item)));
+        } else if (item.kind === "window") {
+            add("Switch To", "window", () => launch(item, x, y));
+            add("Close Window", "close", () => DockService.closeWindow(item.window));
+        } else if (item.kind === "file") {
+            add("Open", "chevron-right", () => launch(item, x, y));
+            if (item.folder) add("Open Containing Folder", "folder", () => Qt.openUrlExternally(LauncherExtras.fileUrl(item.folder)), true);
+        } else if (item.kind === "setting") {
+            add("Open", "settings", () => launch(item, x, y));
+        }
+        return entries;
+    }
+
     // Runs the entry from where its tile sits. Terminal apps are wrapped in Konsole,
     // because DesktopEntry.execute() ignores runInTerminal.
-    function launch(item, x, y) {
+    function start(item, x, y) {
         if (!item) return;
         if (item.kind === "app") {
             let entry = item.entry;

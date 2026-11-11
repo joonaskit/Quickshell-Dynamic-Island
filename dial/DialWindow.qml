@@ -7,12 +7,16 @@ import "dialLogic.js" as Logic
 
 // Experimental category dial launcher: a disc that slides down around the clock pill, with
 // categories on an inner ring and apps on an outer arc. Toggled with
-// `qs ipc call dial toggle`. Created once per screen; DialService.open opens it on all of them.
+// `qs ipc call dial toggle`. Created once per screen; it shows on DialService.screenName only.
 PanelWindow {
     id: window
 
     required property var modelData
     screen: modelData
+
+    // This is the screen the dial opened on, and it is open
+    readonly property bool here: !window.screen || DialService.screenName === "" || DialService.screenName === window.screen.name
+    readonly property bool shown: DialService.open && here
 
     color: "transparent"
     anchors {
@@ -23,20 +27,18 @@ PanelWindow {
     }
     exclusionMode: ExclusionMode.Ignore
     // Stays up while the launched app's icon flies to the pill
-    visible: mapped || DialService.launching !== null
+    visible: mapped || (DialService.launching !== null && here)
 
     // Unmapped once the disc has shrunk away, like SpotlightWindow
     property bool mapped: false
-    Connections {
-        target: DialService
-        function onOpenChanged() {
-            if (DialService.open) {
-                unmapTimer.stop();
-                window.mapped = true;
-                input.forceActiveFocus();
-            } else {
-                unmapTimer.restart();
-            }
+    onShownChanged: {
+        menu.entries = [];
+        if (shown) {
+            unmapTimer.stop();
+            mapped = true;
+            input.forceActiveFocus();
+        } else {
+            unmapTimer.restart();
         }
     }
     Timer {
@@ -47,16 +49,13 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell-dial"
-    WlrLayershell.keyboardFocus: DialService.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    // Only the disc takes clicks; the rest of the window passes them to the windows below
+    // While open the whole screen takes clicks, so one outside the disc closes it. Empty
+    // while closed, so the launch animation takes no clicks.
     mask: Region {
-        // Empty while closed, so the launch animation takes no clicks
-        x: window.cx - Theme.px(Logic.DISC_RADIUS)
-        y: window.cy - Theme.px(Logic.DISC_RADIUS)
-        width: DialService.open ? Theme.px(Logic.DISC_RADIUS * 2) : 0
-        height: DialService.open ? Theme.px(Logic.DISC_RADIUS * 2) : 0
-        shape: RegionShape.Ellipse
+        width: window.shown ? window.width : 0
+        height: window.shown ? window.height : 0
     }
 
     // Centre of the clock pill, where every arc is centred
@@ -170,10 +169,14 @@ PanelWindow {
             if (n > 0) return window.items[window.focusIndex].detail;
             return FileSearchService.searching ? "Searching…" : "No matches";
         }
+        let kind = DialService.categoryKind;
         if (n === 0) {
-            if (window.ringIndex === 0) return "No pinned apps";
-            return window.ringIndex <= 3 ? "Nothing launched yet" : "No apps";
+            if (kind === "pinned") return "No pinned apps";
+            if (kind === "windows") return "No open windows";
+            return kind === "recent" || kind === "frequent" ? "Nothing launched yet" : "No apps";
         }
+        // A window's line says which app it is and its full title
+        if (kind === "windows") return window.items[window.focusIndex].detail;
         return DialService.ringLabels[window.ringIndex] + " · " + n + (n === 1 ? " app" : " apps");
     }
 
@@ -182,13 +185,52 @@ PanelWindow {
         DialService.launch(window.items[index], c.x, c.y);
     }
 
+    // Opens the right-click menu of the tile at `index`, with its corner at x, y (window
+    // coordinates) and kept on the screen
+    function openMenu(index, x, y) {
+        let item = window.items[index];
+        if (!item) return;
+        DialService.setFocus(index);
+        let c = tileCenter(index);
+        menu.entries = DialService.menuFor(item, c.x, c.y);
+        menu.current = -1;
+        menu.x = Math.max(0, Math.min(x, window.width - menu.width));
+        menu.y = Math.max(0, Math.min(y, window.height - menu.height));
+    }
+
+    // The focused tile's menu from the keyboard, beside the tile with its first entry lit
+    function openFocusedMenu() {
+        let c = tileCenter(focusIndex);
+        openMenu(focusIndex, c.x + Theme.px(42), c.y - Theme.px(42));
+        if (menu.isOpen) menu.move(1);
+    }
+
+    function runMenuEntry(entry) {
+        menu.entries = [];
+        if (!entry || entry.separator) return;
+        entry.run();
+        if (entry.closes) DialService.close();
+    }
+
+    // A press outside the disc closes the dial. Below everything else, so the disc's own
+    // tiles, pills and field take their presses first.
+    MouseArea {
+        anchors.fill: parent
+        enabled: window.shown
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        onPressed: mouse => {
+            if (menu.isOpen) menu.entries = [];
+            else if (Math.hypot(mouse.x - window.cx, mouse.y - window.cy) > Theme.px(Logic.DISC_RADIUS)) DialService.close();
+        }
+    }
+
     Item {
         id: hit
         x: window.cx - Theme.px(Logic.DISC_RADIUS)
         y: 0
         width: Theme.px(Logic.DISC_RADIUS * 2)
         height: window.cy + Theme.px(Logic.DISC_RADIUS)
-        enabled: DialService.open
+        enabled: window.shown
     }
 
     WindowBlur {
@@ -205,8 +247,8 @@ PanelWindow {
         // Closed, the whole disc is above the screen. Moved by y, not a transform: WindowBlur
         // places the blur on the same frame for a move, and a frame late for a transform,
         // which let the desktop show sharp through the disc's leading edge.
-        y: DialService.open ? 0 : -(window.cy + Theme.px(Logic.DISC_RADIUS))
-        opacity: DialService.open ? 1 : 0
+        y: window.shown ? 0 : -(window.cy + Theme.px(Logic.DISC_RADIUS))
+        opacity: window.shown ? 1 : 0
 
         Behavior on opacity { NumberAnimation { duration: 180 } }
         Behavior on y { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
@@ -437,6 +479,8 @@ PanelWindow {
 
                             Column {
                                 anchors.centerIn: parent
+                                // Up a little, to leave the running dot room
+                                anchors.verticalCenterOffset: -Theme.px(3)
                                 spacing: Theme.px(4)
 
                                 Image {
@@ -460,7 +504,7 @@ PanelWindow {
                                     width: Theme.px(76)
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
-                                    visible: DialService.searching
+                                    visible: DialService.searching || slot.app.kind === "window"
                                     text: slot.app.sub
                                     color: slot.selected ? Theme.textPrimary : Theme.textSecondary
                                     font.family: Theme.fontFamily
@@ -468,13 +512,33 @@ PanelWindow {
                                 }
                             }
 
+                            // Running indicator, as on the dock
+                            Rectangle {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: Theme.px(3)
+                                width: Theme.px(5)
+                                height: width
+                                radius: width / 2
+                                color: slot.selected ? Theme.accentBlue : Theme.textSecondary
+                                visible: DialService.isRunning(slot.app)
+                            }
+
                             MouseArea {
                                 anchors.fill: parent
                                 enabled: slot.distance <= Logic.VISIBLE_APPS
-                                onClicked: window.launchAt(slot.index)
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: mouse => {
+                                    if (mouse.button === Qt.RightButton) {
+                                        let p = mapToItem(null, mouse.x, mouse.y);
+                                        window.openMenu(slot.index, p.x, p.y);
+                                    } else {
+                                        window.launchAt(slot.index);
+                                    }
+                                }
                             }
 
-                            // Pin button, the only pin indicator: a dot already means "running"
+                            // Pin button, the only pin indicator: the dot below means "running"
                             Rectangle {
                                 id: pinButton
                                 readonly property bool pinned: DialService.isPinned(slot.app)
@@ -558,7 +622,27 @@ PanelWindow {
                     }
 
                     Keys.onPressed: event => {
-                        if (!DialService.open) return;
+                        if (!window.shown) return;
+                        // While the menu is open the keys move through it
+                        if (menu.isOpen) {
+                            switch (event.key) {
+                            case Qt.Key_Down: menu.move(1); break;
+                            case Qt.Key_Up: menu.move(-1); break;
+                            case Qt.Key_Return:
+                            case Qt.Key_Enter: menu.choose(); break;
+                            case Qt.Key_Escape:
+                            case Qt.Key_Menu: menu.entries = []; break;
+                            default: return;
+                            }
+                            event.accepted = true;
+                            return;
+                        }
+                        let jump = { [Qt.Key_Home]: "home", [Qt.Key_End]: "end", [Qt.Key_PageUp]: "pageUp", [Qt.Key_PageDown]: "pageDown" }[event.key];
+                        if (jump) {
+                            DialService.setFocus(Logic.jumpTarget(jump, window.focusIndex, window.items.length));
+                            event.accepted = true;
+                            return;
+                        }
                         switch (event.key) {
                         case Qt.Key_Right: DialService.setFocus(window.focusIndex + 1); break;
                         case Qt.Key_Left: DialService.setFocus(window.focusIndex - 1); break;
@@ -571,6 +655,14 @@ PanelWindow {
                         case Qt.Key_P:
                             if (!(event.modifiers & Qt.ControlModifier)) return;
                             DialService.togglePin(window.items[window.focusIndex]);
+                            break;
+                        // The menu of the focused tile, opened beside it
+                        case Qt.Key_F10:
+                            if (!(event.modifiers & Qt.ShiftModifier)) return;
+                            window.openFocusedMenu();
+                            break;
+                        case Qt.Key_Menu:
+                            window.openFocusedMenu();
                             break;
                         case Qt.Key_Escape:
                             // Clears the search first, then closes
@@ -656,7 +748,7 @@ PanelWindow {
     // Wheel turns the ring or the arc, whichever the pointer is over
     MouseArea {
         anchors.fill: hit
-        enabled: DialService.open
+        enabled: window.shown
         acceptedButtons: Qt.NoButton
 
         // Deltas not yet worth a step, and where and when they came in
@@ -686,7 +778,7 @@ PanelWindow {
     MouseArea {
         id: grip
         anchors.fill: hit
-        enabled: DialService.open
+        enabled: window.shown
         propagateComposedEvents: true
         cursorShape: pressed && dragged ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 
@@ -722,6 +814,7 @@ PanelWindow {
         }
 
         onPressed: mouse => {
+            menu.entries = [];
             dragged = false;
             turner = window.spinnerAt(mouse.x, mouse.y);
             pressX = mouse.x;
@@ -756,8 +849,14 @@ PanelWindow {
         y: window.pillTop
         width: Theme.compactWidthClock
         height: window.pillHeight
-        enabled: DialService.open
+        enabled: window.shown
         cursorShape: Qt.PointingHandCursor
         onClicked: DialService.close()
+    }
+
+    // Right-click menu of a tile, over everything else
+    DialMenu {
+        id: menu
+        onChosen: entry => window.runMenuEntry(entry)
     }
 }

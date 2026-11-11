@@ -18,13 +18,14 @@ ShellRoot {
     IpcHandler {
         target: "launcher"
 
+        // The classic launcher or the dial, as the Launcher Style setting says
         function toggle() {
-            DockService.toggleAppLauncherRequested();
+            DockService.toggleLauncher("");
         }
 
         // Open the launcher directly on the open-windows tab
         function windows() {
-            DockService.windowSwitcherRequested();
+            DockService.showWindows("");
         }
     }
 
@@ -33,7 +34,7 @@ ShellRoot {
         target: "dial"
 
         function toggle() {
-            DialService.toggle();
+            DialService.toggle("", "");
         }
     }
 

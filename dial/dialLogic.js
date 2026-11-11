@@ -18,6 +18,7 @@ var BAR_MIN_ITEMS = 9;   // the arc scrollbar shows above this many items
 // Ring entries in order. "group" ones list the apps of their freedesktop categories.
 var CATEGORIES = [
     { name: "Pinned", kind: "pinned" },
+    { name: "Windows", kind: "windows" },
     { name: "All", kind: "all" },
     { name: "Recent", kind: "recent" },
     { name: "Frequent", kind: "frequent" },
@@ -47,12 +48,19 @@ function groupOf(categories) {
 
 var HISTORY_LIMIT = 16;  // Recent and Frequent show this many, as the dock launcher does
 
+// Index of the ring entry of a kind ("pinned", "windows", ...), or -1
+function categoryIndex(kind) {
+    return CATEGORIES.findIndex(c => c.kind === kind);
+}
+
 // Items of one ring entry. apps: [{ id, name, categories }], pinnedIds: ids in pin order,
-// usage: { appId: { count, last } } from the dock launcher's launch history.
-function itemsFor(category, apps, pinnedIds, usage) {
+// usage: { appId: { count, last } } from the dock launcher's launch history, windows: the
+// open windows, already shaped as items, for the Windows entry.
+function itemsFor(category, apps, pinnedIds, usage, windows) {
     usage = usage || {};
-    let sorted = apps.slice().sort((a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() > b.name.toLowerCase() ? 1 : 0);
     let def = CATEGORIES[clamp(category, 0, CATEGORIES.length - 1)];
+    if (def.kind === "windows") return windows || [];
+    let sorted = apps.slice().sort((a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() > b.name.toLowerCase() ? 1 : 0);
     if (def.kind === "all") return sorted;
     if (def.kind === "group") return sorted.filter(a => groupOf(a.categories) === def.name);
     if (def.kind === "pinned") {
@@ -71,6 +79,18 @@ function itemsFor(category, apps, pinnedIds, usage) {
 // The slot an app arc opens on: the middle of the list
 function middle(count) {
     return Math.floor((count - 1) / 2);
+}
+
+// The slot a navigation key moves the arc to from `focus` in a list of `count`. Home and
+// End go to the ends, PageUp and PageDown a visible side's worth of tiles. key: "home",
+// "end", "pageUp" or "pageDown".
+function jumpTarget(key, focus, count) {
+    let last = Math.max(0, count - 1);
+    if (key === "home") return 0;
+    if (key === "end") return last;
+    if (key === "pageUp") return clamp(focus - VISIBLE_APPS, 0, last);
+    if (key === "pageDown") return clamp(focus + VISIBLE_APPS, 0, last);
+    return clamp(focus, 0, last);
 }
 
 // Position on a circle around the pill centre; 90 degrees is straight down.
@@ -216,15 +236,17 @@ function nameRank(name, query) {
 }
 
 // Apps matching the query, best first. Name matches come before generic-name ones. Among
-// those, pinned apps lead, then launched ones, most used first, then the rest; within each
-// of these a name prefix beats a substring, and ties go alphabetically. So the apps the
-// user reaches for win over a closer but unused spelling.
-// usage is { appId: { count, last } }, pinnedIds the ids pinned in the dial.
-function matchApps(apps, query, usage, pinnedIds) {
+// those, running apps lead, then pinned ones, then launched ones, most used first, then the
+// rest; within each of these a name prefix beats a substring, and ties go alphabetically.
+// So the apps the user reaches for win over a closer but unused spelling.
+// usage is { appId: { count, last } }, pinnedIds the ids pinned in the dial, running
+// { appId: true } for the apps with an open window.
+function matchApps(apps, query, usage, pinnedIds, running) {
     let q = (query || "").trim().toLowerCase();
     if (q === "") return [];
     usage = usage || {};
     pinnedIds = pinnedIds || [];
+    running = running || {};
     let scored = [];
     apps.forEach(a => {
         let rank = nameRank(a.name, q);
@@ -232,11 +254,13 @@ function matchApps(apps, query, usage, pinnedIds) {
         scored.push({
             "app": a,
             "rank": rank,
+            "running": rank < 2 && running[a.id] ? 0 : 1,
             "pinned": rank < 2 && pinnedIds.indexOf(a.id) >= 0 ? 0 : 1,
             "count": rank < 2 && usage[a.id] ? usage[a.id].count : 0
         });
     });
     scored.sort((x, y) => ((x.rank === 2) - (y.rank === 2))
+        || (x.running - y.running)
         || (x.pinned - y.pinned)
         || (y.count - x.count)
         || (x.rank - y.rank)

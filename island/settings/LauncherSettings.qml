@@ -10,6 +10,25 @@ SettingsCategory {
         key: "launcher"
         title: "APP LAUNCHER"
 
+        // Which launcher the shortcut, the dock button and the clock pill open
+        SettingSegmented {
+            title: "Launcher Style"
+            description: "Dial (experimental) opens around the clock pill. With Dial, left-click the pill to open it and right-click to expand the island"
+            keywords: "category dial wheel radial classic"
+            iconName: "apps"
+            iconColor: Theme.accentBlue
+            currentValue: SettingsService.launcherStyle
+            options: [
+                { label: "Classic", value: "classic" },
+                { label: "Dial", value: "dial" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("launcherStyle", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 1. Default View Layout (Grid vs List)
         SettingSegmented {
             title: "Default View Layout"

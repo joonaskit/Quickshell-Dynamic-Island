@@ -265,7 +265,7 @@ Singleton {
             onRead: function(line) {
                 let t = line.trim();
                 if (t === "LAUNCHER_TOGGLE") {
-                    DockService.toggleAppLauncherRequested();
+                    DockService.toggleLauncher("");
                     return;
                 }
                 if (t.length === 0) return;

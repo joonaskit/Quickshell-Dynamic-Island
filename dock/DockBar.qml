@@ -13,6 +13,8 @@ Item {
     property alias windowPickerHitBox: windowPicker
     // The capsule's body, for the window's blur
     property alias capsule: dockCapsule
+    // Name of the screen this dock is on, where the launcher button opens the dial
+    property string screenName: ""
 
     property alias contextMenuOpen: contextMenu.isOpen
     property alias appPickerOpen: appPicker.isOpen
@@ -470,6 +472,7 @@ Item {
                         launchpadItem.pressScale = 1.0;
                         launchpadBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) root.toggleLauncherMenu();
+                        else if (SettingsService.launcherStyle === "dial") DialService.toggle(root.screenName, "");
                         else root.toggleAppPicker();
                     }
                 }

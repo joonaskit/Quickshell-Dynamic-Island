@@ -329,6 +329,7 @@ PanelWindow {
         id: dockBar
         z: 10
         anchors.fill: parent
+        screenName: window.screen ? window.screen.name : ""
         shouldDropDock: window.shouldDropDock
 
         opacity: window.hasFullscreenApp ? 0.0 : 1.0
