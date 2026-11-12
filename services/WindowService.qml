@@ -3,6 +3,7 @@ import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 
 Singleton {
     id: root
@@ -144,6 +145,18 @@ Singleton {
         Quickshell.execDetached(argv);
     }
 
+    // Launch a command in a terminal: Konsole under KDE, else xdg-terminal-exec, $TERMINAL
+    // or the first common terminal found
+    function launchInTerminal(command, appId, workingDirectory) {
+        if (!command || command.length === 0) return;
+        let script = (CompositorService.isKde ? "command -v konsole >/dev/null 2>&1 && exec konsole -e \"$@\"; " : "") +
+                     "command -v xdg-terminal-exec >/dev/null 2>&1 && exec xdg-terminal-exec \"$@\"; " +
+                     "for t in \"$TERMINAL\" konsole foot alacritty kitty ghostty wezterm gnome-terminal xterm; do " +
+                     "[ -n \"$t\" ] && command -v \"$t\" >/dev/null 2>&1 && exec \"$t\" -e \"$@\"; done";
+        let argv = ["sh", "-c", script, "sh"];
+        launchCommand(argv.concat(command), appId, workingDirectory);
+    }
+
     // Launch a DesktopEntry or one of its DesktopActions (appId names the owning entry)
     function launchEntry(entry, appId) {
         if (!entry) return;
@@ -239,6 +252,73 @@ Singleton {
         return list;
     }
 
+    // The app's name for the pill: the last part of its id, else the end of the window title
+    function appTitle(rawApp, rawTitle) {
+        let appName = "";
+        if (rawApp.length > 0) {
+            let segments = rawApp.split(".");
+            let last = segments[segments.length - 1];
+            if (last.toLowerCase() === "desktop" && segments.length > 1) {
+                last = segments[segments.length - 2];
+            }
+            if (last.length > 0) {
+                appName = last.charAt(0).toUpperCase() + last.slice(1);
+            }
+        }
+        if (appName === "" && rawTitle.length > 0) {
+            let dash = rawTitle.split(" — ");
+            if (dash.length > 1) {
+                appName = dash[dash.length - 1];
+            } else {
+                dash = rawTitle.split(" - ");
+                appName = dash.length > 1 ? dash[dash.length - 1] : rawTitle;
+            }
+        }
+        return appName !== "" ? appName : "Desktop";
+    }
+
+    // Outside KWin the active window comes from the Wayland toplevel list (niri and other
+    // compositors with wlr-foreign-toplevel-management). There is no window list or
+    // virtual desktops here: DockService reads the toplevels itself.
+    function syncToplevel() {
+        let t = ToplevelManager.activeToplevel;
+        let active = !!t && t.activated;
+        let app = active ? (t.appId || "") : "";
+        let title = active ? (t.title || "") : "";
+        root.isMaximized = active && t.maximized;
+        root.isFocusedWindowMaximized = root.isMaximized;
+        root.hasFullscreenApp = active && t.fullscreen;
+        root.activeAppId = app;
+        root.activeWindowTitle = title;
+        root.activeAppTitle = root.appTitle(app, title);
+        // The last screen with a focused window, so the dial still knows where to open
+        let screen = active ? root.firstScreenName(t) : "";
+        if (screen !== "") root.activeScreen = screen;
+    }
+
+    // Untyped, because qmllint cannot resolve the type of Toplevel.screens
+    function firstScreenName(toplevel) {
+        let screens = toplevel.screens;
+        return screens && screens.length > 0 ? screens[0].name : "";
+    }
+
+    Component.onCompleted: if (!CompositorService.isKde) root.syncToplevel()
+
+    Connections {
+        target: CompositorService.isKde ? null : ToplevelManager
+        function onActiveToplevelChanged() { root.syncToplevel(); }
+    }
+
+    Connections {
+        target: CompositorService.isKde ? null : ToplevelManager.activeToplevel
+        function onActivatedChanged() { root.syncToplevel(); }
+        function onAppIdChanged() { root.syncToplevel(); }
+        function onTitleChanged() { root.syncToplevel(); }
+        function onMaximizedChanged() { root.syncToplevel(); }
+        function onFullscreenChanged() { root.syncToplevel(); }
+        function onScreensChanged() { root.syncToplevel(); }
+    }
+
     Timer {
         id: restartTimer
         interval: 1000
@@ -251,12 +331,13 @@ Singleton {
     Process {
         id: trackerProc
         command: ["python3", Quickshell.shellDir + "/scripts/kwin_window_tracker.py"]
-        running: true
+        // It loads a KWin script, so it is only started under KWin
+        running: CompositorService.isKde
 
-        Component.onCompleted: HelperService.watch("windows", "Window tracker", trackerProc)
+        Component.onCompleted: if (CompositorService.isKde) HelperService.watch("windows", "Window tracker", trackerProc)
 
         onRunningChanged: {
-            if (!running) {
+            if (!running && CompositorService.isKde) {
                 restartTimer.start();
             }
         }
@@ -294,33 +375,7 @@ Singleton {
                             root.isFocusedWindowMaximized = (rawApp !== "" && rawApp !== "Desktop") ? root.isMaximized : false;
                         }
 
-                        // Clean formatted app name
-                        let appName = "";
-                        if (rawApp.length > 0) {
-                            let segments = rawApp.split(".");
-                            let last = segments[segments.length - 1];
-                            if (last.toLowerCase() === "desktop" && segments.length > 1) {
-                                last = segments[segments.length - 2];
-                            }
-                            if (last.length > 0) {
-                                appName = last.charAt(0).toUpperCase() + last.slice(1);
-                            }
-                        }
-                        if (appName === "" && rawTitle.length > 0) {
-                            let dash = rawTitle.split(" — ");
-                            if (dash.length > 1) {
-                                appName = dash[dash.length - 1];
-                            } else {
-                                dash = rawTitle.split(" - ");
-                                if (dash.length > 1) {
-                                    appName = dash[dash.length - 1];
-                                } else {
-                                    appName = rawTitle;
-                                }
-                            }
-                        }
-
-                        root.activeAppTitle = appName !== "" ? appName : "Desktop";
+                        root.activeAppTitle = root.appTitle(rawApp, rawTitle);
                         return;
                     } catch(e) {
                         console.warn("[WindowService] Error parsing tracker JSON: " + e);
@@ -359,33 +414,7 @@ Singleton {
                         root.isFocusedWindowMaximized = (rawApp !== "" && rawApp !== "Desktop") ? root.isMaximized : false;
                     }
 
-                    // Clean formatted app name
-                    let appName = "";
-                    if (rawApp.length > 0) {
-                        let segments = rawApp.split(".");
-                        let last = segments[segments.length - 1];
-                        if (last.toLowerCase() === "desktop" && segments.length > 1) {
-                            last = segments[segments.length - 2];
-                        }
-                        if (last.length > 0) {
-                            appName = last.charAt(0).toUpperCase() + last.slice(1);
-                        }
-                    }
-                    if (appName === "" && rawTitle.length > 0) {
-                        let dash = rawTitle.split(" — ");
-                        if (dash.length > 1) {
-                            appName = dash[dash.length - 1];
-                        } else {
-                            dash = rawTitle.split(" - ");
-                            if (dash.length > 1) {
-                                appName = dash[dash.length - 1];
-                            } else {
-                                appName = rawTitle;
-                            }
-                        }
-                    }
-
-                    root.activeAppTitle = appName !== "" ? appName : "Desktop";
+                    root.activeAppTitle = root.appTitle(rawApp, rawTitle);
                 }
             }
         }

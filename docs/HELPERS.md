@@ -8,7 +8,7 @@ Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `audio_*
 
 `top_processes.py` runs only while the dial's hardware page is open (`HardwareStatsService.watchProcesses`); if the shell goes, its next write ends it, so it is not in `LONG_RUNNING`.
 
-`scripts/kwin_script.js` runs inside KWin. `kwin_window_tracker.py` loads it from its own directory.
+`scripts/kwin_script.js` runs inside KWin. `kwin_window_tracker.py` loads it from its own directory, and is only started under KDE (`CompositorService.isKde`).
 
 ## Adding a long-running helper
 

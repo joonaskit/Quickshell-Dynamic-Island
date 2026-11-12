@@ -461,8 +461,12 @@ function bluetoothStatus(available, enabled, connected, connecting, battery, cou
 var HARDWARE_RING = ["CPU", "Memory", "Temperature"];
 var HARDWARE_PROGRAMS = 8;
 
+// Settings tiles that open KDE's settings modules (kcmshell6, systemsettings): dimmed where
+// those are not installed
+var KDE_SETTINGS_TILES = ["settings", "wifiSettings", "bluetoothSettings", "audioSettings"];
+
 // Programs that keep the desktop itself running. The dial does not offer to end them.
-var PROTECTED_PROGRAMS = ["systemd", "kwin_wayland", "kwin_x11", "plasmashell", "quickshell", "qs", "Xwayland",
+var PROTECTED_PROGRAMS = ["systemd", "kwin_wayland", "kwin_x11", "plasmashell", "niri", "quickshell", "qs", "Xwayland",
     "pipewire", "pipewire-pulse", "wireplumber", "dbus-daemon", "dbus-broker", "dbus-broker-lau", "sddm",
     "startplasma-way", "ksmserver", "kded6", "polkit-kde-auth", "kwalletd6", "NetworkManager", "python3"];
 

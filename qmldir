@@ -1,6 +1,7 @@
 singleton Theme 1.0 services/Theme.qml
 singleton AudioService 1.0 services/AudioService.qml
 singleton BrightnessService 1.0 services/BrightnessService.qml
+singleton CompositorService 1.0 services/CompositorService.qml
 singleton WindowService 1.0 services/WindowService.qml
 singleton NetworkService 1.0 services/NetworkService.qml
 singleton BluetoothService 1.0 services/BluetoothService.qml

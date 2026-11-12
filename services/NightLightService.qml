@@ -14,7 +14,8 @@ Singleton {
 
     readonly property bool widgetEnabled: SettingsService.nightLightEnabled
 
-    property bool available: true
+    // KWin's Night Light, so not there under other compositors
+    property bool available: CompositorService.isKde
     // Night Light switched on in KWin (it may still be waiting for the evening)
     property bool active: false
     // Currently tinting the screen
@@ -65,7 +66,7 @@ Singleton {
 
     Timer {
         interval: 10000
-        running: root.widgetEnabled
+        running: root.widgetEnabled && CompositorService.isKde
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()

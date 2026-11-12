@@ -225,6 +225,8 @@ Singleton {
     function actionEnabled(item) {
         if (item.id === "lowRefresh") return PowerProfileService.lowRefreshAvailable;
         if (item.id === "systemMonitor") return HardwareStatsService.systemMonitorProblem === "";
+        // KDE's settings modules, which other desktops may not have
+        if (Logic.KDE_SETTINGS_TILES.indexOf(item.id) >= 0) return DepsService.problem(["systemsettings"]) === "";
         return true;
     }
 
@@ -672,15 +674,15 @@ Singleton {
         return entries;
     }
 
-    // Runs the entry from where its tile sits. Terminal apps are wrapped in Konsole,
-    // because DesktopEntry.execute() ignores runInTerminal.
+    // Runs the entry from where its tile sits. Terminal apps are wrapped in a terminal
+    // (WindowService.launchInTerminal), because DesktopEntry.execute() ignores runInTerminal.
     function start(item, x, y) {
         if (!item) return;
         if (item.kind === "app") {
             let entry = item.entry;
             DockService.recordUse({ "id": item.id });
             if (entry.runInTerminal && entry.command && entry.command.length > 0)
-                WindowService.launchCommand(["konsole", "-e"].concat(entry.command), entry.id, entry.workingDirectory);
+                WindowService.launchInTerminal(entry.command, entry.id, entry.workingDirectory);
             else
                 WindowService.launchEntry(entry);
         } else if (item.kind === "setting") {

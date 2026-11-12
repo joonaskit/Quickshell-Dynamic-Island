@@ -787,7 +787,7 @@ PanelWindow {
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
                                     visible: DialService.searching || slot.app.kind === "window" || slot.app.kind === "process" || slot.app.kind === "notification" || (tile.isAction && !!slot.app.sub)
-                                    text: slot.app.sub
+                                    text: slot.app.sub || ""
                                     color: slot.selected ? Theme.textPrimary : Theme.textSecondary
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontPx(9)
