@@ -42,12 +42,16 @@ Item {
 
     property bool shouldDropDock: false
 
+    // The dial replaces the classic launcher, so its button and divider go
+    readonly property bool showLauncher: SettingsService.launcherStyle !== "dial"
+    onShowLauncherChanged: if (!showLauncher) launcherMenu.isOpen = false
+
     readonly property real dockContentLength: {
         let slotSize = Theme.dockIconSize + 8;
         let pinnedCount = (DockService.pinnedApps && DockService.pinnedApps.length) ? DockService.pinnedApps.length : 0;
         let unpinnedCount = (DockService.runningUnpinnedApps && DockService.runningUnpinnedApps.length) ? DockService.runningUnpinnedApps.length : 0;
-        let slots = 1 + (showDownloads ? 1 : 0) + (showTrash ? 1 : 0) + pinnedCount + unpinnedCount;
-        let dividers = 1 + (showDownloads || showTrash ? 1 : 0) + (unpinnedCount > 0 ? 1 : 0);
+        let slots = (showLauncher ? 1 : 0) + (showDownloads ? 1 : 0) + (showTrash ? 1 : 0) + pinnedCount + unpinnedCount;
+        let dividers = (showLauncher ? 1 : 0) + (showDownloads || showTrash ? 1 : 0) + (unpinnedCount > 0 ? 1 : 0);
         let totalItems = slots + dividers;
         let spacing = 2;
         return (slots * slotSize) + (dividers * 1) + (Math.max(0, totalItems - 1) * spacing);
@@ -343,6 +347,7 @@ Item {
             // Launchpad / App Picker Icon
             Item {
                 id: launchpadItem
+                visible: root.showLauncher
                 width: root.isVertical ? Theme.dockHeight : (Theme.dockIconSize + 8)
                 height: root.isVertical ? (Theme.dockIconSize + 8) : Theme.dockHeight
 
@@ -472,7 +477,6 @@ Item {
                         launchpadItem.pressScale = 1.0;
                         launchpadBounceAnim.restart();
                         if (mouse.button === Qt.RightButton) root.toggleLauncherMenu();
-                        else if (SettingsService.launcherStyle === "dial") DialService.toggle(root.screenName, "");
                         else root.toggleAppPicker();
                     }
                 }
@@ -480,6 +484,7 @@ Item {
 
             // Divider between Launchpad and Pinned apps
             Item {
+                visible: root.showLauncher
                 width: root.isVertical ? Theme.dockHeight : 1
                 height: root.isVertical ? 1 : Theme.dockHeight
 
