@@ -23,6 +23,7 @@ singleton NightLightService 1.0 services/NightLightService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
 singleton ScreenService 1.0 services/ScreenService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
+singleton NiriShortcutService 1.0 services/NiriShortcutService.qml
 singleton BackupService 1.0 services/BackupService.qml
 singleton UpdateService 1.0 services/UpdateService.qml
 singleton DepsService 1.0 services/DepsService.qml
@@ -90,6 +91,7 @@ SettingSwatches 1.0 island/settings/SettingSwatches.qml
 SettingFontPicker 1.0 island/settings/SettingFontPicker.qml
 SettingDivider 1.0 island/settings/SettingDivider.qml
 SettingShortcut 1.0 island/settings/SettingShortcut.qml
+NiriShortcutRow 1.0 island/settings/NiriShortcutRow.qml
 AppearanceSettings 1.0 island/settings/AppearanceSettings.qml
 TopBarSettings 1.0 island/settings/TopBarSettings.qml
 TopBarDiagram 1.0 island/settings/TopBarDiagram.qml
@@ -98,6 +100,7 @@ DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
 PowerSettings 1.0 island/settings/PowerSettings.qml
 ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
+NiriShortcutsSettings 1.0 island/settings/NiriShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
 HealthSection 1.0 island/settings/HealthSection.qml
 SettingsCategory 1.0 island/settings/SettingsCategory.qml

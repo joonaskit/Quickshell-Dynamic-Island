@@ -20,9 +20,20 @@ Outside Plasma Qt has no platform theme to name the icon theme, and most icons d
 
 The island is a notification server only if it gets `org.freedesktop.Notifications` first. niri's default setup starts `mako`, which takes it (the log says "Could not register notification server"). Stop and mask it (`systemctl --user mask --now mako.service`) and restart the shell. The default config also starts `waybar`, a top bar of its own: comment out `spawn-at-startup "waybar"` in `~/.config/niri/config.kdl` and stop it (`pkill -x waybar`).
 
+## Shortcuts
+
+KDE's global shortcuts are not there, so under niri the Shortcuts tab of the settings window edits the `binds` block of niri's `config.kdl` (`$NIRI_CONFIG`, else `~/.config/niri/config.kdl`) instead. Tabs split the actions into Shell (the shell's IPC commands), Apps (other `spawn` binds), Windows, Layout, Workspaces, Monitors and System; while searching every tab shows. Each row is one action with all its keys: click a key to change it, its cross to remove it, or + to add another.
+
+- `scripts/niri_binds.py` reads and writes the file; the parsing and editing are in `scripts/niri_binds_core.py` (tested by `tests/test_niri_binds_core.py`). Edits change only the bind they touch, so comments, spacing and properties such as `repeat=false` stay. A new key for a bound action goes on the line after its other keys, otherwise at the end of the block.
+- Each change is written beside the config, checked with `niri validate` and only then moved over it, so niri never loads a broken file; its reason is shown when it refuses one. The previous file is kept as `config.kdl.bak-shortcuts`. niri reloads the config by itself.
+- A key another action has is refused with Use anyway, which removes it from that action first.
+- The actions in `CATALOGUE` and the shell's IPC commands are listed even while unbound. A new shell bind runs `quickshell ipc -p <this checkout> call ...` with `repeat=false`; existing binds count as shell ones only when they reach this checkout.
+- While a row waits for keys the window holds a `ShortcutInhibitor`, so niri does not act on a combination it already has. Key presses become niri key names in `services/niriKeys.js` (tested by `tests/tst_niriKeys.qml`). Super is written `Mod`. niri matches the unshifted key, so with Shift the number row is read from its scan code and other symbols are mapped back as on a US layout: on other layouts check what a Shift+symbol combination recorded.
+- Binds in files the config `include`s are not shown.
+
 ## Launcher shortcut
 
-KDE's global shortcuts are not there. Bind a key in niri's `config.kdl`:
+Bind a key on the Shortcuts tab (Shell, Toggle the dial or Toggle app launcher), or by hand in `config.kdl`:
 
 ```kdl
 binds {
