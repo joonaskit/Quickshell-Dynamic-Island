@@ -150,27 +150,16 @@ Item {
             color: Theme.textPrimary
         }
 
-        Rectangle {
+        ToggleSwitch {
             anchors.right: parent.right
             anchors.rightMargin: 6
             anchors.verticalCenter: parent.verticalCenter
-            width: 32
-            height: 18
-            radius: 9
+            trackWidth: 32
+            trackHeight: 18
+            knobInset: 2
+            interactive: false
+            checked: toggleRow.checked
             color: toggleRow.checked ? Theme.accentGreen : Theme.dockControlTrackOff
-
-            Behavior on color { ColorAnimation { duration: 120 } }
-
-            Rectangle {
-                x: toggleRow.checked ? 16 : 2
-                y: 2
-                width: 14
-                height: 14
-                radius: 7
-                color: Theme.sliderHandle
-
-                Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-            }
         }
 
         MouseArea {

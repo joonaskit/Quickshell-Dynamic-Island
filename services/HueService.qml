@@ -3,6 +3,7 @@ import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "hueRelocate.js" as HueRelocate
 
 // Philips Hue lamp control through scripts/hue.py. Does nothing until the user
 // turns it on in the settings and pairs with a bridge.
@@ -53,6 +54,8 @@ Singleton {
     }
 
     function unpair() {
+        root.cancelRelocate();
+        root.relocateStopped = false;
         SettingsService.setSetting("hueAppKey", "");
         root.lights = [];
         root.connected = false;
@@ -91,8 +94,11 @@ Singleton {
                         root.lights = msg.lights;
                         root.connected = true;
                         root.error = "";
+                        root.relocateStopped = false;
                     } else if (msg.error) {
                         root.error = msg.error;
+                        // A live stream dropping is normal; never reaching the bridge is not
+                        if (msg.unreachable && !root.connected) root.relocate();
                     }
                 } catch (e) {}
             }
@@ -103,6 +109,69 @@ Singleton {
         id: restartTimer
         interval: 5000
         onTriggered: root.streamAllowed = true
+    }
+
+    // The router can move the bridge while the key stays valid, so look for it at
+    // its new address. The stream retries every 5 s, so each search is followed by a wait.
+    function relocate() {
+        if (root.relocateStopped || relocateProc.running || relocateWait.running) return;
+        relocateProc.running = true;
+    }
+
+    // Asked for by the user, so it skips the wait and turns automatic searches back on
+    function relocateNow() {
+        root.relocateStopped = false;
+        relocateWait.stop();
+        root.relocate();
+    }
+
+    // No automatic searches until the bridge is back or the user asks for one
+    function cancelRelocate() {
+        root.relocateStopped = true;
+        relocateWait.stop();
+        relocateProc.running = false;
+    }
+
+    function waitForRelocate(ms) {
+        root.relocateMsLeft = ms;
+        relocateWait.interval = ms;
+        relocateWait.restart();
+    }
+
+    // Search shown in the popup: "searching", "waiting", "stopped" or "" when idle
+    readonly property string relocateState: relocateProc.running ? "searching"
+        : root.relocateStopped ? "stopped"
+        : relocateWait.running ? "waiting" : ""
+    readonly property string relocateStatus: HueRelocate.statusText(root.relocateState, root.relocateMsLeft)
+    property bool relocateStopped: false
+    property int relocateMsLeft: 0
+
+    Timer {
+        id: relocateWait
+    }
+
+    Timer {
+        interval: 1000
+        repeat: true
+        running: relocateWait.running
+        onTriggered: root.relocateMsLeft = Math.max(0, root.relocateMsLeft - interval)
+    }
+
+    Process {
+        id: relocateProc
+        command: ["python3", root.script, "locate"]
+        environment: root.env
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (root.relocateStopped || !root.paired) return;
+                let msg = null;
+                try {
+                    msg = JSON.parse(text.trim());
+                    if (msg.bridge) root.setBridge(msg.bridge);
+                } catch (e) {}
+                root.waitForRelocate(HueRelocate.waitAfter(msg));
+            }
+        }
     }
 
     // Slider writes go out at most every 80 ms so dragging does not flood the bridge

@@ -110,7 +110,7 @@ Item {
     }
     readonly property alias hangsFromBar: hang.joined
     // The window's blur: the card while detached, else the body
-    readonly property Item blurBody: hang.bubble ? bubbleCard : pillBody
+    readonly property Item blurBody: hang.bubble ? surface.card : pillBody
     // How tall the bar's lower edge is (TopBarWings.edgeDepth)
     property real barEdge: 0
     // Where the body is cut into the bar, for TopBarWings.gaps
@@ -286,19 +286,10 @@ Item {
             ColorAnimation { duration: 180 }
         }
 
-        // Detached on glass: the menu's card below the bar (BarHang.bubble)
-        BarBubble {
-            id: bubbleCard
+        PillSurface {
+            id: surface
             hang: hang
-        }
-
-        GlassSurface {
-            body: pillBody
-            flushTop: notchEars.active
-            flatTop: Theme.notchStyle && !root.isTopBarMode
-            flushInset: notchEars.inset
-            hairline: !root.hangsFromBar
-            active: Theme.glass && !hang.bubble
+            ears: notchEars
         }
 
         // Compact Clock View

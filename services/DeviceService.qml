@@ -38,31 +38,12 @@ Singleton {
         root.mountedCount = mCount;
     }
 
-    // Process restart timer
-    Timer {
-        id: restartTimer
-        interval: 2000
-        repeat: false
-        onTriggered: {
-            if (!monitorProc.running) {
-                monitorProc.running = true;
-            }
-        }
-    }
-
     // Background monitor process: streams device list when added/removed/mounted/unmounted
-    Process {
+    HelperProcess {
         id: monitorProc
+        helperId: "devices"
+        helperName: "Device monitor"
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/devices.py", "monitor"]
-        running: true
-
-        Component.onCompleted: HelperService.watch("devices", "Device monitor", monitorProc)
-
-        onRunningChanged: {
-            if (!running) {
-                restartTimer.start();
-            }
-        }
 
         stdout: SplitParser {
             onRead: function(line) {

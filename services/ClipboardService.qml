@@ -76,21 +76,15 @@ Singleton {
     }
 
     // Reports every clipboard change as a JSON line (see scripts/clipboard_tracker.py)
-    Process {
+    HelperProcess {
         id: trackerProc
+        helperId: "clipboard"
+        helperName: "Clipboard tracker"
+        restartDelay: 5000
         command: ["python3", "-u", Quickshell.shellDir + "/scripts/clipboard_tracker.py"]
-        running: true
-        Component.onCompleted: HelperService.watch("clipboard", "Clipboard tracker", trackerProc)
         stdout: SplitParser {
             onRead: line => root.handleRecord(line)
         }
-        onExited: restartTimer.start()
-    }
-
-    Timer {
-        id: restartTimer
-        interval: 5000
-        onTriggered: trackerProc.running = true
     }
 
     // Drops credential-like entries once they have been around long enough

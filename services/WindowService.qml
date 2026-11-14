@@ -319,28 +319,14 @@ Singleton {
         function onScreensChanged() { root.syncToplevel(); }
     }
 
-    Timer {
-        id: restartTimer
-        interval: 1000
-        repeat: false
-        onTriggered: {
-            trackerProc.running = true;
-        }
-    }
-
-    Process {
+    HelperProcess {
         id: trackerProc
+        helperId: "windows"
+        helperName: "Window tracker"
+        restartDelay: 1000
         command: ["python3", Quickshell.shellDir + "/scripts/kwin_window_tracker.py"]
         // It loads a KWin script, so it is only started under KWin
-        running: CompositorService.isKde
-
-        Component.onCompleted: if (CompositorService.isKde) HelperService.watch("windows", "Window tracker", trackerProc)
-
-        onRunningChanged: {
-            if (!running && CompositorService.isKde) {
-                restartTimer.start();
-            }
-        }
+        wanted: CompositorService.isKde
 
         stdout: SplitParser {
             onRead: function(line) {

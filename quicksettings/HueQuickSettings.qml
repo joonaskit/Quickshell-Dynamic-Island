@@ -497,6 +497,34 @@ Item {
                 }
             }
 
+            // Search for a bridge that can't be reached
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.px(8)
+                visible: HueService.paired && !HueService.connected && (HueService.error !== "" || HueService.relocateState !== "")
+
+                Text {
+                    text: HueService.relocateStatus
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontPx(10)
+                    color: Theme.textSecondary
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+
+                HueButton {
+                    visible: HueService.relocateState !== "searching"
+                    text: "SEARCH NOW"
+                    onClicked: HueService.relocateNow()
+                }
+
+                HueButton {
+                    visible: HueService.relocateState === "searching" || HueService.relocateState === "waiting"
+                    text: "CANCEL"
+                    onClicked: HueService.cancelRelocate()
+                }
+            }
+
             // Disconnect from the bridge
             RowLayout {
                 Layout.fillWidth: true

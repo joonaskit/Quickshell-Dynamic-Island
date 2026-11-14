@@ -1,7 +1,6 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Services.UPower
 
 Item {
     id: root
@@ -59,7 +58,7 @@ Item {
                         return Qt.rgba(10/255, 132/255, 255/255, 0.22);
                     }
 
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -318,7 +317,7 @@ Item {
                 id: lowRefreshRow
                 // Unavailable shows as off, leaving the saved setting for when kscreen-doctor is installed
                 readonly property bool isOn: SettingsService.lowRefreshOnBattery && PowerProfileService.lowRefreshAvailable
-                visible: UPower.displayDevice !== null && UPower.displayDevice.isPresent
+                visible: PowerProfileService.hasBattery
                 enabled: PowerProfileService.lowRefreshAvailable
                 opacity: enabled ? 1.0 : 0.4
                 Layout.fillWidth: true
@@ -352,36 +351,9 @@ Item {
                     }
                 }
 
-                // Toggle switch
-                Rectangle {
-                    Layout.preferredWidth: Theme.px(46)
-                    Layout.preferredHeight: Theme.px(26)
-                    radius: Theme.px(13)
-                    color: lowRefreshRow.isOn ? Theme.accentGreen : Theme.controlTrackOff
-
-                    Behavior on color {
-                        ColorAnimation { duration: 180 }
-                    }
-
-                    // Sliding Knob
-                    Rectangle {
-                        y: Theme.px(2)
-                        x: lowRefreshRow.isOn ? Theme.px(22) : Theme.px(2)
-                        width: Theme.px(22)
-                        height: Theme.px(22)
-                        radius: Theme.px(11)
-                        color: Theme.sliderHandle
-
-                        Behavior on x {
-                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: SettingsService.toggleSetting("lowRefreshOnBattery")
-                    }
+                ToggleSwitch {
+                    checked: lowRefreshRow.isOn
+                    onClicked: SettingsService.toggleSetting("lowRefreshOnBattery")
                 }
             }
         }

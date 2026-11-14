@@ -342,7 +342,7 @@ Item {
     // the body, so hanging from the bar they go without
     readonly property var earsBlur: hang.joined ? null : notchEars
     // The window's blur: the card while detached, else the body
-    readonly property Item blurBody: hang.bubble ? bubbleCard : clusterBackground
+    readonly property Item blurBody: hang.bubble ? surface.card : clusterBackground
 
     NotchEars {
         id: notchEars
@@ -416,19 +416,10 @@ Item {
             NumberAnimation { duration: Theme.animDuration; easing.type: Easing.OutCubic }
         }
 
-        // Detached on glass: the menu's card below the bar (BarHang.bubble)
-        BarBubble {
-            id: bubbleCard
+        PillSurface {
+            id: surface
             hang: hang
-        }
-
-        GlassSurface {
-            body: clusterBackground
-            flushTop: notchEars.active
-            flatTop: Theme.notchStyle && !root.isTopBarMode
-            flushInset: notchEars.inset
-            hairline: !hang.joined
-            active: Theme.glass && !hang.bubble
+            ears: notchEars
         }
 
         // Top Header Bar containing the notification & status buttons

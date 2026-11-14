@@ -8,8 +8,19 @@ on:
 
 jobs:
   check:
+    name: Fedora ${{ matrix.fedora }}
     runs-on: ubuntu-latest
-    container: fedora:44
+    container: fedora:${{ matrix.fedora }}
+    # Fedora 45 is new: report its failures without failing the run until it is green
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - fedora: "44"
+            experimental: false
+          - fedora: "45"
+            experimental: true
     steps:
       - name: Install tools
         run: >

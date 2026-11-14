@@ -121,6 +121,9 @@ NotchEars 1.0 components/NotchEars.qml
 GlassSurface 1.0 components/GlassSurface.qml
 BarHang 1.0 components/BarHang.qml
 BarBubble 1.0 components/BarBubble.qml
+PillSurface 1.0 components/PillSurface.qml
+ToggleSwitch 1.0 components/ToggleSwitch.qml
+HelperProcess 1.0 components/HelperProcess.qml
 WindowBlur 1.0 components/WindowBlur.qml
 TabSeamGlow 1.0 components/TabSeamGlow.qml
 DockWindowPicker 1.0 dock/DockWindowPicker.qml
