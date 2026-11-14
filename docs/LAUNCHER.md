@@ -2,6 +2,8 @@
 
 The app launcher (`dock/DockAppPicker.qml`) searches apps, and around that list it can show three extras. The app list and its order are the same with or without them.
 
+The Launcher Style setting (`launcherStyle`) swaps this launcher for the category dial: `DockService.toggleLauncher` and `showWindows` send the shortcut, the IPC calls and the dock button to whichever is chosen. See `docs/DIAL.md`.
+
 ## Calculator, unit conversion and web search shortcuts
 
 Pure functions in `services/launcherExtras.js`, tested by `tests/tst_launcherExtras.qml`. The answer appears as a card above the apps.

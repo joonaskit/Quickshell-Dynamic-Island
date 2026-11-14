@@ -487,12 +487,13 @@ Item {
         visible: root.centered
         anchors.fill: parent
         radius: Math.min(height / 2, root.originRadius + (Theme.corner(18) - root.originRadius) * Math.min(1, root.popProgress))
-        color: Theme.menuSurface
-        border.color: Theme.glass ? Theme.islandBorder : Theme.overlay(0.1)
+        color: Theme.dockMenuSurface
+        border.color: Theme.dockGlass ? Theme.dockIslandBorder : Theme.overlay(0.1)
         border.width: 1
 
         GlassSurface {
             body: centeredBody
+            active: Theme.dockGlass
         }
     }
 
@@ -559,7 +560,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 10
                                 font.weight: Font.Medium
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                             }
                         }
                     }
@@ -666,7 +667,7 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 name: "bolt"
                                 size: 11
-                                color: Theme.accentText
+                                color: Theme.dockAccentText
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
@@ -674,7 +675,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 11
                                 font.weight: Font.Medium
-                                color: Theme.accentText
+                                color: Theme.dockAccentText
                             }
                         }
 
@@ -701,7 +702,7 @@ Item {
                             anchors.centerIn: parent
                             name: "close"
                             size: 12
-                            color: Theme.textSecondary
+                            color: Theme.dockTextSecondary
                         }
 
                         MouseArea {
@@ -734,7 +735,7 @@ Item {
                         SvgIcon {
                             name: "search"
                             size: 14
-                            color: searchInput.activeFocus ? Theme.accent : Theme.textSecondary
+                            color: searchInput.activeFocus ? Theme.accent : Theme.dockTextSecondary
                         }
 
                         TextInput {
@@ -871,7 +872,7 @@ Item {
                                 text: root.isWindowMode ? "Search open windows..." : "Search installed apps..."
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 13
-                                color: Theme.textTertiary
+                                color: Theme.dockTextTertiary
                                 visible: !searchInput.text && !searchInput.activeFocus
                             }
                         }
@@ -891,7 +892,7 @@ Item {
                                     anchors.centerIn: parent
                                     name: "close"
                                     size: 10
-                                    color: Theme.textSecondary
+                                    color: Theme.dockTextSecondary
                                 }
 
                                 MouseArea {
@@ -956,7 +957,7 @@ Item {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 11
                                     font.weight: catPill.isSelected ? Font.DemiBold : Font.Medium
-                                    color: catPill.isSelected ? Theme.accentForeground : (catMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
+                                    color: catPill.isSelected ? Theme.accentForeground : (catMouse.containsMouse ? Theme.textPrimary : Theme.dockTextSecondary)
                                 }
 
                                 MouseArea {
@@ -1020,7 +1021,7 @@ Item {
                                 elide: Text.ElideRight
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 10
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                             }
                         }
                     }
@@ -1167,7 +1168,7 @@ Item {
                                         anchors.centerIn: parent
                                         name: "pin"
                                         size: 9
-                                        color: gridCell.pinned ? Theme.accent : Theme.textSecondary
+                                        color: gridCell.pinned ? Theme.accent : Theme.dockTextSecondary
                                     }
 
                                     MouseArea {
@@ -1250,7 +1251,7 @@ Item {
                                         text: modelData.genericName || modelData.comment || ""
                                         font.family: Theme.fontFamily
                                         font.pixelSize: 10
-                                        color: isSelected ? Theme.overlay(0.8) : Theme.textSecondary
+                                        color: isSelected ? Theme.overlay(0.8) : Theme.dockTextSecondary
                                         elide: Text.ElideRight
                                         width: parent.width
                                         visible: SettingsService.launcherShowGenericNames && !root.isCompact && text.length > 0
@@ -1271,7 +1272,7 @@ Item {
                                         anchors.centerIn: parent
                                         name: "close"
                                         size: root.isCompact ? 10 : 11
-                                        color: closeWinMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                                        color: closeWinMouse.containsMouse ? Theme.accentRed : Theme.dockTextSecondary
                                     }
 
                                     MouseArea {
@@ -1297,7 +1298,7 @@ Item {
                                         anchors.centerIn: parent
                                         name: "settings"
                                         size: root.isCompact ? 10 : 11
-                                        color: editBtnMouse.containsMouse ? Theme.accentOrangeStrong : Theme.textSecondary
+                                        color: editBtnMouse.containsMouse ? Theme.accentOrangeStrong : Theme.dockTextSecondary
                                     }
 
                                     MouseArea {
@@ -1328,7 +1329,7 @@ Item {
                                         font.family: Theme.fontFamily
                                         font.pixelSize: root.isCompact ? 10 : 11
                                         font.weight: Font.Medium
-                                        color: pinned ? Theme.textSecondary : Theme.accent
+                                        color: pinned ? Theme.dockTextSecondary : Theme.accent
                                     }
 
                                     MouseArea {
@@ -1401,7 +1402,7 @@ Item {
                             elide: Text.ElideRight
                             font.family: Theme.fontFamily
                             font.pixelSize: 10
-                            color: (FileSearchService.error !== "" || !FileSearchService.available) ? Theme.accentOrangeStrong : Theme.textSecondary
+                            color: (FileSearchService.error !== "" || !FileSearchService.available) ? Theme.accentOrangeStrong : Theme.dockTextSecondary
                         }
 
                         ListView {
@@ -1464,7 +1465,7 @@ Item {
                                             text: LauncherExtras.shortFolder(fileRow.modelData.folder, root.homeDir)
                                             font.family: Theme.fontFamily
                                             font.pixelSize: 10
-                                            color: fileRow.isSelected ? Theme.overlay(0.8) : Theme.textSecondary
+                                            color: fileRow.isSelected ? Theme.overlay(0.8) : Theme.dockTextSecondary
                                             elide: Text.ElideMiddle
                                             width: parent.width
                                             visible: !root.isCompact
@@ -1510,7 +1511,7 @@ Item {
                             : (root.selectedCategory !== "All" ? ("No apps found in " + root.selectedCategory) : "No applications found")
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 13
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                             }
                         }
                     }
@@ -1562,7 +1563,7 @@ Item {
                             font.family: Theme.fontFamily
                             font.pixelSize: 10
                             font.weight: Font.Medium
-                            color: Theme.textSecondary
+                            color: Theme.dockTextSecondary
                         }
                     }
 
@@ -1576,7 +1577,7 @@ Item {
                     elide: Text.ElideRight
                     font.family: Theme.fontFamily
                     font.pixelSize: 10
-                    color: Theme.textSecondary
+                    color: Theme.dockTextSecondary
                 }
 
                 ListView {
@@ -1637,7 +1638,7 @@ Item {
                                     text: pageRow.modelData.comment
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 10
-                                    color: pageRow.isSelected ? Theme.overlay(0.8) : Theme.textSecondary
+                                    color: pageRow.isSelected ? Theme.overlay(0.8) : Theme.dockTextSecondary
                                     elide: Text.ElideRight
                                     width: parent.width
                                     visible: !root.isCompact && text !== ""

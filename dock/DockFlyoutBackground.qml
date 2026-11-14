@@ -14,9 +14,9 @@ Item {
     // Fillets are dropped when the popup overhangs the dock's straight edge
     property bool fitsOnDock: true
     property real filletSize: 12
-    // A plain rounded card a gap away from the dock (Theme.detachedMenus), drawn by
+    // A plain rounded card a gap away from the dock (Theme.dockDetachedMenus), drawn by
     // `card` below instead of the outline that flares into the dock
-    property bool detached: Theme.detachedMenus
+    property bool detached: Theme.dockDetachedMenus
     property real cornerRadius: 14
     // One side continues an end of the dock in a straight line. Start is left, or
     // top for a vertical dock. The dock straightens its corner under that side as
@@ -34,7 +34,7 @@ Item {
     // Opacity of the body; it fades to the exact dock colour at the base. On glass
     // it is the status bar menus' glass, else the dock's colour.
     property real tintAlpha: Theme.dockPopupAlpha
-    readonly property color tintBase: Theme.glass ? Theme.menuSurface : Theme.dockBackground
+    readonly property color tintBase: Theme.dockGlass ? Theme.dockMenuSurface : Theme.dockBackground
     readonly property color tintColor: Qt.rgba(tintBase.r, tintBase.g, tintBase.b, tintAlpha)
 
     anchors.centerIn: parent
@@ -190,7 +190,7 @@ Item {
         id: hairlineEffect
         anchors.fill: hairline
         source: hairline
-        visible: Theme.glass && !Theme.dockShowBorder && !bgHolder.detached
+        visible: Theme.dockGlass && !Theme.dockShowBorder && !bgHolder.detached
         maskEnabled: true
         maskSource: hairlineMask
         maskSpreadAtMin: 1.0
@@ -199,7 +199,7 @@ Item {
     Shape {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
-        visible: Theme.glass && !bgHolder.detached
+        visible: Theme.dockGlass && !bgHolder.detached
 
         ShapePath {
             strokeColor: "transparent"
@@ -243,6 +243,7 @@ Item {
 
         GlassSurface {
             body: card
+            active: Theme.dockGlass
         }
     }
 }

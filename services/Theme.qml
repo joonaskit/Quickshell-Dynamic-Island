@@ -12,6 +12,10 @@ Singleton {
     // Shell style: "solid" or "glass" (SettingsService.shellStyle), on either scheme.
     // It changes only the island, the dock, the launcher and their menus.
     property string style: "solid"
+    // The dock's and the launcher's own style: "shell" follows `style`, "solid" and
+    // "glass" override it (SettingsService.dockStyle). The dock* roles below are the
+    // ones the dock, its popups and the launcher draw with.
+    property string dockStyle: "shell"
 
     // A translucent layer for hovers, dividers, borders and dimmed text: white on
     // the dark scheme, black on the light one. Use this instead of a literal
@@ -82,6 +86,17 @@ Singleton {
     // A test: on glass, the top bar's and the dock's menus open as separate cards a gap
     // away, not joined to the bar or the dock (BarHang, DockFlyoutGeometry)
     readonly property bool detachedMenus: glass
+    readonly property bool dockGlass: dockStyle === "shell" ? glass : dockStyle === "glass"
+    readonly property bool dockDetachedMenus: dockGlass
+    readonly property color dockMenuSurface: dockGlass ? glassFillStrong : islandBackground
+    readonly property color dockIslandBorder: dockGlass ? glassHairline : Qt.rgba(1, 1, 1, 0)
+    readonly property color dockCardSurface: dockGlass ? Qt.rgba(1, 1, 1, isLight ? 0.5 : 0.07) : cardBackground
+    readonly property color dockCardSurfaceHover: dockGlass ? Qt.rgba(1, 1, 1, isLight ? 0.78 : 0.13) : cardBackgroundHover
+    readonly property color dockRaisedSurface: dockGlass ? (isLight ? Qt.rgba(0.975, 0.975, 0.98, 0.97) : Qt.rgba(0.13, 0.13, 0.15, 0.97)) : cardBackground
+    readonly property color dockControlTrackOff: dockGlass ? overlayNeutral(isLight ? 0.13 : 0.2) : switchTrackOff
+    readonly property color dockTextSecondary: (dockGlass && !isLight) ? "#b4b4b9" : textSecondaryBase
+    readonly property color dockTextTertiary: (dockGlass && !isLight) ? "#88888d" : textTertiaryBase
+    readonly property color dockAccentText: isLight ? Qt.darker(accent, 1.7) : (dockGlass ? Qt.tint(accent, Qt.rgba(1, 1, 1, 0.4)) : accent)
     readonly property real detachedMenuGap: px(8)
     readonly property color islandShadow: Qt.rgba(0, 0, 0, 0)
 
@@ -389,10 +404,10 @@ Singleton {
     // Opacity of the dock, remembered separately for the solid and the glass look
     property real dockOpacity: 0.85
     property real dockGlassOpacity: 0.35
-    readonly property real dockAlpha: glass ? dockGlassOpacity : dockOpacity
+    readonly property real dockAlpha: dockGlass ? dockGlassOpacity : dockOpacity
     readonly property bool dockTintHasHue: dockTintName !== "cool" && dockTintName !== "neutral"
     readonly property var dockTintChoices: [
-        { "name": "cool", "label": "Default", "color": isLight ? (glass ? "#c8c8ce" : "#cfc6b6") : "#5b6078" },
+        { "name": "cool", "label": "Default", "color": isLight ? (dockGlass ? "#c8c8ce" : "#cfc6b6") : "#5b6078" },
         { "name": "neutral", "label": "Neutral", "color": "#6e6e73" },
         { "name": "accent", "label": "Match accent", "color": accent, "hollow": true },
         { "name": "blue", "label": "Blue", "color": accentBlue },
@@ -416,12 +431,12 @@ Singleton {
                 if (dockTintChoices[j].name === dockTintName && dockTintHasHue) lightHue = dockTintChoices[j].color;
             }
             // The default is the island's glass
-            if (lightHue === null) return glass ? Qt.rgba(glassFill.r, glassFill.g, glassFill.b, alpha) : Qt.rgba(0.965, 0.945, 0.915, alpha);
+            if (lightHue === null) return dockGlass ? Qt.rgba(glassFill.r, glassFill.g, glassFill.b, alpha) : Qt.rgba(0.965, 0.945, 0.915, alpha);
             let lightMix = dockTintStrength * 1.5;
             return Qt.rgba(0.97 - (1 - lightHue.r) * lightMix, 0.97 - (1 - lightHue.g) * lightMix, 0.97 - (1 - lightHue.b) * lightMix, alpha);
         }
         if (dockTintName === "neutral") {
-            let grey = glass ? 0.135 : 0.085;
+            let grey = dockGlass ? 0.135 : 0.085;
             return Qt.rgba(grey, grey, grey, alpha);
         }
         let hue = null;
@@ -429,11 +444,11 @@ Singleton {
             if (dockTintChoices[i].name === dockTintName && dockTintHasHue) hue = dockTintChoices[i].color;
         }
         if (hue === null) {
-            return glass ? Qt.rgba(0.12, 0.13, 0.16, alpha) : Qt.rgba(0.08, 0.08, 0.10, alpha);
+            return dockGlass ? Qt.rgba(0.12, 0.13, 0.16, alpha) : Qt.rgba(0.08, 0.08, 0.10, alpha);
         }
         // A dark base with a little of the hue mixed in: clearly tinted, still dark
         // enough for white text
-        let base = glass ? 0.10 : 0.05;
+        let base = dockGlass ? 0.10 : 0.05;
         let mix = dockTintStrength;
         return Qt.rgba(base + hue.r * mix, base + hue.g * mix, base + hue.b * mix, alpha);
     }
@@ -441,5 +456,5 @@ Singleton {
     // Opacity of the dock's popups: well above a see-through dock so their content
     // reads, but less on blurred glass, where the blur does part of that. Follows the
     // dock when the dock is more opaque.
-    readonly property real dockPopupAlpha: Math.max(dockAlpha, glass ? glassFillStrong.a : 0.97)
+    readonly property real dockPopupAlpha: Math.max(dockAlpha, dockGlass ? glassFillStrong.a : 0.97)
 }

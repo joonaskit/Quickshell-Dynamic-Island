@@ -311,6 +311,7 @@ PanelWindow {
     // Frosted glass behind the dock and its popups on the light scheme
     WindowBlur {
         target: window
+        active: Theme.dockGlass && Theme.blurAvailable
         items: [
             dockBar.capsule,
             dockBar.flyoutBlur(dockBar.contextMenuHitBox, 14),
@@ -328,6 +329,7 @@ PanelWindow {
         id: dockBar
         z: 10
         anchors.fill: parent
+        screenName: window.screen ? window.screen.name : ""
         shouldDropDock: window.shouldDropDock
 
         opacity: window.hasFullscreenApp ? 0.0 : 1.0

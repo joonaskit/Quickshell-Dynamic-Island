@@ -1,6 +1,7 @@
 singleton Theme 1.0 services/Theme.qml
 singleton AudioService 1.0 services/AudioService.qml
 singleton BrightnessService 1.0 services/BrightnessService.qml
+singleton CompositorService 1.0 services/CompositorService.qml
 singleton WindowService 1.0 services/WindowService.qml
 singleton NetworkService 1.0 services/NetworkService.qml
 singleton BluetoothService 1.0 services/BluetoothService.qml
@@ -22,6 +23,7 @@ singleton NightLightService 1.0 services/NightLightService.qml
 singleton SettingsService 1.0 services/SettingsService.qml
 singleton ScreenService 1.0 services/ScreenService.qml
 singleton ShortcutService 1.0 services/ShortcutService.qml
+singleton NiriShortcutService 1.0 services/NiriShortcutService.qml
 singleton BackupService 1.0 services/BackupService.qml
 singleton UpdateService 1.0 services/UpdateService.qml
 singleton DepsService 1.0 services/DepsService.qml
@@ -63,6 +65,7 @@ TopBarWings 1.0 island/TopBarWings.qml
 BatteryIndicator 1.0 components/BatteryIndicator.qml
 AppIndicatorPill 1.0 island/AppIndicatorPill.qml
 TopRightStatusCluster 1.0 island/TopRightStatusCluster.qml
+StatusIconSet 1.0 island/StatusIconSet.qml
 WifiQuickSettings 1.0 quicksettings/WifiQuickSettings.qml
 BluetoothQuickSettings 1.0 quicksettings/BluetoothQuickSettings.qml
 PowerQuickSettings 1.0 quicksettings/PowerQuickSettings.qml
@@ -88,6 +91,7 @@ SettingSwatches 1.0 island/settings/SettingSwatches.qml
 SettingFontPicker 1.0 island/settings/SettingFontPicker.qml
 SettingDivider 1.0 island/settings/SettingDivider.qml
 SettingShortcut 1.0 island/settings/SettingShortcut.qml
+NiriShortcutRow 1.0 island/settings/NiriShortcutRow.qml
 AppearanceSettings 1.0 island/settings/AppearanceSettings.qml
 TopBarSettings 1.0 island/settings/TopBarSettings.qml
 TopBarDiagram 1.0 island/settings/TopBarDiagram.qml
@@ -96,6 +100,7 @@ DockSettings 1.0 island/settings/DockSettings.qml
 LauncherSettings 1.0 island/settings/LauncherSettings.qml
 PowerSettings 1.0 island/settings/PowerSettings.qml
 ShortcutsSettings 1.0 island/settings/ShortcutsSettings.qml
+NiriShortcutsSettings 1.0 island/settings/NiriShortcutsSettings.qml
 AboutSettings 1.0 island/settings/AboutSettings.qml
 HealthSection 1.0 island/settings/HealthSection.qml
 SettingsCategory 1.0 island/settings/SettingsCategory.qml
@@ -136,3 +141,12 @@ CompactActivityView 1.0 island/CompactActivityView.qml
 ActivitiesWidget 1.0 widgets/ActivitiesWidget.qml
 ActivityIcon 1.0 components/ActivityIcon.qml
 ActivityProgressBar 1.0 components/ActivityProgressBar.qml
+singleton DialService 1.0 dial/DialService.qml
+DialMenu 1.0 dial/DialMenu.qml
+DialSheet 1.0 dial/DialSheet.qml
+DialField 1.0 dial/DialField.qml
+DialButton 1.0 dial/DialButton.qml
+HueBridgeSheet 1.0 dial/HueBridgeSheet.qml
+NightHoursSheet 1.0 dial/NightHoursSheet.qml
+SendTextSheet 1.0 dial/SendTextSheet.qml
+DialWindow 1.0 dial/DialWindow.qml

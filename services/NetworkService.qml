@@ -14,6 +14,12 @@ Singleton {
     property var availableNetworks: []
     property bool isScanning: false
     property string connectingSsid: ""
+    // Names of the saved Wi-Fi connections, which NetworkManager names after the SSID
+    property var savedSsids: []
+    // The network the last connect failed on, until the next connect
+    property string failedSsid: ""
+    // Password for the connect in progress, written to nmcli's prompt once it starts
+    property string pendingPassword: ""
 
     // nmcli monitor prints a line whenever NetworkManager's state changes (a connection
     // coming up or going down, the Wi-Fi radio switched), so the status is read again
@@ -129,10 +135,37 @@ Singleton {
         }
     }
 
-    // Process to connect to an SSID
+    // Saved Wi-Fi connections. nmcli -t escapes a colon in a name as "\:"; the type is last.
+    Process {
+        id: savedProc
+        command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let names = [];
+                text.trim().split("\n").forEach(line => {
+                    let cut = line.lastIndexOf(":");
+                    if (cut > 0 && line.slice(cut + 1) === "802-11-wireless")
+                        names.push(line.slice(0, cut).replace(/\\:/g, ":").replace(/\\\\/g, "\\"));
+                });
+                root.savedSsids = names;
+            }
+        }
+    }
+
+    // Process to connect to an SSID. With a password, nmcli --ask prompts for it on stdin,
+    // so it never shows in the process list.
     Process {
         id: connectProc
-        onExited: {
+        stdinEnabled: true
+        onStarted: {
+            if (root.pendingPassword !== "") {
+                connectProc.write(root.pendingPassword + "\n");
+                root.pendingPassword = "";
+            }
+        }
+        onExited: function(exitCode) {
+            root.pendingPassword = "";
+            if (exitCode !== 0) root.failedSsid = root.connectingSsid;
             root.connectingSsid = "";
             root.queryNetwork();
             root.scanWifi();
@@ -152,6 +185,7 @@ Singleton {
     }
 
     function scanWifi() {
+        if (!savedProc.running) savedProc.running = true;
         if (!scanProc.running && root.isWifiEnabled) {
             root.isScanning = true;
             scanProc.running = true;
@@ -165,9 +199,19 @@ Singleton {
         toggleRadioProc.running = true;
     }
 
-    function connectTo(targetSsid) {
+    function isSaved(targetSsid) {
+        return root.savedSsids.indexOf(targetSsid) >= 0;
+    }
+
+    // Connects to a network, with `password` for one that is not saved yet
+    function connectTo(targetSsid, password) {
+        if (connectProc.running) return;
         root.connectingSsid = targetSsid;
-        connectProc.command = ["nmcli", "dev", "wifi", "connect", targetSsid];
+        root.failedSsid = "";
+        root.pendingPassword = password || "";
+        connectProc.command = password
+            ? ["nmcli", "--ask", "dev", "wifi", "connect", targetSsid]
+            : ["nmcli", "dev", "wifi", "connect", targetSsid];
         connectProc.running = true;
     }
 

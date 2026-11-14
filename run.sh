@@ -17,6 +17,22 @@ enable_qml_tooling() {
     [ -e "$DIR/.qmlls.ini" ] || [ -L "$DIR/.qmlls.ini" ] || : > "$DIR/.qmlls.ini"
 }
 
+# Outside Plasma Qt has no platform theme to name the icon theme, so most icons would not
+# load. Take KDE's choice from kdeglobals, else GNOME's, unless QS_ICON_THEME is set.
+set_icon_theme() {
+    [ -n "$QS_ICON_THEME" ] && return
+    [ "$KDE_FULL_SESSION" = "true" ] && return
+    case ":$XDG_CURRENT_DESKTOP:" in *:KDE:*) return ;; esac
+    local theme=""
+    if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/kdeglobals" ]; then
+        theme="$(sed -n '/^\[Icons\]/,/^\[/s/^Theme=//p' "${XDG_CONFIG_HOME:-$HOME/.config}/kdeglobals" | head -n 1)"
+    fi
+    if [ -z "$theme" ] && command -v gsettings >/dev/null 2>&1; then
+        theme="$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")"
+    fi
+    [ -n "$theme" ] && export QS_ICON_THEME="$theme"
+}
+
 case "$1" in
     kill|-k|--kill)
         echo "Stopping Quickshell Island..."
@@ -88,6 +104,7 @@ case "$1" in
         quickshell kill -p "$DIR" 2>/dev/null || true
         stop_helpers
         enable_qml_tooling
+        set_icon_theme
         quickshell -p "$DIR" --daemonize
         ;;
     *)
@@ -95,6 +112,7 @@ case "$1" in
         quickshell kill -p "$DIR" 2>/dev/null || true
         stop_helpers
         enable_qml_tooling
+        set_icon_theme
         exec quickshell -p "$DIR"
         ;;
 esac

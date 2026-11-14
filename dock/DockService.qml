@@ -98,6 +98,20 @@ Singleton {
     // True while a centred launcher is open, so the next toggle closes it
     property bool spotlightOpen: false
 
+    // The launcher shortcut and IPC call: the classic launcher or the category dial, as the
+    // Launcher Style setting says. `screenName` is where the dial opens; empty means the
+    // screen of the active window.
+    function toggleLauncher(screenName) {
+        if (SettingsService.launcherStyle === "dial") DialService.toggle(screenName || "", "");
+        else root.toggleAppLauncherRequested();
+    }
+
+    // The same, opened on the open windows
+    function showWindows(screenName) {
+        if (SettingsService.launcherStyle === "dial") DialService.toggle(screenName || "", "windows");
+        else root.windowSwitcherRequested();
+    }
+
     Component.onCompleted: {
         loadPinnedApps();
         updateInstalledApps();

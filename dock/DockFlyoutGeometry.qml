@@ -32,8 +32,8 @@ QtObject {
     // or top for a vertical dock), growing from that corner. The origin point is
     // not used.
     property string align: "center"
-    // A separate card a gap away from the dock (Theme.detachedMenus), not joined to it
-    property bool detached: Theme.detachedMenus
+    // A separate card a gap away from the dock (Theme.dockDetachedMenus), not joined to it
+    property bool detached: Theme.dockDetachedMenus
     readonly property real gap: detached ? Theme.detachedMenuGap : 0
 
     // Morph progress: 0 = flush with the dock at the origin, 1 = fully open

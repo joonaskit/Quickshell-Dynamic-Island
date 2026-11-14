@@ -18,13 +18,23 @@ ShellRoot {
     IpcHandler {
         target: "launcher"
 
+        // The classic launcher or the dial, as the Launcher Style setting says
         function toggle() {
-            DockService.toggleAppLauncherRequested();
+            DockService.toggleLauncher("");
         }
 
         // Open the launcher directly on the open-windows tab
         function windows() {
-            DockService.windowSwitcherRequested();
+            DockService.showWindows("");
+        }
+    }
+
+    // Experimental category dial launcher, see dial/DialWindow.qml
+    IpcHandler {
+        target: "dial"
+
+        function toggle() {
+            DialService.toggle("", "");
         }
     }
 
@@ -198,5 +208,13 @@ ShellRoot {
             SpotlightWindow {}
         }
     }
-    
+
+    // Experimental category dial launcher
+    Variants {
+        model: ScreenService.targetScreens
+
+        delegate: Component {
+            DialWindow {}
+        }
+    }
 }

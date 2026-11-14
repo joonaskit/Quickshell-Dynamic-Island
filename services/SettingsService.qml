@@ -24,6 +24,9 @@ Singleton {
     // "solid" or "glass": the look of the island, the dock and the launcher on either
     // scheme (Theme.glass). KDE apps follow colorScheme only
     property string shellStyle: "solid"
+    // "shell" (follow shellStyle), "solid" or "glass": the look of the dock, its popups
+    // and the launcher alone (Theme.dockGlass)
+    property string dockStyle: "shell"
     // Opacity of the glass style: the island and its pills, and the menus, popups and launcher
     property real glassOpacity: 0.6
     property real glassMenuOpacity: 0.8
@@ -134,6 +137,10 @@ Singleton {
     property bool launcherShowGenericNames: true
     // Open the launcher in the middle of the screen while the dock is hidden
     property bool launcherSpotlight: true
+    // What the launcher shortcut, the dock button and the clock pill open: "classic" or "dial"
+    property string launcherStyle: "classic"
+    // Status icons under the dial's search field instead of the top-right corner (test)
+    property bool dialStatusIcons: false
     // Instant answers in the launcher's search box
     property bool launcherCalculator: true
     property bool launcherConversion: true
@@ -263,6 +270,7 @@ Singleton {
         // Older configs had a glass look for the dock only (dockTransparent)
         if (data.shellStyle === "solid" || data.shellStyle === "glass") root.shellStyle = data.shellStyle;
         else if (data.dockTransparent) root.shellStyle = "glass";
+        if (data.dockStyle === "shell" || data.dockStyle === "solid" || data.dockStyle === "glass") root.dockStyle = data.dockStyle;
         if (data.glassOpacity !== undefined && !isNaN(data.glassOpacity)) root.glassOpacity = Math.max(0.30, Math.min(1.0, parseFloat(data.glassOpacity)));
         if (data.glassMenuOpacity !== undefined && !isNaN(data.glassMenuOpacity)) root.glassMenuOpacity = Math.max(0.30, Math.min(1.0, parseFloat(data.glassMenuOpacity)));
         if (data.accentColor !== undefined && Theme.accentChoices.some(c => c.name === data.accentColor)) root.accentColor = data.accentColor;
@@ -378,6 +386,8 @@ Singleton {
         }
         if (data.launcherShowGenericNames !== undefined) root.launcherShowGenericNames = !!data.launcherShowGenericNames;
         if (data.launcherSpotlight !== undefined) root.launcherSpotlight = !!data.launcherSpotlight;
+        if (data.launcherStyle === "classic" || data.launcherStyle === "dial") root.launcherStyle = data.launcherStyle;
+        if (data.dialStatusIcons !== undefined) root.dialStatusIcons = !!data.dialStatusIcons;
         if (data.launcherCalculator !== undefined) root.launcherCalculator = !!data.launcherCalculator;
         if (data.launcherConversion !== undefined) root.launcherConversion = !!data.launcherConversion;
         if (data.launcherWebSearch !== undefined) root.launcherWebSearch = !!data.launcherWebSearch;
@@ -413,6 +423,7 @@ Singleton {
         Theme.fontDisplayChoice = root.fontDisplayFamily;
         Theme.scheme = root.colorScheme;
         Theme.style = root.shellStyle;
+        Theme.dockStyle = root.dockStyle;
         Theme.glassOpacity = root.glassOpacity;
         Theme.glassMenuOpacity = root.glassMenuOpacity;
         Theme.cornerStyle = root.cornerStyle;
@@ -471,6 +482,12 @@ Singleton {
         let s = SettingChoices.topBarSettings(mode);
         root.setSetting("morphToTopBarWhenMaximized", s.morphToTopBarWhenMaximized);
         root.setSetting("alwaysTopBar", s.alwaysTopBar);
+    }
+
+    // Settings that suit niri, see SettingChoices.niriDefaults
+    function applyNiriDefaults() {
+        let s = SettingChoices.niriDefaults();
+        for (let key in s) root.setSetting(key, s[key]);
     }
 
     function isWidgetEnabled(id) {
@@ -536,6 +553,7 @@ Singleton {
         root.fontDisplayFamily = "";
         root.colorScheme = "dark";
         root.shellStyle = "solid";
+        root.dockStyle = "shell";
         root.glassOpacity = 0.6;
         root.glassMenuOpacity = 0.8;
         root.accentColor = "blue";
@@ -627,6 +645,8 @@ Singleton {
         root.launcherGridColumns = 4;
         root.launcherShowGenericNames = true;
         root.launcherSpotlight = true;
+        root.launcherStyle = "classic";
+        root.dialStatusIcons = false;
         root.launcherCalculator = true;
         root.launcherConversion = true;
         root.launcherWebSearch = true;
@@ -669,6 +689,7 @@ Singleton {
             "fontDisplayFamily": root.fontDisplayFamily,
             "colorScheme": root.colorScheme,
             "shellStyle": root.shellStyle,
+            "dockStyle": root.dockStyle,
             "glassOpacity": root.glassOpacity,
             "glassMenuOpacity": root.glassMenuOpacity,
             "accentColor": root.accentColor,
@@ -756,6 +777,8 @@ Singleton {
             "launcherGridColumns": root.launcherGridColumns,
             "launcherShowGenericNames": root.launcherShowGenericNames,
             "launcherSpotlight": root.launcherSpotlight,
+            "launcherStyle": root.launcherStyle,
+            "dialStatusIcons": root.dialStatusIcons,
             "launcherCalculator": root.launcherCalculator,
             "launcherConversion": root.launcherConversion,
             "launcherWebSearch": root.launcherWebSearch,

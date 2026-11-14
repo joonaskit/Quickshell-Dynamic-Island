@@ -598,6 +598,7 @@ PanelWindow {
     IslandPill {
         id: islandPill
         z: (islandPill.isOpen) ? 300 : 20
+        screenName: window.screen ? window.screen.name : ""
         anchors.horizontalCenter: parent.horizontalCenter
         y: window.pillTopY
         isTopBarMode: window.isMaximized

@@ -10,6 +10,41 @@ SettingsCategory {
         key: "launcher"
         title: "APP LAUNCHER"
 
+        // Which launcher the shortcut, the dock button and the clock pill open
+        SettingSegmented {
+            title: "Launcher Style"
+            description: "Dial (experimental) opens around the clock pill. With Dial, left-click the pill to open it and right-click to expand the island"
+            keywords: "category dial wheel radial classic"
+            iconName: "apps"
+            iconColor: Theme.accentBlue
+            currentValue: SettingsService.launcherStyle
+            options: [
+                { label: "Classic", value: "classic" },
+                { label: "Dial", value: "dial" }
+            ]
+            onSelected: function(val) {
+                SettingsService.setSetting("launcherStyle", val);
+            }
+        }
+
+        SettingDivider { visible: SettingsService.launcherStyle === "dial" }
+
+        // Test: the status icons live in the dial instead of the top-right corner
+        SettingToggle {
+            visible: SettingsService.launcherStyle === "dial"
+            title: "Status Icons in Dial"
+            description: "Show the status icons under the dial's search field instead of the top-right corner. Their menus open over the dial"
+            keywords: "status icons wifi battery dial"
+            iconName: "wifi"
+            iconColor: Theme.accentBlue
+            checked: SettingsService.dialStatusIcons
+            onToggled: function(val) {
+                SettingsService.setSetting("dialStatusIcons", val);
+            }
+        }
+
+        SettingDivider {}
+
         // 1. Default View Layout (Grid vs List)
         SettingSegmented {
             title: "Default View Layout"

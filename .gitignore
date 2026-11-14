@@ -1,6 +1,7 @@
 settings.json
 settings.json.tmp
 dock_pinned.json
+dial_pinned.json
 __pycache__/
 *.py[cod]
 launcher_usage.json

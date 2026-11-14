@@ -88,7 +88,7 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
-                    color: Theme.textSecondary
+                    color: Theme.dockTextSecondary
                     elide: Text.ElideRight
                 }
 
@@ -183,7 +183,7 @@ Item {
                                 radius: 3.5
                                 color: Theme.accent
                                 border.width: 1
-                                border.color: Theme.raisedSurface
+                                border.color: Theme.dockRaisedSurface
                                 visible: modelData.activated
                             }
                         }
@@ -214,7 +214,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 9
                                 font.weight: Font.Medium
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                             }
                         }
 
@@ -232,7 +232,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "close"
                                 size: 11
-                                color: closeBtnMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                                color: closeBtnMouse.containsMouse ? Theme.accentRed : Theme.dockTextSecondary
                             }
 
                             MouseArea {

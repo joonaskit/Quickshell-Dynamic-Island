@@ -87,7 +87,7 @@ Item {
                     font.family: Theme.fontFamily
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
-                    color: Theme.textSecondary
+                    color: Theme.dockTextSecondary
                     elide: Text.ElideRight
                 }
             }
@@ -142,7 +142,7 @@ Item {
                                 text: (root.mprisPlayer && root.mprisPlayer.trackArtist) ? root.mprisPlayer.trackArtist : (root.mprisPlayer && root.mprisPlayer.identity ? root.mprisPlayer.identity : "")
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 10
-                                color: Theme.textSecondary
+                                color: Theme.dockTextSecondary
                                 elide: Text.ElideRight
                                 visible: text.length > 0
                             }
@@ -287,7 +287,7 @@ Item {
                                 anchors.centerIn: parent
                                 name: "close"
                                 size: 10
-                                color: closeWinMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                                color: closeWinMouse.containsMouse ? Theme.accentRed : Theme.dockTextSecondary
                             }
 
                             MouseArea {
@@ -354,7 +354,7 @@ Item {
                         SvgIcon {
                             name: modelData.icon || "chevron-right"
                             size: 13
-                            color: actionMouse.containsMouse ? Theme.accentCyanStrong : Theme.textSecondary
+                            color: actionMouse.containsMouse ? Theme.accentCyanStrong : Theme.dockTextSecondary
                         }
 
                         Text {
@@ -458,7 +458,7 @@ Item {
                     SvgIcon {
                         name: "check"
                         size: 14
-                        color: root.isPinned ? Theme.accent : Theme.textSecondary
+                        color: root.isPinned ? Theme.accent : Theme.dockTextSecondary
                     }
 
                     Text {
@@ -550,7 +550,7 @@ Item {
                     SvgIcon {
                         name: "close"
                         size: 14
-                        color: quitMouse.containsMouse ? Theme.accentRed : Theme.textSecondary
+                        color: quitMouse.containsMouse ? Theme.accentRed : Theme.dockTextSecondary
                     }
 
                     Text {

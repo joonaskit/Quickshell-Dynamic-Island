@@ -14,6 +14,8 @@ Item {
     readonly property bool isOpen: isExpanded || isNotificationOpen
     property bool isTopBarMode: false
     property bool hasFullscreenApp: false
+    // Name of the screen this pill is on, where a click opens the dial
+    property string screenName: ""
     property bool isHovered: compactClickArea.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp
     property date currentDate: clock.date
 
@@ -375,10 +377,15 @@ Item {
             enabled: !root.isOpen
             hoverEnabled: !root.isOpen && !root.isTopBarMode && !root.hasFullscreenApp
             cursorShape: Qt.PointingHandCursor
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-            onClicked: {
+            // With the dial as the launcher, left click opens it and right click expands the
+            // pill. Otherwise either click expands.
+            onClicked: mouse => {
                 if (root.isAlertingNotification && !root.isShowingOsd) {
                     root.openNotification();
+                } else if (mouse.button === Qt.LeftButton && SettingsService.launcherStyle === "dial") {
+                    DialService.toggle(root.screenName, "");
                 } else {
                     root.expand();
                 }

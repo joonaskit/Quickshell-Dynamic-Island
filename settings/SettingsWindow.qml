@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Wayland._ShortcutsInhibitor
 
 // Settings: a floating panel styled like the clipboard history window. It stays open
 // until it is closed, can be dragged by its header and only takes keyboard focus when
@@ -50,9 +51,12 @@ PanelWindow {
     property int currentTab: 0
 
     readonly property bool hasSearchResults: appearanceSettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
-                                             || dockSettings.hasMatches || launcherSettings.hasMatches || powerSettings.hasMatches || shortcutsSettings.hasMatches
+                                             || dockSettings.hasMatches || launcherSettings.hasMatches || powerSettings.hasMatches
+                                             || (CompositorService.isNiri ? niriShortcutsSettings.hasMatches : shortcutsSettings.hasMatches)
 
-    readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, powerSettings, shortcutsSettings, aboutSettings]
+    // The Shortcuts tab edits KDE's global shortcuts, or niri's binds under niri
+    readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, powerSettings,
+                                  CompositorService.isNiri ? niriShortcutsSettings : shortcutsSettings, aboutSettings]
     // Section key to scroll to once the requested tab is laid out
     property string pendingSection: ""
 
@@ -438,7 +442,12 @@ PanelWindow {
                             ShortcutsSettings {
                                 id: shortcutsSettings
                                 title: window.tabs[6]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 6
+                                visible: !CompositorService.isNiri && (SettingsSearch.active ? hasMatches : window.currentTab === 6)
+                            }
+                            NiriShortcutsSettings {
+                                id: niriShortcutsSettings
+                                title: window.tabs[6]
+                                visible: CompositorService.isNiri && (SettingsSearch.active ? hasMatches : window.currentTab === 6)
                             }
                             AboutSettings {
                                 id: aboutSettings
@@ -493,6 +502,12 @@ PanelWindow {
                 }
             }
         }
+    }
+
+    // Keeps niri from acting on a combination while a shortcut row records it
+    ShortcutInhibitor {
+        window: window
+        enabled: window.shown && NiriShortcutService.capturing
     }
 
     WindowBlur {

@@ -32,3 +32,16 @@ function topBarSettings(mode) {
         "alwaysTopBar": mode === "always"
     };
 }
+
+// The settings the "Use niri defaults" button saves: the full-width bar always shown,
+// the status icons kept in the top-right corner rather than in the dial, and no
+// virtual desktops pill, since niri's workspaces are not shown there yet
+function niriDefaults() {
+    return {
+        "morphToTopBarWhenMaximized": true,
+        "alwaysTopBar": true,
+        "autoHideTopBar": false,
+        "dialStatusIcons": false,
+        "showVirtualDesktops": false
+    };
+}

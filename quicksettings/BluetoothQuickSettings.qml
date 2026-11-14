@@ -160,13 +160,7 @@ Item {
 
                                 // Device Icon (headphones or bluetooth)
                                 SvgIcon {
-                                    name: {
-                                        let n = modelData.name.toLowerCase();
-                                        if (n.includes("wh-") || n.includes("head") || n.includes("buds") || n.includes("ear") || n.includes("airpod")) {
-                                            return "headphones";
-                                        }
-                                        return "bluetooth";
-                                    }
+                                    name: modelData.icon
                                     size: Theme.px(13)
                                     color: modelData.isConnected ? Theme.accent : Theme.textSecondary
                                     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
