@@ -40,4 +40,12 @@ TestCase {
             compare(SettingChoices.topBarMode(s.morphToTopBarWhenMaximized, s.alwaysTopBar), modes[i]);
         }
     }
+
+    function test_niriDefaults() {
+        let s = SettingChoices.niriDefaults();
+        compare(SettingChoices.topBarMode(s.morphToTopBarWhenMaximized, s.alwaysTopBar), "always");
+        compare(s.autoHideTopBar, false);
+        compare(s.dialStatusIcons, false);
+        compare(s.showVirtualDesktops, false);
+    }
 }

@@ -12,6 +12,10 @@ The shell is built for KDE Plasma. Under niri the dial launcher works; the rest 
 - **Night Light** is KWin's, so `NightLightService.available` is false and the page says so.
 - **Dial:** the Settings tiles that open KDE's settings modules (`KDE_SETTINGS_TILES` in `dialLogic.js`) are dimmed without `systemsettings` or `kcmshell6`. Terminal apps open through `WindowService.launchInTerminal`: Konsole under KDE, else `xdg-terminal-exec`, `$TERMINAL` or the first common terminal found.
 
+## Settings
+
+Under niri the Top bar page of the settings window starts with a Use niri defaults button (`SettingsService.applyNiriDefaults`). It sets the full-width bar to Always with auto-hide off, keeps the status icons in the top-right corner (`dialStatusIcons` off) and turns off the virtual desktops pill, which has no niri workspaces yet. The values are `niriDefaults` in `services/settingChoices.js`, tested by `tests/tst_settingChoices.qml`. Each is an ordinary setting, so it can be changed again afterwards.
+
 ## Icons
 
 Outside Plasma Qt has no platform theme to name the icon theme, and most icons do not load. `run.sh` sets `QS_ICON_THEME` to KDE's theme from `kdeglobals`, else GNOME's from `gsettings`, unless it is set already or the session is KDE's. Start the shell through `run.sh` (niri runs `~/.config/autostart` entries).

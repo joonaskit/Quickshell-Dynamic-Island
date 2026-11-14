@@ -35,7 +35,7 @@ The search box shows every row whose title, description or `keywords` holds all 
 ## Pages
 
 - **Appearance**: colours, screens, corners, pill style, scale and fonts.
-- **Top bar**: a sketch of the bar whose parts link to their sections (`TopBarDiagram.qml`), when the full-width bar shows and hiding it, the side pills, the status icons and the optional icons.
+- **Top bar**: a sketch of the bar whose parts link to their sections (`TopBarDiagram.qml`), under niri a button for niri's defaults (see `NIRI.md`), when the full-width bar shows and hiding it, the side pills, the status icons and the optional icons.
 - **Island**: what the compact island shows, the expanded island cards and the clock.
 - **Dock** and **Launcher**.
 - **Power**: battery behaviour, such as 60 Hz on battery.

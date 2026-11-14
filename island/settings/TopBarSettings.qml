@@ -78,6 +78,33 @@ SettingsCategory {
 
     TopBarDiagram {}
 
+    // Under niri: one button to set the top bar up for a tiling layout
+    SettingsSection {
+        key: "niri"
+        title: "NIRI"
+        visible: CompositorService.isNiri && !SettingsSearch.active
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.margins: 12
+            spacing: 10
+
+            Text {
+                Layout.fillWidth: true
+                text: "Always show the full-width bar, keep the status icons in the top-right corner and turn off the virtual desktops pill"
+                wrapMode: Text.Wrap
+                font.family: Theme.fontFamily
+                font.pixelSize: 10
+                color: Theme.textSecondary
+            }
+
+            SettingButton {
+                text: "Use niri defaults"
+                onClicked: SettingsService.applyNiriDefaults()
+            }
+        }
+    }
+
     // When the pills flatten into the full-width bar, and hiding it
     SettingsSection {
         key: "topBar"

@@ -484,6 +484,12 @@ Singleton {
         root.setSetting("alwaysTopBar", s.alwaysTopBar);
     }
 
+    // Settings that suit niri, see SettingChoices.niriDefaults
+    function applyNiriDefaults() {
+        let s = SettingChoices.niriDefaults();
+        for (let key in s) root.setSetting(key, s[key]);
+    }
+
     function isWidgetEnabled(id) {
         if (root.widgets[id] !== undefined) return root.widgets[id];
         let widget = WidgetRegistry.byId(id);
