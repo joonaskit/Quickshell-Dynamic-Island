@@ -18,6 +18,6 @@ A checkout that is already past the target, for example a beta install that swit
 - The fetch never waits for a password or a host question, and gives up after 60 seconds, as in `install.sh`.
 - Updates only fast-forward the `main` branch (`git merge --ff-only`), so the checkout stays on `main` and either channel can carry on from it.
 - Nothing is changed when the checkout is on another branch (a developer checkout), has edited tracked files, has commits that are not upstream, or is not its own git checkout (a copied install, or a folder inside another repository).
-- After an update the shell must be restarted. "Restart the shell" runs `run.sh -d`, as the autostart entry does. The tool check runs again, since an update can need a new tool.
+- After an update the shell must be restarted. "Restart the shell" runs `run.sh -d`, as the autostart entry does. A shell started that way does not hot-reload, so files being updated are never loaded half written. The tool check runs again, since an update can need a new tool.
 
 `install.sh` run again still updates with `git pull --ff-only`, whatever the channel.

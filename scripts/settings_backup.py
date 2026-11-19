@@ -6,7 +6,8 @@ Usage:
   settings_backup.py import <file> [--sections settings,dock,usage]
 
 Add --json for one line of JSON instead of text (used by BackupService), and
---dir <path> to work on a config directory other than the shell's own.
+--dir <path> to work on a config directory other than the user's
+($ISLAND_CONFIG_DIR, else ~/.config/quickshell-island).
 
 An export holds settings.json and dock_pinned.json. The launcher's usage history
 (launcher_usage.json) is personal, so it is only included with --usage. The keys
@@ -42,7 +43,15 @@ DEFAULT_EXPORT = ("settings", "dock")
 # Settings that belong to this machine: a credential and the ids of paired devices
 PRIVATE_KEYS = ("hueBridgeIp", "hueAppKey", "hueLightId", "kdeConnectDeviceId")
 
-SHELL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+
+
+def config_dir():
+    """The user's config directory, as SettingsService.configDir finds it."""
+    override = os.environ.get("ISLAND_CONFIG_DIR")
+    if override:
+        return override
+    config_home = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    return os.path.join(config_home, "quickshell-island")
 
 
 class BackupError(Exception):
@@ -157,6 +166,7 @@ def read_json(path):
 
 def write_json(path, value):
     """Write through a temporary file, so a failure never leaves half a config behind."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".tmp-")
     try:
         with os.fdopen(fd, "w") as f:
@@ -249,9 +259,11 @@ def main(argv):
     parser.add_argument("--usage", action="store_true", help="export: include the launcher's usage history")
     parser.add_argument("--with-secrets", action="store_true", help="export: include the Hue bridge key and device ids")
     parser.add_argument("--sections", help="only these sections, comma separated (settings, dock, usage)")
-    parser.add_argument("--dir", default=SHELL_DIR, help="the config directory (default: the shell's own)")
+    parser.add_argument("--dir", default=None, help="the config directory (default: $ISLAND_CONFIG_DIR, else ~/.config/quickshell-island)")
     parser.add_argument("--json", action="store_true", help="print the result as one line of JSON")
     args = parser.parse_args(argv[1:])
+    if args.dir is None:
+        args.dir = config_dir()
     try:
         only = [s.strip() for s in args.sections.split(",") if s.strip()] if args.sections else None
         if args.command == "export":

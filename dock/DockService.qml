@@ -253,7 +253,7 @@ Singleton {
     }
 
     // File loading/saving for pinned apps persistence
-    readonly property string configFilePath: Quickshell.shellDir + "/dock_pinned.json"
+    readonly property string configFilePath: SettingsService.configDir + "/dock_pinned.json"
 
     Process {
         id: loadPinnedProc
@@ -289,7 +289,7 @@ Singleton {
         repeat: false
         onTriggered: {
             let jsonStr = JSON.stringify(root.pinnedApps, null, 2);
-            savePinnedProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.configFilePath, jsonStr];
+            savePinnedProc.command = ["python3", "-c", "import sys, os; os.makedirs(os.path.dirname(sys.argv[1]), exist_ok=True); open(sys.argv[1], 'w').write(sys.argv[2])", root.configFilePath, jsonStr];
             savePinnedProc.running = true;
         }
     }
@@ -304,7 +304,7 @@ Singleton {
 
     // Launch usage (count + last used) powering the launcher's Recent / Frequent tabs
     property var usageStats: ({})
-    readonly property string usageFilePath: Quickshell.shellDir + "/launcher_usage.json"
+    readonly property string usageFilePath: SettingsService.configDir + "/launcher_usage.json"
 
     Process {
         id: loadUsageProc
@@ -336,7 +336,7 @@ Singleton {
         interval: 500
         repeat: false
         onTriggered: {
-            saveUsageProc.command = ["python3", "-c", "import sys; open(sys.argv[1], 'w').write(sys.argv[2])", root.usageFilePath, JSON.stringify(root.usageStats)];
+            saveUsageProc.command = ["python3", "-c", "import sys, os; os.makedirs(os.path.dirname(sys.argv[1]), exist_ok=True); open(sys.argv[1], 'w').write(sys.argv[2])", root.usageFilePath, JSON.stringify(root.usageStats)];
             saveUsageProc.running = true;
         }
     }

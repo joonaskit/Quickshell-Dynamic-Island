@@ -11,7 +11,7 @@ A disc centred on the clock pill that slides down from the top edge of the scree
 - **Windows:** the second category lists every open window (`DockService.windowItems`, as the classic launcher's Windows tab). A window tile shows its title and app; choosing it switches to it.
 - **Running apps:** a dot under the tile marks an app with an open window (`DialService.runningIds`, from the desktop entry the dock finds for each window). Choosing a running app switches to its window, the next one after the active window if it has several, instead of starting it again; New Window in its menu starts another. In search, running apps come first among the name matches.
 - **Menu:** right-click a tile. Apps: Switch To and New Window (running) or Open, the app's own actions (`DockService.getActionsForApp`), Pin to Dial, Edit Application… and Quit (running). Windows: Switch To and Close Window. Files: Open and Open Containing Folder. Settings: Open. The entries come from `DialService.menuFor`, drawn by `dial/DialMenu.qml`; Up/Down and Enter work in it.
-- **Pins:** `dial_pinned.json` (gitignored), a list of app ids. Separate from the dock's pins.
+- **Pins:** `dial_pinned.json` in the config folder (`docs/SETTINGS.md`), a list of app ids. Separate from the dock's pins.
 - **Recent and Frequent:** read from the dock launcher's `launcher_usage.json` (`DockService.usageStats`), 16 each. A dial launch is recorded there too.
 - **Launch:** goes through `WindowService.launchEntry`. Terminal apps go through `WindowService.launchInTerminal` (Konsole under KDE).
 - **niri:** the dial works under niri too, opened by a niri keybinding; see `docs/NIRI.md`.

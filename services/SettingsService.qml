@@ -10,8 +10,12 @@ import "settingChoices.js" as SettingChoices
 Singleton {
     id: root
 
-    // Config file path
-    readonly property string settingsFilePath: Quickshell.shellDir + "/settings.json"
+    // Where the user's config files live (settings.json, the dock's and the dial's pins,
+    // the launcher's usage counts): $ISLAND_CONFIG_DIR, else ~/.config/quickshell-island.
+    // run.sh sets it, and moves files left in the shell folder there. docs/SETTINGS.md
+    readonly property string configDir: Quickshell.env("ISLAND_CONFIG_DIR")
+        || ((Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")) + "/quickshell-island")
+    readonly property string settingsFilePath: root.configDir + "/settings.json"
 
     // User settings properties (with default values matching Theme.qml)
     property real uiScale: 1.0
@@ -690,7 +694,7 @@ Singleton {
     function saveSettings() {
         let jsonStr = JSON.stringify(root.currentData(), null, 2);
         root.lastWritten = jsonStr;
-        saveProc.command = ["python3", "-c", "import sys, os; p=sys.argv[1]; t=p+'.tmp'; open(t, 'w').write(sys.argv[2]); os.replace(t, p)", root.settingsFilePath, jsonStr];
+        saveProc.command = ["python3", "-c", "import sys, os; p=sys.argv[1]; os.makedirs(os.path.dirname(p), exist_ok=True); t=p+'.tmp'; open(t, 'w').write(sys.argv[2]); os.replace(t, p)", root.settingsFilePath, jsonStr];
         saveProc.running = true;
         root.lastSavedTime = Qt.formatTime(new Date(), "hh:mm:ss");
     }

@@ -26,7 +26,7 @@ How a run is set up:
 
 - One `kwin_wayland --virtual` for the whole run, on its own Wayland socket and a private D-Bus with no service files, so nothing is started on demand (portals, a secrets daemon). Layer-shell windows such as the clipboard panel map in it as they do on the desktop.
 - A clean environment (`env -i`) with a temporary `HOME`, `XDG_*` folders and runtime dir. Nothing from the desktop you are using reaches a fixture: not its Wayland or X display, niri's socket or the session bus. `CompositorService` sees neither KDE nor niri, so KWin- and niri-only helpers stay off.
-- Each fixture gets its own directory: its `.qml` files, the repo's `qmldir` and folders linked in, and `tests/fixtures/lib` linked as `fixture`. `Quickshell.shellDir` is that directory, so `SettingsService` reads and writes a `settings.json` of its own there, never yours.
+- Each fixture gets its own directory: its `.qml` files, the repo's `qmldir` and folders linked in, and `tests/fixtures/lib` linked as `fixture`. Its `ISLAND_CONFIG_DIR` is a folder of its own that does not exist yet, so `SettingsService` and the other services read and write config files of their own there, never yours.
 - A fixture fails when it reports a failure, exits uncleanly, runs past 20 seconds, or when its log has a `ReferenceError` or `TypeError` from any file, even when its checks passed.
 
 The run is skipped, without failing, when `quickshell`, `kwin_wayland` or `dbus-run-session` is missing. On Fedora they come from `quickshell`, `kwin` and `dbus-daemon`.
@@ -69,4 +69,5 @@ Keep a fixture to one behaviour, and drive the component through the same proper
 | Fixture | Covers |
 |---|---|
 | `watched-file` | `WatchedFile` following a file that is created, written in place, appended to, replaced by a rename (once and twice in a row), written after a rename, removed and created again |
+| `settings-config-dir` | `SettingsService` keeping `settings.json` in `$ISLAND_CONFIG_DIR`, and creating that folder on the first save |
 | `clipboard-first-open` | `ClipboardWindow` building its card on the first open, fading it in, and keeping the same card across a close and reopen (`CODING_STANDARDS.md`, building windows on first open) |

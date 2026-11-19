@@ -16,6 +16,8 @@ Rules for writing and reviewing changes. Mechanical ones are checked by `./lint.
 
   Polling is a last resort, for state with nothing to signal a change. Then poll only while the view that shows it is open, at the longest interval it can bear. A one-off read when a popup opens is fine.
 - A window that is opened on demand (a panel, a launcher) builds its content on the first open, not at startup: a `Loader` whose `active` is set on the first `shown` and stays set, so reopening is instant and state such as the scroll position survives a close. The window reaches into it through a `content` property, null until then, and the content exposes what it needs with `property alias` or functions. Timers, data and IPC that must run while it is closed stay outside, in the window or a service. See `ClipboardWindow`, `SettingsWindow` and `DialWindow`.
+- A list that also moves with the keyboard and selects the row under the pointer selects it from `onPositionChanged` through `PointerMoveGate`, not from `onEntered`: rows that scroll under a still pointer must not take the selection from the keyboard. See `DockAppPicker` and `DialMenu`.
+- User config files go in `SettingsService.configDir`, never in the shell folder (`Quickshell.shellDir`), which an update or a reinstall replaces.
 - When a change alters behaviour that a doc in `docs/` describes (an API, a file format, a colour mapping), update the doc in the same change.
 
 ## Privacy and safety

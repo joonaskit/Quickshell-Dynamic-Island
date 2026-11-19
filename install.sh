@@ -11,8 +11,10 @@
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 DEFAULT_REMOTE="https://github.com/joonaskit/Quickshell-Dynamic-Island.git"
-CONFIG_FILES=(settings.json dock_pinned.json launcher_usage.json)
+# The user's configuration, kept apart from the shell's files (SettingsService.configDir)
+CONFIG_FILES=(settings.json dock_pinned.json dial_pinned.json launcher_usage.json)
 EXAMPLE_FILES=(settings.json dock_pinned.json)
+CONFIG_DIR="${ISLAND_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/quickshell-island}"
 
 PREFIX="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/island"
 AUTOSTART_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/autostart/quickshell-island.desktop"
@@ -195,19 +197,32 @@ import_configuration() {
         note "would import it with scripts/settings_backup.py"
         return
     fi
-    python3 "$PREFIX/scripts/settings_backup.py" import "$IMPORT_FILE" --dir "$PREFIX" | sed 's/^/  /'
+    python3 "$PREFIX/scripts/settings_backup.py" import "$IMPORT_FILE" --dir "$CONFIG_DIR" | sed 's/^/  /'
     [ "${PIPESTATUS[0]}" = 0 ] || die "The import failed, nothing was changed. Fix the file or run this again without --import."
+}
+
+# Moves configuration that an older version kept in the install folder to its own
+# folder, as run.sh does at start. A file already there wins and the old one stays.
+move_configuration() {
+    local name
+    for name in "${CONFIG_FILES[@]}"; do
+        [ -e "$PREFIX/$name" ] && [ ! -e "$CONFIG_DIR/$name" ] || continue
+        act mkdir -p "$CONFIG_DIR"
+        act mv "$PREFIX/$name" "$CONFIG_DIR/$name"
+        [ "$DRY_RUN" = 1 ] || note "Moved $name to $CONFIG_DIR."
+    done
 }
 
 # Copies the .example files for whatever configuration does not exist yet
 create_default_configuration() {
-    say "Configuration"
+    say "Configuration in $CONFIG_DIR"
     local name path
     for name in "${EXAMPLE_FILES[@]}"; do
-        path="$PREFIX/$name"
+        path="$CONFIG_DIR/$name"
         if [ -e "$path" ]; then
             note "$name already exists, left as it is."
         else
+            act mkdir -p "$CONFIG_DIR"
             act cp "$PREFIX/$name.example" "$path"
             [ "$DRY_RUN" = 1 ] || note "Created $name from $name.example."
         fi
@@ -298,28 +313,25 @@ uninstall() {
         act python3 "$PREFIX/scripts/kde_colors.py" restore >/dev/null 2>&1 || true
     fi
 
-    local name kept=()
-    for name in "${CONFIG_FILES[@]}"; do
-        [ -e "$PREFIX/$name" ] && kept+=("$name")
-    done
-    if [ ${#kept[@]} -gt 0 ] && ! ask "Also delete your configuration (${kept[*]})?" n; then
-        # Everything but the configuration goes
-        local tmp
-        if [ "$DRY_RUN" = 1 ]; then
-            note "would remove everything in $PREFIX except ${kept[*]}"
-        else
-            tmp="$(mktemp -d)"
-            for name in "${kept[@]}"; do mv "$PREFIX/$name" "$tmp/"; done
-            rm -rf "$PREFIX"
-            mkdir -p "$PREFIX"
-            for name in "${kept[@]}"; do mv "$tmp/$name" "$PREFIX/"; done
-            rmdir "$tmp"
-        fi
-        note "Removed the shell. Your configuration is still in $PREFIX."
-        return
-    fi
+    # Configuration an older version left in the install folder is kept like the rest
+    move_configuration
     act rm -rf "$PREFIX"
     note "Removed $PREFIX."
+
+    local name kept=()
+    for name in "${CONFIG_FILES[@]}"; do
+        [ -e "$CONFIG_DIR/$name" ] && kept+=("$name")
+    done
+    if [ ${#kept[@]} -gt 0 ]; then
+        if ask "Also delete your configuration (${kept[*]} in $CONFIG_DIR)?" n; then
+            for name in "${kept[@]}"; do act rm -f "$CONFIG_DIR/$name"; done
+            # theme.json and anything else in the folder stay; an emptied folder goes
+            act rmdir "$CONFIG_DIR" 2>/dev/null || true
+            note "Deleted your configuration."
+        else
+            note "Your configuration is still in $CONFIG_DIR."
+        fi
+    fi
 }
 
 main() {
@@ -348,6 +360,7 @@ main() {
     check_environment
     check_dependencies
     install_shell
+    move_configuration
     import_configuration
     create_default_configuration
     setup_autostart

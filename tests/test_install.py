@@ -17,17 +17,20 @@ class InstallScriptTest(unittest.TestCase):
         self.prefix = os.path.join(self.home, ".config", "quickshell", "island")
         self.autostart = os.path.join(self.home, ".config", "autostart", "quickshell-island.desktop")
         self.link = os.path.join(self.home, ".local", "bin", "island-run")
+        self.config = os.path.join(self.home, ".config", "quickshell-island")
         os.makedirs(self.home)
 
     def run_install(self, *args):
         env = dict(os.environ, HOME=self.home, XDG_CONFIG_HOME=os.path.join(self.home, ".config"))
         # The uninstall's KDE colour scheme restore must only see the fake home
-        for name in ("XDG_BIN_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME"):
+        for name in ("XDG_BIN_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME", "ISLAND_CONFIG_DIR"):
             env.pop(name, None)
         return subprocess.run(["bash", INSTALL, *args], capture_output=True, text=True, env=env, timeout=60, stdin=subprocess.DEVNULL)
 
-    def make_install(self, config=("settings.json", "dock_pinned.json")):
-        """A folder that looks like an install, with a stub run.sh and some configuration."""
+    def make_install(self, config=("settings.json", "dock_pinned.json"), legacy=()):
+        """A folder that looks like an install, with a stub run.sh, some configuration in
+        its own folder, and `legacy` configuration in the install folder, where older
+        versions kept it."""
         os.makedirs(self.prefix)
         for name in ("shell.qml", "qmldir"):
             open(os.path.join(self.prefix, name), "w").close()
@@ -35,9 +38,11 @@ class InstallScriptTest(unittest.TestCase):
         with open(run, "w") as f:
             f.write("#!/bin/sh\nexit 0\n")
         os.chmod(run, 0o755)
-        for name in config:
-            with open(os.path.join(self.prefix, name), "w") as f:
-                f.write("{}")
+        os.makedirs(self.config, exist_ok=True)
+        for folder, names in ((self.config, config), (self.prefix, legacy)):
+            for name in names:
+                with open(os.path.join(folder, name), "w") as f:
+                    f.write("{}")
         os.makedirs(os.path.dirname(self.autostart))
         with open(self.autostart, "w") as f:
             f.write("[Desktop Entry]\n")
@@ -92,8 +97,20 @@ class InstallScriptTest(unittest.TestCase):
         self.make_install()
         result = self.run_install("--uninstall", "--yes")
         self.assertEqual(result.returncode, 0)
-        self.assertEqual(sorted(os.listdir(self.prefix)), ["dock_pinned.json", "settings.json"])
+        self.assertFalse(os.path.exists(self.prefix))
+        self.assertEqual(sorted(os.listdir(self.config)), ["dock_pinned.json", "settings.json"])
         self.assertFalse(os.path.exists(self.autostart))
+
+    def test_uninstall_keeps_configuration_left_in_the_install_folder(self):
+        self.make_install(config=("settings.json",), legacy=("settings.json", "dial_pinned.json"))
+        with open(os.path.join(self.config, "settings.json"), "w") as f:
+            f.write('{"new": true}')
+        self.assertEqual(self.run_install("--uninstall", "--yes").returncode, 0)
+        self.assertFalse(os.path.exists(self.prefix))
+        self.assertEqual(sorted(os.listdir(self.config)), ["dial_pinned.json", "settings.json"])
+        # The file already in the config folder wins
+        with open(os.path.join(self.config, "settings.json")) as f:
+            self.assertEqual(f.read(), '{"new": true}')
 
     def test_uninstall_without_configuration_removes_the_folder(self):
         self.make_install(config=())

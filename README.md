@@ -65,7 +65,7 @@ You can also skip the installer: install the requirements above, clone the repos
 | Command | Action |
 | --- | --- |
 | `./run.sh` | Start (restarts if already running) |
-| `./run.sh -d` | Start in the background |
+| `./run.sh -d` | Start in the background, as the autostart entry does. It is restarted if it crashes, and its output goes to the journal: `journalctl --user -t quickshell-island` |
 | `./run.sh -k` | Stop |
 | `./run.sh --check` | Check for missing tools and services |
 | `./run.sh --run <command>` | Run a command and show its progress in the island, see `docs/ACTIVITIES_API.md`. The installer also adds this as `island-run` (skip it with `--no-link`) |
@@ -95,7 +95,7 @@ Open it again from the settings under About, or with `./run.sh -i onboarding ope
 - The Hue bridge key and the ids of paired devices are left out unless you add `--with-secrets`, so an export is safe to share. An import without them keeps the values this machine already has.
 - `--sections settings,dock,usage` limits an export or an import to those parts.
 - An import is checked before anything changes. A file that is malformed or made by a newer version is refused and nothing is touched. Keys this version does not know are ignored, and settings missing from the file go back to their defaults.
-- The files an import replaces are first copied to `~/.local/state/quickshell-island/backups/<time>/`. Copy them back into the shell's folder to undo it.
+- The files an import replaces are first copied to `~/.local/state/quickshell-island/backups/<time>/`. Copy them back into `~/.config/quickshell-island/` to undo it.
 - A running shell takes the imported configuration at once.
 
 The file format is described in `docs/CONFIG_EXPORT.md`.
@@ -127,7 +127,9 @@ The file format is described in `docs/CONFIG_EXPORT.md`.
 
 ## Configuration
 
-Use the settings window (the gear in the expanded island), or edit `settings.json` directly. Changes are picked up on restart. Pinned dock apps are stored in `dock_pinned.json`. Both files are gitignored, as is `launcher_usage.json`, where the launcher keeps its usage counts. To start from the defaults, copy `settings.json.example` and `dock_pinned.json.example` to those names.
+Use the settings window (the gear in the expanded island), or edit `~/.config/quickshell-island/settings.json` directly; a running shell applies the edit when you save. Pinned dock apps are stored in `dock_pinned.json` in the same folder, the dial's pins in `dial_pinned.json`, and the launcher's usage counts in `launcher_usage.json`. To start from the defaults, delete those files, or copy `settings.json.example` and `dock_pinned.json.example` from the shell over them.
+
+Older versions kept these files in the shell's own folder. `run.sh` moves them on the next start. To give a checkout config of its own, set `ISLAND_CONFIG_DIR`, e.g. `ISLAND_CONFIG_DIR="$PWD" ./run.sh` (`docs/SETTINGS.md`).
 
 The shell also writes its colors, fonts and scale to `~/.config/quickshell-island/theme.json`, so companion apps can match its look. See `docs/THEME.md`.
 

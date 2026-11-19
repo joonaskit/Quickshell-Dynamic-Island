@@ -17,8 +17,6 @@ ROOT="$(dirname "$TESTS")"
 
 # The real qmldir and folders, so the fixture's shell.qml sees the shell's types as
 # shell.qml does, with the fixture's files and Steps (as "fixture") beside them.
-# settings.json and the other config files stay behind: SettingsService reads and
-# writes its own, beside the fixture.
 layout() {
     local dir="$1" name="$2" d
     mkdir -p "$dir"
@@ -45,7 +43,9 @@ if [ -n "$FIXTURE_NAMES" ]; then
         mkdir -p "$FIXTURE_TMP/work/$name"
         layout "$dir" "$name"
         log="$FIXTURE_TMP/$name.log"
-        FIXTURE_WORK="$FIXTURE_TMP/work/$name" timeout -k 2 20 quickshell -p "$dir" --no-color >"$log" 2>&1
+        # Config files of its own (ISLAND_CONFIG_DIR, not yet created), so no fixture
+        # sees another's settings
+        FIXTURE_WORK="$FIXTURE_TMP/work/$name" ISLAND_CONFIG_DIR="$FIXTURE_TMP/work/$name/config" timeout -k 2 20 quickshell -p "$dir" --no-color >"$log" 2>&1
         code=$?
         result="$(grep -o 'RESULT .*' "$log" | tail -n 1)"
         # A script error in the shell's own files fails the fixture even when its checks

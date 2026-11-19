@@ -82,6 +82,35 @@ class HelpersTest(unittest.TestCase):
         self.assertEqual(sb.missing_apps([{"id": "custom"}], set()), [])
 
 
+class ConfigDirTest(unittest.TestCase):
+    def config_dir(self, **env):
+        old = dict(os.environ)
+        try:
+            for name in ("ISLAND_CONFIG_DIR", "XDG_CONFIG_HOME"):
+                os.environ.pop(name, None)
+            os.environ.update(env)
+            return sb.config_dir()
+        finally:
+            os.environ.clear()
+            os.environ.update(old)
+
+    def test_override(self):
+        self.assertEqual(self.config_dir(ISLAND_CONFIG_DIR="/x/dev", XDG_CONFIG_HOME="/c"), "/x/dev")
+
+    def test_xdg_config_home(self):
+        self.assertEqual(self.config_dir(XDG_CONFIG_HOME="/c"), "/c/quickshell-island")
+
+    def test_home(self):
+        self.assertEqual(self.config_dir(HOME="/h"), "/h/.config/quickshell-island")
+
+    def test_import_creates_the_folder(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "new", "settings.json")
+            sb.write_json(path, {"a": 1})
+            with open(path) as f:
+                self.assertEqual(json.load(f), {"a": 1})
+
+
 class FilesTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

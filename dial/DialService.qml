@@ -442,7 +442,7 @@ Singleton {
 
     FileView {
         id: pinFile
-        path: Quickshell.shellDir + "/dial_pinned.json"
+        path: SettingsService.configDir + "/dial_pinned.json"
         printErrors: false
         onLoaded: {
             try {
