@@ -296,7 +296,7 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (modelData.isKWin) {
+                                    if (modelData.tracked) {
                                         WindowService.closeWindow(modelData.id);
                                     } else if (modelData.raw) {
                                         try { modelData.raw.close(); } catch(e) {}
@@ -312,7 +312,7 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (modelData.isKWin) {
+                            if (modelData.tracked) {
                                 WindowService.activateWindow(modelData.id);
                             } else if (modelData.raw) {
                                 if (modelData.raw.minimized) modelData.raw.minimized = false;

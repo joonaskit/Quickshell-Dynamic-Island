@@ -2,6 +2,7 @@ singleton Theme 1.0 services/Theme.qml
 singleton AudioService 1.0 services/AudioService.qml
 singleton BrightnessService 1.0 services/BrightnessService.qml
 singleton CompositorService 1.0 services/CompositorService.qml
+singleton NiriService 1.0 services/NiriService.qml
 singleton WindowService 1.0 services/WindowService.qml
 singleton NetworkService 1.0 services/NetworkService.qml
 singleton BluetoothService 1.0 services/BluetoothService.qml
@@ -38,6 +39,7 @@ OnboardingWelcome 1.0 onboarding/OnboardingWelcome.qml
 OnboardingSystemCheck 1.0 onboarding/OnboardingSystemCheck.qml
 OnboardingImport 1.0 onboarding/OnboardingImport.qml
 OnboardingSetup 1.0 onboarding/OnboardingSetup.qml
+OnboardingNiri 1.0 onboarding/OnboardingNiri.qml
 OnboardingTips 1.0 onboarding/OnboardingTips.qml
 OnboardingDone 1.0 onboarding/OnboardingDone.qml
 IslandWindow 1.0 island/IslandWindow.qml

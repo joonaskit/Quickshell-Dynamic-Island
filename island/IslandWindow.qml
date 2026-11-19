@@ -560,6 +560,7 @@ PanelWindow {
     // Companion Pill for Virtual Desktops / Workspaces
     VirtualDesktopsPill {
         id: virtualDesktopsPill
+        screenName: window.screen ? window.screen.name : ""
         x: (SettingsService.showWindowControls && appCluster.visible) ? (appCluster.x + appCluster.width + (window.desktopsTabTucked ? -Math.round(virtualDesktopsPill.width * 0.5) : 8)) : 16
         y: window.virtualDesktopsTargetY
         isSlidOut: !window.virtualDesktopsShouldHide && !window.barHidden

@@ -2,6 +2,7 @@ import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import "dockOverlap.js" as DockOverlap
 
 PanelWindow {
     id: window
@@ -46,76 +47,24 @@ PanelWindow {
     // Popups currently open
     readonly property bool hasOpenPopups: dockBar.contextMenuOpen || dockBar.appPickerOpen || dockBar.trashMenuOpen || dockBar.launcherMenuOpen || dockBar.downloadsStackOpen || dockBar.windowPickerOpen
 
-    // Detect if any normal window overlaps or touches the dock area on this screen
+    // Whether a window on this screen overlaps or touches the dock (dockOverlap.js)
     readonly property bool windowOverlapsDock: {
-        if (!WindowService.windowList || WindowService.windowList.length === 0) {
-            return false;
-        }
-
+        let list = WindowService.windowList;
+        if (!list || list.length === 0) return false;
         let scr = window.screen;
-        let scrName = (scr && scr.name) ? scr.name : "";
-        let scrW = (scr && scr.width > 0) ? scr.width : 1920;
-        let scrH = (scr && scr.height > 0) ? scr.height : 1080;
-        let scrX = (scr && scr.x !== undefined) ? scr.x : 0;
-        let scrY = (scr && scr.y !== undefined) ? scr.y : 0;
-
-        // Dock bounding box in global desktop coordinates
-        let dWidth = Math.max(dockBar.capsuleWidth || 300, 300);
-        let dHeight = Math.max(dockBar.capsuleHeight || 60, Theme.dockHeight + Theme.dockBottomMargin + 10);
-
-        let dLeft, dRight, dTop, dBottom;
-        if (window.dockPosition === "left") {
-            dLeft = scrX;
-            dRight = scrX + Theme.dockHeight + Theme.dockBottomMargin + 10;
-            dTop = scrY + (scrH - dHeight) / 2;
-            dBottom = dTop + dHeight;
-        } else if (window.dockPosition === "right") {
-            dLeft = scrX + scrW - (Theme.dockHeight + Theme.dockBottomMargin + 10);
-            dRight = scrX + scrW;
-            dTop = scrY + (scrH - dHeight) / 2;
-            dBottom = dTop + dHeight;
-        } else {
-            dLeft = scrX + (scrW - dWidth) / 2;
-            dRight = dLeft + dWidth;
-            dTop = scrY + scrH - dHeight;
-            dBottom = scrY + scrH;
-        }
-
-        for (let i = 0; i < WindowService.windowList.length; i++) {
-            let w = WindowService.windowList[i];
-            if (!w) continue;
-            if (w.minimized) continue;
-            if (w.onCurrent === false) continue;
-
-            // Never treat quickshell's or plasmashell's own UI as overlapping windows
-            let wApp = (w.app || "").toLowerCase();
-            if (wApp === "quickshell" || wApp === "plasmashell" || wApp === "org.kde.plasmashell") continue;
-
-            // If window is tied to a specific screen, skip if it belongs to another display
-            if (w.screen && scrName && w.screen !== scrName) continue;
-
-            // Maximized window on this screen covers the dock
-            if (w.maximized) return true;
-
-            let ww = w.width || 0;
-            let wh = w.height || 0;
-            if (ww <= 0 || wh <= 0) continue;
-
-            let wx = w.x || 0;
-            let wy = w.y || 0;
-
-            if (scrX > 0 && wx < scrX && (wx + ww) <= scrW) wx += scrX;
-            if (scrY > 0 && wy < scrY && (wy + wh) <= scrH) wy += scrY;
-
-            let wRight = wx + ww;
-            let wBottom = wy + wh;
-
-            // Check AABB intersection
-            let intersects = !(wRight <= dLeft || wx >= dRight || wBottom <= dTop || wy >= dBottom);
-            if (intersects) return true;
-        }
-
-        return false;
+        let screenBox = {
+            "name": (scr && scr.name) ? scr.name : "",
+            "x": (scr && scr.x !== undefined) ? scr.x : 0,
+            "y": (scr && scr.y !== undefined) ? scr.y : 0,
+            "width": (scr && scr.width > 0) ? scr.width : 1920,
+            "height": (scr && scr.height > 0) ? scr.height : 1080
+        };
+        let edge = Theme.dockHeight + Theme.dockBottomMargin + 10;
+        let tall = Math.max(dockBar.capsuleHeight || 60, edge);
+        let rect = window.dockPosition === "bottom"
+            ? DockOverlap.dockRect(screenBox, "bottom", Math.max(dockBar.capsuleWidth || 300, 300), tall)
+            : DockOverlap.dockRect(screenBox, window.dockPosition, tall, edge);
+        return DockOverlap.overlaps(list, screenBox, rect);
     }
 
     // Auto-hide configuration conditions
@@ -123,7 +72,9 @@ PanelWindow {
     readonly property bool shouldAutoHideAlways: SettingsService.dockAutoHideAlways
 
     // Should the dock be hidden
-    readonly property bool isDockHidden: (shouldAutoHideFromWindows || shouldAutoHideAlways) && !hasOpenPopups
+    // niri's overview shows every workspace zoomed out; the dock stays up there so apps can
+    // be launched and switched
+    readonly property bool isDockHidden: (shouldAutoHideFromWindows || shouldAutoHideAlways) && !hasOpenPopups && !NiriService.overviewOpen
 
     // Reveal state when user dwells near edge
     property bool dockRevealed: false

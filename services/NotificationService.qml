@@ -2,7 +2,9 @@ pragma Singleton
 import ".."
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
+import "desktopConflicts.js" as Conflicts
 
 Singleton {
     id: root
@@ -60,6 +62,84 @@ Singleton {
         console.info("[NotificationService] Initialized native NotificationServer");
     }
 
+    // ---- Other programs in the shell's place (desktopConflicts.js) ----
+
+    // { notificationOwner, ownsNotifications, waybar }, null until checked.
+    // notificationOwner is the process name of another daemon that owns the name.
+    property var conflicts: null
+
+    function checkConflicts() {
+        conflictProc.running = true;
+    }
+
+    // The shell runs sh, so $PPID is the shell's own process
+    Process {
+        id: conflictProc
+        command: ["sh", "-c",
+            "pid=$(busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus "
+            + "GetConnectionUnixProcessID s org.freedesktop.Notifications 2>/dev/null | cut -d' ' -f2); "
+            + "if [ -z \"$pid\" ]; then echo owner=; "
+            + "elif [ \"$pid\" = \"$PPID\" ]; then echo owner=self; "
+            + "else echo \"owner=$(cat /proc/$pid/comm 2>/dev/null)\"; fi; "
+            + "pgrep -x waybar >/dev/null && echo waybar=1; true"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let c = Conflicts.parse(text);
+                root.conflicts = c;
+                let lines = Conflicts.summary(c);
+                for (let i = 0; i < lines.length; i++) console.warn("[NotificationService] " + lines[i]);
+            }
+        }
+    }
+
+    // After the session's autostart has had time to start mako or waybar
+    Timer {
+        running: true
+        interval: 5000
+        onTriggered: root.checkConflicts()
+    }
+
+    // ---- niri's config errors ----
+
+    readonly property string niriConfigId: "niri-config-error"
+
+    function showNiriConfigError() {
+        root.dismissNotification(root.niriConfigId, false);
+        if (!NiriService.configFailed) return;
+        let actions = [];
+        if (!DepsService.noneUsable(["niri-settings"])) {
+            actions.push({
+                "identifier": "open",
+                "text": "Open niri Settings",
+                "invoke": function() { WindowService.openNiriSettings("files"); }
+            });
+        }
+        root.postLocal(root.niriConfigId, "niri", "io.github.joonaskit.NiriSettings",
+            "niri could not load its config",
+            "niri keeps the last config that worked. Run niri validate to see the error.", actions);
+    }
+
+    Connections {
+        target: NiriService.active ? NiriService : null
+        function onConfigFailedChanged() { root.showNiriConfigError(); }
+        function onConfigReloadsChanged() { if (NiriService.configFailed) root.showNiriConfigError(); }
+    }
+
+    // A notification from the shell itself. actions: [{ identifier, text, invoke }]
+    function postLocal(id, appName, appIcon, summary, body, actions) {
+        let raw = { "actions": actions || [], "dismiss": function() {} };
+        root.pushNotification({
+            "id": id,
+            "appName": appName,
+            "appIcon": appIcon || "",
+            "summary": summary,
+            "body": body || "",
+            "time": Qt.formatTime(new Date(), "hh:mm"),
+            "timestamp": Date.now(),
+            "_raw": raw
+        });
+    }
+
     function handleNotification(notif) {
         if (!notif) return;
         let summary = notif.summary || "";
@@ -90,6 +170,11 @@ Singleton {
             root.dismissNotification(uid, false);
         });
 
+        root.pushNotification(data);
+    }
+
+    // Adds a notification to the history and starts the island alert
+    function pushNotification(data) {
         root.latestNotification = data;
         root.unreadCount += 1;
 

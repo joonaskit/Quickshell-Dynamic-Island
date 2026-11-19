@@ -619,8 +619,9 @@ Item {
                         }
                     }
 
-                    // Edit Menu button (KDE Menu Editor)
+                    // Edit Menu button (KDE Menu Editor), when it is installed
                     Rectangle {
+                        visible: DesktopEntries.byId("org.kde.kmenuedit") !== null
                         Layout.preferredHeight: 26
                         Layout.preferredWidth: editMenuRow.implicitWidth + 14
                         radius: 13
@@ -659,8 +660,9 @@ Item {
                         }
                     }
 
-                    // KRunner button
+                    // KRunner button, under KDE only: elsewhere the launcher is the shell's own
                     Rectangle {
+                        visible: CompositorService.isKde
                         Layout.preferredHeight: 26
                         Layout.preferredWidth: krunnerRow.implicitWidth + 14
                         radius: 13

@@ -43,7 +43,7 @@ The search box shows every row whose title, description or `keywords` holds all 
 - **Island**: what the compact island shows, the expanded island cards and the clock.
 - **Dock** and **Launcher**.
 - **Power**: battery behaviour, such as 60 Hz on battery.
-- **Shortcuts**: KDE's global shortcuts, or niri's binds when the shell runs under niri (`NiriShortcutsSettings.qml`, see `NIRI.md`).
+- **Shortcuts**: KDE's global shortcuts, or under niri the shell's commands bound in niri's config, with a link to niri-settings for niri's other binds (`NiriShortcutsSettings.qml`, see `NIRI.md`).
 - **About**.
 
 Put a setting on the page for the part of the screen it changes.

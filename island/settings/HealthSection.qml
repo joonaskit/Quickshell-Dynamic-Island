@@ -1,6 +1,8 @@
 import "../.."
 import QtQuick
+import Quickshell
 import QtQuick.Layouts
+import "../../services/desktopConflicts.js" as Conflicts
 
 // Health of the shell: the dependency check, the helper scripts and any
 // leftover helpers from an earlier run. Shown on the About page.
@@ -63,6 +65,25 @@ SettingsSection {
         onTriggered: HelperService.scan()
     }
 
+    // Another notification daemon or top bar; checked when the page opens
+    onVisibleChanged: if (visible) NotificationService.checkConflicts()
+
+    readonly property var conflicts: NotificationService.conflicts
+    readonly property var conflictRows: {
+        let rows = [];
+        let c = section.conflicts;
+        if (!c) return rows;
+        if (c.notificationOwner) {
+            let fix = Conflicts.notificationFix(c.notificationOwner);
+            rows.push({ "title": c.notificationOwner + " shows notifications instead of the island", "text": fix.text, "command": fix.command });
+        }
+        if (c.waybar) {
+            let fix = Conflicts.waybarFix(CompositorService.isNiri);
+            rows.push({ "title": "waybar is running as a second top bar", "text": fix.text, "command": fix.command });
+        }
+        return rows;
+    }
+
     // Dependency check
     ColumnLayout {
         readonly property bool matchesSearch: SettingsSearch.matches("Health Dependencies Tools", "missing installed check")
@@ -109,6 +130,76 @@ SettingsSection {
                 font.family: Theme.fontFamily
                 font.pixelSize: 10
                 color: Theme.textSecondary
+            }
+        }
+    }
+
+    // Other programs in the shell's place
+    ColumnLayout {
+        readonly property bool matchesSearch: SettingsSearch.matches("Notifications Conflicts", "mako dunst waybar daemon second bar")
+
+        visible: section.conflictRows.length > 0
+        Layout.fillWidth: true
+        Layout.leftMargin: 12
+        Layout.rightMargin: 12
+        Layout.bottomMargin: 8
+        spacing: 8
+
+        Repeater {
+            model: section.conflictRows
+
+            delegate: ColumnLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: 4
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    StatusDot { dotColor: Theme.accentOrange }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: modelData.title
+                        wrapMode: Text.Wrap
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        color: Theme.textPrimary
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    text: modelData.text
+                    wrapMode: Text.Wrap
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 10
+                    color: Theme.textSecondary
+                }
+
+                RowLayout {
+                    visible: modelData.command !== ""
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    spacing: 8
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: modelData.command
+                        wrapMode: Text.WrapAnywhere
+                        font.family: "monospace"
+                        font.pixelSize: 10
+                        color: Theme.textPrimary
+                    }
+
+                    SmallButton {
+                        text: "Copy"
+                        onClicked: Quickshell.execDetached(["wl-copy", "--", modelData.command])
+                    }
+                }
             }
         }
     }

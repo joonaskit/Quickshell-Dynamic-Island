@@ -205,7 +205,7 @@ Item {
                 (idLower.indexOf("steam") >= 0 && (wApp.indexOf("steam") >= 0 || wTitle.indexOf("steam") >= 0)) ||
                 (idLower.indexOf("spotify") >= 0 && (wApp.indexOf("spotify") >= 0 || wTitle.indexOf("spotify") >= 0)) ||
                 (idLower.length > 3 && (wApp.indexOf(idLower) >= 0 || wTitle.indexOf(idLower) >= 0))) {
-                if (w.isKWin) {
+                if (w.tracked) {
                     WindowService.activateWindow(w.id);
                 } else if (w.raw && typeof w.raw.activate === "function") {
                     if (w.raw.minimized) w.raw.minimized = false;

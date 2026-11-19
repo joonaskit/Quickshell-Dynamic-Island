@@ -46,6 +46,17 @@ TestCase {
         compare(SettingChoices.topBarMode(s.morphToTopBarWhenMaximized, s.alwaysTopBar), "always");
         compare(s.autoHideTopBar, false);
         compare(s.dialStatusIcons, false);
-        compare(s.showVirtualDesktops, false);
+        compare(s.showVirtualDesktops, true);
+        compare(s.dockAutoHideFromWindows, true);
+        compare(s.dockAutoHideAlways, false);
+    }
+
+    function test_first_start_under_niri_applies_niri_defaults() {
+        compare(SettingChoices.firstStartSettings("niri"), SettingChoices.niriDefaults());
+    }
+
+    function test_first_start_elsewhere_applies_nothing() {
+        compare(Object.keys(SettingChoices.firstStartSettings("kde")).length, 0);
+        compare(Object.keys(SettingChoices.firstStartSettings("other")).length, 0);
     }
 }

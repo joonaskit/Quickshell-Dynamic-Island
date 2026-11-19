@@ -272,6 +272,7 @@ Item {
 
             // Divider before Settings
             Rectangle {
+                visible: NetworkService.hasSettings
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Theme.overlay(0.08)
@@ -279,6 +280,7 @@ Item {
 
             // Footer Link: Wi-Fi Settings...
             Rectangle {
+                visible: NetworkService.hasSettings
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.px(28)
                 radius: Theme.corner(8)

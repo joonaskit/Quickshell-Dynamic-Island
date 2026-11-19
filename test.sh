@@ -14,7 +14,7 @@ if [ -z "$RUNNER" ]; then
 fi
 
 status=0
-QT_QPA_PLATFORM=offscreen "$RUNNER" -input tests "$@" || status=1
+QT_QPA_PLATFORM=offscreen QML_XHR_ALLOW_FILE_READ=1 "$RUNNER" -input tests "$@" || status=1
 python3 -m unittest discover -s tests -p 'test_*.py' || status=1
 tests/run_fixtures.sh || status=1
 exit "$status"

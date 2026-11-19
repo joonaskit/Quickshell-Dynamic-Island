@@ -251,6 +251,7 @@ Item {
 
             // Divider before Settings
             Rectangle {
+                visible: BluetoothService.hasSettings
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
                 color: Theme.overlay(0.08)
@@ -258,6 +259,7 @@ Item {
 
             // Footer Link: Bluetooth Settings...
             Rectangle {
+                visible: BluetoothService.hasSettings
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.px(28)
                 radius: Theme.corner(8)

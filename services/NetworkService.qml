@@ -172,10 +172,21 @@ Singleton {
         }
     }
 
-    // Process to launch KDE Plasma Network Settings
+    // The settings app the popup's footer opens: KDE's module under KDE, else the
+    // first of nm-connection-editor or kcmshell6 found. Empty when there is none; the
+    // footer is hidden then.
+    property var settingsCommand: CompositorService.isKde ? ["kcmshell6", "kcm_networkmanagement"] : []
+    readonly property bool hasSettings: root.settingsCommand.length > 0
+
     Process {
-        id: settingsProc
-        command: ["kcmshell6", "kcm_networkmanagement"]
+        running: !CompositorService.isKde
+        command: ["sh", "-c", "for c in \"$@\"; do command -v \"${c%% *}\" >/dev/null 2>&1 && { echo \"$c\"; exit 0; }; done", "sh", "nm-connection-editor", "kcmshell6 kcm_networkmanagement"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let found = text.trim();
+                if (found !== "") root.settingsCommand = found.split(" ");
+            }
+        }
     }
 
     function queryNetwork() {
@@ -216,6 +227,6 @@ Singleton {
     }
 
     function openSettings() {
-        settingsProc.running = true;
+        if (root.hasSettings) Quickshell.execDetached(root.settingsCommand);
     }
 }

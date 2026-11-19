@@ -10,7 +10,11 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    readonly property var steps: ["Welcome", "System check", "Import", "Setup", "Tips", "Done"]
+    // Every page, in the order of OnboardingWindow's StackLayout, and the steps shown:
+    // the niri page only under niri
+    readonly property var pages: ["Welcome", "System check", "niri", "Import", "Setup", "Tips", "Done"]
+    readonly property var steps: root.pages.filter(p => p !== "niri" || CompositorService.isNiri)
+    readonly property int pageIndex: root.pages.indexOf(root.steps[root.step])
 
     property bool open: false
     property int step: 0

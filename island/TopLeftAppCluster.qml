@@ -387,7 +387,7 @@ Item {
                 }
 
                 MenuItem {
-                    visible: !root.isDesktop
+                    visible: !root.isDesktop && WindowService.canMinimize
                     iconName: "minimize"
                     iconColor: Theme.textSecondary
                     label: "Minimize"
@@ -398,7 +398,7 @@ Item {
                 }
 
                 MenuItem {
-                    visible: !root.isDesktop
+                    visible: !root.isDesktop && WindowService.canKeepAbove
                     iconName: "pin"
                     iconColor: Theme.accentOrangeStrong
                     label: "Always on Top"
@@ -412,7 +412,7 @@ Item {
                     visible: !root.isDesktop
                     iconName: "desktop"
                     iconColor: Theme.accentPurple
-                    label: "Move to Next Desktop"
+                    label: "Move to Next " + WindowService.desktopNoun
                     onClicked: {
                         WindowService.moveToNextDesktop(root.activeWindowId || root.activeAppId);
                         root.closeMenu();

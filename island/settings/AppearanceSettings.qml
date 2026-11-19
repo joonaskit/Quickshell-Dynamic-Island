@@ -1,5 +1,6 @@
 import "../.."
 import QtQuick
+import QtQuick.Layouts
 
 SettingsCategory {
 
@@ -28,7 +29,7 @@ SettingsCategory {
         SettingSegmented {
             title: "Style"
             keywords: "glass frosted blur transparent translucent solid"
-            description: Theme.glass && !Theme.blurAvailable
+            description: Theme.glass && !Theme.blurSupported
                 ? "Frosted glass for the island, dock and launcher. Blurring the desktop behind it needs Quickshell 0.3 or later"
                 : "Frosted glass for the island, dock and launcher, on either appearance. KDE apps follow the appearance only"
             iconName: "contrast"
@@ -40,6 +41,57 @@ SettingsCategory {
             ]
             onSelected: function(val) {
                 SettingsService.setSetting("shellStyle", val);
+            }
+        }
+
+        // Under niri: whether niri blurs the shell's surfaces (NiriService.blur, docs/GLASS.md)
+        ColumnLayout {
+            id: niriBlur
+            readonly property var blur: NiriService.blur
+            readonly property bool off: !!blur && !blur.enabled
+            readonly property bool blocked: !!blur && blur.blockedBy && blur.blockedBy.length > 0
+            readonly property bool xray: !!blur && blur.xrayOff && blur.xrayOff.length === 0
+            Layout.fillWidth: true
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            Layout.bottomMargin: 8
+            spacing: 6
+            visible: CompositorService.isNiri && Theme.glass && !!blur && blur.enabled !== undefined && !SettingsSearch.active
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontPx(10)
+                    color: niriBlur.off || niriBlur.blocked ? Theme.accentOrange : Theme.textSecondary
+                    text: niriBlur.off
+                        ? "niri's blur is off (blur { off } in its config), so the glass is drawn without it"
+                        : niriBlur.blocked
+                            ? "A layer-rule in niri's config turns blur off for " + niriBlur.blur.blockedBy.join(", ")
+                            : niriBlur.xray
+                                ? "niri blurs the wallpaper behind the shell, not the windows (xray). To blur the windows too, add this layer-rule to niri's config:"
+                                : "niri blurs what is behind the shell"
+                }
+
+                SettingButton {
+                    visible: !DepsService.noneUsable(["niri-settings"])
+                    text: niriBlur.off ? "Appearance in niri settings" : "Layer rules in niri settings"
+                    onClicked: WindowService.openNiriSettings(niriBlur.off ? "appearance" : "layer-rules")
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: niriBlur.xray && !niriBlur.off && !niriBlur.blocked
+                text: niriBlur.blur ? niriBlur.blur.suggestedRule : ""
+                textFormat: Text.PlainText
+                font.family: "monospace"
+                font.pixelSize: Theme.fontPx(10)
+                color: Theme.textPrimary
             }
         }
 
@@ -146,7 +198,7 @@ SettingsCategory {
 
         SettingSegmented {
             title: "Show On"
-            description: "The main screen is the one set as main in KDE System Settings. The island, dock and other windows follow it"
+            description: (CompositorService.isNiri ? "The main screen is the one that had focus when the shell started" : "The main screen is the one set as main in KDE System Settings") + ". The island, dock and other windows follow it"
             iconName: "window"
             iconColor: Theme.accentGreen
             currentValue: SettingsService.screenMode

@@ -43,10 +43,22 @@ if [ -n "$FIXTURE_NAMES" ]; then
         mkdir -p "$FIXTURE_TMP/work/$name"
         layout "$dir" "$name"
         log="$FIXTURE_TMP/$name.log"
+        # A fixture with a `niri` file talks to tests/fake_niri.py, which serves the
+        # recordings in tests/data/niri and logs the actions sent to it
+        niri_env=()
+        fake_pid=""
+        if [ -f "$TESTS/fixtures/$name/niri" ]; then
+            sock="$FIXTURE_TMP/work/$name/niri.sock"
+            python3 "$TESTS/fake_niri.py" "$sock" "$FIXTURE_TMP/work/$name/niri-actions.jsonl" &
+            fake_pid=$!
+            for _ in $(seq 50); do [ -S "$sock" ] && break; sleep 0.1; done
+            niri_env=(NIRI_SOCKET="$sock" FAKE_NIRI_PID="$fake_pid" FAKE_NIRI_LOG="$FIXTURE_TMP/work/$name/niri-actions.jsonl")
+        fi
         # Config files of its own (ISLAND_CONFIG_DIR, not yet created), so no fixture
         # sees another's settings
-        FIXTURE_WORK="$FIXTURE_TMP/work/$name" ISLAND_CONFIG_DIR="$FIXTURE_TMP/work/$name/config" timeout -k 2 20 quickshell -p "$dir" --no-color >"$log" 2>&1
+        env "${niri_env[@]}" FIXTURE_WORK="$FIXTURE_TMP/work/$name" ISLAND_CONFIG_DIR="$FIXTURE_TMP/work/$name/config" timeout -k 2 20 quickshell -p "$dir" --no-color >"$log" 2>&1
         code=$?
+        [ -n "$fake_pid" ] && kill "$fake_pid" 2>/dev/null && wait "$fake_pid" 2>/dev/null
         result="$(grep -o 'RESULT .*' "$log" | tail -n 1)"
         # A script error in the shell's own files fails the fixture even when its checks
         # pass: it is the warning a hand check is most likely to miss

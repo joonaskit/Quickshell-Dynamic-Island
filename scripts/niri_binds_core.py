@@ -16,80 +16,12 @@ import shlex
 
 import shortcuts
 
-GROUPS = ["Shell", "Apps", "Windows", "Layout", "Workspaces", "Monitors", "System"]
-
-# Shell IPC commands, as in shortcuts.py, plus the dial, which KDE opens from its own key
+# Shell IPC commands, as in shortcuts.py, plus the dial, which KDE opens from its own key.
+# niri's own actions are edited in niri-settings (docs/NIRI.md); the page lists only these.
 SHELL_ACTIONS = shortcuts.ACTIONS + [
     ("dial.toggle", "Launcher", "Toggle the dial", "dial", "toggle", ()),
 ]
 SHELL_BY_COMMAND = {(a[3], a[4], *a[5]): a for a in SHELL_ACTIONS}
-
-
-def _directions(template, title, names):
-    return [(template % n, title % n.replace("-", " ")) for n in names]
-
-
-# (action, title) per group: listed even while unbound, so they can be given a key
-CATALOGUE = {
-    "Windows": [
-        ("close-window", "Close window"),
-        *_directions("focus-column-%s", "Focus column %s", ("left", "right", "first", "last")),
-        *_directions("focus-window-%s", "Focus window %s", ("up", "down", "previous")),
-        *_directions("move-column-%s", "Move column %s", ("left", "right")),
-        *_directions("move-column-to-%s", "Move column to %s", ("first", "last")),
-        *_directions("move-window-%s", "Move window %s", ("up", "down")),
-        ("consume-or-expel-window-left", "Consume or expel window left"),
-        ("consume-or-expel-window-right", "Consume or expel window right"),
-        ("consume-window-into-column", "Consume window into column"),
-        ("expel-window-from-column", "Expel window from column"),
-        ("toggle-window-floating", "Toggle floating"),
-        ("switch-focus-between-floating-and-tiling", "Switch focus between floating and tiling"),
-        ("fullscreen-window", "Fullscreen window"),
-        ("toggle-windowed-fullscreen", "Toggle windowed fullscreen"),
-    ],
-    "Layout": [
-        ("maximize-column", "Maximize column"),
-        ("maximize-window-to-edges", "Maximize window to edges"),
-        ("expand-column-to-available-width", "Expand column to available width"),
-        ("center-column", "Center column"),
-        ("center-visible-columns", "Center visible columns"),
-        ("switch-preset-column-width", "Next preset column width"),
-        ("switch-preset-column-width-back", "Previous preset column width"),
-        ("switch-preset-window-height", "Next preset window height"),
-        ("reset-window-height", "Reset window height"),
-        ('set-column-width "-10%"', "Narrower column"),
-        ('set-column-width "+10%"', "Wider column"),
-        ('set-window-height "-10%"', "Shorter window"),
-        ('set-window-height "+10%"', "Taller window"),
-        ("toggle-column-tabbed-display", "Toggle tabbed column"),
-    ],
-    "Workspaces": [
-        *_directions("focus-workspace-%s", "Focus workspace %s", ("up", "down", "previous")),
-        *_directions("move-column-to-workspace-%s", "Move column to workspace %s", ("up", "down")),
-        *_directions("move-window-to-workspace-%s", "Move window to workspace %s", ("up", "down")),
-        *_directions("move-workspace-%s", "Move workspace %s", ("up", "down")),
-        *[("focus-workspace %d" % n, "Focus workspace %d" % n) for n in range(1, 10)],
-        *[("move-column-to-workspace %d" % n, "Move column to workspace %d" % n) for n in range(1, 10)],
-    ],
-    "Monitors": [
-        *_directions("focus-monitor-%s", "Focus monitor %s", ("left", "right", "up", "down")),
-        *_directions("move-column-to-monitor-%s", "Move column to monitor %s", ("left", "right", "up", "down")),
-        *_directions("move-workspace-to-monitor-%s", "Move workspace to monitor %s", ("left", "right")),
-    ],
-    "System": [
-        ("toggle-overview", "Toggle overview"),
-        ("show-hotkey-overlay", "Show hotkey overlay"),
-        ("screenshot", "Screenshot"),
-        ("screenshot-screen", "Screenshot screen"),
-        ("screenshot-window", "Screenshot window"),
-        ('switch-layout "next"', "Next keyboard layout"),
-        ('switch-layout "prev"', "Previous keyboard layout"),
-        ("toggle-keyboard-shortcuts-inhibit", "Toggle shortcut inhibit"),
-        ("power-off-monitors", "Power off monitors"),
-        ("quit", "Quit niri"),
-    ],
-}
-CATALOGUE_BY_ACTION = {a: (g, t) for g, rows in CATALOGUE.items() for a, t in rows}
 
 # Modifier spellings niri accepts, by what they mean. Mod is Super in a real session.
 MODIFIERS = {
@@ -318,7 +250,9 @@ def action_text(node):
 
 
 def humanize(action):
-    return action[:1].upper() + action[1:].replace("-", " ")
+    """"move-column-left" -> "Move column left"; arguments stay as written."""
+    name, sep, args = action.partition(" ")
+    return name[:1].upper() + name[1:].replace("-", " ") + sep + args
 
 
 class Bind:
@@ -372,57 +306,39 @@ def shell_command(args):
 
 
 def classify(bind, shell_dir):
-    """(id, group, title, detail) for a bind found in the config."""
+    """(id, title) for a bind found in the config: the title names it in a conflict."""
     node = bind.action_node
     name = node.name.value
     if name in ("spawn", "spawn-sh"):
         args = [a.value for a in node.args]
         command = shell_command(args)
         if command in SHELL_BY_COMMAND:
-            action = SHELL_BY_COMMAND[command]
-            return "shell:" + action[0], "Shell", action[2], " ".join(command)
-        detail = args[0] if name == "spawn-sh" and args else " ".join(shlex.quote(a) for a in args)
+            return "shell:" + SHELL_BY_COMMAND[command][0], SHELL_BY_COMMAND[command][2]
         title_tok = bind.props.get("hotkey-overlay-title")
         if title_tok is not None and title_tok.kind == "string" and title_tok.value:
-            return bind.action, "Apps", title_tok.value, detail
-        return bind.action, "Apps", detail, ""
-    if bind.action in CATALOGUE_BY_ACTION:
-        group, title = CATALOGUE_BY_ACTION[bind.action]
-        return bind.action, group, title, bind.action
-    if "monitor" in name:
-        group = "Monitors"
-    elif "workspace" in name:
-        group = "Workspaces"
-    elif "window" in name or "column" in name:
-        group = "Windows"
-    else:
-        group = "System"
-    return bind.action, group, humanize(bind.action), bind.action
+            return bind.action, title_tok.value
+        detail = args[0] if name == "spawn-sh" and args else " ".join(shlex.quote(a) for a in args)
+        return bind.action, detail
+    return bind.action, humanize(bind.action)
 
 
 def list_actions(text, shell_dir):
-    """Rows for the page: {"groups": [{"name", "actions": [{id, title, detail, keys}]}]}.
+    """Rows for the page: {"groups": [{"name": "Shell", "actions": [{id, title, detail, keys}]}]}.
 
-    Catalogue actions come first in each group, bound or not, then the config's other
-    binds in the order they are written."""
+    Every shell action, bound or not. Other binds are not listed, but set_key still
+    checks them for conflicts."""
     _blocks, binds = find_binds(text)
     rows = {}
-    order = {g: [] for g in GROUPS}
-
-    def row(action_id, group, title, detail):
-        if action_id not in rows:
-            rows[action_id] = {"id": action_id, "title": title, "detail": detail, "keys": []}
-            order[group].append(action_id)
-        return rows[action_id]
-
+    order = []
     for a in SHELL_ACTIONS:
-        row("shell:" + a[0], "Shell", a[2], " ".join((a[3], a[4], *a[5])))
-    for group, entries in CATALOGUE.items():
-        for action, title in entries:
-            row(action, group, title, action)
+        action_id = "shell:" + a[0]
+        rows[action_id] = {"id": action_id, "title": a[2], "detail": " ".join((a[3], a[4], *a[5])), "keys": []}
+        order.append(action_id)
     for bind in binds:
-        row(*classify(bind, shell_dir))["keys"].append(bind.key)
-    return {"groups": [{"name": g, "actions": [rows[i] for i in order[g]]} for g in GROUPS]}
+        action_id = classify(bind, shell_dir)[0]
+        if action_id in rows:
+            rows[action_id]["keys"].append(bind.key)
+    return {"groups": [{"name": "Shell", "actions": [rows[i] for i in order]}]}
 
 
 def new_action_text(action_id, shell_dir):
@@ -432,8 +348,7 @@ def new_action_text(action_id, shell_dir):
             if "shell:" + a[0] == action_id:
                 words = ["quickshell", "ipc", "-p", shell_dir, "call", a[3], a[4], *a[5]]
                 return "spawn " + " ".join(json.dumps(w, ensure_ascii=False) for w in words)
-        return None
-    return action_id if action_id in CATALOGUE_BY_ACTION else None
+    return None
 
 
 class EditError(Exception):
@@ -483,7 +398,7 @@ def set_key(text, action_id, old_key, new_key, shell_dir, force=False):
     for bind in binds:
         if normalize_key(bind.key) != wanted:
             continue
-        bind_id, _group, title, _detail = classify(bind, shell_dir)
+        bind_id, title = classify(bind, shell_dir)
         if bind_id == action_id:
             if old is not None and old != wanted:
                 # Already has the new key: dropping the old one is all that is left

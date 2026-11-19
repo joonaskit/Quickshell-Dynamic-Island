@@ -75,7 +75,9 @@ OnboardingPage {
 
     Text {
         Layout.fillWidth: true
-        text: "The Shortcuts page in Settings binds these, and the volume, brightness, media and timer controls, to keys for you. It saves them in KDE's own shortcut settings."
+        text: CompositorService.isNiri
+            ? "The Shortcuts page in Settings binds these, and the volume, brightness, media and timer controls, to keys for you. It saves them in niri's config."
+            : "The Shortcuts page in Settings binds these, and the volume, brightness, media and timer controls, to keys for you. It saves them in KDE's own shortcut settings."
         wrapMode: Text.WordWrap
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontPx(12)
