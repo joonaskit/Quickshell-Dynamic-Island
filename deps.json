@@ -38,7 +38,7 @@
         "The shell itself (X11 sessions are not supported)"
       ],
       "packages": {},
-      "note": "Log in to a Wayland session: KDE Plasma, or niri (experimental, see docs/NIRI.md)"
+      "note": "Log in to a Wayland session: KDE Plasma, or niri (beta, see docs/NIRI.md)"
     },
     {
       "id": "kwin",
