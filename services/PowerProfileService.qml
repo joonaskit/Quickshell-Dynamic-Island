@@ -27,57 +27,59 @@ Singleton {
     readonly property string lowRefreshProblem: DepsService.problem(["kscreen-doctor"])
     readonly property bool lowRefreshAvailable: lowRefreshProblem === ""
 
-    // Process to query active profile
+    // Follows power-profiles-daemon's change signals through Quickshell, so nothing polls it.
+    // Quickshell never listens if the daemon was not there when the shell started, so the
+    // profile is also read once at start and after each change made here.
+    Connections {
+        target: PowerProfiles
+        function onProfileChanged() {
+            root.profileSignals++;
+            root.activeProfile = root.profileName(PowerProfiles.profile);
+        }
+    }
+
+    // Signals seen, and how many there were when the running read started
+    property int profileSignals: 0
+    property int readSignals: 0
+
+    function profileName(profile) {
+        switch (profile) {
+        case PowerProfile.PowerSaver: return "power-saver";
+        case PowerProfile.Performance: return "performance";
+        default: return "balanced";
+        }
+    }
+
     Process {
         id: queryProc
         command: ["busctl", "--system", "get-property", "net.hadess.PowerProfiles", "/net/hadess/PowerProfiles", "net.hadess.PowerProfiles", "ActiveProfile"]
-        running: false
-
-        stdout: SplitParser {
-            onRead: function(line) {
-                let t = line.trim();
-                // Format: s "performance"
-                let match = t.match(/"([^"]+)"/);
-                if (match && match[1]) {
-                    root.activeProfile = match[1];
-                }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                // A signal that came in during the read is newer than its reply. Format: s "performance"
+                let match = text.trim().match(/"([^"]+)"/);
+                if (match && root.readSignals === root.profileSignals) root.activeProfile = match[1];
             }
         }
     }
 
-    Timer {
-        id: pollTimer
-        interval: 4000
-        running: true
-        repeat: true
-        onTriggered: {
-            root.queryProfile();
-        }
-    }
-
-    Component.onCompleted: {
-        root.queryProfile();
-    }
+    Component.onCompleted: root.queryProfile()
 
     function queryProfile() {
-        if (!queryProc.running) {
-            queryProc.running = true;
-        }
+        if (queryProc.running) return;
+        root.readSignals = root.profileSignals;
+        queryProc.running = true;
     }
 
     function setProfile(profileName) {
+        if (root.profiles.indexOf(profileName) < 0) return;
         root.activeProfile = profileName;
-        let p = Qt.createQmlObject('import Quickshell.Io; Process { command: ["busctl", "--system", "set-property", "net.hadess.PowerProfiles", "/net/hadess/PowerProfiles", "net.hadess.PowerProfiles", "ActiveProfile", "s", "' + profileName + '"]; running: true; }', root);
-        refreshTimer.restart();
+        setProc.command = ["busctl", "--system", "set-property", "net.hadess.PowerProfiles", "/net/hadess/PowerProfiles", "net.hadess.PowerProfiles", "ActiveProfile", "s", profileName];
+        setProc.running = true;
     }
 
-    Timer {
-        id: refreshTimer
-        interval: 300
-        repeat: false
-        onTriggered: {
-            root.queryProfile();
-        }
+    Process {
+        id: setProc
+        onExited: root.queryProfile()
     }
 
     // Lower the built-in screen's refresh rate while on battery, and put it back on AC

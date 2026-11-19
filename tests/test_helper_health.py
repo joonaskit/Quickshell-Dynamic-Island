@@ -46,6 +46,13 @@ class LongRunningTest(unittest.TestCase):
         self.assertTrue(hh.is_long_running("devices.py", ["monitor"]))
         self.assertFalse(hh.is_long_running("devices.py", ["list"]))
 
+    def test_watchers_only(self):
+        for script in ("gamemode.py", "kdeconnect.py", "downloads_tracker.py"):
+            self.assertTrue(hh.is_long_running(script, ["watch"]))
+        self.assertFalse(hh.is_long_running("gamemode.py", ["status"]))
+        self.assertFalse(hh.is_long_running("kdeconnect.py", ["list"]))
+        self.assertFalse(hh.is_long_running("downloads_tracker.py", []))
+
     def test_one_shot_scripts(self):
         self.assertFalse(hh.is_long_running("shortcuts.py", []))
         self.assertFalse(hh.is_long_running("island_run.py", []))

@@ -93,7 +93,8 @@
       "features": [
         "Window tracking for the dock and the active-app pill",
         "Activities API for other apps",
-        "File copy progress from KDE apps"
+        "File copy progress from KDE apps",
+        "Live updates for the KDE Connect and GameMode widgets"
       ],
       "packages": {
         "arch": "python-dbus",
@@ -113,7 +114,9 @@
       "features": [
         "Window tracking for the dock and the active-app pill",
         "Activities API for other apps",
-        "File copy progress from KDE apps"
+        "File copy progress from KDE apps",
+        "Live updates for the KDE Connect and GameMode widgets",
+        "The dock's Downloads stack"
       ],
       "packages": {
         "arch": "python-gobject",

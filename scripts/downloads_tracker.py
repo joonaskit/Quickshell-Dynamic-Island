@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""The newest files in the downloads folder, for DownloadsService.
+
+With no argument prints them once as JSON. With `watch` prints them, then again
+on each change to the folder (one JSON line each).
+"""
 import json
 import os
 import subprocess
@@ -90,5 +95,37 @@ def scan():
         "files": items
     }
 
+# A download writes many times, so wait for a gap before scanning again
+SETTLE_MS = 500
+
+
+def watch():
+    from gi.repository import Gio, GLib
+
+    last = [None]
+    pending = [None]
+
+    def emit():
+        pending[0] = None
+        line = json.dumps(scan())
+        if line != last[0]:
+            last[0] = line
+            print(line, flush=True)
+        return False
+
+    def schedule(*_args):
+        if pending[0] is not None:
+            GLib.source_remove(pending[0])
+        pending[0] = GLib.timeout_add(SETTLE_MS, emit)
+
+    emit()
+    monitor = Gio.File.new_for_path(get_downloads_dir()).monitor_directory(Gio.FileMonitorFlags.WATCH_MOVES, None)
+    monitor.connect("changed", schedule)
+    GLib.MainLoop().run()
+
+
 if __name__ == '__main__':
-    print(json.dumps(scan()))
+    if sys.argv[1:] == ['watch']:
+        watch()
+    else:
+        print(json.dumps(scan()))

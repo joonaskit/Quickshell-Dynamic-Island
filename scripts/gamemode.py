@@ -6,6 +6,7 @@ Talks to gamemoded over the session bus with busctl. Output is JSON.
 Commands:
   status        whether gamemoded is reachable, the registered games and whether
                 the shell itself is registered ("forced")
+  watch         print the status, then again on each change (one JSON line each)
   force-on      register the shell (this script's parent) as a game
   force-off     unregister it
 
@@ -50,15 +51,14 @@ def process_name(pid):
         return str(pid)
 
 
-def cmd_status():
+def read_status():
     shell_pid = os.getppid()
     try:
         pids = parse_games(busctl("call", SERVICE, PATH, SERVICE, "ListGames"))
     except GameModeError:
-        print(json.dumps({"available": False, "games": [], "forced": False}))
-        return
+        return {"available": False, "games": [], "forced": False}
     games = [{"pid": pid, "name": process_name(pid)} for pid in pids if pid != shell_pid]
-    print(json.dumps({"available": True, "games": games, "forced": shell_pid in pids}))
+    return {"available": True, "games": games, "forced": shell_pid in pids}
 
 
 def set_forced(on):
@@ -67,12 +67,15 @@ def set_forced(on):
 
 
 def main(argv):
-    if len(argv) != 2 or argv[1] not in ("status", "force-on", "force-off"):
+    if len(argv) != 2 or argv[1] not in ("status", "watch", "force-on", "force-off"):
         print(__doc__, file=sys.stderr)
         return 2
     try:
         if argv[1] == "status":
-            cmd_status()
+            print(json.dumps(read_status()))
+        elif argv[1] == "watch":
+            import dbus_watch
+            dbus_watch.watch(SERVICE, read_status)
         else:
             set_forced(argv[1] == "force-on")
     except GameModeError as exc:

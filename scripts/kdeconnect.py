@@ -5,6 +5,7 @@ Talks to the kdeconnect daemon over the session bus with busctl. Output is JSON.
 
 Commands:
   list                         paired devices with reachability, battery and the actions they offer
+  watch                        print the list, then again on each change (one JSON line each)
   ping <id>                    send a ping
   clipboard <id>               send this computer's clipboard to the device
   ring <id>                    make the device ring (Find my phone)
@@ -81,7 +82,7 @@ def get_all(path, iface):
     return {name: value["data"] for name, value in data["data"][0].items()}
 
 
-def cmd_list():
+def read_devices():
     out = json.loads(busctl("call", SERVICE, DAEMON_PATH, SERVICE + ".daemon", "devices", "bb", "false", "true"))
     ids = [i for i in out["data"][0] if ID_PATTERN.match(i)]
     paths = busctl("tree", SERVICE, "--list").split("\n")
@@ -92,7 +93,15 @@ def cmd_list():
         plugins = plugins_in_tree(paths, device_id) if props.get("isReachable") else set()
         battery = get_all(path + "/battery", DEVICE_IFACE + ".battery") if "battery" in plugins else None
         devices.append(summarize_device(device_id, props, plugins, battery))
-    print(json.dumps({"devices": devices}))
+    return {"devices": devices}
+
+
+def read_devices_or_error():
+    """The list, or {"error": ...} while the daemon cannot be reached"""
+    try:
+        return read_devices()
+    except (KdeConnectError, ValueError, KeyError, IndexError) as exc:
+        return {"error": str(exc)}
 
 
 def run_action(action, device_id, argument=None):
@@ -112,7 +121,10 @@ def main(argv):
     command, rest = argv[1], argv[2:]
     try:
         if command == "list":
-            cmd_list()
+            print(json.dumps(read_devices()))
+        elif command == "watch" and not rest:
+            import dbus_watch
+            dbus_watch.watch(SERVICE, read_devices_or_error)
         elif command in ("ping", "clipboard", "ring") and len(rest) == 1:
             run_action(command, rest[0])
         elif command in ("share-text", "share-url") and len(rest) == 2:

@@ -64,11 +64,38 @@ Singleton {
         if (!configProc.running) configProc.running = true;
     }
 
+    // KWin's change signals, one JSON line each. Lines that only move the current temperature
+    // (every step of a transition) are applied as they come; anything else reads the state again
+    HelperProcess {
+        id: monitorProc
+        helperId: "nightlight"
+        helperName: "Night Light monitor"
+        wanted: root.widgetEnabled && CompositorService.isKde
+        command: ["busctl", "--user", "--json=short", "monitor", "--match",
+                  "type='signal',path='/org/kde/KWin/NightLight',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged'"]
+        onStarted: root.refresh()
+        stdout: SplitParser {
+            onRead: function(line) {
+                let changed = null;
+                try {
+                    changed = JSON.parse(line).payload.data[1];
+                } catch (e) {
+                    return;
+                }
+                let keys = Object.keys(changed);
+                if (keys.length === 1 && keys[0] === "currentTemperature") {
+                    root.currentTemperature = changed.currentTemperature.data;
+                    return;
+                }
+                signalTimer.restart();
+            }
+        }
+    }
+
+    // Several properties change together, so one read follows a burst of signals
     Timer {
-        interval: 10000
-        running: root.widgetEnabled && CompositorService.isKde
-        repeat: true
-        triggeredOnStart: true
+        id: signalTimer
+        interval: 200
         onTriggered: root.refresh()
     }
 
