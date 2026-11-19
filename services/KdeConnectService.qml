@@ -40,30 +40,36 @@ Singleton {
         if (!listProc.running) listProc.running = true;
     }
 
-    Timer {
-        interval: 5000
-        running: root.enabled
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refresh()
+    function applyList(line) {
+        try {
+            let msg = JSON.parse(line.trim());
+            if (msg.devices) {
+                root.devices = msg.devices;
+                root.daemonAvailable = true;
+                return;
+            }
+        } catch (e) {}
+        root.daemonAvailable = false;
+        root.devices = [];
     }
 
+    // Prints the device list again whenever the daemon signals a change
+    HelperProcess {
+        helperId: "kdeconnect"
+        helperName: "KDE Connect watcher"
+        wanted: root.enabled
+        command: ["python3", "-u", root.script, "watch"]
+        stdout: SplitParser {
+            onRead: line => root.applyList(line)
+        }
+    }
+
+    // A one-off read, for when the popup opens
     Process {
         id: listProc
         command: ["python3", root.script, "list"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    let msg = JSON.parse(text.trim());
-                    if (msg.devices) {
-                        root.devices = msg.devices;
-                        root.daemonAvailable = true;
-                        return;
-                    }
-                } catch (e) {}
-                root.daemonAvailable = false;
-                root.devices = [];
-            }
+            onStreamFinished: root.applyList(text)
         }
     }
 

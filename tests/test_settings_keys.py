@@ -37,7 +37,7 @@ def problems(qml, example_keys):
     """One line per missing edit, empty when every key is handled in all five places."""
     load = function_body(qml, "applySettings")
     reset = function_body(qml, "resetDefaults")
-    saved = set(re.findall(r'"(\w+)"\s*:', function_body(qml, "saveSettings")))
+    saved = set(re.findall(r'"(\w+)"\s*:', function_body(qml, "currentData")))
     found = []
     for key in example_keys:
         if not re.search(r"^\s*property\s+\w+\s+%s\s*:" % re.escape(key), qml, re.M):
@@ -47,7 +47,7 @@ def problems(qml, example_keys):
         if key not in NOT_RESET and not assigns(reset, key):
             found.append("%s: not reset in resetDefaults" % key)
         if key not in saved:
-            found.append("%s: not saved in saveSettings" % key)
+            found.append("%s: not saved in currentData" % key)
     for key in sorted(saved - set(example_keys)):
         found.append("%s: saved but has no default in settings.json.example" % key)
     return found
@@ -88,7 +88,7 @@ class SettingsKeysTest(unittest.TestCase):
 
     def test_missing_save(self):
         qml = self.without_line(r'"showOsd": root\.showOsd')
-        self.assertIn("showOsd: not saved in saveSettings", problems(qml, self.keys))
+        self.assertIn("showOsd: not saved in currentData", problems(qml, self.keys))
 
     def test_missing_example_default(self):
         keys = [k for k in self.keys if k != "showOsd"]

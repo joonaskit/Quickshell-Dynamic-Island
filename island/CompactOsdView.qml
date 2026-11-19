@@ -34,10 +34,10 @@ Item {
             Layout.preferredHeight: dotSize
 
             Behavior on leftEdge {
-                NumberAnimation { duration: dotTrack.movingRight ? 220 : 120; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.duration(dotTrack.movingRight ? 220 : 120); easing.type: Easing.OutCubic }
             }
             Behavior on rightEdge {
-                NumberAnimation { duration: dotTrack.movingRight ? 120 : 220; easing.type: Easing.OutCubic }
+                NumberAnimation { duration: Theme.duration(dotTrack.movingRight ? 120 : 220); easing.type: Easing.OutCubic }
             }
 
             Repeater {

@@ -11,44 +11,43 @@ Singleton {
     property var recentFiles: []
     property bool isScanning: false
 
-    // The scan only runs while the dock shows the Downloads item
+    // The watcher only runs while the dock shows the Downloads item
     readonly property bool enabled: SettingsService.dockShowDownloads
-    onEnabledChanged: { if (enabled) refresh(); }
 
-    // Scanner process that queries the downloads folder and recent files
-    Process {
-        id: scanProc
-        command: ["python3", "-u", Quickshell.shellDir + "/scripts/downloads_tracker.py"]
-
-        stdout: StdioCollector {
-            onTextChanged: {
-                let t = text.trim();
-                if (t.length > 0) {
-                    try {
-                        let res = JSON.parse(t);
-                        if (res && res.dir) {
-                            root.downloadsDir = res.dir;
-                            root.recentFiles = res.files || [];
-                        }
-                    } catch(e) {
-                        console.warn("[DownloadsService] Error parsing downloads JSON:", e);
-                    }
+    function applyScan(line) {
+        let t = line.trim();
+        if (t.length > 0) {
+            try {
+                let res = JSON.parse(t);
+                if (res && res.dir) {
+                    root.downloadsDir = res.dir;
+                    root.recentFiles = res.files || [];
                 }
-                root.isScanning = false;
+            } catch (e) {
+                console.warn("[DownloadsService] Error parsing downloads JSON:", e);
             }
+        }
+        root.isScanning = false;
+    }
+
+    // Scans again whenever something in the downloads folder changes
+    HelperProcess {
+        helperId: "downloads"
+        helperName: "Downloads watcher"
+        wanted: root.enabled
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/downloads_tracker.py", "watch"]
+        stdout: SplitParser {
+            onRead: line => root.applyScan(line)
         }
     }
 
-    // Auto-refresh timer
-    Timer {
-        interval: 8000
-        repeat: true
-        running: root.enabled
-        onTriggered: root.refresh()
-    }
-
-    Component.onCompleted: {
-        root.refresh();
+    // A one-off scan, for when the stack opens
+    Process {
+        id: scanProc
+        command: ["python3", "-u", Quickshell.shellDir + "/scripts/downloads_tracker.py"]
+        stdout: StdioCollector {
+            onStreamFinished: root.applyScan(text)
+        }
     }
 
     function refresh() {

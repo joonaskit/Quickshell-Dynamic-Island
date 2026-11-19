@@ -28,36 +28,42 @@ Singleton {
     }
 
     function setForced(on) {
-        // Optimistic, so the switch moves at once; the next status read corrects it
+        // Optimistic, so the switch moves at once; the status read after it corrects it
         root.forced = on;
         runProc.command = ["python3", root.script, on ? "force-on" : "force-off"];
         runProc.running = true;
     }
 
-    Timer {
-        interval: 3000
-        running: root.enabled
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.refresh()
+    function applyStatus(line) {
+        try {
+            let msg = JSON.parse(line.trim());
+            root.available = !!msg.available;
+            root.games = msg.games || [];
+            root.forced = !!msg.forced;
+            return;
+        } catch (e) {}
+        root.available = false;
+        root.games = [];
+        root.forced = false;
     }
 
+    // Prints the status again whenever gamemoded signals a change
+    HelperProcess {
+        helperId: "gamemode"
+        helperName: "GameMode watcher"
+        wanted: root.enabled
+        command: ["python3", "-u", root.script, "watch"]
+        stdout: SplitParser {
+            onRead: line => root.applyStatus(line)
+        }
+    }
+
+    // A one-off read, for when the popup opens and after a change made here
     Process {
         id: statusProc
         command: ["python3", root.script, "status"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    let msg = JSON.parse(text.trim());
-                    root.available = !!msg.available;
-                    root.games = msg.games || [];
-                    root.forced = !!msg.forced;
-                    return;
-                } catch (e) {}
-                root.available = false;
-                root.games = [];
-                root.forced = false;
-            }
+            onStreamFinished: root.applyStatus(text)
         }
     }
 

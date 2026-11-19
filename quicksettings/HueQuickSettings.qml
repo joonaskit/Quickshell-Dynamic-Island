@@ -167,14 +167,14 @@ Item {
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
                     color: HueService.anyOn ? Qt.rgba(255/255, 159/255, 10/255, 0.22) : Theme.cardSurfaceHover
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "bulb"
                         size: Theme.px(20)
                         color: HueService.anyOn ? root.hueColor : Theme.textTertiary
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
                     }
                 }
 
@@ -237,8 +237,8 @@ Item {
                     radius: Theme.px(14)
                     color: root.light && root.light.on ? Qt.rgba(255/255, 159/255, 10/255, 0.25) : Theme.overlay(0.1)
                     scale: powerMouse.pressed ? 0.92 : (powerMouse.containsMouse ? 1.05 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
+                    Behavior on scale { NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutBack } }
 
                     Text {
                         anchors.centerIn: parent

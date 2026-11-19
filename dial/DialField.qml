@@ -28,7 +28,7 @@ Rectangle {
     color: "transparent"
     border.width: 1
     border.color: input.activeFocus ? Qt.alpha(root.tint, 0.7) : Theme.glassHairline
-    Behavior on border.color { ColorAnimation { duration: 120 } }
+    Behavior on border.color { ColorAnimation { duration: Theme.duration(120) } }
 
     Text {
         id: labelText

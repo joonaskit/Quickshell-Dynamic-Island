@@ -28,10 +28,10 @@ Rectangle {
         }
 
         SequentialAnimation on x {
-            running: root.indeterminate && root.visible
+            running: root.indeterminate && root.visible && !Theme.reduceMotion
             loops: Animation.Infinite
-            NumberAnimation { from: 0; to: root.width - fill.width; duration: 900; easing.type: Easing.InOutQuad }
-            NumberAnimation { from: root.width - fill.width; to: 0; duration: 900; easing.type: Easing.InOutQuad }
+            NumberAnimation { from: 0; to: root.width - fill.width; duration: Theme.duration(900); easing.type: Easing.InOutQuad }
+            NumberAnimation { from: root.width - fill.width; to: 0; duration: Theme.duration(900); easing.type: Easing.InOutQuad }
         }
     }
 }

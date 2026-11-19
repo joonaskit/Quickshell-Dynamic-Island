@@ -355,14 +355,14 @@ Item {
                 property real pressScale: 1.0
 
                 Behavior on pressScale {
-                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.duration(90); easing.type: Easing.OutCubic }
                 }
 
                 SequentialAnimation {
                     id: launchpadBounceAnim
                     alwaysRunToEnd: true
-                    NumberAnimation { target: launchpadItem; property: "bounceHeight"; to: 12; duration: 100; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: launchpadItem; property: "bounceHeight"; to: 0; duration: 150; easing.type: Easing.OutBounce }
+                    NumberAnimation { target: launchpadItem; property: "bounceHeight"; to: 12; duration: Theme.duration(100); easing.type: Easing.OutQuad }
+                    NumberAnimation { target: launchpadItem; property: "bounceHeight"; to: 0; duration: Theme.duration(150); easing.type: Easing.OutBounce }
                 }
 
                 property real dockScale: {
@@ -532,11 +532,11 @@ Item {
 
                         Behavior on x {
                             enabled: !pinnedItem.isBeingDragged && !root.isVertical
-                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: Theme.duration(180); easing.type: Easing.OutCubic }
                         }
                         Behavior on y {
                             enabled: !pinnedItem.isBeingDragged && root.isVertical
-                            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                            NumberAnimation { duration: Theme.duration(180); easing.type: Easing.OutCubic }
                         }
                     }
 
@@ -698,14 +698,14 @@ Item {
                 property real pressScale: 1.0
 
                 Behavior on pressScale {
-                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.duration(90); easing.type: Easing.OutCubic }
                 }
 
                 SequentialAnimation {
                     id: downloadsBounceAnim
                     alwaysRunToEnd: true
-                    NumberAnimation { target: downloadsItem; property: "bounceHeight"; to: 12; duration: 100; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: downloadsItem; property: "bounceHeight"; to: 0; duration: 150; easing.type: Easing.OutBounce }
+                    NumberAnimation { target: downloadsItem; property: "bounceHeight"; to: 12; duration: Theme.duration(100); easing.type: Easing.OutQuad }
+                    NumberAnimation { target: downloadsItem; property: "bounceHeight"; to: 0; duration: Theme.duration(150); easing.type: Easing.OutBounce }
                 }
 
                 property real dockScale: {
@@ -825,14 +825,14 @@ Item {
                 property real pressScale: 1.0
 
                 Behavior on pressScale {
-                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Theme.duration(90); easing.type: Easing.OutCubic }
                 }
 
                 SequentialAnimation {
                     id: trashBounceAnim
                     alwaysRunToEnd: true
-                    NumberAnimation { target: trashItem; property: "bounceHeight"; to: 12; duration: 100; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: trashItem; property: "bounceHeight"; to: 0; duration: 150; easing.type: Easing.OutBounce }
+                    NumberAnimation { target: trashItem; property: "bounceHeight"; to: 12; duration: Theme.duration(100); easing.type: Easing.OutQuad }
+                    NumberAnimation { target: trashItem; property: "bounceHeight"; to: 0; duration: Theme.duration(150); easing.type: Easing.OutBounce }
                 }
 
                 property real dockScale: {

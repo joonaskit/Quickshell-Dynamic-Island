@@ -130,7 +130,7 @@ Item {
                     radius: Theme.corner(8)
                     color: rowHover.hovered ? Theme.overlay(0.12) : (modelData.activated ? Theme.accentTint(0.12) : "transparent")
 
-                    Behavior on color { ColorAnimation { duration: 100 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(100) } }
 
                     // Passive, so hovering the close button still counts as hovering the row
                     HoverHandler {
@@ -226,7 +226,7 @@ Item {
                             color: closeBtnMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : "transparent"
                             opacity: rowHover.hovered ? 1.0 : 0.0
 
-                            Behavior on opacity { NumberAnimation { duration: 100 } }
+                            Behavior on opacity { NumberAnimation { duration: Theme.duration(100) } }
 
                             SvgIcon {
                                 anchors.centerIn: parent

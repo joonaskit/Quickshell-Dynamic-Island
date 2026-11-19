@@ -560,10 +560,10 @@ Item {
 
                         scale: mouseArea.pressed ? 0.90 : 1.0
 
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
                         Behavior on scale {
                             NumberAnimation {
-                                duration: 120
+                                duration: Theme.duration(120)
                                 easing.type: Easing.OutCubic
                             }
                         }
@@ -759,7 +759,7 @@ Item {
                                 return "transparent";
                             }
 
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
 
                             RowLayout {
                                 anchors.fill: parent

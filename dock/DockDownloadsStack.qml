@@ -151,7 +151,7 @@ Item {
                     radius: Theme.corner(8)
                     color: fileMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
 
-                    Behavior on color { ColorAnimation { duration: 100 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(100) } }
 
                     RowLayout {
                         anchors.fill: parent

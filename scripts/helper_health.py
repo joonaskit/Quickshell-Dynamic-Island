@@ -24,6 +24,9 @@ LONG_RUNNING = {
     "activities_bridge.py": None,
     "kio_jobs.py": None,
     "devices.py": "monitor",
+    "gamemode.py": "watch",
+    "kdeconnect.py": "watch",
+    "downloads_tracker.py": "watch",
 }
 
 

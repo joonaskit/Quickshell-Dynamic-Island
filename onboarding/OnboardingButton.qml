@@ -21,7 +21,7 @@ Rectangle {
     scale: buttonMouse.pressed && button.active ? 0.96 : 1.0
 
     Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+    Behavior on scale { NumberAnimation { duration: Theme.duration(120); easing.type: Easing.OutCubic } }
 
     Text {
         id: label

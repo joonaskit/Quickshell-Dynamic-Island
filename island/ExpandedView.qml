@@ -253,7 +253,7 @@ Item {
             color: grabberMouse.containsMouse ? Theme.overlay(0.45) : Theme.overlay(0.25)
 
             Behavior on color {
-                ColorAnimation { duration: 150 }
+                ColorAnimation { duration: Theme.duration(150) }
             }
         }
 

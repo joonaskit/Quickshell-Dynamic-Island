@@ -6,6 +6,8 @@ How settings are stored and how to add one. For what the user sees, see the sett
 
 `settings.json` and `dock_pinned.json` are the user's live config and are gitignored. Defaults live in `settings.json.example` and `dock_pinned.json.example`, so new default keys go there.
 
+`SettingsService` reads `settings.json` through `WatchedFile` (`components/WatchedFile.qml`), at start and again whenever the file changes, so a hand edit or an import applies at once. Its own saves (`saveSettings`, 250 ms after a change) come back as changes and are skipped by their text (`lastWritten`). A change from elsewhere is applied without being written back, so a hand-edited file keeps its layout; a file that lacks keys (an export from an older version) first resets the settings to their defaults, so those keys do too. A file that does not parse is ignored and the current settings kept, and an empty one is taken for an editor halfway through saving.
+
 ## Adding a setting
 
 A new `settings.json` key needs five things:
@@ -14,7 +16,7 @@ A new `settings.json` key needs five things:
 2. A property in `services/SettingsService.qml`.
 3. A load line in `applySettings`.
 4. A reset in `resetDefaults`.
-5. An entry in `saveSettings`.
+5. An entry in `currentData`, which `saveSettings` writes.
 
 `tests/test_settings_keys.py` checks all five. Keys handled differently on purpose go in its allow-lists.
 
@@ -22,7 +24,7 @@ A setting that belongs to one machine (a credential, a device id) also goes in `
 
 ## The settings window
 
-`settings/SettingsWindow.qml` is a floating panel styled like the clipboard window, one per screen, shown on the active one. The pages and their controls are in `island/settings/`.
+`settings/SettingsWindow.qml` is a floating panel styled like the clipboard window, one per screen, shown on the active one. Its card and pages are built the first time it opens (`content`, through a `Loader`) and kept after; `requestOpenSettings` opens the window before asking for the tab and section, so they apply to the built card. The pages and their controls are in `island/settings/`.
 
 Open it with `SettingsService.requestOpenSettings(tab, section)`, or `quickshell ipc call settings open <tab> <section>`. `tab` is a name from the window's tab list and `section` the `key` of a `SettingsSection` on it; the window scrolls to that section and outlines it for a moment. Either can be empty. Its open state and position are `SettingsService.windowOpen`, `windowX` and `windowY`.
 

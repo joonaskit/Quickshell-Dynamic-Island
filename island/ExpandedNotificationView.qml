@@ -48,7 +48,7 @@ Item {
                     font.weight: Font.DemiBold
                     color: showAllMouse.containsMouse ? Theme.accent : Theme.textSecondary
 
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
                 }
 
                 SvgIcon {

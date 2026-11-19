@@ -29,10 +29,10 @@ Item {
             border.color: root.expanded ? Theme.accentTint(0.35) : Theme.overlay(0.08)
 
             Behavior on color {
-                ColorAnimation { duration: 150 }
+                ColorAnimation { duration: Theme.duration(150) }
             }
             Behavior on border.color {
-                ColorAnimation { duration: 150 }
+                ColorAnimation { duration: Theme.duration(150) }
             }
 
             RowLayout {
@@ -102,7 +102,7 @@ Item {
                     border.color: modelData.isDefault ? Theme.accentTint(0.35) : "transparent"
 
                     Behavior on color {
-                        ColorAnimation { duration: 120 }
+                        ColorAnimation { duration: Theme.duration(120) }
                     }
 
                     RowLayout {

@@ -41,7 +41,7 @@ Rectangle {
     NumberAnimation { id: opacityAnim; target: notifCard; property: "opacity"; to: 1.0; duration: Theme.animDurationFast }
 
     Behavior on color {
-        ColorAnimation { duration: 120 }
+        ColorAnimation { duration: Theme.duration(120) }
     }
 
     MouseArea {
@@ -101,11 +101,11 @@ Rectangle {
                 scale: dismissMouse.pressed ? 0.88 : (dismissMouse.containsMouse ? 1.22 : 1.0)
 
                 Behavior on color {
-                    ColorAnimation { duration: 120 }
+                    ColorAnimation { duration: Theme.duration(120) }
                 }
 
                 Behavior on scale {
-                    NumberAnimation { duration: 150; easing.type: Easing.OutBack; easing.overshoot: 1.4 }
+                    NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutBack; easing.overshoot: 1.4 }
                 }
 
                 SvgIcon {
@@ -171,8 +171,8 @@ Rectangle {
                     color: actionMouse.containsMouse ? Theme.accentTint(0.32) : Theme.accentTint(0.18)
                     scale: actionMouse.pressed ? 0.94 : 1.0
 
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
+                    Behavior on scale { NumberAnimation { duration: Theme.duration(120); easing.type: Easing.OutCubic } }
 
                     Text {
                         id: actionLabel

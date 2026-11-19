@@ -20,6 +20,18 @@ else
     status=1
 fi
 
+# Every animation length goes through Theme.duration(), so the animation speed setting
+# reaches it (docs/ANIMATION_CATALOGUE.md)
+echo "== durations"
+bare=$(git ls-files -z --cached --others --exclude-standard '*.qml' \
+    | xargs -0 grep -nE '\bduration\s*[:=][^/]*[0-9]' 2>/dev/null \
+    | grep -v 'Theme\.duration(')
+if [ -n "$bare" ]; then
+    echo "$bare"
+    echo "A duration with a number in it: wrap it in Theme.duration()" >&2
+    status=1
+fi
+
 if command -v ruff >/dev/null 2>&1; then
     RUFF=(ruff)
 elif command -v uvx >/dev/null 2>&1; then

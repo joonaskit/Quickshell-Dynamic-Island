@@ -19,7 +19,7 @@ Item {
     readonly property string dockPosition: Theme.dockPosition
 
     Behavior on pressScale {
-        NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.duration(90); easing.type: Easing.OutCubic }
     }
 
     // True while the dock's context menu is showing for this icon
@@ -45,7 +45,7 @@ Item {
 
     // Smooth scaling behavior
     Behavior on dockScale {
-        NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.duration(140); easing.type: Easing.OutCubic }
     }
 
     // Snappy bounce animation on click
@@ -57,14 +57,14 @@ Item {
             target: root
             property: "clickBounceHeight"
             to: 12
-            duration: 100
+            duration: Theme.duration(100)
             easing.type: Easing.OutQuad
         }
         NumberAnimation {
             target: root
             property: "clickBounceHeight"
             to: 0
-            duration: 150
+            duration: Theme.duration(150)
             easing.type: Easing.OutBounce
         }
     }
@@ -73,10 +73,10 @@ Item {
     SequentialAnimation {
         id: bounceAnim
         loops: 3
-        NumberAnimation { target: root; property: "launchBounceHeight"; to: 22; duration: 200; easing.type: Easing.OutQuad }
-        NumberAnimation { target: root; property: "launchBounceHeight"; to: 0; duration: 180; easing.type: Easing.InQuad }
-        NumberAnimation { target: root; property: "launchBounceHeight"; to: 12; duration: 160; easing.type: Easing.OutQuad }
-        NumberAnimation { target: root; property: "launchBounceHeight"; to: 0; duration: 140; easing.type: Easing.InQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 22; duration: Theme.duration(200); easing.type: Easing.OutQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 0; duration: Theme.duration(180); easing.type: Easing.InQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 12; duration: Theme.duration(160); easing.type: Easing.OutQuad }
+        NumberAnimation { target: root; property: "launchBounceHeight"; to: 0; duration: Theme.duration(140); easing.type: Easing.InQuad }
     }
 
     // Stop bounce if window appears

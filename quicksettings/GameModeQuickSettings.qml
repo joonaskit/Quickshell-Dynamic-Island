@@ -52,14 +52,14 @@ Item {
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
                     color: GameModeService.active ? Qt.rgba(48/255, 209/255, 88/255, 0.22) : Theme.cardSurfaceHover
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "gamepad"
                         size: Theme.px(20)
                         color: GameModeService.active ? root.gameColor : Theme.textTertiary
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
                     }
                 }
 
@@ -97,8 +97,8 @@ Item {
                     radius: Theme.px(14)
                     color: GameModeService.forced ? Qt.rgba(48/255, 209/255, 88/255, 0.25) : Theme.overlay(0.1)
                     scale: forceMouse.pressed ? 0.92 : (forceMouse.containsMouse ? 1.05 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
+                    Behavior on scale { NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutBack } }
 
                     Text {
                         anchors.centerIn: parent

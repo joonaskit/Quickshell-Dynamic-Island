@@ -73,8 +73,8 @@ QtObject {
     property real swapFade: 1.0
     property SequentialAnimation swapAnim: SequentialAnimation {
         PropertyAction { target: geo; property: "swapFade"; value: 0.0 }
-        PauseAnimation { duration: 70 }
-        NumberAnimation { target: geo; property: "swapFade"; to: 1.0; duration: 200; easing.type: Easing.OutCubic }
+        PauseAnimation { duration: Theme.duration(70) }
+        NumberAnimation { target: geo; property: "swapFade"; to: 1.0; duration: Theme.duration(200); easing.type: Easing.OutCubic }
     }
     onTargetXChanged: if (shown) swapAnim.restart()
     onTargetYChanged: if (shown) swapAnim.restart()

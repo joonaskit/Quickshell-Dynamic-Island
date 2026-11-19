@@ -281,7 +281,7 @@ Item {
                             color: closeWinMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.3) : "transparent"
                             opacity: winMouse.containsMouse ? 1.0 : 0.0
 
-                            Behavior on opacity { NumberAnimation { duration: 100 } }
+                            Behavior on opacity { NumberAnimation { duration: Theme.duration(100) } }
 
                             SvgIcon {
                                 anchors.centerIn: parent

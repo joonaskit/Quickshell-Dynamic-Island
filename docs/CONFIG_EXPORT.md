@@ -48,5 +48,5 @@ The `settings` section leaves out the keys that belong to one machine (`hueBridg
 ## Implementation
 
 - `scripts/settings_backup.py` writes and reads the file, tested by `tests/test_settings_backup.py`. `services/BackupService.qml` runs it for the Backup section of the About settings page.
-- After an import the running shell must re-read the files: `SettingsService.reloadFromDisk` and `DockService.reloadConfig`, or the `config reload` IPC call.
+- A running shell picks up an imported `settings.json` by itself, as it watches the file (`docs/SETTINGS.md`). The pinned apps and launcher usage are still read again only by `DockService.reloadConfig`, so an import still calls the `config reload` IPC target (`run.sh import` does), which runs it and re-reads `settings.json` too.
 - The machine-specific keys are `PRIVATE_KEYS` in the script. A new one goes there and in the list above.

@@ -33,7 +33,7 @@ Item {
                 opacity: root.isHovered ? 0.35 : 0.15
 
                 Behavior on opacity {
-                    NumberAnimation { duration: 200 }
+                    NumberAnimation { duration: Theme.duration(200) }
                 }
             }
 
@@ -44,7 +44,7 @@ Item {
                 color: root.isHovered ? Theme.accent : Theme.overlay(0.75)
 
                 Behavior on color {
-                    ColorAnimation { duration: 180 }
+                    ColorAnimation { duration: Theme.duration(180) }
                 }
             }
         }

@@ -40,10 +40,10 @@ Item {
     // Gentle breathing while the tab is tucked
     property real pulse: 1.0
     SequentialAnimation on pulse {
-        running: root.active
+        running: root.active && !Theme.reduceMotion
         loops: Animation.Infinite
-        NumberAnimation { to: 0.55; duration: 1100; easing.type: Easing.InOutSine }
-        NumberAnimation { to: 1.0; duration: 1100; easing.type: Easing.InOutSine }
+        NumberAnimation { to: 0.55; duration: Theme.duration(1100); easing.type: Easing.InOutSine }
+        NumberAnimation { to: 1.0; duration: Theme.duration(1100); easing.type: Easing.InOutSine }
     }
 
     // The seam in local coordinates: the covering pill's edge and its bottom corner

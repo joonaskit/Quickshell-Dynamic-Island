@@ -67,10 +67,10 @@ Item {
                 }
 
                 NumberAnimation on spin {
-                    running: ring.visible && root.progress < 0 && root.visible
+                    running: ring.visible && root.progress < 0 && root.visible && !Theme.reduceMotion
                     from: 0
                     to: 1
-                    duration: 1100
+                    duration: Theme.duration(1100)
                     loops: Animation.Infinite
                 }
             }

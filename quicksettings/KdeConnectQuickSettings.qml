@@ -42,7 +42,7 @@ Item {
         color: !active ? Theme.overlay(0.04) : (buttonMouse.containsMouse ? Theme.accentTint(0.3) : Theme.overlay(0.1))
         scale: buttonMouse.pressed && active ? 0.96 : 1.0
         Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: Theme.duration(120); easing.type: Easing.OutCubic } }
 
         RowLayout {
             anchors.centerIn: parent
@@ -101,14 +101,14 @@ Item {
                     Layout.preferredHeight: Theme.px(38)
                     radius: Theme.px(19)
                     color: root.ready ? Qt.rgba(48/255, 209/255, 88/255, 0.22) : Theme.cardSurfaceHover
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: "phone"
                         size: Theme.px(20)
                         color: root.ready ? root.kcColor : Theme.textTertiary
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
                     }
                 }
 

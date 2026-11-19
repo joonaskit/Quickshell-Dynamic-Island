@@ -283,7 +283,7 @@ Item {
         }
 
         Behavior on border.color {
-            ColorAnimation { duration: 180 }
+            ColorAnimation { duration: Theme.duration(180) }
         }
 
         PillSurface {

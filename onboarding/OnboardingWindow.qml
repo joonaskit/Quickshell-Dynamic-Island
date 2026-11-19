@@ -52,8 +52,8 @@ PanelWindow {
                         implicitHeight: Theme.px(7)
                         radius: height / 2
                         color: index <= OnboardingService.step ? Theme.accent : Theme.overlay(0.16)
-                        Behavior on implicitWidth { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on implicitWidth { NumberAnimation { duration: Theme.duration(180); easing.type: Easing.OutCubic } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
 
                         MouseArea {
                             anchors.fill: parent

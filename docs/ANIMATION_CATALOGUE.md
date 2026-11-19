@@ -20,6 +20,20 @@ All durations and easings are defined in `Theme.qml` and referenced throughout:
 | `Theme.animOvershoot` | **1.08** | Standard overshoot (pill morphs) |
 | `Theme.animEntranceOvershoot` | **1.15** | Entrance overshoot (scale-from-zero) |
 
+The values above are at the normal speed. Each goes through `Theme.duration(ms)`, and so must every other animation length: a bare number in a `duration` fails `./lint.sh`.
+
+## Animation speed
+
+`Theme.duration(ms)` multiplies by `Theme.animationFactor`, which follows the compositor's own setting:
+
+- **KDE:** Animation speed in System Settings (General Behavior), kept as `AnimationDurationFactor` in the `[KDE]` group of `~/.config/kdeglobals`. It is absent at the default of 1; Instant writes 0.
+- **niri:** the `animations` block of `config.kdl` (`$NIRI_CONFIG`, else `~/.config/niri/config.kdl`): `off` is 0 and `slowdown <factor>` is that factor. Blocks for single animations and files the config includes are not read.
+- Elsewhere it is 1. `ISLAND_ANIMATION_FACTOR` (for example `ISLAND_ANIMATION_FACTOR=0 ./run.sh`) overrides all of them, for testing.
+
+The file is watched (`components/WatchedFile.qml`), so a change applies at once. The parsing is in `services/animationSpeed.js`, tested by `tests/tst_animationSpeed.qml`.
+
+At 0, `Theme.reduceMotion` is true and the animations that loop (the visualizer, pulsing glows, the finished timer's blink, indeterminate progress) stop, as a loop of no length would spin. Timers that wait for an animation to end before acting scale too (`DialWindow`'s `unmapTimer`, `DialService`'s `dropTimer`), so a slower speed does not cut the animation short. Timers that are delays for the user (hover dwell, how long an alert stays) do not.
+
 > [!NOTE]
 > No `Transition {}`, `enter:`/`exit:` Popup properties, or `states:` state machines were found anywhere. Every animation is driven by a `Behavior {}` block reacting to a property binding change (typically an `isOpen` / `anyMenuOpen` / `shouldShow` boolean).
 

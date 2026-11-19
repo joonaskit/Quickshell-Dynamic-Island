@@ -73,7 +73,7 @@ ColumnLayout {
         SequentialAnimation {
             id: highlightAnim
             NumberAnimation { target: highlightRing; property: "opacity"; to: 1; duration: Theme.animDurationFast }
-            PauseAnimation { duration: 700 }
+            PauseAnimation { duration: Theme.duration(700) }
             NumberAnimation { target: highlightRing; property: "opacity"; to: 0; duration: Theme.animDuration }
         }
 
