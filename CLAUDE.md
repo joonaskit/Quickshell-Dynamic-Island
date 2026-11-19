@@ -36,6 +36,7 @@ Read the doc for an area before changing it:
 - Animations: `docs/ANIMATION_CATALOGUE.md`
 - Category dial launcher (experimental): `docs/DIAL.md`
 - Running under niri (experimental): `docs/NIRI.md`
+- Unit tests and shell tests (`tests/fixtures/`): `docs/TESTING.md`
 
 ## Running
 

@@ -7,6 +7,7 @@ Rules for writing and reviewing changes. Mechanical ones are checked by `./lint.
 - `services/*Service.qml` singletons own state and talk to the system. Views bind to them and hold no system logic.
 - Colors, sizes and scale come from `services/Theme.qml`, never hardcoded values.
 - Logic that needs no system goes in a plain file with its own tests: a `.js` file tested by a `tests/tst_*.qml`, or a `scripts/*_core.py` with no D-Bus tested by a `tests/test_*.py`. The service or the D-Bus script stays a thin layer over it.
+- Behaviour that needs Quickshell itself (a window, a `FileView`, a service), and that a hand check could miss, gets a shell test in `tests/fixtures/` (`docs/TESTING.md`).
 - Don't poll state that has a change signal. Use the first of these that fits:
   1. a native Quickshell service that signals on change (`PowerProfiles`, `UPower`, `Pipewire`, ...);
   2. an event stream, run as a long-running helper (`docs/HELPERS.md`): `udevadm monitor`, `nmcli monitor`, `busctl monitor --match`, or a script's `watch` command that listens for D-Bus signals (`scripts/dbus_watch.py`) or file changes;

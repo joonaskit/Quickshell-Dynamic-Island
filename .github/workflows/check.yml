@@ -27,6 +27,7 @@ jobs:
           dnf install -y --setopt=install_weak_deps=False
           git quickshell qt6-qtdeclarative-devel qt6-qt5compat ruff
           python3 python3-dbus python3-gobject dbus-daemon
+          kwin util-linux-core
       - uses: actions/checkout@v4
       - name: Trust the checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"

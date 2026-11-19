@@ -12,9 +12,19 @@ QMLLINT="$(command -v qmllint qmllint6 /usr/lib64/qt6/bin/qmllint /usr/lib/qt6/b
 if [ -n "$QMLLINT" ]; then
     echo "== qmllint"
     # Tracked and untracked (not ignored) files, minus any deleted but not yet committed
-    git ls-files -z --cached --others --exclude-standard '*.qml' \
+    git ls-files -z --cached --others --exclude-standard '*.qml' ':!tests/fixtures/*/shell.qml' \
         | while IFS= read -r -d '' f; do [ -f "$f" ] && printf '%s\0' "$f"; done \
         | xargs -0 "$QMLLINT" || status=1
+    # A shell test only resolves its types laid out as tests/run_fixtures.sh runs it
+    fixtures="$(mktemp -d)"
+    for f in tests/fixtures/*/shell.qml; do
+        [ -f "$f" ] || continue
+        name="$(basename "$(dirname "$f")")"
+        tests/run_fixtures.sh --layout "$fixtures/$name" "$name"
+        cp .qmllint.ini "$fixtures/$name/"
+        (cd "$fixtures/$name" && "$QMLLINT" shell.qml) || status=1
+    done
+    rm -rf "$fixtures"
 else
     echo "qmllint not found (install the Qt 6 declarative tools)" >&2
     status=1
