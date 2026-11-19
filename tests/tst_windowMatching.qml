@@ -83,4 +83,28 @@ TestCase {
     function test_unrelatedAppsDoNotMatch() {
         compare(match({ "id": "org.kde.konsole", "name": "Konsole", "command": "konsole" }, ["firefox", "org.kde.dolphin"]), []);
     }
+
+    // #150: a pin's name used to substring-match any app-id containing it
+    function test_nameMatchesOnlyWholeParts() {
+        let settings = { "id": "systemsettings", "name": "Settings" };
+        compare(match(settings, ["io.github.joonaskit.NiriSettings", "org.gnome.Settings"]), ["org.gnome.Settings"]);
+        compare(match({ "id": "x", "name": "Files" }, ["com.example.MyFiles"]), []);
+    }
+
+    // #150: a window whose app-id names its own desktop entry is not claimed by another
+    function test_windowWithOwnEntryIsNotClaimed() {
+        let settings = { "id": "systemsettings", "desktopFile": "systemsettings.desktop", "command": "systemsettings", "name": "System Settings" };
+        let windows = [
+            { "appId": "systemsettings6", "ownEntry": "" },
+            { "appId": "systemsettings-helper", "ownEntry": "systemsettings-helper" },
+            { "appId": "systemsettings", "ownEntry": "systemsettings" }
+        ];
+        compare(appIds(WindowMatching.matchWindows(settings, windows, "")), ["systemsettings6", "systemsettings"]);
+    }
+
+    function test_ownEntrySameAsAppStillMatches() {
+        let nautilus = { "id": "org.gnome.Nautilus", "desktopFile": "org.gnome.Nautilus.desktop" };
+        let windows = [{ "appId": "org.gnome.Nautilus", "ownEntry": "org.gnome.Nautilus" }];
+        compare(appIds(WindowMatching.matchWindows(nautilus, windows, "")), ["org.gnome.Nautilus"]);
+    }
 }
