@@ -22,7 +22,7 @@ A setting that belongs to one machine (a credential, a device id) also goes in `
 
 ## The settings window
 
-`settings/SettingsWindow.qml` is a floating panel styled like the clipboard window, one per screen, shown on the active one. The pages and their controls are in `island/settings/`.
+`settings/SettingsWindow.qml` is a floating panel styled like the clipboard window, one per screen, shown on the active one. Its card and pages are built the first time it opens (`content`, through a `Loader`) and kept after; `requestOpenSettings` opens the window before asking for the tab and section, so they apply to the built card. The pages and their controls are in `island/settings/`.
 
 Open it with `SettingsService.requestOpenSettings(tab, section)`, or `quickshell ipc call settings open <tab> <section>`. `tab` is a name from the window's tab list and `section` the `key` of a `SettingsSection` on it; the window scrolls to that section and outlines it for a moment. Either can be empty. Its open state and position are `SettingsService.windowOpen`, `windowX` and `windowY`.
 

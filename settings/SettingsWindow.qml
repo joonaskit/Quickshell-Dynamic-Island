@@ -45,41 +45,20 @@ PanelWindow {
         return WindowService.activeScreen === window.screen.name;
     }
     readonly property bool shown: SettingsService.windowOpen && isThisScreenActive
-    visible: shown || card.opacity > 0.01
+    visible: shown || (content !== null && content.opacity > 0.01)
 
     readonly property var tabs: ["Appearance", "Top bar", "Island", "Dock", "Launcher", "Power", "Shortcuts", "About"]
     property int currentTab: 0
 
-    readonly property bool hasSearchResults: appearanceSettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
-                                             || dockSettings.hasMatches || launcherSettings.hasMatches || powerSettings.hasMatches
-                                             || (CompositorService.isNiri ? niriShortcutsSettings.hasMatches : shortcutsSettings.hasMatches)
-
-    // The Shortcuts tab edits KDE's global shortcuts, or niri's binds under niri
-    readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, powerSettings,
-                                  CompositorService.isNiri ? niriShortcutsSettings : shortcutsSettings, aboutSettings]
     // Section key to scroll to once the requested tab is laid out
     property string pendingSection: ""
-
-    // Scrolls the current page to its SettingsSection with this key and highlights it
-    function scrollToSection(key) {
-        let page = window.pages[window.currentTab];
-        let found = null;
-        for (let i = 0; page && i < page.children.length; i++) {
-            if (page.children[i].key === key) found = page.children[i];
-        }
-        if (!found) return;
-        let y = found.mapToItem(contentColumn, 0, 0).y;
-        scrollContainer.contentY = Math.max(0, Math.min(scrollContainer.contentHeight - scrollContainer.height, y - Theme.px(4)));
-        found.highlight();
-    }
 
     // Switches to a tab by its name in `tabs`; unknown names are ignored
     function showTab(name) {
         let idx = tabs.indexOf(name);
         if (idx < 0) return;
-        searchInput.text = "";
         window.currentTab = idx;
-        scrollContainer.contentY = 0;
+        if (window.content) window.content.resetView();
     }
 
     // Moves the window, keeping it on its screen
@@ -101,8 +80,9 @@ PanelWindow {
             SettingsService.windowX = Math.round((window.screen.width - window.width) / 2);
             SettingsService.windowY = Math.round((window.screen.height - window.height) / 2);
         }
-        searchInput.text = "";
-        Qt.callLater(() => searchInput.forceActiveFocus());
+        // Builds the card now, before it fades in
+        window.contentRequested = true;
+        window.content.focusSearch();
     }
 
     Connections {
@@ -118,7 +98,7 @@ PanelWindow {
     Timer {
         id: sectionTimer
         interval: 60
-        onTriggered: window.scrollToSection(window.pendingSection)
+        onTriggered: if (window.content) window.content.scrollToSection(window.pendingSection)
     }
 
     // Small pill button, as in the clipboard window
@@ -151,353 +131,402 @@ PanelWindow {
         }
     }
 
-    Rectangle {
-        id: card
+    // Built on the first open and kept after, so a window that is never opened costs
+    // nothing and reopening is instant. Ids inside are not visible out here: the rest of
+    // the file reaches them through `content`, which is null until then.
+    property bool contentRequested: false
+    readonly property var content: cardLoader.item
+
+    Loader {
+        id: cardLoader
         anchors.fill: parent
-        radius: Theme.corner(20)
-        // A test of the glass style on a standalone window: the menus' glass, blurred behind
-        color: Theme.glass ? Theme.menuSurface : Theme.cardBackground
-        border.width: 1
-        border.color: Theme.glass ? Theme.glassHairline : Theme.overlay(0.1)
-        opacity: window.shown ? 1 : 0
-        scale: window.shown ? 1 : 0.96
-        Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
-        Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
-
-        GlassSurface {
-            body: card
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Theme.px(16)
-            spacing: Theme.px(10)
-
-            // Header, which also moves the window when dragged
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.px(30)
-
-                MouseArea {
-                    property real pressX: 0
-                    property real pressY: 0
-                    anchors.fill: parent
-                    cursorShape: Qt.SizeAllCursor
-                    onPressed: mouse => {
-                        pressX = mouse.x;
-                        pressY = mouse.y;
-                    }
-                    onPositionChanged: mouse => {
-                        if (pressed) window.moveBy(mouse.x - pressX, mouse.y - pressY);
-                    }
-                }
-
-                RowLayout {
-                    anchors.fill: parent
-                    spacing: Theme.px(8)
-
-                    SvgIcon {
-                        name: "settings"
-                        size: Theme.px(16)
-                        color: Theme.accent
-                    }
-
-                    Text {
-                        text: "Settings"
-                        font.family: Theme.fontDisplay
-                        font.pixelSize: Theme.fontPx(15)
-                        font.weight: Font.Bold
-                        color: Theme.textPrimary
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: "Preferences & Customization"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontPx(11)
-                        color: Theme.textTertiary
-                        elide: Text.ElideRight
-                    }
-
-                    ActionButton {
-                        iconName: "close"
-                        onClicked: window.close()
-                    }
-                }
-            }
-
-            // Search (filters rows across every category)
+        active: window.contentRequested
+        sourceComponent: Component {
             Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.px(34)
-                radius: Theme.corner(9)
-                color: Theme.overlay(0.08)
-                border.width: 1
-                border.color: searchInput.activeFocus ? Theme.accent : Theme.overlay(0.08)
+                id: card
+                // False for the frame it is built in, so the first open still fades in
+                property bool ready: false
+                Component.onCompleted: Qt.callLater(() => card.ready = true)
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.IBeamCursor
-                    onClicked: searchInput.forceActiveFocus()
+                readonly property bool hasSearchResults: appearanceSettings.hasMatches || topBarSettings.hasMatches || islandSettings.hasMatches
+                                                         || dockSettings.hasMatches || launcherSettings.hasMatches || powerSettings.hasMatches
+                                                         || (CompositorService.isNiri ? niriShortcutsSettings.hasMatches : shortcutsSettings.hasMatches)
+
+                // The Shortcuts tab edits KDE's global shortcuts, or niri's binds under niri
+                readonly property var pages: [appearanceSettings, topBarSettings, islandSettings, dockSettings, launcherSettings, powerSettings,
+                                              CompositorService.isNiri ? niriShortcutsSettings : shortcutsSettings, aboutSettings]
+
+                // Scrolls the current page to its SettingsSection with this key and highlights it
+                function scrollToSection(key) {
+                    let page = card.pages[window.currentTab];
+                    let found = null;
+                    for (let i = 0; page && i < page.children.length; i++) {
+                        if (page.children[i].key === key) found = page.children[i];
+                    }
+                    if (!found) return;
+                    let y = found.mapToItem(contentColumn, 0, 0).y;
+                    scrollContainer.contentY = Math.max(0, Math.min(scrollContainer.contentHeight - scrollContainer.height, y - Theme.px(4)));
+                    found.highlight();
                 }
 
-                RowLayout {
+                // An empty search, scrolled to the top
+                function resetView() {
+                    searchInput.text = "";
+                    scrollContainer.contentY = 0;
+                }
+
+                function focusSearch() {
+                    searchInput.text = "";
+                    Qt.callLater(() => searchInput.forceActiveFocus());
+                }
+
+                anchors.fill: parent
+                radius: Theme.corner(20)
+                // A test of the glass style on a standalone window: the menus' glass, blurred behind
+                color: Theme.glass ? Theme.menuSurface : Theme.cardBackground
+                border.width: 1
+                border.color: Theme.glass ? Theme.glassHairline : Theme.overlay(0.1)
+                opacity: window.shown && card.ready ? 1 : 0
+                scale: window.shown && card.ready ? 1 : 0.96
+                Behavior on opacity { NumberAnimation { duration: Theme.animDurationFast } }
+                Behavior on scale { NumberAnimation { duration: Theme.animDurationFast; easing.type: Easing.OutCubic } }
+
+                GlassSurface {
+                    body: card
+                }
+
+                ColumnLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: Theme.px(10)
-                    anchors.rightMargin: Theme.px(8)
-                    spacing: Theme.px(8)
+                    anchors.margins: Theme.px(16)
+                    spacing: Theme.px(10)
 
-                    SvgIcon {
-                        name: "search"
-                        size: Theme.px(14)
-                        color: searchInput.activeFocus ? Theme.accent : Theme.textSecondary
-                    }
-
-                    TextInput {
-                        id: searchInput
+                    // Header, which also moves the window when dragged
+                    Item {
                         Layout.fillWidth: true
-                        activeFocusOnTab: true
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontPx(13)
-                        color: Theme.textPrimary
-                        selectionColor: Theme.accentTint(0.4)
-                        selectedTextColor: Theme.textPrimary
-                        clip: true
-                        selectByMouse: true
-                        onTextChanged: {
-                            SettingsSearch.query = text;
-                            scrollContainer.contentY = 0;
-                        }
-
-                        Keys.onEscapePressed: function(event) {
-                            if (text !== "") {
-                                text = "";
-                            } else {
-                                window.close();
-                            }
-                            event.accepted = true;
-                        }
-
-                        Text {
-                            anchors.fill: parent
-                            text: "Search settings..."
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontPx(13)
-                            color: Theme.textTertiary
-                            visible: !searchInput.text
-                        }
-                    }
-
-                    // Clear button
-                    Rectangle {
-                        Layout.preferredWidth: Theme.px(20)
-                        Layout.preferredHeight: Theme.px(20)
-                        radius: Theme.corner(10)
-                        visible: searchInput.text !== ""
-                        color: clearMouse.containsMouse ? Theme.overlay(0.14) : "transparent"
-
-                        Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-                        SvgIcon {
-                            anchors.centerIn: parent
-                            name: "close"
-                            size: Theme.px(11)
-                            color: clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
-                        }
+                        Layout.preferredHeight: Theme.px(30)
 
                         MouseArea {
-                            id: clearMouse
+                            property real pressX: 0
+                            property real pressY: 0
                             anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                searchInput.text = "";
-                                searchInput.forceActiveFocus();
+                            cursorShape: Qt.SizeAllCursor
+                            onPressed: mouse => {
+                                pressX = mouse.x;
+                                pressY = mouse.y;
+                            }
+                            onPositionChanged: mouse => {
+                                if (pressed) window.moveBy(mouse.x - pressX, mouse.y - pressY);
+                            }
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: Theme.px(8)
+
+                            SvgIcon {
+                                name: "settings"
+                                size: Theme.px(16)
+                                color: Theme.accent
+                            }
+
+                            Text {
+                                text: "Settings"
+                                font.family: Theme.fontDisplay
+                                font.pixelSize: Theme.fontPx(15)
+                                font.weight: Font.Bold
+                                color: Theme.textPrimary
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: "Preferences & Customization"
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontPx(11)
+                                color: Theme.textTertiary
+                                elide: Text.ElideRight
+                            }
+
+                            ActionButton {
+                                iconName: "close"
+                                onClicked: window.close()
                             }
                         }
                     }
-                }
-            }
 
-            // Categories and the active page
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: Theme.px(12)
+                    // Search (filters rows across every category)
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Theme.px(34)
+                        radius: Theme.corner(9)
+                        color: Theme.overlay(0.08)
+                        border.width: 1
+                        border.color: searchInput.activeFocus ? Theme.accent : Theme.overlay(0.08)
 
-                // Category list (nothing is highlighted while searching)
-                Rectangle {
-                    Layout.preferredWidth: Theme.px(170)
-                    Layout.fillHeight: true
-                    radius: Theme.corner(12)
-                    color: Theme.overlay(0.04)
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.IBeamCursor
+                            onClicked: searchInput.forceActiveFocus()
+                        }
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: Theme.px(6)
-                        spacing: Theme.px(2)
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: Theme.px(10)
+                            anchors.rightMargin: Theme.px(8)
+                            spacing: Theme.px(8)
 
-                        Repeater {
-                            model: window.tabs
+                            SvgIcon {
+                                name: "search"
+                                size: Theme.px(14)
+                                color: searchInput.activeFocus ? Theme.accent : Theme.textSecondary
+                            }
 
-                            Rectangle {
-                                id: tabBtn
-                                required property var modelData
-                                required property int index
-                                readonly property bool isSelected: !SettingsSearch.active && window.currentTab === index
+                            TextInput {
+                                id: searchInput
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: Theme.px(32)
-                                radius: Theme.corner(8)
-                                color: isSelected ? Theme.accentTint(0.25) : (tabMouse.containsMouse ? Theme.overlay(0.08) : "transparent")
-                                Behavior on color { ColorAnimation { duration: Theme.animDurationTooltip } }
+                                activeFocusOnTab: true
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontPx(13)
+                                color: Theme.textPrimary
+                                selectionColor: Theme.accentTint(0.4)
+                                selectedTextColor: Theme.textPrimary
+                                clip: true
+                                selectByMouse: true
+                                onTextChanged: {
+                                    SettingsSearch.query = text;
+                                    scrollContainer.contentY = 0;
+                                }
+
+                                Keys.onEscapePressed: function(event) {
+                                    if (text !== "") {
+                                        text = "";
+                                    } else {
+                                        window.close();
+                                    }
+                                    event.accepted = true;
+                                }
 
                                 Text {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: Theme.px(12)
-                                    text: tabBtn.modelData
+                                    anchors.fill: parent
+                                    text: "Search settings..."
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontPx(12)
-                                    font.weight: tabBtn.isSelected ? Font.DemiBold : Font.Normal
-                                    color: tabBtn.isSelected ? Theme.accentText : Theme.textSecondary
+                                    font.pixelSize: Theme.fontPx(13)
+                                    color: Theme.textTertiary
+                                    visible: !searchInput.text
+                                }
+                            }
+
+                            // Clear button
+                            Rectangle {
+                                Layout.preferredWidth: Theme.px(20)
+                                Layout.preferredHeight: Theme.px(20)
+                                radius: Theme.corner(10)
+                                visible: searchInput.text !== ""
+                                color: clearMouse.containsMouse ? Theme.overlay(0.14) : "transparent"
+
+                                Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
+
+                                SvgIcon {
+                                    anchors.centerIn: parent
+                                    name: "close"
+                                    size: Theme.px(11)
+                                    color: clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
                                 }
 
                                 MouseArea {
-                                    id: tabMouse
+                                    id: clearMouse
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: window.showTab(tabBtn.modelData)
+                                    onClicked: {
+                                        searchInput.text = "";
+                                        searchInput.forceActiveFocus();
+                                    }
                                 }
-                            }
-                        }
-
-                        Item { Layout.fillHeight: true }
-                    }
-                }
-
-                // Page, scrolled when taller than the window
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-
-                    readonly property bool needsScroll: scrollContainer.contentHeight > scrollContainer.height
-
-                    Flickable {
-                        id: scrollContainer
-                        anchors.fill: parent
-                        contentWidth: width
-                        contentHeight: contentColumn.implicitHeight + Theme.px(8)
-                        boundsBehavior: Flickable.StopAtBounds
-                        interactive: parent.needsScroll
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.NoButton
-                            onWheel: function(wheel) {
-                                if (scrollContainer.interactive) {
-                                    scrollContainer.contentY = Math.max(0, Math.min(scrollContainer.contentHeight - scrollContainer.height, scrollContainer.contentY - wheel.angleDelta.y));
-                                    scrollFadeTimer.restart();
-                                }
-                            }
-                        }
-
-                        ColumnLayout {
-                            id: contentColumn
-                            width: scrollContainer.width - Theme.px(14)
-                            spacing: 14
-
-                            // Categories: the active tab, or every category with matches while searching
-                            AppearanceSettings {
-                                id: appearanceSettings
-                                title: window.tabs[0]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 0
-                            }
-                            TopBarSettings {
-                                id: topBarSettings
-                                title: window.tabs[1]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 1
-                            }
-                            IslandSettings {
-                                id: islandSettings
-                                title: window.tabs[2]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 2
-                            }
-                            DockSettings {
-                                id: dockSettings
-                                title: window.tabs[3]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 3
-                            }
-                            LauncherSettings {
-                                id: launcherSettings
-                                title: window.tabs[4]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 4
-                            }
-                            PowerSettings {
-                                id: powerSettings
-                                title: window.tabs[5]
-                                visible: SettingsSearch.active ? hasMatches : window.currentTab === 5
-                            }
-                            ShortcutsSettings {
-                                id: shortcutsSettings
-                                title: window.tabs[6]
-                                visible: !CompositorService.isNiri && (SettingsSearch.active ? hasMatches : window.currentTab === 6)
-                            }
-                            NiriShortcutsSettings {
-                                id: niriShortcutsSettings
-                                title: window.tabs[6]
-                                visible: CompositorService.isNiri && (SettingsSearch.active ? hasMatches : window.currentTab === 6)
-                            }
-                            AboutSettings {
-                                id: aboutSettings
-                                title: window.tabs[7]
-                                visible: !SettingsSearch.active && window.currentTab === 7
-                            }
-
-                            // Empty search result
-                            Text {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 10
-                                Layout.bottomMargin: 10
-                                visible: SettingsSearch.active && !window.hasSearchResults
-                                text: "No settings match \"" + SettingsSearch.query.trim() + "\""
-                                horizontalAlignment: Text.AlignHCenter
-                                elide: Text.ElideRight
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontPx(12)
-                                color: Theme.textSecondary
                             }
                         }
                     }
 
-                    // Fading scroll indicator, hidden when idle
-                    Item {
-                        id: scrollTrack
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.right: parent.right
-                        width: 3
-                        visible: parent.needsScroll
-                        opacity: (scrollContainer.moving || scrollContainer.flicking || scrollFadeTimer.running) ? 1.0 : 0.0
+                    // Categories and the active page
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        spacing: Theme.px(12)
 
-                        Behavior on opacity {
-                            NumberAnimation { duration: Theme.animDurationFast }
-                        }
-
+                        // Category list (nothing is highlighted while searching)
                         Rectangle {
-                            width: 3
-                            radius: 1.5
-                            color: Theme.overlay(0.35)
-                            y: Math.max(0, Math.min(scrollTrack.height - height, scrollContainer.visibleArea.yPosition * scrollTrack.height))
-                            height: Math.max(28, scrollContainer.visibleArea.heightRatio * scrollTrack.height)
-                        }
-                    }
+                            Layout.preferredWidth: Theme.px(170)
+                            Layout.fillHeight: true
+                            radius: Theme.corner(12)
+                            color: Theme.overlay(0.04)
 
-                    Timer {
-                        id: scrollFadeTimer
-                        interval: 800
-                        repeat: false
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.px(6)
+                                spacing: Theme.px(2)
+
+                                Repeater {
+                                    model: window.tabs
+
+                                    Rectangle {
+                                        id: tabBtn
+                                        required property var modelData
+                                        required property int index
+                                        readonly property bool isSelected: !SettingsSearch.active && window.currentTab === index
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: Theme.px(32)
+                                        radius: Theme.corner(8)
+                                        color: isSelected ? Theme.accentTint(0.25) : (tabMouse.containsMouse ? Theme.overlay(0.08) : "transparent")
+                                        Behavior on color { ColorAnimation { duration: Theme.animDurationTooltip } }
+
+                                        Text {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: Theme.px(12)
+                                            text: tabBtn.modelData
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontPx(12)
+                                            font.weight: tabBtn.isSelected ? Font.DemiBold : Font.Normal
+                                            color: tabBtn.isSelected ? Theme.accentText : Theme.textSecondary
+                                        }
+
+                                        MouseArea {
+                                            id: tabMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: window.showTab(tabBtn.modelData)
+                                        }
+                                    }
+                                }
+
+                                Item { Layout.fillHeight: true }
+                            }
+                        }
+
+                        // Page, scrolled when taller than the window
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+
+                            readonly property bool needsScroll: scrollContainer.contentHeight > scrollContainer.height
+
+                            Flickable {
+                                id: scrollContainer
+                                anchors.fill: parent
+                                contentWidth: width
+                                contentHeight: contentColumn.implicitHeight + Theme.px(8)
+                                boundsBehavior: Flickable.StopAtBounds
+                                interactive: parent.needsScroll
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.NoButton
+                                    onWheel: function(wheel) {
+                                        if (scrollContainer.interactive) {
+                                            scrollContainer.contentY = Math.max(0, Math.min(scrollContainer.contentHeight - scrollContainer.height, scrollContainer.contentY - wheel.angleDelta.y));
+                                            scrollFadeTimer.restart();
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    id: contentColumn
+                                    width: scrollContainer.width - Theme.px(14)
+                                    spacing: 14
+
+                                    // Categories: the active tab, or every category with matches while searching
+                                    AppearanceSettings {
+                                        id: appearanceSettings
+                                        title: window.tabs[0]
+                                        visible: SettingsSearch.active ? hasMatches : window.currentTab === 0
+                                    }
+                                    TopBarSettings {
+                                        id: topBarSettings
+                                        title: window.tabs[1]
+                                        visible: SettingsSearch.active ? hasMatches : window.currentTab === 1
+                                    }
+                                    IslandSettings {
+                                        id: islandSettings
+                                        title: window.tabs[2]
+                                        visible: SettingsSearch.active ? hasMatches : window.currentTab === 2
+                                    }
+                                    DockSettings {
+                                        id: dockSettings
+                                        title: window.tabs[3]
+                                        visible: SettingsSearch.active ? hasMatches : window.currentTab === 3
+                                    }
+                                    LauncherSettings {
+                                        id: launcherSettings
+                                        title: window.tabs[4]
+                                        visible: SettingsSearch.active ? hasMatches : window.currentTab === 4
+                                    }
+                                    PowerSettings {
+                                        id: powerSettings
+                                        title: window.tabs[5]
+                                        visible: SettingsSearch.active ? hasMatches : window.currentTab === 5
+                                    }
+                                    ShortcutsSettings {
+                                        id: shortcutsSettings
+                                        title: window.tabs[6]
+                                        visible: !CompositorService.isNiri && (SettingsSearch.active ? hasMatches : window.currentTab === 6)
+                                    }
+                                    NiriShortcutsSettings {
+                                        id: niriShortcutsSettings
+                                        title: window.tabs[6]
+                                        visible: CompositorService.isNiri && (SettingsSearch.active ? hasMatches : window.currentTab === 6)
+                                    }
+                                    AboutSettings {
+                                        id: aboutSettings
+                                        title: window.tabs[7]
+                                        visible: !SettingsSearch.active && window.currentTab === 7
+                                    }
+
+                                    // Empty search result
+                                    Text {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: 10
+                                        Layout.bottomMargin: 10
+                                        visible: SettingsSearch.active && !card.hasSearchResults
+                                        text: "No settings match \"" + SettingsSearch.query.trim() + "\""
+                                        horizontalAlignment: Text.AlignHCenter
+                                        elide: Text.ElideRight
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontPx(12)
+                                        color: Theme.textSecondary
+                                    }
+                                }
+                            }
+
+                            // Fading scroll indicator, hidden when idle
+                            Item {
+                                id: scrollTrack
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
+                                anchors.right: parent.right
+                                width: 3
+                                visible: parent.needsScroll
+                                opacity: (scrollContainer.moving || scrollContainer.flicking || scrollFadeTimer.running) ? 1.0 : 0.0
+
+                                Behavior on opacity {
+                                    NumberAnimation { duration: Theme.animDurationFast }
+                                }
+
+                                Rectangle {
+                                    width: 3
+                                    radius: 1.5
+                                    color: Theme.overlay(0.35)
+                                    y: Math.max(0, Math.min(scrollTrack.height - height, scrollContainer.visibleArea.yPosition * scrollTrack.height))
+                                    height: Math.max(28, scrollContainer.visibleArea.heightRatio * scrollTrack.height)
+                                }
+                            }
+
+                            Timer {
+                                id: scrollFadeTimer
+                                interval: 800
+                                repeat: false
+                            }
+                        }
                     }
                 }
             }
@@ -512,6 +541,6 @@ PanelWindow {
 
     WindowBlur {
         target: window
-        items: [card]
+        items: [window.content]
     }
 }
