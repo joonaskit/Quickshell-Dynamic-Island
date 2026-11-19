@@ -26,17 +26,17 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             SequentialAnimation on height {
-                running: root.playing
+                running: root.playing && !Theme.reduceMotion
                 loops: Animation.Infinite
-                NumberAnimation { to: root.maxHeight * 0.85; duration: 320; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight * 1.5; duration: 280; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.maxHeight * 0.5; duration: 250; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight; duration: 300; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.85; duration: Theme.duration(320); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight * 1.5; duration: Theme.duration(280); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.5; duration: Theme.duration(250); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight; duration: Theme.duration(300); easing.type: Easing.InOutQuad }
             }
 
             Behavior on height {
                 enabled: !root.playing
-                NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
+                NumberAnimation { duration: Theme.duration(250); easing.type: Easing.OutQuad }
             }
         }
 
@@ -49,17 +49,17 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             SequentialAnimation on height {
-                running: root.playing
+                running: root.playing && !Theme.reduceMotion
                 loops: Animation.Infinite
-                NumberAnimation { to: root.maxHeight * 0.4; duration: 260; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.maxHeight; duration: 350; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight * 1.8; duration: 290; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.maxHeight * 0.7; duration: 240; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.4; duration: Theme.duration(260); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight; duration: Theme.duration(350); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight * 1.8; duration: Theme.duration(290); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.7; duration: Theme.duration(240); easing.type: Easing.InOutQuad }
             }
 
             Behavior on height {
                 enabled: !root.playing
-                NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
+                NumberAnimation { duration: Theme.duration(250); easing.type: Easing.OutQuad }
             }
         }
 
@@ -72,17 +72,17 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             SequentialAnimation on height {
-                running: root.playing
+                running: root.playing && !Theme.reduceMotion
                 loops: Animation.Infinite
-                NumberAnimation { to: root.maxHeight * 0.95; duration: 380; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight * 1.2; duration: 220; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.maxHeight * 0.65; duration: 310; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight; duration: 270; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.95; duration: Theme.duration(380); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight * 1.2; duration: Theme.duration(220); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.65; duration: Theme.duration(310); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight; duration: Theme.duration(270); easing.type: Easing.InOutQuad }
             }
 
             Behavior on height {
                 enabled: !root.playing
-                NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
+                NumberAnimation { duration: Theme.duration(250); easing.type: Easing.OutQuad }
             }
         }
 
@@ -95,17 +95,17 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             SequentialAnimation on height {
-                running: root.playing
+                running: root.playing && !Theme.reduceMotion
                 loops: Animation.Infinite
-                NumberAnimation { to: root.maxHeight * 0.6; duration: 240; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.maxHeight * 0.9; duration: 330; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight * 2.0; duration: 280; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: root.minHeight; duration: 260; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.6; duration: Theme.duration(240); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.maxHeight * 0.9; duration: Theme.duration(330); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight * 2.0; duration: Theme.duration(280); easing.type: Easing.InOutQuad }
+                NumberAnimation { to: root.minHeight; duration: Theme.duration(260); easing.type: Easing.InOutQuad }
             }
 
             Behavior on height {
                 enabled: !root.playing
-                NumberAnimation { duration: 250; easing.type: Easing.OutQuad }
+                NumberAnimation { duration: Theme.duration(250); easing.type: Easing.OutQuad }
             }
         }
     }

@@ -68,7 +68,7 @@ Item {
     readonly property bool reachesDockEnd: !root.centered && !root.isVertical && root.dockCapsuleWidth > 0 && root.wantedWidth >= root.dockCapsuleWidth - Theme.dockRadius - geo.filletSize
     property real dockEndProgress: root.reachesDockEnd ? root.openProgress : 0
     Behavior on dockEndProgress {
-        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.duration(180); easing.type: Easing.OutCubic }
     }
     // Full size of the launcher; animates when the layout settings change
     property real finalWidth: root.reachesDockEnd ? Math.max(root.wantedWidth, root.dockCapsuleWidth) : root.wantedWidth
@@ -84,10 +84,10 @@ Item {
     property real finalHeight: root.combinedFiles ? Math.min(isCompact ? Theme.launcherCombinedHeightCompact : Theme.launcherCombinedHeight, root.maxHeight) : (isCompact ? 440 : 480)
 
     Behavior on finalWidth {
-        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.duration(180); easing.type: Easing.OutCubic }
     }
     Behavior on finalHeight {
-        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        NumberAnimation { duration: Theme.duration(180); easing.type: Easing.OutCubic }
     }
 
     // The launcher is an extension of the dock: it grows out of the corner by the
@@ -948,7 +948,7 @@ Item {
                                 border.color: isSelected ? Theme.accent : Theme.overlay(0.08)
                                 border.width: 1
 
-                                Behavior on color { ColorAnimation { duration: 120 } }
+                                Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
 
                                 Text {
                                     id: catText
@@ -1074,7 +1074,7 @@ Item {
                                 border.color: gridCell.isSelected ? Theme.accentTint(0.6) : (gridHover.hovered ? Theme.overlay(0.12) : "transparent")
                                 border.width: 1
 
-                                Behavior on color { ColorAnimation { duration: 100 } }
+                                Behavior on color { ColorAnimation { duration: Theme.duration(100) } }
 
                                 // Passive, so hovering the pin badge still counts as hovering the tile
                                 HoverHandler {
@@ -1122,7 +1122,7 @@ Item {
                                             mipmap: true
                                             smooth: true
                                             scale: gridHover.hovered ? 1.08 : 1.0
-                                            Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                            Behavior on scale { NumberAnimation { duration: Theme.duration(140); easing.type: Easing.OutCubic } }
                                         }
                                     }
 

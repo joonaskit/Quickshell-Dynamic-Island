@@ -1,6 +1,8 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
+import "animationSpeed.js" as AnimationSpeed
 
 Singleton {
     id: theme
@@ -346,13 +348,36 @@ Singleton {
     property int expandedHeightWithMedia: px(baseExpandedHeightWithMedia)
     property int expandedRadius: Math.round(px(baseExpandedRadius) * cornerScaleSoft)
 
-    // Animations
-    readonly property int animDuration: 360
-    readonly property int animDurationFast: 180
-    readonly property int animDurationTooltip: 120      // tooltip opacity fade & press scale
-    readonly property int animDurationPopover: 160      // popover X/Y repositioning slide
-    readonly property int animDurationTopBar: 260       // top-bar mode height morph (tighter, no overshoot)
-    readonly property int animDurationProgress: 300     // live progress bar fills
+    // Animations. Every duration goes through duration(), so the shell follows the
+    // compositor's animation speed: KDE's Animation speed or niri's `animations` block
+    // (docs/ANIMATION_CATALOGUE.md). ISLAND_ANIMATION_FACTOR overrides both.
+    readonly property real animationFactor: {
+        let forced = parseFloat(Quickshell.env("ISLAND_ANIMATION_FACTOR") || "");
+        if (!isNaN(forced) && forced >= 0) return forced;
+        if (CompositorService.isKde) return AnimationSpeed.kdeFactor(kdeGlobals.text);
+        if (CompositorService.isNiri) return AnimationSpeed.niriFactor(niriConfig.text);
+        return 1;
+    }
+    // Animations are off: also stop the ones that loop, which would spin with no length
+    readonly property bool reduceMotion: animationFactor === 0
+    function duration(ms) {
+        return AnimationSpeed.scale(ms, animationFactor);
+    }
+
+    readonly property string configHome: Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")
+    property WatchedFile kdeGlobals: WatchedFile {
+        path: CompositorService.isKde ? theme.configHome + "/kdeglobals" : ""
+    }
+    property WatchedFile niriConfig: WatchedFile {
+        path: CompositorService.isNiri ? (Quickshell.env("NIRI_CONFIG") || theme.configHome + "/niri/config.kdl") : ""
+    }
+
+    readonly property int animDuration: duration(360)
+    readonly property int animDurationFast: duration(180)
+    readonly property int animDurationTooltip: duration(120)      // tooltip opacity fade & press scale
+    readonly property int animDurationPopover: duration(160)      // popover X/Y repositioning slide
+    readonly property int animDurationTopBar: duration(260)       // top-bar mode height morph (tighter, no overshoot)
+    readonly property int animDurationProgress: duration(300)     // live progress bar fills
     readonly property int animEasing: Easing.OutBack
     readonly property real animOvershoot: 1.08
     readonly property real animEntranceOvershoot: 1.15  // scale-from-zero entrance (bubbles, pills appearing)

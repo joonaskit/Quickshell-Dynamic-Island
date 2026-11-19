@@ -82,10 +82,10 @@ Item {
             // Only while shown: the view stays loaded when hidden, and a running
             // animation makes the window draw every frame
             SequentialAnimation on opacity {
-                running: root.visible
+                running: root.visible && !Theme.reduceMotion
                 loops: Animation.Infinite
-                NumberAnimation { from: 1.0; to: 0.3; duration: 600; easing.type: Easing.InOutQuad }
-                NumberAnimation { from: 0.3; to: 1.0; duration: 600; easing.type: Easing.InOutQuad }
+                NumberAnimation { from: 1.0; to: 0.3; duration: Theme.duration(600); easing.type: Easing.InOutQuad }
+                NumberAnimation { from: 0.3; to: 1.0; duration: Theme.duration(600); easing.type: Easing.InOutQuad }
             }
         }
     }

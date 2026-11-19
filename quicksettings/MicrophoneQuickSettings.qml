@@ -56,7 +56,7 @@ Item {
                     color: !MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.22) : Theme.cardSurfaceHover
 
                     Behavior on color {
-                        ColorAnimation { duration: 180 }
+                        ColorAnimation { duration: Theme.duration(180) }
                     }
 
                     SvgIcon {
@@ -66,7 +66,7 @@ Item {
                         color: !MicrophoneService.isMuted ? Theme.accentRed : Theme.textTertiary
 
                         Behavior on color {
-                            ColorAnimation { duration: 180 }
+                            ColorAnimation { duration: Theme.duration(180) }
                         }
                     }
 
@@ -110,8 +110,8 @@ Item {
                     color: MicrophoneService.isMuted ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : Theme.overlay(0.1)
                     scale: toggleMouse.pressed ? 0.92 : (toggleMouse.containsMouse ? 1.05 : 1.0)
 
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
+                    Behavior on scale { NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutBack } }
 
                     Text {
                         anchors.centerIn: parent
@@ -185,7 +185,7 @@ Item {
                         radius: Theme.corner(14)
                         color: MicrophoneService.isMuted ? Theme.overlay(0.2) : Theme.accentRed
 
-                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
                     }
 
                     // Icon inside slider

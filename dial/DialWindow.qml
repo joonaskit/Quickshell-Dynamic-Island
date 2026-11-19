@@ -48,7 +48,8 @@ PanelWindow {
     }
     Timer {
         id: unmapTimer
-        interval: 420
+        // The slide away takes Theme.duration(360)
+        interval: Theme.duration(420)
         onTriggered: window.mapped = false
     }
 
@@ -102,7 +103,7 @@ PanelWindow {
             }
             glide.from = position;
             glide.to = index;
-            glide.duration = Logic.turnDuration(distance);
+            glide.duration = Theme.duration(Logic.turnDuration(distance));
             glide.easing.overshoot = Logic.turnOvershoot(distance);
             glide.start();
         }
@@ -476,8 +477,8 @@ PanelWindow {
                     y: dial.shown ? 0 : -(window.cy + Theme.px(Logic.DISC_RADIUS))
                     opacity: dial.shown ? 1 : 0
 
-                    Behavior on opacity { NumberAnimation { duration: 180 } }
-                    Behavior on y { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.duration(180) } }
+                    Behavior on y { NumberAnimation { duration: Theme.duration(360); easing.type: Easing.OutCubic } }
 
                     Rectangle {
                         id: disc
@@ -512,7 +513,7 @@ PanelWindow {
                         y: window.cy
                         preferredRendererType: Shape.CurveRenderer
                         opacity: window.items.length > Logic.BAR_MIN_ITEMS ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 180 } }
+                        Behavior on opacity { NumberAnimation { duration: Theme.duration(180) } }
 
                         readonly property real radius: Theme.px(Logic.BAR_RADIUS)
                         readonly property var span: Logic.thumbSpan(arcSpin.position, window.items.length)
@@ -542,7 +543,7 @@ PanelWindow {
                         preferredRendererType: Shape.CurveRenderer
                         opacity: DialService.page !== "" && dial.pageView.gauge >= 0 ? 1 : 0
                         visible: opacity > 0
-                        Behavior on opacity { NumberAnimation { duration: 240 } }
+                        Behavior on opacity { NumberAnimation { duration: Theme.duration(240) } }
 
                         readonly property real radius: Theme.px(Logic.BAR_RADIUS)
                         // From 165° round the bottom to 15°
@@ -550,7 +551,7 @@ PanelWindow {
                         readonly property real span: 150
                         property real level: Math.max(0, dial.pageView.gauge)
                         // Follows a drag on the slider at once
-                        Behavior on level { enabled: !(grip.pressed && grip.sliding); NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
+                        Behavior on level { enabled: !(grip.pressed && grip.sliding); NumberAnimation { duration: Theme.duration(600); easing.type: Easing.OutCubic } }
 
                         ShapePath {
                             fillColor: "transparent"
@@ -582,7 +583,7 @@ PanelWindow {
                         opacity: dial.pageView.slider ? gauge.opacity : 0
                         visible: opacity > 0
                         scale: grip.pressed && grip.sliding ? 1.3 : 1
-                        Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                        Behavior on scale { NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutCubic } }
                     }
 
                     // Category ring. Each pill is bent along the ring, and so is its label.
@@ -629,7 +630,7 @@ PanelWindow {
                                     ShapePath {
                                         fillColor: pill.selected ? Theme.accentBlue : Theme.overlay(pillHover.hovered ? 0.2 : 0.12)
                                         strokeColor: "transparent"
-                                        Behavior on fillColor { ColorAnimation { duration: 180 } }
+                                        Behavior on fillColor { ColorAnimation { duration: Theme.duration(180) } }
 
                                         PathAngleArc {
                                             radiusX: pill.radius + pill.half
@@ -760,7 +761,7 @@ PanelWindow {
                                             : slot.selected ? Qt.alpha(Theme.accentBlue, 0.24) : Theme.overlay(tileHover.hovered ? 0.08 : 0)
                                         border.width: 1
                                         opacity: isAction && !DialService.actionEnabled(slot.app) ? 0.4 : 1
-                                        Behavior on color { ColorAnimation { duration: 120 } }
+                                        Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
 
                                         HoverHandler { id: tileHover }
                                         border.color: armed ? Qt.alpha(Theme.accentRed, 0.7) : slot.selected ? Qt.alpha(tint, 0.6) : "transparent"
@@ -789,7 +790,7 @@ PanelWindow {
                                                 height: width
                                                 radius: width / 2
                                                 color: filled ? tint : Qt.alpha(tint, 0.2)
-                                                Behavior on color { ColorAnimation { duration: 120 } }
+                                                Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
 
                                                 SvgIcon {
                                                     anchors.centerIn: parent
@@ -859,7 +860,7 @@ PanelWindow {
                                             border.width: Theme.px(2)
                                             border.color: Theme.islandBackground
                                             visible: slot.selected && slot.app.kind === "app"
-                                            Behavior on color { ColorAnimation { duration: 180 } }
+                                            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
 
                                             SvgIcon {
                                                 anchors.centerIn: parent
@@ -883,7 +884,7 @@ PanelWindow {
                     // Hidden on a page by opacity alone, so the field keeps the keys.
                     Column {
                         opacity: DialService.page === "" ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 180 } }
+                        Behavior on opacity { NumberAnimation { duration: Theme.duration(180) } }
                         x: window.cx - width / 2
                         // The text sits where the prototype has it; the box takes 4 px above it
                         y: window.cy + Theme.px(27)
@@ -1017,7 +1018,7 @@ PanelWindow {
                         spacing: Theme.px(2)
                         opacity: DialService.page !== "" ? 1 : 0
                         visible: opacity > 0
-                        Behavior on opacity { NumberAnimation { duration: 180 } }
+                        Behavior on opacity { NumberAnimation { duration: Theme.duration(180) } }
 
                         Text {
                             width: parent.width
@@ -1222,8 +1223,8 @@ PanelWindow {
                     bottomRightRadius: bottomLeftRadius
                     color: Theme.islandSurface
                     opacity: DialService.launching !== null && DialService.launching.phase === 1 ? 1 : 0
-                    Behavior on width { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
-                    Behavior on opacity { NumberAnimation { duration: 180 } }
+                    Behavior on width { NumberAnimation { duration: Theme.duration(240); easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: Theme.duration(180) } }
 
                     Text {
                         anchors.centerIn: parent
@@ -1252,10 +1253,10 @@ PanelWindow {
                     y: (flying ? window.cy : (launch ? launch.y : window.cy)) - height / 2
                     scale: flying ? 0.45 : 1
                     opacity: launch && launch.phase < 2 ? 1 : 0
-                    Behavior on opacity { enabled: flyIcon.launch !== null && flyIcon.launch.phase === 2; NumberAnimation { duration: 150 } }
-                    Behavior on x { enabled: flyIcon.flying; NumberAnimation { duration: 420; easing.type: Easing.InOutCubic } }
-                    Behavior on y { enabled: flyIcon.flying; NumberAnimation { duration: 420; easing.type: Easing.InOutCubic } }
-                    Behavior on scale { enabled: flyIcon.flying; NumberAnimation { duration: 420; easing.type: Easing.InOutCubic } }
+                    Behavior on opacity { enabled: flyIcon.launch !== null && flyIcon.launch.phase === 2; NumberAnimation { duration: Theme.duration(150) } }
+                    Behavior on x { enabled: flyIcon.flying; NumberAnimation { duration: Theme.duration(420); easing.type: Easing.InOutCubic } }
+                    Behavior on y { enabled: flyIcon.flying; NumberAnimation { duration: Theme.duration(420); easing.type: Easing.InOutCubic } }
+                    Behavior on scale { enabled: flyIcon.flying; NumberAnimation { duration: Theme.duration(420); easing.type: Easing.InOutCubic } }
                 }
 
                 // The Spinner whose ring is under a point of `hit`: the category ring inside the turn

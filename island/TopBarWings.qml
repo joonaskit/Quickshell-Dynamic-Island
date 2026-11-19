@@ -151,7 +151,7 @@ Item {
             visible: opacity > 0.01
 
             Behavior on opacity {
-                NumberAnimation { duration: 180 }
+                NumberAnimation { duration: Theme.duration(180) }
             }
         }
     }

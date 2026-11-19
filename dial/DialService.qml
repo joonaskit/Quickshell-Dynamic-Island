@@ -582,7 +582,8 @@ Singleton {
 
     Timer {
         id: dropTimer
-        interval: 300
+        // Longer than the fade out, which follows the animation speed
+        interval: Theme.duration(300)
         onTriggered: root.launching = null
     }
 

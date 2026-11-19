@@ -208,7 +208,7 @@ Item {
 
                         scale: itemMouse.pressed ? 0.90 : 1.0
 
-                        Behavior on color { ColorAnimation { duration: 110 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(110) } }
                         Behavior on scale {
                             NumberAnimation {
                                 duration: Theme.animDurationTooltip
@@ -229,7 +229,7 @@ Item {
                                 font.weight: desktopItem.isCurrent ? Font.Bold : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Font.DemiBold : Font.Normal)
                                 color: desktopItem.isCurrent ? Theme.textPrimary : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
 
-                                Behavior on color { ColorAnimation { duration: 110 } }
+                                Behavior on color { ColorAnimation { duration: Theme.duration(110) } }
                             }
 
                             // Workspace-style open window activity dot
@@ -481,7 +481,7 @@ Item {
                     }
                     color: switchMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                     Behavior on color {
-                        ColorAnimation { duration: 100 }
+                        ColorAnimation { duration: Theme.duration(100) }
                     }
 
                     RowLayout {
@@ -535,7 +535,7 @@ Item {
                     }
                     color: addMenuMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                     Behavior on color {
-                        ColorAnimation { duration: 100 }
+                        ColorAnimation { duration: Theme.duration(100) }
                     }
 
                     RowLayout {
@@ -588,7 +588,7 @@ Item {
                     }
                     color: removeMouse.containsMouse ? Qt.rgba(1, 0.27, 0.23, 0.20) : "transparent"
                     Behavior on color {
-                        ColorAnimation { duration: 100 }
+                        ColorAnimation { duration: Theme.duration(100) }
                     }
 
                     RowLayout {
@@ -642,7 +642,7 @@ Item {
                     }
                     color: settingsMenuMouse.containsMouse ? Theme.overlay(0.12) : "transparent"
                     Behavior on color {
-                        ColorAnimation { duration: 100 }
+                        ColorAnimation { duration: Theme.duration(100) }
                     }
 
                     RowLayout {

@@ -49,10 +49,10 @@ Item {
     property real pulseFactor: 1.0
 
     SequentialAnimation on pulseFactor {
-        running: root.active
+        running: root.active && !Theme.reduceMotion
         loops: Animation.Infinite
-        NumberAnimation { to: 0.70; duration: 950; easing.type: Easing.InOutSine }
-        NumberAnimation { to: 1.00; duration: 950; easing.type: Easing.InOutSine }
+        NumberAnimation { to: 0.70; duration: Theme.duration(950); easing.type: Easing.InOutSine }
+        NumberAnimation { to: 1.00; duration: Theme.duration(950); easing.type: Easing.InOutSine }
     }
 
     // Layer 1: Soft Feathered Ambient Colored Halo (Radiates out as a round diffuse aura)

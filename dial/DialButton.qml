@@ -21,8 +21,8 @@ Rectangle {
         : (mouse.containsMouse ? Qt.alpha(tint, 0.3) : Theme.overlay(0.08))
     opacity: busy || !enabled ? 0.5 : 1
     scale: mouse.pressed ? 0.95 : 1
-    Behavior on color { ColorAnimation { duration: 120 } }
-    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+    Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
+    Behavior on scale { NumberAnimation { duration: Theme.duration(120); easing.type: Easing.OutCubic } }
 
     Text {
         id: label

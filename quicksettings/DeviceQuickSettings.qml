@@ -59,7 +59,7 @@ Item {
                         return Theme.cardSurfaceHover;
                     }
 
-                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
 
                     SvgIcon {
                         anchors.centerIn: parent
@@ -70,7 +70,7 @@ Item {
                             if (DeviceService.hasDevices) return Theme.accent;
                             return Theme.textTertiary;
                         }
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
                     }
 
                     MouseArea {
@@ -131,7 +131,7 @@ Item {
                     radius: Theme.px(14)
                     color: refreshMouse.containsMouse ? Theme.cardSurfaceHover : "transparent"
 
-                    Behavior on color { ColorAnimation { duration: 150 } }
+                    Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
 
                     SvgIcon {
                         anchors.centerIn: parent

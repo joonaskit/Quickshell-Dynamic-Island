@@ -69,10 +69,10 @@ Item {
 
             // Blink when finished
             SequentialAnimation on opacity {
-                running: root.finished
+                running: root.finished && !Theme.reduceMotion
                 loops: Animation.Infinite
-                NumberAnimation { to: 0.35; duration: 450 }
-                NumberAnimation { to: 1.0; duration: 450 }
+                NumberAnimation { to: 0.35; duration: Theme.duration(450) }
+                NumberAnimation { to: 1.0; duration: Theme.duration(450) }
                 onRunningChanged: if (!running) parent.opacity = 1.0
             }
         }

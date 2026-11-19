@@ -162,7 +162,7 @@ Item {
             }
             scale: nightMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -202,7 +202,7 @@ Item {
             }
             scale: hueMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -242,7 +242,7 @@ Item {
             }
             scale: gameMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -282,7 +282,7 @@ Item {
             }
             scale: kdeMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -318,7 +318,7 @@ Item {
             color: CaffeineService.isActive ? Qt.rgba(255/255, 159/255, 10/255, 0.22) : "transparent"
             scale: coffeeMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -351,7 +351,7 @@ Item {
             color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : "transparent"
             scale: dndMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -384,7 +384,7 @@ Item {
             color: root.host.openMenu === "wifi" ? Theme.accentTint(0.25) : "transparent"
             scale: wifiMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -421,7 +421,7 @@ Item {
             color: root.host.openMenu === "bluetooth" ? Theme.accentTint(0.25) : "transparent"
             scale: btMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -463,7 +463,7 @@ Item {
             }
             scale: micMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -506,7 +506,7 @@ Item {
             color: root.host.openMenu === "clipboard" ? Theme.accentTint(0.25) : "transparent"
             scale: clipboardMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -544,7 +544,7 @@ Item {
             color: root.host.openMenu === "profile" ? Qt.rgba(48/255, 209/255, 88/255, 0.25) : "transparent"
             scale: profileMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -586,7 +586,7 @@ Item {
             color: root.host.openMenu === "hardware" ? Theme.accentTint(0.25) : "transparent"
             scale: hardwareMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -628,7 +628,7 @@ Item {
             }
             scale: devicesMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -679,7 +679,7 @@ Item {
             color: root.host.openMenu === "notification" ? Qt.rgba(255/255, 159/255, 10/255, 0.25) : "transparent"
             scale: notifMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             SvgIcon {
@@ -732,7 +732,7 @@ Item {
             }
             scale: batteryMouse.pressed ? 0.90 : 1.0
 
-            Behavior on color { ColorAnimation { duration: 180 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(180) } }
             Behavior on scale { NumberAnimation { duration: Theme.animDurationTooltip; easing.type: Easing.OutCubic } }
 
             BatteryIndicator {

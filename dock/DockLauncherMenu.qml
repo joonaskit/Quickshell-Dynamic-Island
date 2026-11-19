@@ -104,7 +104,7 @@ Item {
                         radius: Theme.corner(5)
                         color: isSelected ? Theme.accent : (segMouse.containsMouse ? Theme.overlay(0.10) : "transparent")
 
-                        Behavior on color { ColorAnimation { duration: 100 } }
+                        Behavior on color { ColorAnimation { duration: Theme.duration(100) } }
 
                         Text {
                             anchors.centerIn: parent

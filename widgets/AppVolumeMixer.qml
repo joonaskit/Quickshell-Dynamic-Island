@@ -28,8 +28,8 @@ Item {
             border.width: 1
             border.color: root.expanded ? Theme.accentTint(0.35) : Theme.overlay(0.08)
 
-            Behavior on color { ColorAnimation { duration: 150 } }
-            Behavior on border.color { ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
+            Behavior on border.color { ColorAnimation { duration: Theme.duration(150) } }
 
             RowLayout {
                 anchors.fill: parent
@@ -170,7 +170,7 @@ Item {
                                     radius: height / 2
                                     color: row.muted ? Theme.textTertiary : (drag.containsMouse || drag.pressed ? Theme.accent : Theme.sliderFill)
                                     width: Math.max(0, Math.min(track.width, (row.muted ? 0 : row.vol) * track.width))
-                                    Behavior on color { ColorAnimation { duration: 150 } }
+                                    Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
                                 }
                             }
 

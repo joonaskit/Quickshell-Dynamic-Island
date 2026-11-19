@@ -75,7 +75,7 @@ Item {
                     width: Math.max(0, Math.min(sliderTrack.width, (root.isMuted ? 0 : root.volume) * sliderTrack.width))
 
                     Behavior on color {
-                        ColorAnimation { duration: 150 }
+                        ColorAnimation { duration: Theme.duration(150) }
                     }
                 }
             }

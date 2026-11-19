@@ -646,7 +646,7 @@ Item {
             : (isActive ? Theme.overlay(0.08) : "transparent")
 
         Behavior on color {
-            ColorAnimation { duration: 100 }
+            ColorAnimation { duration: Theme.duration(100) }
         }
 
         RowLayout {

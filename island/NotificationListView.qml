@@ -78,8 +78,8 @@ Item {
                 color: SettingsService.dndEnabled ? Qt.rgba(191/255, 90/255, 242/255, 0.22) : (dndMouse.containsMouse ? Theme.overlay(0.1) : Theme.overlay(0.05))
                 scale: dndMouse.pressed ? 0.92 : 1.0
 
-                Behavior on color { ColorAnimation { duration: 150 } }
-                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                Behavior on color { ColorAnimation { duration: Theme.duration(150) } }
+                Behavior on scale { NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutCubic } }
 
                 RowLayout {
                     id: dndRow
@@ -120,11 +120,11 @@ Item {
                 scale: clearMouse.pressed ? 0.92 : (clearMouse.containsMouse ? 1.08 : 1.0)
 
                 Behavior on color {
-                    ColorAnimation { duration: 150 }
+                    ColorAnimation { duration: Theme.duration(150) }
                 }
 
                 Behavior on scale {
-                    NumberAnimation { duration: 150; easing.type: Easing.OutBack; easing.overshoot: 1.3 }
+                    NumberAnimation { duration: Theme.duration(150); easing.type: Easing.OutBack; easing.overshoot: 1.3 }
                 }
 
                 RowLayout {
@@ -215,7 +215,7 @@ Item {
                             radius: Theme.px(8)
                             color: chipMouse.containsMouse ? Theme.overlay(0.12) : Theme.overlay(0.06)
 
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
 
                             RowLayout {
                                 id: chipRow
@@ -255,7 +255,7 @@ Item {
                             radius: Theme.px(9)
                             color: groupClearMouse.containsMouse ? Qt.rgba(255/255, 69/255, 58/255, 0.25) : "transparent"
 
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Behavior on color { ColorAnimation { duration: Theme.duration(120) } }
 
                             SvgIcon {
                                 anchors.centerIn: parent

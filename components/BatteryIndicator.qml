@@ -75,11 +75,11 @@ Item {
                     }
 
                     Behavior on width {
-                        NumberAnimation { duration: 300 }
+                        NumberAnimation { duration: Theme.duration(300) }
                     }
 
                     Behavior on color {
-                        ColorAnimation { duration: 200 }
+                        ColorAnimation { duration: Theme.duration(200) }
                     }
                 }
 

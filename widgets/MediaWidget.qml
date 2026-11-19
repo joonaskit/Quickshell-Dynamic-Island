@@ -222,7 +222,7 @@ Item {
                 width: root.trackLength > 0 ? Math.min(trackBar.width, Math.max(0, (root.trackPosition / root.trackLength) * trackBar.width)) : 0
 
                 Behavior on color {
-                    ColorAnimation { duration: 150 }
+                    ColorAnimation { duration: Theme.duration(150) }
                 }
             }
 
