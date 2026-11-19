@@ -497,6 +497,7 @@ Singleton {
                 list.push({
                     id: w.id,
                     appId: w.app,
+                    ownEntry: root.exactEntryId(w.app),
                     title: w.title,
                     activated: !!w.active,
                     minimized: !!w.minimized,
@@ -521,6 +522,7 @@ Singleton {
                 list.push({
                     id: tw.appId,
                     appId: tw.appId,
+                    ownEntry: root.exactEntryId(tw.appId),
                     title: tw.title,
                     activated: tw.activated,
                     minimized: tw.minimized,
@@ -530,6 +532,14 @@ Singleton {
             }
         }
         return list;
+    }
+
+    // The id of the desktop entry named exactly by a window's app-id, or "". windowMatching.js
+    // keeps such a window to its own entry instead of guessing (#150)
+    function exactEntryId(appId) {
+        if (!appId) return "";
+        let entry = DesktopEntries.byId(appId);
+        return entry ? (entry.id || "") : "";
     }
 
     // Match windows to an app definition (logic in windowMatching.js). `windows` is the

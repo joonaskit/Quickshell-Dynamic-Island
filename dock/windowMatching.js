@@ -9,12 +9,14 @@ function normalize(s) {
 
 // Returns the windows in `windows` that belong to `app`.
 // app:      { id, desktopFile, rawAppId, command, name }, all optional
-// windows:  [{ appId, ... }], as built by DockService.getMergedWindows
+// windows:  [{ appId, ownEntry, ... }], as built by DockService.getMergedWindows;
+//           ownEntry is the id of the desktop entry the app-id names exactly, or 
 // wmClass:  the desktop entry's StartupWMClass, or "" if it has none
 //
 // Entries declaring StartupWMClass are matched exactly, so that e.g. a
 // Vivaldi PWA window is not mistaken for the Vivaldi browser itself. Other
-// entries fall back to substring matching on id, command and name.
+// entries fall back to substring matching on id, command and name, except for a
+// window whose app-id names another desktop entry exactly: it is that app's (#150).
 function matchWindows(app, windows, wmClass) {
     let list = [];
     if (!windows || windows.length === 0) return list;
@@ -24,6 +26,7 @@ function matchWindows(app, windows, wmClass) {
     let rawLower = normalize(app.rawAppId);
     let cmdLower = (app.command || "").toLowerCase();
     let nameLower = (app.name || "").toLowerCase();
+    let nameWord = nameLower.replace(/\s+/g, "");
     let wmClassLower = (wmClass || "").toLowerCase();
     let strict = wmClassLower.length > 0;
 
@@ -37,6 +40,8 @@ function matchWindows(app, windows, wmClass) {
             if (match) list.push(w);
             continue;
         }
+        let own = normalize(w.ownEntry);
+        if (!match && own.length > 0 && own !== idLower && own !== deskLower) continue;
         if (!match && idLower.length > 2 && (wApp.endsWith("." + idLower) || deskLower.endsWith("." + wApp) || idLower.indexOf(wApp) >= 0 || wApp.indexOf(idLower) >= 0)) {
             match = true;
         }
@@ -46,7 +51,9 @@ function matchWindows(app, windows, wmClass) {
         if (!match && cmdLower.length > 2 && (wApp === cmdLower || wApp.indexOf(cmdLower) >= 0 || cmdLower.indexOf(wApp) >= 0)) {
             match = true;
         }
-        if (!match && nameLower.length > 3 && wApp.indexOf(nameLower) >= 0) {
+        // The name only as a whole part of the app-id: "Settings" matches org.gnome.Settings
+        // but not io.github.joonaskit.NiriSettings
+        if (!match && nameWord.length > 3 && wApp.split(/[.\-_]/).indexOf(nameWord) >= 0) {
             match = true;
         }
 
