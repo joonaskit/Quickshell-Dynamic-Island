@@ -1,6 +1,6 @@
 # Quickshell Island
 
-A floating, morphing "island" top bar for KDE Plasma (Wayland), built with [Quickshell](https://quickshell.org) and QML. It also runs under [niri](https://github.com/YaLTeR/niri) (experimental): the bar, dock, launcher and dial work, and the KDE-specific parts are left out. See `docs/NIRI.md`.
+A floating, morphing "island" top bar for KDE Plasma (Wayland), built with [Quickshell](https://quickshell.org) and QML. It also runs under [niri](https://github.com/YaLTeR/niri) (beta): the bar, dock, launcher and dial work, the desktops pill shows niri's workspaces, and the KDE-specific parts are left out. See `docs/NIRI.md`.
 
 A compact pill at the top of the screen shows the clock, media and notifications. It expands on hover or click into a full panel. It can also morph into a full-width top bar when a window is maximized.
 
@@ -24,11 +24,11 @@ A compact pill at the top of the screen shows the clock, media and notifications
 
 - A Wayland session with either:
   - **KDE Plasma 6** (KWin), the main target, or
-  - **niri** (experimental). The desktops pill shows niri's workspaces, and the dock follows niri's windows. Left out there: Night Light, KDE colour schemes, System Settings pages in the launcher and 60 Hz on battery. The shell's shortcuts are bound in niri's `config.kdl` instead of KDE's, niri's own settings are left to [niri-settings](https://github.com/joonaskit/niri-settings), and the shell's notifications need `mako` stopped first (the Health page says so). See `docs/NIRI.md`
+  - **niri** (beta). The desktops pill shows niri's workspaces, and the dock follows niri's windows. Left out there: Night Light, KDE colour schemes, System Settings pages in the launcher and 60 Hz on battery. The shell's shortcuts are bound in niri's `config.kdl` instead of KDE's, niri's own settings are left to [niri-settings](https://github.com/joonaskit/niri-settings), the recommended companion, and the shell's notifications need `mako` stopped first (the Health page says so). See `docs/NIRI.md`
 - [Quickshell](https://quickshell.org). 0.3 or later blurs the desktop behind the Glass style; 0.2 draws the glass without blur (see `docs/GLASS.md`)
 - Python 3 with `dbus-python` and `PyGObject`
 - CLI tools: `nmcli`, `brightnessctl`, `udevadm`, `wl-clipboard`, `udisksctl`, `lsblk`, `systemd-inhibit`, `loginctl`, `busctl`, `qdbus-qt6`, `xdg-open`, `gtk-launch`, `notify-send` (timer alerts)
-- On KDE: `kscreen-doctor` (main display, 60 Hz on battery); on niri: `niri` itself (Shortcuts settings) and optionally `xdg-terminal-exec` (terminal apps)
+- On KDE: `kscreen-doctor` (main display, 60 Hz on battery); on niri: `niri` itself (Shortcuts settings) and optionally `niri-settings` (niri's own settings), a screen locker (`swaylock`, `hyprlock` or `gtklock`, for Lock) and `xdg-terminal-exec` (terminal apps)
 - Optional: `kioclient` (the dock's "Properties" entry) and `gio` (fallback for mounting USB drives)
 - UPower, for battery, power-profiles-daemon, for power profiles, and BlueZ, for Bluetooth
 - PipeWire, for volume, the microphone and choosing audio devices

@@ -35,7 +35,7 @@ Read the doc for an area before changing it:
 - Expanded-view widgets: `docs/WIDGETS.md`
 - Animations: `docs/ANIMATION_CATALOGUE.md`
 - Category dial launcher (experimental): `docs/DIAL.md`
-- Running under niri (experimental): `docs/NIRI.md`
+- Running under niri (beta), `NiriService`: `docs/NIRI.md`
 - Unit tests and shell tests (`tests/fixtures/`): `docs/TESTING.md`
 
 ## Running

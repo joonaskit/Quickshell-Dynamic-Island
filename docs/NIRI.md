@@ -1,6 +1,16 @@
-# niri (experimental)
+# niri (beta)
 
-The shell is built for KDE Plasma. Under niri the bar, dock, launcher and dial work, and the virtual desktops pill shows niri's workspaces. The KDE parts are left out: Night Light, KDE colour schemes, System Settings pages and the 60 Hz on battery switch (`kscreen-doctor`). Buttons that would open a KDE settings module are hidden; where [niri-settings](https://github.com/joonaskit/niri-settings) has the page, they open it instead.
+The shell is built for KDE Plasma, and runs under niri as a beta. Under niri the bar, dock, launcher and dial work, the virtual desktops pill shows niri's workspaces, and window actions go through niri's IPC. The KDE parts are left out: Night Light, KDE colour schemes, System Settings pages and the 60 Hz on battery switch (`kscreen-doctor`). Buttons that would open a KDE settings module are hidden; where [niri-settings](https://github.com/joonaskit/niri-settings) has the page, they open it instead.
+
+## Setting up
+
+The first start under niri sets the shell up for it and opens the welcome guide, whose niri step checks the rest. In short:
+
+1. Start the shell at login through `run.sh`, as `install.sh` does with an entry in `~/.config/autostart/` (niri runs those).
+2. Stop mako, which takes the notifications: `systemctl --user mask --now mako.service`, then restart the shell.
+3. Comment out `spawn-at-startup "waybar"` in `~/.config/niri/config.kdl`, so there is one top bar.
+4. Install [niri-settings](https://github.com/joonaskit/niri-settings), the recommended companion for niri's own settings: key bindings, outputs, input, layout and rules.
+5. Install a screen locker (swaylock, hyprlock or gtklock) for Lock, and bind a key to the launcher (the guide offers Mod+Space).
 
 ## Dependencies
 
@@ -67,7 +77,7 @@ KDE's global shortcuts are not there, so under niri the Shortcuts tab of the set
 
 ## Launcher shortcut
 
-Bind a key on the Shortcuts tab (Shell, Toggle the dial or Toggle app launcher), or by hand in `config.kdl`:
+The welcome guide's niri step offers to bind Mod+Space. Otherwise bind a key on the Shortcuts tab (Toggle the dial or Toggle app launcher), or by hand in `config.kdl`:
 
 ```kdl
 binds {
@@ -90,3 +100,10 @@ niri 26.04 blurs a layer surface that asks for it, as the glass style does, unle
 ## Shell tests
 
 `tests/fake_niri.py` stands in for niri's socket: it serves the recordings in `tests/data/niri/` as the event stream and logs the actions it is sent. `tests/run_fixtures.sh` starts it for a fixture with a `niri` file in its folder; see `docs/TESTING.md`.
+
+## Known limits
+
+- Sleep (`systemctl suspend`) does not lock first. Have the idle daemon lock before sleep, for example swayidle's `before-sleep swaylock -f`.
+- Binds in files the config `include`s are not shown on the Shortcuts tab, and their keys are not checked for conflicts.
+- niri cannot open the launcher on a tap of Super alone (see Launcher shortcut).
+- The blur check reads `config.kdl` again when it changes, but not the files it includes.
