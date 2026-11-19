@@ -37,6 +37,13 @@ PanelWindow {
     // Top layer sits above regular/maximized windows but below fullscreen windows
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell-island"
+
+    // Caffeine outside KDE: idle daemons there (swayidle under niri) follow the Wayland
+    // idle-inhibit protocol, not the systemd-inhibit lock CaffeineService holds
+    IdleInhibitor {
+        window: window
+        enabled: CaffeineService.isActive && !CompositorService.isKde
+    }
     // Lets notification replies and menus with text fields take typing once clicked
     WlrLayershell.keyboardFocus: (islandPill.isNotificationOpen || statusCluster.notificationMenuOpen || statusCluster.hueMenuOpen || statusCluster.nightMenuOpen || statusCluster.kdeMenuOpen) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
