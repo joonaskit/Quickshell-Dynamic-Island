@@ -26,3 +26,5 @@ Try a D-Bus helper on a private bus first, with `./run.sh --sandbox`.
 `deps.json` lists every external tool, Python module, D-Bus service and socket service the shell uses, with the features each one supports and its package name per distro. Add an entry when a feature starts using a new one.
 
 `scripts/check_deps.py` (`./run.sh --check`, and the welcome guide's system check) checks them, tested by `tests/test_check_deps.py`.
+
+An entry that only one desktop uses lists it in `desktops`: `["kde"]` for KWin and other Plasma tools, `["niri"]` for niri's. The values are `CompositorService.name`'s (`kde`, `niri`, `other`), and the check tells the desktop the same way. On any other desktop the entry is `not-needed`: it is not checked, never fails the check or goes into the install command, and `./run.sh --check` lists it under "Not checked on". `DepsService` still counts it as unusable, so a feature that needs it (Night Light under niri) is off, and says which desktop the tool is for. An entry without `desktops` is checked everywhere.

@@ -38,12 +38,15 @@
         "The shell itself (X11 sessions are not supported)"
       ],
       "packages": {},
-      "note": "Log in to a Plasma (Wayland) session"
+      "note": "Log in to a Wayland session: KDE Plasma, or niri (experimental, see docs/NIRI.md)"
     },
     {
       "id": "kwin",
       "name": "KWin (KDE Plasma)",
       "severity": "required",
+      "desktops": [
+        "kde"
+      ],
       "check": {
         "type": "dbus",
         "bus": "user",
@@ -60,6 +63,29 @@
         "fedora": "kwin",
         "opensuse": "kwin6",
         "debian": "kwin-wayland"
+      },
+      "note": "Needed under KDE Plasma only"
+    },
+    {
+      "id": "niri",
+      "name": "niri",
+      "severity": "recommended",
+      "desktops": [
+        "niri"
+      ],
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "niri"
+        ]
+      },
+      "features": [
+        "Shortcuts settings (edits niri's binds, checked with niri validate)"
+      ],
+      "packages": {
+        "arch": "niri",
+        "fedora": "niri",
+        "opensuse": "niri"
       }
     },
     {
@@ -129,6 +155,9 @@
       "id": "kscreen-doctor",
       "name": "kscreen-doctor",
       "severity": "recommended",
+      "desktops": [
+        "kde"
+      ],
       "check": {
         "type": "command",
         "anyOf": [
@@ -507,6 +536,9 @@
       "id": "kconfig-tools",
       "name": "kreadconfig6 and kwriteconfig6",
       "severity": "optional",
+      "desktops": [
+        "kde"
+      ],
       "check": {
         "type": "command",
         "allOf": [
@@ -528,6 +560,9 @@
       "id": "plasma-apply-colorscheme",
       "name": "plasma-apply-colorscheme",
       "severity": "optional",
+      "desktops": [
+        "kde"
+      ],
       "check": {
         "type": "command",
         "anyOf": [
@@ -564,6 +599,28 @@
         "opensuse": "kdialog",
         "debian": "kdialog"
       }
+    },
+    {
+      "id": "xdg-terminal-exec",
+      "name": "xdg-terminal-exec",
+      "severity": "optional",
+      "desktops": [
+        "niri",
+        "other"
+      ],
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "xdg-terminal-exec"
+        ]
+      },
+      "features": [
+        "Opening terminal apps from the launcher and the dial"
+      ],
+      "packages": {
+        "fedora": "xdg-terminal-exec"
+      },
+      "note": "Without it $TERMINAL, or the first common terminal found, is used"
     },
     {
       "id": "upower",

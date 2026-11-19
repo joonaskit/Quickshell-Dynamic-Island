@@ -6,8 +6,10 @@ Usage:
   check_deps.py --json    the same result as JSON, for the shell and scripts
 
 Each dependency is "found", "missing" or "not-running" (a service that is
-installed but not on the bus or its socket). The exit code is 1 only when a required
-dependency is not found, and 2 when deps.json cannot be read.
+installed but not on the bus or its socket), or "not-needed": an entry with
+"desktops" (e.g. ["kde"]) is only checked on those desktops. The desktop is told as
+CompositorService tells it: "kde", "niri" or "other". The exit code is 1 only when a
+required dependency is not found, and 2 when deps.json cannot be read.
 
 Uses the standard library only, so it runs before dbus-python and PyGObject
 are installed.
@@ -23,7 +25,9 @@ import sys
 MANIFEST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "deps.json")
 
 SEVERITIES = ("required", "recommended", "optional")
-FOUND, MISSING, NOT_RUNNING = "found", "missing", "not-running"
+FOUND, MISSING, NOT_RUNNING, NOT_NEEDED = "found", "missing", "not-running", "not-needed"
+
+DESKTOP_NAMES = {"kde": "KDE Plasma", "niri": "niri", "other": "this desktop"}
 
 INSTALL_COMMANDS = {
     "arch": "sudo pacman -S",
@@ -57,6 +61,9 @@ class Probe:
 
     def session_type(self):
         return os.environ.get("XDG_SESSION_TYPE", "")
+
+    def desktop(self):
+        return detect_desktop(os.environ)
 
     def bus_names(self, bus):
         """Names on the bus, including ones that would start on demand. Empty when busctl fails."""
@@ -116,6 +123,20 @@ def check_status(check, probe):
     raise ValueError(f"unknown check type: {kind}")
 
 
+def detect_desktop(env):
+    """"kde", "niri" or "other", as CompositorService decides it: ISLAND_COMPOSITOR wins,
+    then NIRI_SOCKET (niri started from Plasma keeps Plasma's XDG_CURRENT_DESKTOP), then
+    XDG_CURRENT_DESKTOP naming KDE."""
+    forced = env.get("ISLAND_COMPOSITOR", "").lower()
+    if forced in ("kde", "niri", "other"):
+        return forced
+    if env.get("NIRI_SOCKET"):
+        return "niri"
+    if "KDE" in env.get("XDG_CURRENT_DESKTOP", "").upper().split(":"):
+        return "kde"
+    return "other"
+
+
 def detect_distro(os_release):
     """The deps.json distro key for the text of /etc/os-release, or "" when it is not a supported one."""
     fields = {}
@@ -134,14 +155,18 @@ def detect_distro(os_release):
 def evaluate(manifest, probe, distro):
     """The full report: every dependency with its status, plus one install command for what is missing."""
     results = []
+    desktop = probe.desktop()
     for dep in manifest["dependencies"]:
         if dep.get("severity") not in SEVERITIES:
             raise ValueError(f"{dep.get('id')}: unknown severity")
+        desktops = dep.get("desktops")
+        needed = not desktops or desktop in desktops
         results.append({
             "id": dep["id"],
             "name": dep["name"],
             "severity": dep["severity"],
-            "status": check_status(dep["check"], probe),
+            "status": check_status(dep["check"], probe) if needed else NOT_NEEDED,
+            "desktops": desktops or [],
             "features": dep.get("features", []),
             "package": dep.get("packages", {}).get(distro, ""),
             "note": dep.get("note", ""),
@@ -153,7 +178,8 @@ def evaluate(manifest, probe, distro):
     command = f"{INSTALL_COMMANDS[distro]} {' '.join(packages)}" if packages and distro in INSTALL_COMMANDS else ""
     return {
         "distro": distro,
-        "ok": not any(r["severity"] == "required" and r["status"] != FOUND for r in results),
+        "desktop": desktop,
+        "ok": not any(r["severity"] == "required" and r["status"] not in (FOUND, NOT_NEEDED) for r in results),
         "installCommand": command,
         "dependencies": results,
     }
@@ -167,7 +193,7 @@ def format_table(report, color=False):
     width = max(len(r["name"]) for r in report["dependencies"])
     lines = []
     for severity in SEVERITIES:
-        rows = [r for r in report["dependencies"] if r["severity"] == severity]
+        rows = [r for r in report["dependencies"] if r["severity"] == severity and r["status"] != NOT_NEEDED]
         if not rows:
             continue
         lines.append(paint(severity.upper(), "1"))
@@ -184,7 +210,12 @@ def format_table(report, color=False):
                 lines.append(f"  {' ' * width}    {r['note']}")
         lines.append("")
 
-    problems = [r for r in report["dependencies"] if r["status"] != FOUND]
+    skipped = [r["name"] for r in report["dependencies"] if r["status"] == NOT_NEEDED]
+    if skipped:
+        lines.append(f"Not checked on {DESKTOP_NAMES.get(report['desktop'], report['desktop'])}: {', '.join(skipped)}")
+        lines.append("")
+
+    problems = [r for r in report["dependencies"] if r["status"] not in (FOUND, NOT_NEEDED)]
     if not problems:
         lines.append("Everything was found.")
     else:
