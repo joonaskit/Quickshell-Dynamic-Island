@@ -10,7 +10,11 @@ jobs:
   check:
     name: Fedora ${{ matrix.fedora }}
     runs-on: ubuntu-latest
-    container: fedora:${{ matrix.fedora }}
+    container:
+      image: fedora:${{ matrix.fedora }}
+      # Fedora's kwin_wayland carries the cap_sys_nice file capability, and the kernel
+      # refuses to run it in a container that lacks it (the shell tests, docs/TESTING.md)
+      options: --cap-add=SYS_NICE
     # Fedora 45 is new: report its failures without failing the run until it is green
     continue-on-error: ${{ matrix.experimental }}
     strategy:
