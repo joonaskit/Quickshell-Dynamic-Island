@@ -19,7 +19,9 @@ Singleton {
         if (!checkProc.running) checkProc.running = true;
     }
 
-    // The dependencies from `ids` that were not found. Empty while the result is unknown
+    // The dependencies from `ids` that were not found. Empty while the result is unknown.
+    // One made for another desktop ("not-needed", e.g. KWin under niri) counts too: the
+    // feature that needs it cannot work here either.
     function missingOf(ids) {
         if (!root.report || !ids) return [];
         return root.report.dependencies.filter(d => ids.indexOf(d.id) >= 0 && d.status !== "found");
@@ -46,7 +48,18 @@ Singleton {
     // What is missing from the alternatives in `ids` and how to install it, or "" when one is usable
     function problem(ids) {
         if (!root.noneUsable(ids)) return "";
-        return root.missingOf(ids).map(d => d.status === "not-running" ? d.name + " is installed but not running" : d.name + " is not installed" + (d.package ? " (package: " + d.package + ")" : "")).join(", or ");
+        return root.missingOf(ids).map(d => root.describe(d)).join(", or ");
+    }
+
+    function describe(d) {
+        if (d.status === "not-running") return d.name + " is installed but not running";
+        if (d.status === "not-needed") return "Needs " + d.name + ", which is for " + root.desktopNames(d.desktops) + " only";
+        return d.name + " is not installed" + (d.package ? " (package: " + d.package + ")" : "");
+    }
+
+    function desktopNames(desktops) {
+        let names = { "kde": "KDE Plasma", "niri": "niri", "other": "other desktops" };
+        return (desktops || []).map(d => names[d] || d).join(" and ");
     }
 
     Component.onCompleted: root.runCheck()

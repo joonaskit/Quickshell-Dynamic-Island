@@ -20,7 +20,9 @@ Singleton {
     readonly property var report: DepsService.report
     readonly property bool checkFailed: DepsService.checkFailed
     readonly property bool checking: DepsService.checking
-    readonly property var problems: root.report ? root.report.dependencies.filter(d => d.status !== "found") : []
+    // Entries for another desktop (KWin under niri) are neither found nor missing: left out
+    readonly property var checked: root.report ? root.report.dependencies.filter(d => d.status !== "not-needed") : []
+    readonly property var problems: root.checked.filter(d => d.status !== "found")
     readonly property var importantProblems: root.problems.filter(d => d.severity !== "optional")
     readonly property var optionalProblems: root.problems.filter(d => d.severity === "optional")
 

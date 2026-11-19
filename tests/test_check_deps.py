@@ -14,8 +14,9 @@ import check_deps  # noqa: E402
 
 
 class FakeProbe:
-    def __init__(self, commands=(), modules=(), session="wayland", names=None, units=(), sockets=()):
+    def __init__(self, commands=(), modules=(), session="wayland", names=None, units=(), sockets=(), desktop="kde"):
         self.commands = set(commands)
+        self.current_desktop = desktop
         self.modules = set(modules)
         self.session = session
         self.names = names or {}
@@ -31,6 +32,9 @@ class FakeProbe:
     def session_type(self):
         return self.session
 
+    def desktop(self):
+        return self.current_desktop
+
     def bus_names(self, bus):
         return set(self.names.get(bus, ()))
 
@@ -41,9 +45,63 @@ class FakeProbe:
         return name in self.sockets
 
 
-def dep(check, severity="optional", packages=None, dep_id="x"):
-    return {"id": dep_id, "name": dep_id, "severity": severity, "check": check,
-            "features": ["a feature"], "packages": packages or {}}
+def dep(check, severity="optional", packages=None, dep_id="x", desktops=None):
+    entry = {"id": dep_id, "name": dep_id, "severity": severity, "check": check,
+             "features": ["a feature"], "packages": packages or {}}
+    if desktops:
+        entry["desktops"] = desktops
+    return entry
+
+
+class DetectDesktopTest(unittest.TestCase):
+    def test_kde(self):
+        self.assertEqual(check_deps.detect_desktop({"XDG_CURRENT_DESKTOP": "KDE"}), "kde")
+
+    def test_niri_socket_wins_over_plasma(self):
+        env = {"XDG_CURRENT_DESKTOP": "KDE", "NIRI_SOCKET": "/run/user/1000/niri.sock"}
+        self.assertEqual(check_deps.detect_desktop(env), "niri")
+
+    def test_other(self):
+        self.assertEqual(check_deps.detect_desktop({"XDG_CURRENT_DESKTOP": "GNOME"}), "other")
+        self.assertEqual(check_deps.detect_desktop({}), "other")
+
+    def test_override(self):
+        env = {"ISLAND_COMPOSITOR": "KDE", "NIRI_SOCKET": "/x"}
+        self.assertEqual(check_deps.detect_desktop(env), "kde")
+        self.assertEqual(check_deps.detect_desktop({"ISLAND_COMPOSITOR": "bogus", "NIRI_SOCKET": "/x"}), "niri")
+
+
+class DesktopsTest(unittest.TestCase):
+    def manifest(self):
+        return {"dependencies": [
+            dep({"type": "command", "anyOf": ["quickshell"]}, "required", {"fedora": "quickshell"}, "quickshell"),
+            dep({"type": "dbus", "name": "org.kde.KWin"}, "required", {"fedora": "kwin"}, "kwin", ["kde"]),
+            dep({"type": "command", "anyOf": ["niri"]}, "recommended", {"fedora": "niri"}, "niri", ["niri"]),
+        ]}
+
+    def test_entries_for_another_desktop_are_not_needed(self):
+        report = check_deps.evaluate(self.manifest(), FakeProbe(commands=["quickshell"], desktop="niri"), "fedora")
+        self.assertEqual(report["desktop"], "niri")
+        self.assertEqual([r["status"] for r in report["dependencies"]], ["found", "not-needed", "missing"])
+        # A required entry for KDE does not fail the check under niri, nor is it installed
+        self.assertTrue(report["ok"])
+        self.assertEqual(report["installCommand"], "sudo dnf install niri")
+
+    def test_entries_for_this_desktop_are_checked(self):
+        report = check_deps.evaluate(self.manifest(), FakeProbe(commands=["quickshell"], desktop="kde"), "fedora")
+        self.assertEqual([r["status"] for r in report["dependencies"]], ["found", "missing", "not-needed"])
+        self.assertFalse(report["ok"])
+
+    def test_other_desktops_need_neither(self):
+        report = check_deps.evaluate(self.manifest(), FakeProbe(commands=["quickshell"], desktop="other"), "fedora")
+        self.assertEqual([r["status"] for r in report["dependencies"]], ["found", "not-needed", "not-needed"])
+
+    def test_table_lists_what_was_not_checked(self):
+        report = check_deps.evaluate(self.manifest(), FakeProbe(commands=["quickshell", "niri"], desktop="niri"), "fedora")
+        table = check_deps.format_table(report)
+        self.assertIn("Not checked on niri: kwin", table)
+        self.assertIn("Everything was found.", table)
+        self.assertNotIn("missing", table)
 
 
 class CheckStatusTest(unittest.TestCase):
@@ -201,9 +259,17 @@ class ManifestTest(unittest.TestCase):
             self.manifest = json.load(f)
 
     def test_evaluates_on_an_empty_system(self):
-        report = check_deps.evaluate(self.manifest, FakeProbe(session=""), "fedora")
-        self.assertFalse(report["ok"])
-        self.assertTrue(all(r["status"] == "missing" for r in report["dependencies"]))
+        for desktop in ("kde", "niri", "other"):
+            report = check_deps.evaluate(self.manifest, FakeProbe(session="", desktop=desktop), "fedora")
+            self.assertFalse(report["ok"], desktop)
+            for r in report["dependencies"]:
+                expected = "missing" if not r["desktops"] or desktop in r["desktops"] else "not-needed"
+                self.assertEqual(r["status"], expected, (desktop, r["id"]))
+
+    def test_desktops_are_known(self):
+        for d in self.manifest["dependencies"]:
+            self.assertLessEqual(set(d.get("desktops", [])), {"kde", "niri", "other"}, d["id"])
+            self.assertNotEqual(d.get("desktops"), [], d["id"])
 
     def test_ids_are_unique_and_entries_complete(self):
         ids = [d["id"] for d in self.manifest["dependencies"]]

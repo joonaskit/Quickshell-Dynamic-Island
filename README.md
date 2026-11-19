@@ -1,6 +1,6 @@
 # Quickshell Island
 
-A floating, morphing "island" top bar for KDE Plasma (Wayland), built with [Quickshell](https://quickshell.org) and QML.
+A floating, morphing "island" top bar for KDE Plasma (Wayland), built with [Quickshell](https://quickshell.org) and QML. It also runs under [niri](https://github.com/YaLTeR/niri) (experimental): the bar, dock, launcher and dial work, and the KDE-specific parts are left out. See `docs/NIRI.md`.
 
 A compact pill at the top of the screen shows the clock, media and notifications. It expands on hover or click into a full panel. It can also morph into a full-width top bar when a window is maximized.
 
@@ -10,27 +10,30 @@ A compact pill at the top of the screen shows the clock, media and notifications
 - **Expanded view:** calendar, timer and stopwatch (running ones show in the pill), media controls, notifications, audio output selector, per-app volume mixer, and volume and brightness sliders. Notifications are grouped by app and support action buttons and inline replies, and clicking a notification preview in the pill opens it in place.
 - **Status cluster:** Do Not Disturb, Wi-Fi, Bluetooth, microphone, clipboard history, power profile, hardware stats, USB devices, caffeine (inhibit idle) and battery. Each has a quick-settings popup. The power profile popup can also drop the built-in screen to 60 Hz on battery, and puts back the rate it lowered when plugged in.
 - **Philips Hue (optional):** off by default. Turn it on in the settings under Widgets to get a lamp icon whose popup pairs with a Hue Bridge on your network and controls a lamp's power, brightness and white temperature. The bridge address and app key are saved in `settings.json`. If the bridge can't be reached, the shell asks `discovery.meethue.com` for its new address and keeps the key. The popup shows when it will search next, with buttons to search now or cancel. Bluetooth-only bulbs are not supported.
-- **Night Light (optional):** off by default. Turn it on in the settings under Widgets to get a moon icon whose popup switches KDE Night Light on and off, sets the night temperature and chooses between sunset to sunrise, custom hours (a start and an end time) and always on. Changes are saved in `kwinrc`, and the Night Light plugin is reloaded to apply them. The widget icons sit at the start of the status cluster, apart from the system icons by a thin divider.
+- **Night Light (optional, KDE only):** off by default. Turn it on in the settings under Widgets to get a moon icon whose popup switches KDE Night Light on and off, sets the night temperature and chooses between sunset to sunrise, custom hours (a start and an end time) and always on. Changes are saved in `kwinrc`, and the Night Light plugin is reloaded to apply them. The widget icons sit at the start of the status cluster, apart from the system icons by a thin divider.
 - **KDE Connect (optional):** off by default. Turn it on in the settings under Widgets to get a phone icon whose popup shows a paired device's connection and battery (when the device reports one) and can ping it, send the clipboard, a file, text or a link, and make it ring. Only the actions the device supports are enabled. Pair the phone from the KDE Connect app first.
 - **GameMode (optional):** off by default. Turn it on in the settings under Widgets to get a gamepad icon that lights up while Feral GameMode is applied to a game (started with `gamemoderun`, or by Steam, Lutris or Heroic). Its popup lists those games and has a switch that forces GameMode on without a game, for emulators and other apps that cannot start it themselves. The forced state ends when the shell exits. Needs the `gamemode` package.
 - **Clipboard history:** a floating window (`./run.sh -v`) with search, text, link, image and file filters (copied images show a preview, copied files show their folder), pinning and details such as size, age and source app. History is kept in memory only. Copies from password managers are never recorded, credential-like text is hidden and expires, and an incognito mode pauses recording.
 - **Desktop switch indicator:** switching virtual desktops briefly shows a row of dots with a sliding highlight in the island's OSD slot, even when the pill is hidden.
 - **Left cluster:** active app, window controls, virtual desktop pill and system tray.
-- **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script.
+- **Window awareness:** hides on fullscreen and morphs or reserves space when a window is maximized, through a KWin script (under niri, from the Wayland window list).
 - **Settings UI:** toggle every icon and widget, UI and font scale, interface and display fonts, corner roundness, accent color, dock tint and opacity, an experimental light mode, a frosted glass style for either mode, caffeine that stays on across restarts, 24h clock and more. Settings are saved to `settings.json`.
 - **Dock:** floating dock with an app launcher, enabled in `shell.qml`. The launcher has Recent and Frequent tabs, ranks search results by use, and has a Windows tab that works as a window switcher. The search box also answers sums (`2*(3+4)`), unit conversions (`5 km in mi`) and web search shortcuts (`g cats`, configurable in the Launcher settings); Enter copies the result or opens the search. With File Search turned on in the same settings, ordinary typing also finds files and folders by name through [Filehouse](https://github.com/joonaskit/filehouse) (`filehouse --search`): the launcher grows taller and lists the apps first, then a line, then the files. Down moves from the apps into the files; Enter opens one and Alt+Enter shows it in its folder. `f report 2024` lists only files. Typing two letters or more also looks up pages of KDE System Settings (Display, Night Light and so on): the launcher widens and lists them in a column beside the apps. Tab moves into the column, Enter opens a page, and System Settings Pages in the Launcher settings turns it off. While the dock is hidden, the launcher shortcut drops it out of the island into the middle of the screen instead (Centre When Dock Is Hidden, in the Launcher settings). Right-clicking the launcher button gives quick access to its settings. Popups on the dock morph between icons as you move from one to the next. The Downloads stack and the Trash at the end of the dock can each be turned off in the Dock settings.
 
 ## Requirements
 
-- KDE Plasma on Wayland (KWin)
+- A Wayland session with either:
+  - **KDE Plasma 6** (KWin), the main target, or
+  - **niri** (experimental). Left out there: virtual desktops, Night Light, KDE colour schemes, System Settings pages in the launcher, the main-screen choice and 60 Hz on battery. Shortcuts are edited in niri's `config.kdl` instead of KDE's, and the shell's notifications need `mako` stopped first. See `docs/NIRI.md`
 - [Quickshell](https://quickshell.org). 0.3 or later blurs the desktop behind the Glass style; 0.2 draws the glass without blur (see `docs/GLASS.md`)
 - Python 3 with `dbus-python` and `PyGObject`
 - CLI tools: `nmcli`, `brightnessctl`, `udevadm`, `wl-clipboard`, `udisksctl`, `lsblk`, `systemd-inhibit`, `loginctl`, `busctl`, `qdbus-qt6`, `xdg-open`, `gtk-launch`, `notify-send` (timer alerts)
+- On KDE: `kscreen-doctor` (main display, 60 Hz on battery); on niri: `niri` itself (Shortcuts settings) and optionally `xdg-terminal-exec` (terminal apps)
 - Optional: `kioclient` (the dock's "Properties" entry) and `gio` (fallback for mounting USB drives)
 - UPower, for battery, power-profiles-daemon, for power profiles, and BlueZ, for Bluetooth
 - PipeWire, for volume, the microphone and choosing audio devices
 
-Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
+Run `./run.sh --check` to see which of these are missing on your system, which features each one affects and the command that installs them. Tools for the other desktop are skipped, so KWin is not reported missing under niri. `./run.sh --check --json` prints the same result as JSON. The list it checks is `deps.json`.
 
 The shell runs the same check at startup. A status icon whose tool is missing (for example Wi-Fi without `nmcli`) is dimmed and does nothing, and hovering it names the missing tool and its package. The brightness control says which tool it needs (`brightnessctl`). In the Top bar settings, the status icon list names the missing tool and its package, and "Hide Icons With Missing Tools" removes those icons instead of dimming them. The power menu and battery icon are never affected. Install the tool and restart the shell, or press "Check again" in the welcome guide, to bring the feature back.
 
@@ -42,7 +45,7 @@ cd ~/.config/quickshell/island
 ./install.sh
 ```
 
-The installer checks your system with `./run.sh --check` and shows the command that installs what is missing (Arch, Fedora, openSUSE and Debian or Ubuntu). It runs that command only if you answer yes, because it uses `sudo`. It then creates `settings.json` and `dock_pinned.json` from the `.example` files if you have none, and sets the shell to start at login with an entry in `~/.config/autostart/`. It never overwrites your configuration, and running it again updates the shell with `git pull` and changes nothing else. The welcome guide opens the first time the shell starts.
+The installer checks your system with `./run.sh --check` and shows the command that installs what is missing (Arch, Fedora, openSUSE and Debian or Ubuntu). It runs that command only if you answer yes, because it uses `sudo`. It then creates `settings.json` and `dock_pinned.json` in `~/.config/quickshell-island/` from the `.example` files if you have none, and sets the shell to start at login with an entry in `~/.config/autostart/`. It never overwrites your configuration, and running it again updates the shell with `git pull` and changes nothing else. The welcome guide opens the first time the shell starts.
 
 | Option | Effect |
 | --- | --- |

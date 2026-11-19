@@ -13,7 +13,7 @@ OnboardingPage {
     title: "System check"
     intro: {
         if (!page.report) return OnboardingService.checkFailed ? "The check could not run. Try ./run.sh --check in a terminal." : "Checking the tools and services the shell uses…";
-        let total = page.report.dependencies.length;
+        let total = OnboardingService.checked.length;
         let missing = OnboardingService.problems.length;
         if (missing === 0) return "All " + total + " tools and services the shell uses were found. Nothing to do here.";
         return (total - missing) + " of " + total + " tools and services were found. The features below will not work until the rest are installed.";

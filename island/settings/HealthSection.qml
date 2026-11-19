@@ -10,7 +10,8 @@ SettingsSection {
     title: "HEALTH"
     subtitle: "What is installed and which helpers are running"
 
-    readonly property var missing: DepsService.report ? DepsService.report.dependencies.filter(d => d.status !== "found") : []
+    // Tools for another desktop (KWin under niri) are not missing here
+    readonly property var missing: DepsService.report ? DepsService.report.dependencies.filter(d => d.status !== "found" && d.status !== "not-needed") : []
 
     // Inline components cannot see this file's ids, so they use Theme directly
     component SmallButton: Rectangle {

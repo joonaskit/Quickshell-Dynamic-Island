@@ -1,6 +1,10 @@
 # niri (experimental)
 
-The shell is built for KDE Plasma. Under niri the dial launcher works; the rest of the shell runs but its KDE parts are missing.
+The shell is built for KDE Plasma. Under niri the bar, dock, launcher and dial work; the KDE parts are left out: virtual desktops, Night Light, KDE colour schemes, System Settings pages, and the main-screen choice and 60 Hz on battery switch (both `kscreen-doctor`).
+
+## Dependencies
+
+Entries in `deps.json` that only KDE uses (KWin, `kscreen-doctor`, `kreadconfig6`, `plasma-apply-colorscheme`) say `"desktops": ["kde"]`, so `./run.sh --check` does not report them missing under niri. niri's own are `niri` (the Shortcuts tab checks every edit with `niri validate`) and `xdg-terminal-exec` (terminal apps). See `docs/HELPERS.md`.
 
 ## How the compositor is told
 
