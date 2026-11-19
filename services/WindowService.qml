@@ -293,7 +293,7 @@ Singleton {
     }
 
     function lockScreen() {
-        Quickshell.execDetached(["loginctl", "lock-session"]);
+        PowerService.lock();
     }
 
     // Resolve an icon name or path to an image source, or "" if not found

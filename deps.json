@@ -642,6 +642,33 @@
       "note": "From https://github.com/joonaskit/niri-settings"
     },
     {
+      "id": "screen-locker",
+      "name": "screen locker",
+      "severity": "optional",
+      "desktops": [
+        "niri",
+        "other"
+      ],
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "swaylock",
+          "hyprlock",
+          "gtklock"
+        ]
+      },
+      "features": [
+        "Lock in the power menu, the dial and the window menu"
+      ],
+      "packages": {
+        "arch": "swaylock",
+        "fedora": "swaylock",
+        "opensuse": "swaylock",
+        "debian": "swaylock"
+      },
+      "note": "Any of swaylock, hyprlock or gtklock; $ISLAND_LOCK_COMMAND names another"
+    },
+    {
       "id": "upower",
       "name": "UPower",
       "severity": "optional",
