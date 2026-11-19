@@ -2,6 +2,7 @@ pragma Singleton
 // Quickshell.Bluetooth's qmldir does not declare its dependency on Quickshell, so qmllint
 // cannot resolve its types (BluetoothAdapter, UntypedObjectModel)
 // qmllint disable unresolved-type
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
@@ -23,9 +24,21 @@ Singleton {
         return d ? d.address : "";
     }
 
+    // The settings app the popup's footer opens: KDE's module under KDE, else the
+    // first of blueman-manager or overskride found. Empty when there is none; the
+    // footer is hidden then.
+    property var settingsCommand: CompositorService.isKde ? ["kcmshell6", "kcm_bluetooth"] : []
+    readonly property bool hasSettings: root.settingsCommand.length > 0
+
     Process {
-        id: settingsProc
-        command: ["kcmshell6", "kcm_bluetooth"]
+        running: !CompositorService.isKde
+        command: ["sh", "-c", "for c in \"$@\"; do command -v \"${c%% *}\" >/dev/null 2>&1 && { echo \"$c\"; exit 0; }; done", "sh", "blueman-manager", "overskride"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let found = text.trim();
+                if (found !== "") root.settingsCommand = found.split(" ");
+            }
+        }
     }
 
     function device(mac) {
@@ -44,6 +57,6 @@ Singleton {
     }
 
     function openSettings() {
-        settingsProc.running = true;
+        if (root.hasSettings) Quickshell.execDetached(root.settingsCommand);
     }
 }

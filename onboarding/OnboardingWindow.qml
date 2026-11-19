@@ -100,10 +100,11 @@ PanelWindow {
             StackLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                currentIndex: OnboardingService.step
+                currentIndex: OnboardingService.pageIndex
 
                 OnboardingWelcome {}
                 OnboardingSystemCheck {}
+                OnboardingNiri {}
                 OnboardingImport {}
                 OnboardingSetup {}
                 OnboardingTips {}

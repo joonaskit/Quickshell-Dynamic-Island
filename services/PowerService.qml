@@ -1,4 +1,5 @@
 pragma Singleton
+import ".."
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -26,6 +27,9 @@ Singleton {
         command: ["systemctl", "poweroff"]
     }
 
+    // KDE's power settings module needs Plasma's power management, so it is offered under KDE only
+    readonly property bool hasSettings: CompositorService.isKde
+
     Process {
         id: settingsProc
         command: ["kcmshell6", "kcm_powerdevilprofilesconfig"]
@@ -48,6 +52,6 @@ Singleton {
     }
 
     function openSettings() {
-        settingsProc.running = true;
+        if (root.hasSettings) settingsProc.running = true;
     }
 }

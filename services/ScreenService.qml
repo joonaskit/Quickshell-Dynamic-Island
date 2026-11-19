@@ -8,12 +8,13 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // Name of the main display in KDE System Settings, empty when it is not known
+    // Name of the main display: the one KDE System Settings marks as main, under niri the
+    // one that had focus when the shell started. Empty when it is not known.
     property string primaryName: ""
 
     readonly property var screens: Quickshell.screens
 
-    // The screen KDE marks as main, else the first one
+    // The main screen, else the first one
     readonly property var primaryScreen: {
         for (let i = 0; i < screens.length; i++) {
             if (screens[i].name === primaryName) return screens[i];
@@ -33,7 +34,21 @@ Singleton {
     }
 
     function refresh() {
-        if (!primaryProc.running) primaryProc.running = true;
+        if (CompositorService.isNiri) root.pickNiriPrimary();
+        else if (CompositorService.isKde && !primaryProc.running) primaryProc.running = true;
+    }
+
+    // niri has no main display. The one with focus at start is taken, and kept while it is
+    // connected, so the windows do not follow focus from screen to screen.
+    function pickNiriPrimary() {
+        let names = root.screens.map(s => s.name);
+        if (root.primaryName !== "" && names.indexOf(root.primaryName) >= 0) return;
+        root.primaryName = NiriService.focusedOutput;
+    }
+
+    Connections {
+        target: CompositorService.isNiri ? NiriService : null
+        function onFocusedOutputChanged() { root.pickNiriPrimary(); }
     }
 
     Component.onCompleted: refresh()

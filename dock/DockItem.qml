@@ -365,7 +365,7 @@ Item {
             }
 
             let nw = wins[nextIdx];
-            if (nw.isKWin) {
+            if (nw.tracked) {
                 WindowService.activateWindow(nw.id);
             } else if (nw.raw) {
                 if (nw.raw.minimized) nw.raw.minimized = false;

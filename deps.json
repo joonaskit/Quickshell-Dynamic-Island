@@ -623,6 +623,25 @@
       "note": "Without it $TERMINAL, or the first common terminal found, is used"
     },
     {
+      "id": "niri-settings",
+      "name": "niri settings",
+      "severity": "optional",
+      "desktops": [
+        "niri"
+      ],
+      "check": {
+        "type": "command",
+        "anyOf": [
+          "niri-settings"
+        ]
+      },
+      "features": [
+        "Settings under niri: niri's key bindings, displays, layout and window rules"
+      ],
+      "packages": {},
+      "note": "From https://github.com/joonaskit/niri-settings"
+    },
+    {
       "id": "upower",
       "name": "UPower",
       "severity": "optional",

@@ -4,7 +4,7 @@ The Python scripts in `scripts/` that feed data to the services, and how the she
 
 ## The scripts
 
-Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `downloads_tracker.py`, `clipboard_tracker.py`, `shortcuts.py`, `niri_binds.py`, `activities_bridge.py` and `kio_jobs.py`. Some run once per request, others for as long as the shell does; `LONG_RUNNING` in `scripts/helper_health.py` names the second kind.
+Among them `kwin_window_tracker.py`, `hardware_stats.py`, `devices.py`, `downloads_tracker.py`, `clipboard_tracker.py`, `shortcuts.py`, `niri_binds.py`, `niri_blur.py`, `activities_bridge.py` and `kio_jobs.py`. Some run once per request, others for as long as the shell does; `LONG_RUNNING` in `scripts/helper_health.py` names the second kind.
 
 `gamemode.py`, `kdeconnect.py` and `downloads_tracker.py` read once when called plainly (a popup opening, the Downloads stack's refresh), and keep running with `watch`, printing a JSON line each time the state changes. The first two run their read again on any D-Bus signal from their service, or when it appears on or leaves the bus (`scripts/dbus_watch.py`); the third on any change in the downloads folder (a Gio file monitor). Each waits for a short gap so a burst of changes gives one read, and prints nothing when the state is unchanged. They run only while their widget or the dock's Downloads item is on. Night Light runs `busctl monitor --match` on KWin's Night Light object the same way. See "Don't poll" in `CODING_STANDARDS.md`.
 

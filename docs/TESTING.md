@@ -25,7 +25,7 @@ tests/run_fixtures.sh watched-file
 How a run is set up:
 
 - One `kwin_wayland --virtual` for the whole run, on its own Wayland socket and a private D-Bus with no service files, so nothing is started on demand (portals, a secrets daemon). Layer-shell windows such as the clipboard panel map in it as they do on the desktop.
-- A clean environment (`env -i`) with a temporary `HOME`, `XDG_*` folders and runtime dir. Nothing from the desktop you are using reaches a fixture: not its Wayland or X display, niri's socket or the session bus. `CompositorService` sees neither KDE nor niri, so KWin- and niri-only helpers stay off.
+- A clean environment (`env -i`) with a temporary `HOME`, `XDG_*` folders and runtime dir. Nothing from the desktop you are using reaches a fixture: not its Wayland or X display, niri's socket or the session bus. `CompositorService` sees neither KDE nor niri, so KWin- and niri-only helpers stay off, unless the fixture asks for the fake niri below.
 - Each fixture gets its own directory: its `.qml` files, the repo's `qmldir` and folders linked in, and `tests/fixtures/lib` linked as `fixture`. Its `ISLAND_CONFIG_DIR` is a folder of its own that does not exist yet, so `SettingsService` and the other services read and write config files of their own there, never yours.
 - A fixture fails when it reports a failure, exits uncleanly, runs past 20 seconds, or when its log has a `ReferenceError` or `TypeError` from any file, even when its checks passed.
 
@@ -64,10 +64,17 @@ Report results with `console.info` if you add any of your own: Quickshell does n
 
 Keep a fixture to one behaviour, and drive the component through the same properties and services the shell does. Before relying on a new fixture, break the code it covers once and see it fail.
 
+### Under niri
+
+niri does not run headless, but the shell talks to it only through `$NIRI_SOCKET`. A fixture with a file named `niri` in its folder gets `tests/fake_niri.py` on that socket, so `CompositorService` reports niri. It serves the recordings in `tests/data/niri/` (`startup` then `session`) as the event stream, answers `Workspaces`, `Windows` and `FocusedOutput` from them, and writes each action it is sent to `$FAKE_NIRI_LOG`, one JSON line each. SIGUSR1 (`$FAKE_NIRI_PID`) closes the event streams, as when niri restarts. `NiriActions` (`tests/fixtures/lib/NiriActions.qml`) wraps both: `has(json)` is true once the log has that action, and `dropStreams()` sends the signal.
+
 ### Fixtures
 
 | Fixture | Covers |
 |---|---|
 | `watched-file` | `WatchedFile` following a file that is created, written in place, appended to, replaced by a rename (once and twice in a row), written after a rename, removed and created again |
 | `settings-config-dir` | `SettingsService` keeping `settings.json` in `$ISLAND_CONFIG_DIR`, and creating that folder on the first save |
+| `niri-workspaces` | Under (fake) niri, the virtual desktops pill listing one output's workspaces from the event stream, and stepping it sending `FocusWorkspace` |
+| `niri-window-actions` | Under niri, the dock's window list coming from niri's windows, and closing one sending `CloseWindow` with its id |
+| `niri-reconnect` | `NiriService` reconnecting after niri's event stream closes, and building its state again |
 | `clipboard-first-open` | `ClipboardWindow` building its card on the first open, fading it in, and keeping the same card across a close and reopen (`CODING_STANDARDS.md`, building windows on first open) |

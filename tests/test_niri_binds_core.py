@@ -59,43 +59,41 @@ class ListTest(unittest.TestCase):
     def setUp(self):
         self.rows = rows(CONFIG)
 
-    def test_groups_in_order(self):
+    def test_only_the_shell_group(self):
         names = [g["name"] for g in core.list_actions(CONFIG, SHELL)["groups"]]
-        self.assertEqual(names, core.GROUPS)
-
-    def test_several_keys_for_one_action(self):
-        self.assertEqual(self.rows["focus-column-left"]["keys"], ["Mod+Left", "Mod+H"])
+        self.assertEqual(names, ["Shell"])
 
     def test_shell_action_found(self):
         dial = self.rows["shell:dial.toggle"]
         self.assertEqual(dial["keys"], ["Mod+Space"])
         self.assertEqual(dial["group"], "Shell")
 
-    def test_unbound_catalogue_action_listed(self):
-        self.assertEqual(self.rows["toggle-overview"]["keys"], [])
+    def test_unbound_shell_action_listed(self):
         self.assertEqual(self.rows["shell:clipboard.toggle"]["keys"], [])
 
-    def test_app_titles(self):
-        self.assertEqual(self.rows['spawn "konsole"']["title"], "Open a Terminal")
-        mute = self.rows['spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"']
-        self.assertEqual(mute["group"], "Apps")
-        self.assertEqual(mute["title"], "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
-
-    def test_arguments_and_multiline(self):
-        self.assertEqual(self.rows["focus-workspace 1"]["keys"], ["Mod+1"])
-        self.assertEqual(self.rows['set-column-width "-10%"']["keys"], ["Mod+Minus"])
-        self.assertEqual(self.rows["quit"]["keys"], ["Mod+Shift+E"])  # /- one skipped
-
-    def test_unknown_action_grouped_by_name(self):
-        r = rows("binds {\n    Mod+Z { move-window-to-monitor-left; }\n}\n")
-        self.assertEqual(r["move-window-to-monitor-left"]["group"], "Monitors")
-        self.assertEqual(r["move-window-to-monitor-left"]["title"], "Move window to monitor left")
+    def test_niri_actions_not_listed(self):
+        self.assertNotIn("focus-column-left", self.rows)
+        self.assertNotIn('spawn "konsole"', self.rows)
 
     def test_other_checkout_is_not_this_shell(self):
         text = 'binds {\n    Mod+Z { spawn "quickshell" "ipc" "-p" "/elsewhere" "call" "dial" "toggle"; }\n}\n'
-        r = rows(text)
-        self.assertEqual(r["shell:dial.toggle"]["keys"], [])
-        self.assertEqual(r['spawn "quickshell" "ipc" "-p" "/elsewhere" "call" "dial" "toggle"']["group"], "Apps")
+        self.assertEqual(rows(text)["shell:dial.toggle"]["keys"], [])
+
+
+class ClassifyTest(unittest.TestCase):
+    def titles(self, text):
+        _blocks, binds = core.find_binds(text)
+        return {core.classify(b, SHELL)[0]: core.classify(b, SHELL)[1] for b in binds}
+
+    def test_titles(self):
+        t = self.titles(CONFIG)
+        self.assertEqual(t['spawn "konsole"'], "Open a Terminal")
+        self.assertEqual(t['spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"'], "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
+        self.assertEqual(t["close-window"], "Close window")
+        self.assertEqual(t["shell:dial.toggle"], "Toggle the dial")
+        self.assertEqual(t["focus-workspace 1"], "Focus workspace 1")
+        self.assertEqual(t['set-column-width "-10%"'], 'Set column width "-10%"')
+        self.assertIn("quit", t)  # the /- one is skipped, the multiline one found
 
 
 class KeyTest(unittest.TestCase):
@@ -120,8 +118,8 @@ class SetKeyTest(unittest.TestCase):
         self.assertIn('    Mod+Return { spawn "konsole"; }\n', out)
 
     def test_add_unbound_goes_at_end_of_block(self):
-        out = core.set_key(CONFIG, "toggle-overview", "", "Mod+O", SHELL)
-        self.assertTrue(out.endswith("    Mod+O { toggle-overview; }\n}\n"))
+        out = core.set_key(CONFIG, "shell:clipboard.toggle", "", "Mod+V", SHELL)
+        self.assertTrue(out.endswith('"call" "clipboard" "toggle"; }\n}\n'))
 
     def test_add_shell_action(self):
         out = core.set_key(CONFIG, "shell:clipboard.toggle", "", "Mod+V", SHELL)
@@ -131,19 +129,18 @@ class SetKeyTest(unittest.TestCase):
 
     def test_conflict(self):
         with self.assertRaises(core.EditError) as ctx:
-            core.set_key(CONFIG, "toggle-overview", "", "Mod+Q", SHELL)
+            core.set_key(CONFIG, "shell:clipboard.toggle", "", "Mod+Q", SHELL)
         self.assertEqual(ctx.exception.conflict["id"], "close-window")
         self.assertEqual(ctx.exception.conflict["title"], "Close window")
 
     def test_conflict_ignores_case_and_spelling(self):
         with self.assertRaises(core.EditError):
-            core.set_key(CONFIG, "toggle-overview", "", "Super+left", SHELL)
+            core.set_key(CONFIG, "shell:clipboard.toggle", "", "Super+left", SHELL)
 
     def test_force_takes_the_key(self):
-        out = core.set_key(CONFIG, "toggle-overview", "", "Mod+Q", SHELL, force=True)
-        r = rows(out)
-        self.assertEqual(r["toggle-overview"]["keys"], ["Mod+Q"])
-        self.assertEqual(r["close-window"]["keys"], [])
+        out = core.set_key(CONFIG, "shell:clipboard.toggle", "", "Mod+Q", SHELL, force=True)
+        self.assertEqual(rows(out)["shell:clipboard.toggle"]["keys"], ["Mod+Q"])
+        self.assertNotIn("close-window", out)
         self.assertNotIn("// trailing", out)
 
     def test_same_key_again_is_no_change(self):
@@ -151,24 +148,25 @@ class SetKeyTest(unittest.TestCase):
 
     def test_rebinding_to_own_other_key_drops_old(self):
         out = core.set_key(CONFIG, "focus-column-left", "Mod+Left", "Mod+H", SHELL)
-        self.assertEqual(rows(out)["focus-column-left"]["keys"], ["Mod+H"])
+        self.assertNotIn("Mod+Left", out)
+        self.assertIn("    Mod+H     { focus-column-left; }\n", out)
 
     def test_multiline_bind_rekeyed(self):
         out = core.set_key(CONFIG, "quit", "Mod+Shift+E", "Ctrl+Alt+Delete", SHELL)
         self.assertIn("    Ctrl+Alt+Delete {\n        quit;\n    }\n", out)
 
     def test_no_binds_block(self):
-        out = core.set_key("input {}\n", "toggle-overview", "", "Mod+O", SHELL)
-        self.assertEqual(out, "input {}\n\nbinds {\n    Mod+O { toggle-overview; }\n}\n")
+        out = core.set_key("input {}\n", "shell:clipboard.toggle", "", "Mod+V", SHELL)
+        self.assertTrue(out.startswith("input {}\n\nbinds {\n    Mod+V repeat=false { spawn "))
 
     def test_invalid_key_text(self):
         for key in ("", "Mod+", "Mod+A B"):
             with self.assertRaises(core.EditError):
-                core.set_key(CONFIG, "toggle-overview", "", key, SHELL)
+                core.set_key(CONFIG, "shell:clipboard.toggle", "", key, SHELL)
 
     def test_unknown_action(self):
         with self.assertRaises(core.EditError):
-            core.set_key(CONFIG, "not-an-action", "", "Mod+Z", SHELL)
+            core.set_key(CONFIG, "toggle-overview", "", "Mod+Z", SHELL)
 
 
 class RemoveKeyTest(unittest.TestCase):

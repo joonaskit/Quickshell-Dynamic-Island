@@ -34,14 +34,24 @@ function topBarSettings(mode) {
 }
 
 // The settings the "Use niri defaults" button saves: the full-width bar always shown,
-// the status icons kept in the top-right corner rather than in the dial, and no
-// virtual desktops pill, since niri's workspaces are not shown there yet
+// the status icons kept in the top-right corner rather than in the dial, the virtual
+// desktops pill showing niri's workspaces, and the dock hiding while a window is under
+// it: niri's tiled windows fill the screen's height, and the dock reserves no space
 function niriDefaults() {
     return {
         "morphToTopBarWhenMaximized": true,
         "alwaysTopBar": true,
         "autoHideTopBar": false,
         "dialStatusIcons": false,
-        "showVirtualDesktops": false
+        "showVirtualDesktops": true,
+        "dockAutoHideFromWindows": true,
+        "dockAutoHideAlways": false
     };
+}
+
+// Settings a first start applies, before settings.json exists: niri's defaults under niri,
+// else none. Once the file is written a later start never applies them again, so a change
+// the user makes afterwards stays.
+function firstStartSettings(compositor) {
+    return compositor === "niri" ? niriDefaults() : {};
 }

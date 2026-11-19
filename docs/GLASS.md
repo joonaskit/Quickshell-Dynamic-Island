@@ -35,7 +35,7 @@ A second, wider glass shape behind a pill is more likely a real body than the bl
 
 The blur uses Quickshell's `BackgroundEffect` (the `ext-background-effect-v1` protocol), and rounded `Region`s, which both came with Quickshell 0.3. KWin 6.7 supports the protocol.
 
-At startup `Theme` compiles a window that uses both, without creating it, and sets `Theme.blurAvailable`. `WindowBlur` builds its effect from a string at runtime for the same reason: the shell still loads, and `./lint.sh` still passes, on Quickshell 0.2.
+At startup `Theme` compiles a window that uses both, without creating it, and sets `Theme.blurSupported`. `Theme.blurAvailable` is that and, under niri, whether niri's config lets the island be blurred (`NiriService.shellBlurred`, see `NIRI.md`). `WindowBlur` builds its effect from a string at runtime for the same reason: the shell still loads, and `./lint.sh` still passes, on Quickshell 0.2.
 
 Without the blur the fills are more opaque: `Theme.glassAlpha` moves the set opacity 60% of the way to solid, so the default 60% gives 84%. On light the fill is also a neutral grey instead of white, so text stays readable over a sharp background and the white rim still shows. A compositor without the protocol gives the clearer fill with no blur behind it.
 

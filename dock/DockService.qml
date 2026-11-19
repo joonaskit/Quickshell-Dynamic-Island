@@ -187,6 +187,7 @@ Singleton {
     }
 
     function openLaunchpad() {
+        if (!CompositorService.isKde) return;
         Quickshell.execDetached(["qdbus-qt6", "org.kde.krunner", "/App", "display"]);
     }
 
@@ -368,7 +369,7 @@ Singleton {
     // ---- Windows (launcher window switcher) ----
     function activateWindow(w) {
         if (!w) return;
-        if (w.isKWin) {
+        if (w.tracked) {
             WindowService.activateWindow(w.id);
         } else if (w.raw) {
             if (w.raw.minimized) w.raw.minimized = false;
@@ -378,7 +379,7 @@ Singleton {
 
     function closeWindow(w) {
         if (!w) return;
-        if (w.isKWin) {
+        if (w.tracked) {
             WindowService.closeWindow(w.id);
         } else if (w.raw) {
             try { w.raw.close(); } catch(e) {}
@@ -395,7 +396,7 @@ Singleton {
             let entry = findDesktopEntry(w.appId);
             let appName = entry ? entry.name : w.appId;
             items.push({
-                id: "win:" + (w.isKWin ? w.id : (w.appId + ":" + i)),
+                id: "win:" + (w.tracked ? w.id : (w.appId + ":" + i)),
                 name: (w.title && w.title.trim().length > 0) ? w.title : appName,
                 genericName: appName + (w.minimized ? " · minimized" : "") + (w.onCurrent === false ? " · other desktop" : ""),
                 comment: "",
@@ -485,7 +486,9 @@ Singleton {
         }
     }
 
-    // Get list of open windows from WindowService (KWin) and ToplevelManager (Wayland)
+    // Open windows from WindowService (KWin's or niri's, `tracked`: acted on by id through
+    // WindowService) and from ToplevelManager (other Wayland compositors, acted on through
+    // the toplevel itself). niri's list covers every window, so its toplevels are skipped.
     function getMergedWindows() {
         let list = [];
         if (WindowService.windowList && WindowService.windowList.length > 0) {
@@ -502,17 +505,17 @@ Singleton {
                     gameName: w.rawApp ? (w.name || "") : "",
                     gameIcon: w.rawApp ? (w.icon || "") : "",
                     gameCommand: w.rawApp ? (w.command || "") : "",
-                    isKWin: true
+                    tracked: true
                 });
             }
         }
-        if (ToplevelManager.toplevels && ToplevelManager.toplevels.values && ToplevelManager.toplevels.values.length > 0) {
+        if (!NiriService.ready && ToplevelManager.toplevels && ToplevelManager.toplevels.values && ToplevelManager.toplevels.values.length > 0) {
             for (let j = 0; j < ToplevelManager.toplevels.values.length; j++) {
                 let tw = ToplevelManager.toplevels.values[j];
                 let dup = false;
                 for (let k = 0; k < list.length; k++) {
                     let kw = list[k];
-                    if (kw.isKWin && kw.gameName && kw.rawAppId === tw.appId && kw.title === tw.title) { dup = true; break; }
+                    if (kw.tracked && kw.gameName && kw.rawAppId === tw.appId && kw.title === tw.title) { dup = true; break; }
                 }
                 if (dup) continue;
                 list.push({
@@ -522,7 +525,7 @@ Singleton {
                     activated: tw.activated,
                     minimized: tw.minimized,
                     raw: tw,
-                    isKWin: false
+                    tracked: false
                 });
             }
         }
@@ -574,7 +577,7 @@ Singleton {
                 if (wins.length === 1) {
                     // Minimize if only 1 active window
                     let w = wins[0];
-                    if (w.isKWin) {
+                    if (w.tracked) {
                         WindowService.activateWindow(w.id);
                     } else if (w.raw) {
                         w.raw.minimized = true;
@@ -583,7 +586,7 @@ Singleton {
                     // Cycle to next window
                     let nextIdx = (activeIdx + 1) % wins.length;
                     let nw = wins[nextIdx];
-                    if (nw.isKWin) {
+                    if (nw.tracked) {
                         WindowService.activateWindow(nw.id);
                     } else if (nw.raw) {
                         if (nw.raw.minimized) nw.raw.minimized = false;
@@ -593,7 +596,7 @@ Singleton {
             } else {
                 // Focus first window
                 let fw = wins[0];
-                if (fw.isKWin) {
+                if (fw.tracked) {
                     WindowService.activateWindow(fw.id);
                 } else if (fw.raw) {
                     if (fw.raw.minimized) fw.raw.minimized = false;
@@ -615,7 +618,7 @@ Singleton {
         let wins = findToplevels(app);
         for (let i = 0; i < wins.length; i++) {
             let w = wins[i];
-            if (w.isKWin) {
+            if (w.tracked) {
                 WindowService.closeWindow(w.id);
             } else if (w.raw) {
                 try { w.raw.close(); } catch(e) {}

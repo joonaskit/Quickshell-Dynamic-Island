@@ -91,7 +91,7 @@ SettingsCategory {
 
             Text {
                 Layout.fillWidth: true
-                text: "Always show the full-width bar, keep the status icons in the top-right corner and turn off the virtual desktops pill"
+                text: "Always show the full-width bar, keep the status icons in the top-right corner, show niri's workspaces in the virtual desktops pill and hide the dock while a window is under it"
                 wrapMode: Text.Wrap
                 font.family: Theme.fontFamily
                 font.pixelSize: 10

@@ -1,0 +1,14 @@
+{"WindowOpenedOrChanged": {"window": {"id": 14, "title": "htop", "app_id": "foot", "pid": 1014, "workspace_id": 1, "is_focused": true, "is_floating": false, "is_urgent": false, "layout": {"pos_in_scrolling_layout": [3, 1], "tile_size": [1260.0, 1384.0], "window_size": [1260, 1384], "tile_pos_in_workspace_view": null, "window_offset_in_tile": [0.0, 0.0]}, "focus_timestamp": {"secs": 114, "nanos": 0}}}}
+{"WorkspaceActiveWindowChanged": {"workspace_id": 1, "active_window_id": 14}}
+{"WindowFocusChanged": {"id": 12}}
+{"WindowOpenedOrChanged": {"window": {"id": 12, "title": "~/code", "app_id": "foot", "pid": 1012, "workspace_id": 1, "is_focused": true, "is_floating": false, "is_urgent": false, "layout": {"pos_in_scrolling_layout": [2, 1], "tile_size": [1260.0, 1384.0], "window_size": [1260, 1384], "tile_pos_in_workspace_view": null, "window_offset_in_tile": [0.0, 0.0]}, "focus_timestamp": {"secs": 112, "nanos": 0}}}}
+{"WindowLayoutsChanged": {"changes": [[12, {"pos_in_scrolling_layout": [2, 1], "tile_size": [2028.0, 1384.0], "window_size": [2028, 1384], "tile_pos_in_workspace_view": null, "window_offset_in_tile": [0.0, 0.0]}], [99, {"pos_in_scrolling_layout": [1, 1], "tile_size": [1260.0, 1384.0], "window_size": [1260, 1384], "tile_pos_in_workspace_view": null, "window_offset_in_tile": [0.0, 0.0]}]]}}
+{"WindowClosed": {"id": 14}}
+{"WorkspaceActivated": {"id": 4, "focused": true}}
+{"WindowFocusChanged": {"id": null}}
+{"WindowUrgencyChanged": {"id": 13, "urgent": true}}
+{"WorkspaceUrgencyChanged": {"id": 3, "urgent": true}}
+{"OverviewOpenedOrClosed": {"is_open": true}}
+{"KeyboardLayoutSwitched": {"idx": 1}}
+{"ConfigLoaded": {"failed": true}}
+{"SomethingNewerNiriSends": {"value": 1}}

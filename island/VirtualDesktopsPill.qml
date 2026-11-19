@@ -1,6 +1,7 @@
 import ".."
 import QtQuick
 import QtQuick.Layouts
+import "../services/niriState.js" as NiriState
 
 Item {
     id: root
@@ -14,11 +15,34 @@ Item {
         if (!isSlidOut) root.isTooltipActive = false;
     }
 
-    readonly property var desktops: WindowService.virtualDesktops
-    readonly property int desktopCount: WindowService.desktopCount
-    readonly property int currentIndex: WindowService.currentDesktopIndex
-    readonly property string currentId: WindowService.currentDesktopId
-    readonly property string currentName: WindowService.currentDesktopName
+    // The screen the pill is on. niri's workspaces belong to one output, so under niri
+    // the pill shows that output's; KDE's desktops are the same on every screen.
+    property string screenName: ""
+    // NiriService.workspaces is passed only so the binding follows niri's changes
+    readonly property var desktops: WindowService.niri
+        ? NiriState.desktopsOn(NiriService.state, root.screenName, NiriService.workspaces)
+        : WindowService.virtualDesktops
+    readonly property int desktopCount: root.desktops.length
+    readonly property int currentIndex: {
+        for (let i = 0; i < root.desktops.length; i++) {
+            if (root.desktops[i].isCurrent) return i;
+        }
+        return 0;
+    }
+    readonly property string currentId: root.desktopCount > 0 ? root.desktops[root.currentIndex].id : ""
+    readonly property string currentName: root.desktopCount > 0 ? (root.desktops[root.currentIndex].name || (WindowService.desktopNoun + " " + (root.currentIndex + 1))) : ""
+
+    // The wheel moves to the neighbouring desktop. Under niri that is the neighbour on
+    // this pill's output, which need not be the focused one.
+    function step(delta) {
+        if (!WindowService.niri) {
+            if (delta > 0) WindowService.nextDesktop();
+            else WindowService.previousDesktop();
+            return;
+        }
+        let next = root.currentIndex + delta;
+        if (next >= 0 && next < root.desktopCount) WindowService.switchToDesktop(root.desktops[next].id);
+    }
 
     // Tooltip state
     property string hoveredTooltipText: ""
@@ -163,11 +187,8 @@ Item {
             hoverEnabled: false
 
             onWheel: function(wheel) {
-                if (wheel.angleDelta.y > 0) {
-                    WindowService.previousDesktop();
-                } else if (wheel.angleDelta.y < 0) {
-                    WindowService.nextDesktop();
-                }
+                if (wheel.angleDelta.y > 0) root.step(-1);
+                else if (wheel.angleDelta.y < 0) root.step(1);
             }
         }
 
@@ -227,7 +248,7 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: root.isTopBarMode ? 11 : 12
                                 font.weight: desktopItem.isCurrent ? Font.Bold : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Font.DemiBold : Font.Normal)
-                                color: desktopItem.isCurrent ? Theme.textPrimary : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary)
+                                color: desktopItem.isCurrent ? Theme.textPrimary : (desktopItem.modelData.urgent ? Theme.accentRed : ((itemMouse.containsMouse && !root.isTopBarMode && !root.hasFullscreenApp) ? Theme.textPrimary : Theme.textSecondary))
 
                                 Behavior on color { ColorAnimation { duration: Theme.duration(110) } }
                             }
@@ -251,17 +272,14 @@ Item {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                             onWheel: function(wheel) {
-                                if (wheel.angleDelta.y > 0) {
-                                    WindowService.previousDesktop();
-                                } else if (wheel.angleDelta.y < 0) {
-                                    WindowService.nextDesktop();
-                                }
+                                if (wheel.angleDelta.y > 0) root.step(-1);
+                                else if (wheel.angleDelta.y < 0) root.step(1);
                             }
 
                             onEntered: {
                                 if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp || !root.isSlidOut) return;
                                 let mapped = desktopItem.mapToItem(root, desktopItem.width / 2, 0);
-                                let dName = modelData.name || ("Desktop " + (modelData.index + 1));
+                                let dName = modelData.name || (WindowService.desktopNoun + " " + (modelData.index + 1));
                                 let winText = desktopItem.winCount > 0 ? (" • " + desktopItem.winCount + (desktopItem.winCount === 1 ? " window" : " windows")) : " (Empty)";
                                 root.hoveredTooltipText = dName + winText;
                                 root.hoveredTooltipTargetX = mapped.x;
@@ -289,6 +307,7 @@ Item {
             // Subtle "+" button to add a new virtual desktop
             Rectangle {
                 id: addDesktopBtn
+                visible: WindowService.canEditDesktops
                 anchors.verticalCenter: parent.verticalCenter
                 width: root.isTopBarMode ? 18 : 22
                 height: root.isTopBarMode ? 18 : 22
@@ -320,17 +339,14 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onWheel: function(wheel) {
-                        if (wheel.angleDelta.y > 0) {
-                            WindowService.previousDesktop();
-                        } else if (wheel.angleDelta.y < 0) {
-                            WindowService.nextDesktop();
-                        }
+                        if (wheel.angleDelta.y > 0) root.step(-1);
+                        else if (wheel.angleDelta.y < 0) root.step(1);
                     }
 
                     onEntered: {
                         if (root.menuOpen || root.isTopBarMode || root.hasFullscreenApp || !root.isSlidOut) return;
                         let mapped = addDesktopBtn.mapToItem(root, addDesktopBtn.width / 2, 0);
-                        root.hoveredTooltipText = "New Desktop";
+                        root.hoveredTooltipText = "New " + WindowService.desktopNoun;
                         root.hoveredTooltipTargetX = mapped.x;
                         root.isTooltipActive = true;
                     }
@@ -498,7 +514,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Switch to Desktop"
+                            text: "Switch to " + WindowService.desktopNoun
                             font.family: Theme.fontFamily
                             font.pixelSize: 12
                             color: Theme.textPrimary
@@ -521,6 +537,7 @@ Item {
 
                 // Add New Desktop
                 Rectangle {
+                    visible: WindowService.canEditDesktops
                     width: parent.width
                     height: 28
                     radius: Theme.corner(7)
@@ -576,7 +593,7 @@ Item {
                     width: parent.width
                     height: 28
                     radius: Theme.corner(7)
-                    visible: root.desktopCount > 1
+                    visible: root.desktopCount > 1 && WindowService.canEditDesktops
                     scale: removeMouse.pressed ? 0.98 : (removeMouse.containsMouse ? 1.02 : 1.0)
                     transformOrigin: Item.Center
                     Behavior on scale {

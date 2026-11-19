@@ -232,13 +232,21 @@ Singleton {
     // 250 ms apart, so each comes back before the next), and the text last applied
     property string lastWritten: ""
     property string loadedText: ""
+    // The keys a first start applied for the compositor (the welcome guide names them).
+    // Not saved: once settings.json exists they are ordinary settings.
+    property var firstStartDefaults: []
 
     function loadText(text) {
         let t = text.trim();
         if (t.length === 0) {
-            // No settings.json yet: a new install, running on the defaults. Later, an empty
-            // file is an editor halfway through saving, and the next change will have it.
-            if (!root.isLoaded) root.applySettings({ "onboardingVersion": 0 });
+            // No settings.json yet: a new install, running on the defaults, or under niri on
+            // niri's (SettingChoices.firstStartSettings). Later, an empty file is an editor
+            // halfway through saving, and the next change will have it.
+            if (!root.isLoaded) {
+                let first = SettingChoices.firstStartSettings(CompositorService.name);
+                root.firstStartDefaults = Object.keys(first);
+                root.applySettings(Object.assign({ "onboardingVersion": 0 }, first));
+            }
             return;
         }
         if (t === root.loadedText || t === root.lastWritten) return;

@@ -2,12 +2,12 @@ import "../.."
 import QtQuick
 import QtQuick.Layouts
 
-// niri's keyboard shortcuts, one tab per group of actions. Shown in place of the KDE
-// Shortcuts page when the shell runs under niri; while searching every group shows.
+// Keys for the shell's own commands in niri's config. Shown in place of the KDE Shortcuts
+// page under niri. niri's other binds are edited in niri-settings (docs/NIRI.md).
 SettingsCategory {
     id: page
 
-    property string currentGroup: "Shell"
+    readonly property bool hasNiriSettings: !DepsService.noneUsable(["niri-settings"])
 
     // Pick up edits made to config.kdl by hand each time the tab is shown
     onVisibleChanged: {
@@ -41,56 +41,6 @@ SettingsCategory {
         }
     }
 
-    // Group tabs
-    Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: 32
-        visible: !SettingsSearch.active
-        radius: Theme.corner(8)
-        color: Theme.overlay(0.08)
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.margins: 2
-            spacing: 2
-
-            Repeater {
-                model: NiriShortcutService.groups
-
-                Rectangle {
-                    id: tab
-                    required property var modelData
-                    readonly property bool isSelected: page.currentGroup === modelData.name
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    radius: Theme.corner(6)
-                    color: isSelected ? Theme.overlay(0.22) : (tabMouse.containsMouse ? Theme.overlay(0.06) : "transparent")
-
-                    Behavior on color { ColorAnimation { duration: Theme.animDurationFast } }
-
-                    Text {
-                        anchors.centerIn: parent
-                        width: Math.min(implicitWidth, parent.width - 8)
-                        text: tab.modelData.name
-                        elide: Text.ElideRight
-                        font.family: Theme.fontFamily
-                        font.pixelSize: 11
-                        font.weight: tab.isSelected ? Font.Bold : Font.Normal
-                        color: tab.isSelected ? Theme.textPrimary : Theme.textSecondary
-                    }
-
-                    MouseArea {
-                        id: tabMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: page.currentGroup = tab.modelData.name
-                    }
-                }
-            }
-        }
-    }
-
     Repeater {
         model: NiriShortcutService.groups
 
@@ -98,7 +48,7 @@ SettingsCategory {
             id: section
             required property var modelData
             title: modelData.name.toUpperCase()
-            visible: SettingsSearch.active ? hasMatches : page.currentGroup === modelData.name
+            visible: !SettingsSearch.active || hasMatches
 
             Repeater {
                 model: section.modelData.actions
@@ -116,6 +66,53 @@ SettingsCategory {
                     onRemoved: function(key) {
                         NiriShortcutService.removeKey(modelData.id, key);
                     }
+                }
+            }
+        }
+    }
+
+    // niri's own actions: focus, layout, workspaces, screenshots...
+    SettingsSection {
+        key: "niriBinds"
+        title: "NIRI"
+
+        RowLayout {
+            readonly property bool matchesSearch: SettingsSearch.matches("Edit niri's other key bindings", "niri-settings binds windows workspaces layout screenshot")
+
+            Layout.fillWidth: true
+            Layout.margins: 12
+            spacing: 10
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 2
+
+                Text {
+                    Layout.fillWidth: true
+                    text: "Edit niri's other key bindings"
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                    color: Theme.textPrimary
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    text: page.hasNiriSettings
+                        ? "Windows, layout, workspaces and niri's other actions are set in niri-settings, with a keyboard map and conflict checks"
+                        : "Windows, layout, workspaces and niri's other actions are set in niri-settings, which is not installed. Get it from github.com/joonaskit/niri-settings"
+                    font.family: Theme.fontFamily
+                    font.pixelSize: 10
+                    color: Theme.textSecondary
+                }
+            }
+
+            SettingButton {
+                text: page.hasNiriSettings ? "Open niri Settings" : "Get niri-settings"
+                onClicked: {
+                    if (page.hasNiriSettings) WindowService.openNiriSettings("binds");
+                    else Qt.openUrlExternally("https://github.com/joonaskit/niri-settings");
                 }
             }
         }

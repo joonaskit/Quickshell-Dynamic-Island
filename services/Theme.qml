@@ -48,7 +48,10 @@ Singleton {
     // (blurAvailable), WindowBlur also blurs the desktop behind them, so the fill can be
     // clearer; without it the fill stays milky enough to read over a sharp background.
     readonly property bool glass: style === "glass"
-    property bool blurAvailable: false
+    // Quickshell can ask for blur (the probe below), and the compositor blurs: under niri
+    // the config can turn it off (NiriService.shellBlurred)
+    property bool blurSupported: false
+    readonly property bool blurAvailable: blurSupported && NiriService.shellBlurred
     // Opacity of the glass (SettingsService.glassOpacity, glassMenuOpacity): the island
     // and its pills, and the menus, popups and launcher, which carry more text
     property real glassOpacity: 0.6
@@ -257,7 +260,7 @@ Singleton {
                 'import QtQuick; import Quickshell; import Quickshell.Wayland; QtObject { property Component window: Component { PanelWindow { BackgroundEffect.blurRegion: Region { radius: 1 } } } }',
                 theme, "BlurProbe");
             blurProbe.destroy();
-            theme.blurAvailable = true;
+            theme.blurSupported = true;
         } catch (e) {
             console.info("Theme: this Quickshell has no BackgroundEffect (0.3 and later), glass is drawn without blur");
         }
