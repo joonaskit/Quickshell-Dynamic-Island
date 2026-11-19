@@ -213,48 +213,54 @@ Singleton {
         root.openSettingsRequested(tab || "", section || "");
     }
 
-    // Set by reloadFromDisk: the next load starts from the defaults, so keys the file lacks do not keep their old values
-    property bool resetOnLoad: false
-
-    // Process to read settings.json on startup, and again after an import
-    Process {
-        id: loadProc
-        command: ["python3", "-c", "import sys, os, time; p=sys.argv[1]\nt = open(p).read() if os.path.exists(p) else ''\nif not t.strip() and os.path.exists(p):\n    time.sleep(0.3)\n    t = open(p).read()\nsys.stdout.write(t)", root.settingsFilePath]
-        running: true
-
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let t = text.trim();
-                let reset = root.resetOnLoad;
-                root.resetOnLoad = false;
-                if (t.length > 0) {
-                    try {
-                        let data = JSON.parse(t);
-                        console.info("[SettingsService] Settings loaded successfully from settings.json");
-                        if (reset) root.resetDefaults();
-                        root.applySettings(data);
-                    } catch(e) {
-                        console.warn("[SettingsService] Error parsing settings.json: " + e);
-                    }
-                } else {
-                    // No settings.json yet: a new install, running on the defaults
-                    root.applySettings({ "onboardingVersion": 0 });
-                }
-            }
-        }
+    // settings.json, read at start and again whenever it changes on disk: a hand edit, an
+    // import (scripts/settings_backup.py) or another program. The shell's own saves come
+    // back as changes too, and are skipped.
+    WatchedFile {
+        id: settingsFile
+        path: root.settingsFilePath
+        onTextChanged: root.loadText(text)
+        // Later, so the singletons applySettings reaches are all built
+        Component.onCompleted: Qt.callLater(() => root.loadText(settingsFile.text))
     }
 
-    function loadSettings() {
-        if (!loadProc.running) {
-            loadProc.running = true;
-        }
-    }
+    // The text saveSettings last wrote, to tell its own saves from other changes (saves are
+    // 250 ms apart, so each comes back before the next), and the text last applied
+    property string lastWritten: ""
+    property string loadedText: ""
 
-    // Takes settings.json as it is on disk now (after an import), dropping any unsaved change
-    function reloadFromDisk() {
+    function loadText(text) {
+        let t = text.trim();
+        if (t.length === 0) {
+            // No settings.json yet: a new install, running on the defaults. Later, an empty
+            // file is an editor halfway through saving, and the next change will have it.
+            if (!root.isLoaded) root.applySettings({ "onboardingVersion": 0 });
+            return;
+        }
+        if (t === root.loadedText || t === root.lastWritten) return;
+        root.loadedText = t;
+        let data;
+        try {
+            data = JSON.parse(t);
+        } catch (e) {
+            console.warn("[SettingsService] Error parsing settings.json, keeping the current settings: " + e);
+            return;
+        }
+        if (!data || typeof data !== "object") return;
+        let first = !root.isLoaded;
+        // A file from an older version (an import) lacks newer keys: those go back to their defaults
+        let current = root.currentData();
+        if (!first && Object.keys(current).some(key => !(key in data))) root.resetDefaults();
+        root.applySettings(data);
+        // The file is what was just applied, so there is nothing to write back, and a
+        // pending save of the old settings must not overwrite it
         saveTimer.stop();
-        root.resetOnLoad = true;
-        loadProc.running = true;
+        console.info("[SettingsService] Settings " + (first ? "loaded from" : "reloaded from") + " settings.json");
+    }
+
+    // Reads settings.json again. It is watched, so this is only needed if a change was missed
+    function reloadFromDisk() {
+        settingsFile.reread();
     }
 
     function applySettings(data) {
@@ -682,7 +688,16 @@ Singleton {
     }
 
     function saveSettings() {
-        let data = {
+        let jsonStr = JSON.stringify(root.currentData(), null, 2);
+        root.lastWritten = jsonStr;
+        saveProc.command = ["python3", "-c", "import sys, os; p=sys.argv[1]; t=p+'.tmp'; open(t, 'w').write(sys.argv[2]); os.replace(t, p)", root.settingsFilePath, jsonStr];
+        saveProc.running = true;
+        root.lastSavedTime = Qt.formatTime(new Date(), "hh:mm:ss");
+    }
+
+    // Every setting as saved in settings.json
+    function currentData() {
+        return {
             "uiScale": root.uiScale,
             "fontScale": root.fontScale,
             "fontFamily": root.fontFamily,
@@ -792,13 +807,5 @@ Singleton {
             "clipboardIgnoredApps": root.clipboardIgnoredApps,
             "updateChannel": root.updateChannel
         };
-        let jsonStr = JSON.stringify(data, null, 2);
-        saveProc.command = ["python3", "-c", "import sys, os; p=sys.argv[1]; t=p+'.tmp'; open(t, 'w').write(sys.argv[2]); os.replace(t, p)", root.settingsFilePath, jsonStr];
-        saveProc.running = true;
-        root.lastSavedTime = Qt.formatTime(new Date(), "hh:mm:ss");
-    }
-
-    Component.onCompleted: {
-        root.loadSettings();
     }
 }
