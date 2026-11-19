@@ -15,6 +15,14 @@ Rectangle {
 
     readonly property bool isOpen: entries.length > 0
 
+    // The menu opens where the pointer is: only a pointer that then moves highlights a
+    // row, so the first entry stays highlighted for the keyboard
+    PointerMoveGate {
+        id: pointerGate
+        referenceItem: root.Window.contentItem
+    }
+    onEntriesChanged: pointerGate.reset()
+
     // Index of the next entry from `from` in `step` direction, skipping separators
     function nextFrom(from, step) {
         let n = entries.length;
@@ -103,7 +111,9 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onEntered: root.current = row.index
+                        onPositionChanged: mouse => {
+                            if (pointerGate.moved(this, mouse)) root.current = row.index;
+                        }
                         onClicked: root.chosen(row.modelData)
                     }
                 }

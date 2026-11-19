@@ -36,17 +36,18 @@ Read the doc for an area before changing it:
 - Animations: `docs/ANIMATION_CATALOGUE.md`
 - Category dial launcher (experimental): `docs/DIAL.md`
 - Running under niri (experimental): `docs/NIRI.md`
+- Unit tests and shell tests (`tests/fixtures/`): `docs/TESTING.md`
 
 ## Running
 
 - Quickshell hot-reloads on save for most QML changes, but not for everything. Icon changes (e.g. `SvgIcon`) do not reload, and edits to singleton services (e.g. `DockService`, `WindowService`) may not either, so the user must kill and start the process again (`./run.sh -k`, then `./run.sh`). Tell the user when a change needs this. If it has crashed, the user restarts it too.
-- `./run.sh` starts it. Other flags: `-l` toggles the launcher, `-k` kills it, `-d` runs it as a daemon.
+- `./run.sh` starts it. Other flags: `-l` toggles the launcher, `-k` kills it, `-d` runs it in the background under a supervisor that restarts it after a crash, with no hot reload and its output in the journal (`journalctl --user -t quickshell-island`).
 - The session bus is the user's live desktop. Try D-Bus helpers under `./run.sh --sandbox [COMMAND...]` (`scripts/sandbox.sh`): a private bus with its own `activities_bridge.py`, whose activity lists go to the file in `$ISLAND_SANDBOX_LOG`. `tests/test_kio_jobs_sandbox.py` uses it.
 - `./test.sh` runs the unit tests and `./lint.sh` the linters; both must pass before reporting work done. CI runs both (`.github/workflows/check.yml`). UI changes are still checked by hand in the running shell.
 
 ## Config files
 
-- `settings.json` and `dock_pinned.json` are the user's live config and are gitignored. Never overwrite or commit them.
+- The user's live config (`settings.json`, `dock_pinned.json`, `dial_pinned.json`, `launcher_usage.json`) lives in `$ISLAND_CONFIG_DIR`, else `~/.config/quickshell-island/` (`SettingsService.configDir`), not in the checkout. `run.sh` moves copies left in the checkout there once. Never overwrite, move or commit them.
 
 ## Git
 

@@ -73,7 +73,7 @@ Singleton {
             return;
         }
         root.action = action;
-        runProc.command = ["python3", root.script, action, path, "--json", "--sections", root.sections];
+        runProc.command = ["python3", root.script, action, path, "--json", "--sections", root.sections, "--dir", SettingsService.configDir];
         runProc.running = true;
     }
 

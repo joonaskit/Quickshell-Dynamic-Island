@@ -1,6 +1,6 @@
 # Configuration export format
 
-`scripts/settings_backup.py` (`./run.sh --export` and `--import`, and the Backup section of the About settings page) writes and reads this file. It is one JSON document.
+`scripts/settings_backup.py` (`./run.sh --export` and `--import`, and the Backup section of the About settings page) writes and reads this file. It is one JSON document. The script works on the config folder (`$ISLAND_CONFIG_DIR`, else `~/.config/quickshell-island/`, see `docs/SETTINGS.md`), or another one given with `--dir`.
 
 ```json
 {

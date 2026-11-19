@@ -4,7 +4,9 @@ How settings are stored and how to add one. For what the user sees, see the sett
 
 ## Files
 
-`settings.json` and `dock_pinned.json` are the user's live config and are gitignored. Defaults live in `settings.json.example` and `dock_pinned.json.example`, so new default keys go there.
+The user's config files live in `SettingsService.configDir`: `$ISLAND_CONFIG_DIR`, else `~/.config/quickshell-island/`, beside `theme.json`. They are `settings.json`, the dock's `dock_pinned.json`, the dial's `dial_pinned.json` and the launcher's `launcher_usage.json`. Defaults live in `settings.json.example` and `dock_pinned.json.example` in the shell, so new default keys go there.
+
+Older versions kept those files in the shell folder. `run.sh` moves them to the config folder before each start, once: a file already in the config folder wins, and the old one is left where it was. It also creates the folder, which matters because a file watch cannot be set on a folder that does not exist yet. Set `ISLAND_CONFIG_DIR` to give a checkout config of its own, for example `ISLAND_CONFIG_DIR="$PWD" ./run.sh` for a development checkout that should not share the installed shell's settings. `theme.json` stays in `~/.config/quickshell-island/` either way, since companion apps read it there.
 
 `SettingsService` reads `settings.json` through `WatchedFile` (`components/WatchedFile.qml`), at start and again whenever the file changes, so a hand edit or an import applies at once. Its own saves (`saveSettings`, 250 ms after a change) come back as changes and are skipped by their text (`lastWritten`). A change from elsewhere is applied without being written back, so a hand-edited file keeps its layout; a file that lacks keys (an export from an older version) first resets the settings to their defaults, so those keys do too. A file that does not parse is ignored and the current settings kept, and an empty one is taken for an editor halfway through saving.
 

@@ -171,6 +171,7 @@ Singleton {
         lines.push("Kernel: " + (v.kernel || "unknown"));
         lines.push("Session: " + (Quickshell.env("XDG_SESSION_TYPE") || "unknown") + ", " + (Quickshell.env("XDG_CURRENT_DESKTOP") || "unknown"));
         lines.push("Shell directory: " + Quickshell.shellDir);
+        lines.push("Config directory: " + SettingsService.configDir);
         lines.push("");
         lines.push("Dependencies:");
         if (DepsService.report) {

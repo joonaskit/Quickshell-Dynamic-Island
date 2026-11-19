@@ -10,7 +10,11 @@ jobs:
   check:
     name: Fedora ${{ matrix.fedora }}
     runs-on: ubuntu-latest
-    container: fedora:${{ matrix.fedora }}
+    container:
+      image: fedora:${{ matrix.fedora }}
+      # Fedora's kwin_wayland carries the cap_sys_nice file capability, and the kernel
+      # refuses to run it in a container that lacks it (the shell tests, docs/TESTING.md)
+      options: --cap-add=SYS_NICE
     # Fedora 45 is new: report its failures without failing the run until it is green
     continue-on-error: ${{ matrix.experimental }}
     strategy:
@@ -27,6 +31,7 @@ jobs:
           dnf install -y --setopt=install_weak_deps=False
           git quickshell qt6-qtdeclarative-devel qt6-qt5compat ruff
           python3 python3-dbus python3-gobject dbus-daemon
+          kwin util-linux-core
       - uses: actions/checkout@v4
       - name: Trust the checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"

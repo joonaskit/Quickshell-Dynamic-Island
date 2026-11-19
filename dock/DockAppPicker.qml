@@ -26,6 +26,13 @@ Item {
     property real dockCapsuleWidth: 0
     property real dockCapsuleHeight: 0
 
+    // The app grid and list select the row under a pointer that moves, not one that a
+    // scroll or a new search moved under a still pointer. Reset on open.
+    PointerMoveGate {
+        id: pointerGate
+        referenceItem: root.Window.contentItem
+    }
+
     // Set by the dock before opening to start on a specific tab (e.g. "Windows")
     property string pendingCategory: ""
     readonly property bool isWindowMode: selectedCategory === "Windows"
@@ -397,6 +404,7 @@ Item {
     }
 
     onIsOpenChanged: {
+        pointerGate.reset();
         if (isOpen) {
             DockService.updateInstalledApps();
             SettingsPagesService.load();
@@ -1088,8 +1096,8 @@ Item {
                                     hoverEnabled: true
                                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                                     cursorShape: Qt.PointingHandCursor
-                                    onEntered: {
-                                        appGridView.currentIndex = index;
+                                    onPositionChanged: function(mouse) {
+                                        if (pointerGate.moved(gridMouse, mouse)) appGridView.currentIndex = index;
                                     }
                                     onClicked: function(mouse) {
                                         if (mouse.button === Qt.RightButton) {
@@ -1359,8 +1367,8 @@ Item {
                                 hoverEnabled: true
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 cursorShape: Qt.PointingHandCursor
-                                onEntered: {
-                                    appListView.currentIndex = index;
+                                onPositionChanged: function(mouse) {
+                                    if (pointerGate.moved(itemMouse, mouse)) appListView.currentIndex = index;
                                 }
                                 onClicked: function(mouse) {
                                     if (mouse.button === Qt.RightButton) {
