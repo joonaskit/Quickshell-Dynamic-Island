@@ -19,6 +19,8 @@ Singleton {
     property string activeScreen: ""
     property var windowList: []
     property var virtualDesktops: []
+    // Icon shown when an app's icon name is not in the theme
+    readonly property string fallbackIcon: "application-x-executable"
 
     // What the window actions can do here. niri has no minimize and no keep above, and
     // makes and removes its workspaces itself. Callers hide what is false.
@@ -308,7 +310,8 @@ Singleton {
         if (Quickshell.hasThemeIcon(iconName)) {
             return "image://icon/" + iconName;
         }
-        let p = Quickshell.iconPath(iconName);
+        // check=true: an unknown name gives "" instead of Qt's missing-icon checkerboard
+        let p = Quickshell.iconPath(iconName, true);
         if (p && p.length > 0) {
             if (p.startsWith("file://") || p.startsWith("image://")) {
                 return p;
@@ -325,7 +328,7 @@ Singleton {
         if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
         let iconName = entry ? entry.icon : appId;
         if (!iconName || iconName.length === 0) return "";
-        return resolveIconSource(iconName) || ("image://icon/" + iconName);
+        return resolveIconSource(iconName) || resolveIconSource(root.fallbackIcon);
     }
 
     function getAppWindows(appId) {
