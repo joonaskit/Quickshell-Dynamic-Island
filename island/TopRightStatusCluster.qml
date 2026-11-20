@@ -435,10 +435,11 @@ Item {
                 anchors.centerIn: parent
                 spacing: Theme.px(6)
 
-                // Calendar / Date Readout (only in top-bar mode)
+                // Calendar / Date Readout (only in top-bar mode, if turned on)
                 RowLayout {
+                    id: dateReadout
                     spacing: Theme.px(5)
-                    visible: root.isTopBarMode
+                    visible: root.isTopBarMode && SettingsService.showTopBarDate
 
                     SvgIcon {
                         name: "calendar"
@@ -460,7 +461,7 @@ Item {
                     Layout.preferredWidth: visible ? 1 : 0
                     Layout.preferredHeight: Theme.px(14)
                     color: Theme.overlay(0.15)
-                    visible: root.isTopBarMode && (root.visibleIconCount > 0)
+                    visible: dateReadout.visible && (root.visibleIconCount > 0)
                     Layout.rightMargin: Theme.px(4)
                 }
 
