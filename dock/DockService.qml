@@ -1015,10 +1015,8 @@ Singleton {
         root.installedApps = list;
     }
 
-    // Resolve an icon source string to a file URL or image://icon, or the generic
-    // app icon when the name is not found (e.g. a game whose app id has no icon)
+    // Resolve an icon source string to a file URL or image://icon, or "" if not found
     function resolveIcon(iconName) {
-        if (!iconName) return "";
-        return WindowService.resolveIconSource(iconName) || WindowService.resolveIconSource(WindowService.fallbackIcon);
+        return WindowService.resolveIconSource(iconName);
     }
 }

@@ -1121,16 +1121,13 @@ Item {
                                         width: root.isCompact ? 36 : 46
                                         height: width
 
-                                        Image {
+                                        AppIcon {
                                             anchors.centerIn: parent
                                             width: parent.width
                                             height: parent.height
-                                            source: DockService.resolveIcon(modelData.icon)
-                                            sourceSize.width: 96
-                                            sourceSize.height: 96
-                                            fillMode: Image.PreserveAspectFit
-                                            mipmap: true
-                                            smooth: true
+                                            icon: modelData.icon || ""
+                                            name: modelData.name || ""
+                                            sourceSize: 96
                                             scale: gridHover.hovered ? 1.08 : 1.0
                                             Behavior on scale { NumberAnimation { duration: Theme.duration(140); easing.type: Easing.OutCubic } }
                                         }
@@ -1231,15 +1228,12 @@ Item {
                                 spacing: 10
 
                                 // App Icon
-                                Image {
+                                AppIcon {
                                     Layout.preferredWidth: root.isCompact ? 22 : 28
                                     Layout.preferredHeight: root.isCompact ? 22 : 28
-                                    source: DockService.resolveIcon(modelData.icon)
-                                    sourceSize.width: 64
-                                    sourceSize.height: 64
-                                    fillMode: Image.PreserveAspectFit
-                                    mipmap: true
-                                    smooth: true
+                                    icon: modelData.icon || ""
+                                    name: modelData.name || ""
+                                    sourceSize: 64
                                 }
 
                                 // App Title & Generic Name

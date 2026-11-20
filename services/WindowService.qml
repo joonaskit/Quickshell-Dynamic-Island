@@ -19,8 +19,6 @@ Singleton {
     property string activeScreen: ""
     property var windowList: []
     property var virtualDesktops: []
-    // Icon shown when an app's icon name is not in the theme
-    readonly property string fallbackIcon: "application-x-executable"
 
     // What the window actions can do here. niri has no minimize and no keep above, and
     // makes and removes its workspaces itself. Callers hide what is false.
@@ -328,7 +326,7 @@ Singleton {
         if (!entry) entry = DesktopEntries.heuristicLookup(cleanId);
         let iconName = entry ? entry.icon : appId;
         if (!iconName || iconName.length === 0) return "";
-        return resolveIconSource(iconName) || resolveIconSource(root.fallbackIcon);
+        return resolveIconSource(iconName);
     }
 
     function getAppWindows(appId) {

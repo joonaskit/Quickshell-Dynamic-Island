@@ -165,13 +165,11 @@ Item {
                             Layout.preferredWidth: 20
                             Layout.preferredHeight: 20
 
-                            Image {
+                            AppIcon {
                                 anchors.fill: parent
-                                source: root.appData ? DockService.resolveIcon(root.appData.icon) : ""
-                                sourceSize.width: 40
-                                sourceSize.height: 40
-                                fillMode: Image.PreserveAspectFit
-                                mipmap: true
+                                icon: root.appData ? (root.appData.icon || "") : ""
+                                name: root.appData ? (root.appData.name || "") : ""
+                                sourceSize: 40
                                 opacity: modelData.minimized ? 0.45 : 1.0
                             }
 
