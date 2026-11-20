@@ -1015,7 +1015,7 @@ Singleton {
         root.installedApps = list;
     }
 
-    // Resolve an icon source string to a file URL or image://icon
+    // Resolve an icon source string to a file URL or image://icon, or "" if not found
     function resolveIcon(iconName) {
         return WindowService.resolveIconSource(iconName);
     }

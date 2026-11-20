@@ -130,16 +130,12 @@ Item {
         transformOrigin: Item.Center
         scale: root.dockScale * root.pressScale
 
-        // Application icon image
-        Image {
+        // Application icon, or a letter tile when it can't be loaded
+        AppIcon {
             id: appIcon
             anchors.fill: parent
-            source: appData ? DockService.resolveIcon(appData.icon) : ""
-            sourceSize.width: 128
-            sourceSize.height: 128
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
+            icon: appData ? (appData.icon || "") : ""
+            name: appData ? (appData.name || "") : ""
             asynchronous: true
 
             // Subtle drop shadow under icon
@@ -150,29 +146,7 @@ Item {
                 radius: Theme.corner(10)
                 color: Qt.rgba(0, 0, 0, 0.25)
                 z: -1
-                visible: appIcon.status === Image.Ready
-            }
-        }
-
-        // Fallback squircle icon if image fails to load
-        Rectangle {
-            anchors.fill: parent
-            radius: Theme.corner(11)
-            visible: appIcon.status !== Image.Ready
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Theme.tileGradientTop }
-                GradientStop { position: 1.0; color: Theme.tileGradientBottom }
-            }
-            border.color: Theme.overlay(0.15)
-            border.width: 1
-
-            Text {
-                anchors.centerIn: parent
-                text: appData ? (appData.name ? appData.name.charAt(0).toUpperCase() : "?") : "?"
-                font.family: Theme.fontDisplay
-                font.pixelSize: 18
-                font.weight: Font.Bold
-                color: Theme.textPrimary
+                visible: appIcon.loaded
             }
         }
 
