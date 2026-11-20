@@ -130,6 +130,22 @@ SettingsCategory {
         SettingDivider {}
 
         SettingToggle {
+            title: "Show Date"
+            keywords: "calendar day weekday date full-width bar panel"
+            description: "Show the date beside the status icons in the full-width bar"
+            iconName: "calendar"
+            iconColor: Theme.accentBlue
+            isSubOption: true
+            enabled: SettingsService.topBarMode !== "island"
+            checked: SettingsService.showTopBarDate
+            onToggled: function(val) {
+                SettingsService.setSetting("showTopBarDate", val);
+            }
+        }
+
+        SettingDivider {}
+
+        SettingToggle {
             title: "Keep Windows Below the Bar"
             keywords: "reserve space exclusive zone overlap maximized"
             description: "Reserve the bar's height so maximized windows start under it"

@@ -58,6 +58,8 @@ Singleton {
     property bool showMediaWhenPlaying: true
     property bool morphToTopBarWhenMaximized: true
     property bool reserveSpaceWhenMaximized: true
+    // Calendar icon and date left of the status icons in the full-width bar
+    property bool showTopBarDate: false
     property bool reserveSpaceWithoutBar: false
     property bool alwaysTopBar: false
     property bool autoHideTopBar: false
@@ -310,6 +312,7 @@ Singleton {
         if (data.showMediaWhenPlaying !== undefined) root.showMediaWhenPlaying = !!data.showMediaWhenPlaying;
         if (data.morphToTopBarWhenMaximized !== undefined) root.morphToTopBarWhenMaximized = !!data.morphToTopBarWhenMaximized;
         if (data.reserveSpaceWhenMaximized !== undefined) root.reserveSpaceWhenMaximized = !!data.reserveSpaceWhenMaximized;
+        if (data.showTopBarDate !== undefined) root.showTopBarDate = !!data.showTopBarDate;
         if (data.reserveSpaceWithoutBar !== undefined) root.reserveSpaceWithoutBar = !!data.reserveSpaceWithoutBar;
         if (data.alwaysTopBar !== undefined) root.alwaysTopBar = !!data.alwaysTopBar;
         if (data.autoHideTopBar !== undefined) root.autoHideTopBar = !!data.autoHideTopBar;
@@ -589,6 +592,7 @@ Singleton {
         root.showMediaWhenPlaying = true;
         root.morphToTopBarWhenMaximized = true;
         root.reserveSpaceWhenMaximized = true;
+        root.showTopBarDate = false;
         root.reserveSpaceWithoutBar = false;
         root.alwaysTopBar = false;
         root.autoHideTopBar = false;
@@ -734,6 +738,7 @@ Singleton {
             "showMediaWhenPlaying": root.showMediaWhenPlaying,
             "morphToTopBarWhenMaximized": root.morphToTopBarWhenMaximized,
             "reserveSpaceWhenMaximized": root.reserveSpaceWhenMaximized,
+            "showTopBarDate": root.showTopBarDate,
             "reserveSpaceWithoutBar": root.reserveSpaceWithoutBar,
             "alwaysTopBar": root.alwaysTopBar,
             "autoHideTopBar": root.autoHideTopBar,
