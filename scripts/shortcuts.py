@@ -41,7 +41,8 @@ KEY_META = 0x01000022  # how KDE stores a bare Meta shortcut
 
 # (id, group, title, ipc target, function, arguments)
 ACTIONS = [
-    ("launcher.toggle", "Launcher", "Toggle app launcher", "launcher", "toggle", ()),
+    # Opens the classic launcher or the dial, as the Launcher Style setting says
+    ("launcher.toggle", "Launcher", "Toggle launcher (classic or dial)", "launcher", "toggle", ()),
     ("launcher.windows", "Launcher", "Open window switcher", "launcher", "windows", ()),
     ("clipboard.toggle", "Clipboard", "Toggle clipboard history", "clipboard", "toggle", ()),
     ("clipboard.incognito", "Clipboard", "Toggle incognito mode", "clipboard", "toggleIncognito", ()),
