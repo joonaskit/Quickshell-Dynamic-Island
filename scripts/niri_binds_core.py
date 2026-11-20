@@ -16,12 +16,15 @@ import shlex
 
 import shortcuts
 
-# Shell IPC commands, as in shortcuts.py, plus the dial, which KDE opens from its own key.
-# niri's own actions are edited in niri-settings (docs/NIRI.md); the page lists only these.
-SHELL_ACTIONS = shortcuts.ACTIONS + [
-    ("dial.toggle", "Launcher", "Toggle the dial", "dial", "toggle", ()),
+# Shell IPC commands, as in shortcuts.py. niri's own actions are edited in niri-settings
+# (docs/NIRI.md); the page lists only these.
+SHELL_ACTIONS = list(shortcuts.ACTIONS)
+# Recognised but not offered: launcher.toggle follows Launcher Style, so one key serves both
+# launchers. A bind made by hand or before is still listed, so it can be moved or removed.
+HIDDEN_ACTIONS = [
+    ("dial.toggle", "Launcher", "Always open the dial (ignores Launcher Style)", "dial", "toggle", ()),
 ]
-SHELL_BY_COMMAND = {(a[3], a[4], *a[5]): a for a in SHELL_ACTIONS}
+SHELL_BY_COMMAND = {(a[3], a[4], *a[5]): a for a in SHELL_ACTIONS + HIDDEN_ACTIONS}
 
 # Modifier spellings niri accepts, by what they mean. Mod is Super in a real session.
 MODIFIERS = {
@@ -325,12 +328,12 @@ def classify(bind, shell_dir):
 def list_actions(text, shell_dir):
     """Rows for the page: {"groups": [{"name": "Shell", "actions": [{id, title, detail, keys}]}]}.
 
-    Every shell action, bound or not. Other binds are not listed, but set_key still
-    checks them for conflicts."""
+    Every shell action, bound or not, and a hidden one only while it is bound. Other binds
+    are not listed, but set_key still checks them for conflicts."""
     _blocks, binds = find_binds(text)
     rows = {}
     order = []
-    for a in SHELL_ACTIONS:
+    for a in SHELL_ACTIONS + HIDDEN_ACTIONS:
         action_id = "shell:" + a[0]
         rows[action_id] = {"id": action_id, "title": a[2], "detail": " ".join((a[3], a[4], *a[5])), "keys": []}
         order.append(action_id)
@@ -338,13 +341,15 @@ def list_actions(text, shell_dir):
         action_id = classify(bind, shell_dir)[0]
         if action_id in rows:
             rows[action_id]["keys"].append(bind.key)
-    return {"groups": [{"name": "Shell", "actions": [rows[i] for i in order]}]}
+    hidden = {"shell:" + a[0] for a in HIDDEN_ACTIONS}
+    shown = [rows[i] for i in order if i not in hidden or rows[i]["keys"]]
+    return {"groups": [{"name": "Shell", "actions": shown}]}
 
 
 def new_action_text(action_id, shell_dir):
     """What to write for an action that has no bind yet, or None if it is unknown."""
     if action_id.startswith("shell:"):
-        for a in SHELL_ACTIONS:
+        for a in SHELL_ACTIONS + HIDDEN_ACTIONS:
             if "shell:" + a[0] == action_id:
                 words = ["quickshell", "ipc", "-p", shell_dir, "call", a[3], a[4], *a[5]]
                 return "spawn " + " ".join(json.dumps(w, ensure_ascii=False) for w in words)

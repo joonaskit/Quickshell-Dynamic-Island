@@ -76,8 +76,12 @@ class ListTest(unittest.TestCase):
         self.assertNotIn('spawn "konsole"', self.rows)
 
     def test_other_checkout_is_not_this_shell(self):
-        text = 'binds {\n    Mod+Z { spawn "quickshell" "ipc" "-p" "/elsewhere" "call" "dial" "toggle"; }\n}\n'
-        self.assertEqual(rows(text)["shell:dial.toggle"]["keys"], [])
+        text = 'binds {\n    Mod+Z { spawn "quickshell" "ipc" "-p" "/elsewhere" "call" "clipboard" "toggle"; }\n}\n'
+        self.assertEqual(rows(text)["shell:clipboard.toggle"]["keys"], [])
+
+    def test_dial_row_hidden_until_bound(self):
+        self.assertNotIn("shell:dial.toggle", rows("binds {\n}\n"))
+        self.assertIn("shell:launcher.toggle", rows("binds {\n}\n"))
 
 
 class ClassifyTest(unittest.TestCase):
@@ -90,7 +94,7 @@ class ClassifyTest(unittest.TestCase):
         self.assertEqual(t['spawn "konsole"'], "Open a Terminal")
         self.assertEqual(t['spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"'], "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
         self.assertEqual(t["close-window"], "Close window")
-        self.assertEqual(t["shell:dial.toggle"], "Toggle the dial")
+        self.assertEqual(t["shell:dial.toggle"], "Always open the dial (ignores Launcher Style)")
         self.assertEqual(t["focus-workspace 1"], "Focus workspace 1")
         self.assertEqual(t['set-column-width "-10%"'], 'Set column width "-10%"')
         self.assertIn("quit", t)  # the /- one is skipped, the multiline one found

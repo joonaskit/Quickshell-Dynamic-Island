@@ -77,7 +77,7 @@ KDE's global shortcuts are not there, so under niri the Shortcuts tab of the set
 
 ## Launcher shortcut
 
-The welcome guide's niri step offers to bind Mod+Space. Otherwise bind a key on the Shortcuts tab (Toggle the dial or Toggle app launcher), or by hand in `config.kdl`:
+The welcome guide's niri step offers to bind Mod+Space. Otherwise bind a key to Toggle launcher on the Shortcuts tab, or by hand in `config.kdl`:
 
 ```kdl
 binds {
@@ -85,7 +85,7 @@ binds {
 }
 ```
 
-With Launcher Style set to Dial this opens the dial; `call dial toggle` opens it whatever the style.
+It opens the classic launcher or the dial, as Launcher Style says, so changing the style needs no new key. `call dial toggle` opens the dial whatever the style. The Shortcuts tab does not offer it, but lists a bind to it (Always open the dial) so it can be moved to Toggle launcher or removed (`HIDDEN_ACTIONS` in `scripts/niri_binds_core.py`).
 
 niri binds key combinations only: it cannot tell a tap of Super from a hold, so the dial cannot open on Super alone as KDE's launcher does. A tap would need a key remapper such as keyd, which runs system-wide.
 
